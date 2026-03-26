@@ -1,0 +1,33 @@
+{
+  "name": "agilis",
+  "private": true,
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "preinstall": "node ./scripts/check-node.js",
+    "predev": "node ./scripts/check-node.js",
+    "prebuild": "node ./scripts/check-node.js",
+    "predev:backend": "node ./scripts/check-node.js",
+    "predev:frontend": "node ./scripts/check-node.js",
+    "predb:migrate": "node ./scripts/check-node.js",
+    "predb:seed": "node ./scripts/check-node.js",
+    "postinstall": "npm --prefix backend run prisma:generate",
+    "dev": "sh -c 'npm run dev:backend & npm run dev:frontend'",
+    "build": "sh -c 'npm run build:backend && npm run build:frontend'",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:migrate": "npm --prefix backend run prisma:migrate",
+    "db:seed": "npm --prefix backend run prisma:seed",
+    "dev:backend": "npm --prefix backend run start:dev",
+    "dev:frontend": "npm --prefix frontend run start",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build"
+  }
+}

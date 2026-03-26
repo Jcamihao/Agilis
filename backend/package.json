@@ -1,0 +1,45 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "sh ./scripts/run-with-env.sh nest start --watch",
+    "start:dev": "sh ./scripts/run-with-env.sh nest start --watch",
+    "start": "sh ./scripts/run-with-env.sh node dist/main.js",
+    "build": "nest build",
+    "prisma:generate": "sh ./scripts/run-with-env.sh prisma generate",
+    "prisma:migrate": "sh ./scripts/run-with-env.sh prisma migrate dev",
+    "prisma:migrate:deploy": "sh ./scripts/run-with-env.sh prisma migrate deploy",
+    "prisma:seed": "sh ./scripts/run-with-env.sh ts-node --project tsconfig.json prisma/seed.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.2",
+    "@nestjs/config": "^3.2.3",
+    "@nestjs/core": "^10.4.2",
+    "@nestjs/jwt": "^10.2.0",
+    "@nestjs/passport": "^10.0.3",
+    "@nestjs/platform-express": "^10.4.2",
+    "@nestjs/schedule": "^4.1.1",
+    "@prisma/client": "^5.22.0",
+    "bcrypt": "^5.1.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.5",
+    "@nestjs/schematics": "^10.1.4",
+    "@nestjs/testing": "^10.4.2",
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.1",
+    "@types/passport-jwt": "^4.0.1",
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.6.3"
+  }
+}
