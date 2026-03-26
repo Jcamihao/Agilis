@@ -1,0 +1,95 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  users     User[]
+  tasks     Task[]
+  taskLogs  TaskLog[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model User {
+  id             String       @id @default(uuid())
+  name           String
+  email          String       @unique
+  password       String
+  role           Role         @default(USER)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedTasks  Task[]       @relation("AssignedTasks")
+  createdTasks   Task[]       @relation("CreatedTasks")
+  taskLogs       TaskLog[]    @relation("TaskLogActors")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId])
+}
+
+model Task {
+  id             String       @id @default(uuid())
+  title          String
+  description    String?
+  status         TaskStatus   @default(PENDING)
+  dueDate        DateTime
+  assignedToId   String
+  assignedTo     User         @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: Restrict)
+  createdById    String
+  createdBy      User         @relation("CreatedTasks", fields: [createdById], references: [id], onDelete: Restrict)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  logs           TaskLog[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([organizationId, status])
+  @@index([assignedToId])
+  @@index([dueDate])
+}
+
+model TaskLog {
+  id             String        @id @default(uuid())
+  taskId         String
+  task           Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  action         TaskLogAction
+  description    String
+  fromStatus     TaskStatus?
+  toStatus       TaskStatus?
+  performedById  String?
+  performedBy    User?         @relation("TaskLogActors", fields: [performedById], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now())
+
+  @@index([taskId])
+  @@index([organizationId, createdAt])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  DELAYED
+}
+
+enum TaskLogAction {
+  CREATED
+  STATUS_CHANGED
+  AUTO_DELAYED
+  AUTO_REMINDER_SENT
+  AUTO_ESCALATED
+}
