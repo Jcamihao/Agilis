@@ -1,0 +1,105 @@
+<div class="login-page">
+  <section class="login-page__hero">
+    <span class="login-page__pill">codeStage Solucoes</span>
+    <h1>{{ brand.name }}</h1>
+    <p class="login-page__slogan">{{ brand.slogan }}</p>
+
+    <div class="login-page__story">
+      <h2>Operacao disciplinada sem perseguir a equipe o dia inteiro.</h2>
+      <p>
+        O Agilis acompanha o ritmo do time, expõe gargalos e cobra automaticamente as
+        tarefas atrasadas para que o gestor atue com clareza, nao no improviso.
+      </p>
+    </div>
+
+    <div class="login-page__highlights">
+      <article class="card">
+        <span class="material-symbols-outlined">timer</span>
+        <div>
+          <strong>Tarefas vencidas em evidência</strong>
+          <p>Status muda automaticamente para atraso a cada minuto.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="material-symbols-outlined">monitoring</span>
+        <div>
+          <strong>Visão premium de produtividade</strong>
+          <p>Dashboard, planner e board operacional pensados para SaaS B2B.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="login-page__panel">
+    <mat-card class="login-page__card">
+      <mat-tab-group animationDuration="200ms">
+        <mat-tab label="Entrar">
+          <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+            <h3>Acesse sua operação</h3>
+            <p>Use o usuário seed ou entre com sua conta da organização.</p>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Senha</mat-label>
+              <input matInput type="password" formControlName="password" />
+            </mat-form-field>
+
+            <div class="login-page__hint">
+              Demo seed: <strong>admin&#64;agilis.local</strong> / <strong>Agilis&#64;123</strong>
+            </div>
+
+            <button mat-flat-button color="primary" type="submit" [disabled]="loginLoading()">
+              @if (loginLoading()) {
+                Entrando...
+              } @else {
+                Entrar no Agilis
+              }
+            </button>
+          </form>
+        </mat-tab>
+
+        <mat-tab label="Criar espaço">
+          <form class="login-form" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+            <h3>Primeiro acesso</h3>
+            <p>Crie sua organização e receba um usuário administrador automaticamente.</p>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nome da organização</mat-label>
+              <input matInput formControlName="organizationName" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Seu nome</mat-label>
+              <input matInput formControlName="name" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Senha</mat-label>
+              <input matInput type="password" formControlName="password" />
+            </mat-form-field>
+
+            <button mat-flat-button color="primary" type="submit" [disabled]="registerLoading()">
+              @if (registerLoading()) {
+                Criando...
+              } @else {
+                Criar organização
+              }
+            </button>
+          </form>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+
+    <footer class="login-page__footer">{{ brand.company }}</footer>
+  </section>
+</div>

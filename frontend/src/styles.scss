@@ -1,0 +1,127 @@
+@use '@angular/material' as mat;
+@use 'tokens' as *;
+
+$agilis-primary: mat.define-palette(mat.$teal-palette, 500, 300, 700);
+$agilis-accent: mat.define-palette(mat.$cyan-palette, 400, 200, 700);
+$agilis-warn: mat.define-palette(mat.$red-palette);
+$agilis-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $agilis-primary,
+      accent: $agilis-accent,
+      warn: $agilis-warn,
+    ),
+  )
+);
+
+@include mat.core();
+@include mat.all-component-themes($agilis-theme);
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: $bg;
+  color: $navy;
+  font-family: 'IBM Plex Sans', sans-serif;
+  line-height: 1.4;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.mat-mdc-card {
+  background: #ffffff !important;
+  border: 1px solid $border-soft;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05) !important;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-text-field-wrapper {
+  background: #ffffff !important;
+  border-radius: 10px !important;
+}
+
+.mat-mdc-form-field-focus-overlay {
+  background: transparent !important;
+}
+
+.mat-mdc-outlined-button {
+  --mdc-outlined-button-container-shape: 10px;
+}
+
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-shape: 10px;
+  --mdc-filled-button-label-text-weight: 700;
+}
+
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-track-height: 6px;
+  --mdc-linear-progress-active-indicator-height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.mat-mdc-chip {
+  --mdc-chip-container-height: 28px;
+  font-weight: 600;
+}
+
+.mat-mdc-table {
+  background: transparent !important;
+}
+
+.mat-mdc-header-row {
+  background: $surface-muted;
+}
+
+.mat-mdc-header-cell,
+.mat-mdc-cell {
+  border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  background: rgba(20, 184, 166, 0.04);
+}
+
+.snackbar-success .mdc-snackbar__surface {
+  background: #0f766e !important;
+  color: white !important;
+}
+
+.snackbar-error .mdc-snackbar__surface {
+  background: #dc2626 !important;
+  color: white !important;
+}

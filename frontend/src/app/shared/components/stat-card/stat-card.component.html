@@ -1,0 +1,12 @@
+<article class="stat-card" [class]="'stat-card stat-card--' + accent()">
+  <div class="stat-card__topline">
+    <span>{{ title() }}</span>
+    <span class="material-symbols-outlined">{{ icon() }}</span>
+  </div>
+
+  <strong>{{ value() }}</strong>
+
+  @if (helper()) {
+    <p>{{ helper() }}</p>
+  }
+</article>

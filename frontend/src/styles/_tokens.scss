@@ -1,0 +1,23 @@
+$navy: #0f172a;
+$bg: #f5f7fa;
+$card: #ffffff;
+
+$primary: #14b8a6;
+$secondary: #38bdf8;
+
+$blue-soft: #dcebff;
+$pink-soft: #fde2f3;
+$yellow-soft: #fff3d6;
+$green-soft: #dcfce7;
+
+$text-muted: #64748b;
+$border-soft: rgba(15, 23, 42, 0.08);
+$surface-muted: #eef3f8;
+
+.card {
+  background: $card;
+  border: 1px solid $border-soft;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  padding: 18px;
+}

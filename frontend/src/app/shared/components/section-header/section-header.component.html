@@ -1,0 +1,15 @@
+<header class="section-header">
+  <div>
+    @if (eyebrow()) {
+      <span class="section-header__eyebrow">{{ eyebrow() }}</span>
+    }
+    <h1>{{ title() }}</h1>
+    @if (subtitle()) {
+      <p>{{ subtitle() }}</p>
+    }
+  </div>
+
+  <div class="section-header__actions">
+    <ng-content />
+  </div>
+</header>
