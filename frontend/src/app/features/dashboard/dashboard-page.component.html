@@ -1,0 +1,146 @@
+<div class="dashboard-page">
+  <agilis-section-header
+    eyebrow="Cockpit de apoio"
+    title="Dashboard executivo"
+    subtitle="O Kanban é o centro da operação. Este painel resume saúde, risco e ritmo para apoiar as decisões antes de voltar ao board."
+  >
+    <a mat-flat-button color="primary" routerLink="/app/tasks">Abrir kanban</a>
+  </agilis-section-header>
+
+  @if (loading()) {
+    <mat-card class="dashboard-page__loading card">
+      <mat-progress-bar mode="indeterminate" />
+      <p>Carregando visão operacional...</p>
+    </mat-card>
+  } @else {
+    @if (overview(); as summary) {
+      <section class="dashboard-page__stats">
+        <agilis-stat-card
+          title="Total de tarefas"
+          [value]="summary.totalTasks.toString()"
+          helper="Base operacional da organização"
+          icon="assignment"
+          accent="sky"
+        />
+
+        <agilis-stat-card
+          title="Concluídas"
+          [value]="summary.completedTasks.toString()"
+          [helper]="completionRate() + '% do fluxo entregue'"
+          icon="task_alt"
+          accent="teal"
+        />
+
+        <agilis-stat-card
+          title="Atrasadas"
+          [value]="summary.delayedTasks.toString()"
+          helper="Pontos de atenção imediata"
+          icon="warning"
+          accent="rose"
+        />
+
+        <agilis-stat-card
+          title="Usuários ativos"
+          [value]="summary.totalUsers.toString()"
+          helper="Equipe conectada à operação"
+          icon="groups"
+          accent="gold"
+        />
+      </section>
+
+      <section class="dashboard-page__grid">
+        <mat-card class="card dashboard-page__panel">
+          <div class="dashboard-page__panel-header">
+            <div>
+              <span class="dashboard-page__kicker">Saúde do fluxo</span>
+              <h2>Distribuição por status</h2>
+            </div>
+            <strong>{{ completionRate() }}%</strong>
+          </div>
+
+          <div class="dashboard-page__progress-list">
+            @for (status of statusOrder; track status) {
+              <div class="dashboard-page__progress-item">
+                <div>
+                  <span>{{ statusConfig[status].label }}</span>
+                  <small>{{ statusConfig[status].progress() }}% do total</small>
+                </div>
+                <mat-progress-bar [value]="statusConfig[status].progress()" />
+              </div>
+            }
+          </div>
+        </mat-card>
+
+        <mat-card class="card dashboard-page__panel">
+          <div class="dashboard-page__panel-header">
+            <div>
+              <span class="dashboard-page__kicker">Ação imediata</span>
+              <h2>Tarefas atrasadas</h2>
+            </div>
+          </div>
+
+          <div class="dashboard-page__list">
+            @for (task of delayedTasks(); track trackTask($index, task)) {
+              <article class="dashboard-page__task">
+                <div>
+                  <strong>{{ task.title }}</strong>
+                  <p>{{ task.assignedTo.name }} • vence {{ task.dueDate | date: 'dd/MM HH:mm' }}</p>
+                </div>
+                <mat-chip color="warn" highlighted>Atrasada</mat-chip>
+              </article>
+            } @empty {
+              <p class="dashboard-page__empty">Nenhuma tarefa atrasada no momento.</p>
+            }
+          </div>
+        </mat-card>
+
+        <mat-card class="card dashboard-page__panel">
+          <div class="dashboard-page__panel-header">
+            <div>
+              <span class="dashboard-page__kicker">Próximo ciclo</span>
+              <h2>Prazo chegando</h2>
+            </div>
+          </div>
+
+          <div class="dashboard-page__list">
+            @for (task of dueSoonTasks(); track trackTask($index, task)) {
+              <article class="dashboard-page__task dashboard-page__task--soft">
+                <div>
+                  <strong>{{ task.title }}</strong>
+                  <p>{{ task.assignedTo.name }} • {{ task.dueDate | date: 'dd/MM HH:mm' }}</p>
+                </div>
+                <span class="dashboard-page__soft-badge">Em foco</span>
+              </article>
+            } @empty {
+              <p class="dashboard-page__empty">Nenhum prazo crítico nas próximas 48 horas.</p>
+            }
+          </div>
+        </mat-card>
+
+        <mat-card class="card dashboard-page__panel">
+          <div class="dashboard-page__panel-header">
+            <div>
+              <span class="dashboard-page__kicker">Rastro operacional</span>
+              <h2>Últimas movimentações</h2>
+            </div>
+          </div>
+
+          <div class="dashboard-page__activity-list">
+            @for (log of recentLogs(); track trackLog($index, log)) {
+              <article class="dashboard-page__activity">
+                <span class="material-symbols-outlined">bolt</span>
+                <div>
+                  <strong>{{ log.taskTitle }}</strong>
+                  <p>{{ log.description }}</p>
+                </div>
+                <time>{{ log.createdAt | date: 'dd/MM HH:mm' }}</time>
+              </article>
+            } @empty {
+              <p class="dashboard-page__empty">Sem atividades registradas ainda.</p>
+            }
+          </div>
+        </mat-card>
+      </section>
+    }
+  }
+</div>

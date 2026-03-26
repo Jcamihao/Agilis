@@ -1,0 +1,61 @@
+<div class="planner-page">
+  <agilis-section-header
+    eyebrow="Ritmo semanal"
+    title="Planner"
+    subtitle="Planejamento visual para enxergar o que vence hoje, o que entra em pressão e o que já saiu da mesa."
+  />
+
+  <mat-card class="planner-page__hero card">
+    <div class="planner-page__hero-content">
+      <span class="planner-page__hero-kicker">Cadência operacional</span>
+      <h2>O planner organiza a fila por urgência real.</h2>
+      <p>
+        Tudo é alimentado pelas tarefas da organização. O objetivo aqui é priorizar com
+        contexto, não só listar demandas.
+      </p>
+    </div>
+  </mat-card>
+
+  @if (loading()) {
+    <mat-card class="card planner-page__loading">
+      <mat-progress-bar mode="indeterminate" />
+      <p>Montando o planner...</p>
+    </mat-card>
+  } @else {
+    <section class="planner-page__grid">
+      @for (group of groups(); track trackGroup($index, group)) {
+        <mat-card class="card planner-page__group">
+          <header>
+            <div>
+              <h3>{{ group.title }}</h3>
+              <p>{{ group.description }}</p>
+            </div>
+            <span>{{ group.tasks.length }}</span>
+          </header>
+
+          <div class="planner-page__tasks">
+            @for (task of group.tasks; track trackTask($index, task)) {
+              <article class="planner-page__task">
+                <div class="planner-page__task-topline">
+                  <strong>{{ task.title }}</strong>
+                  <mat-chip>{{ task.status }}</mat-chip>
+                </div>
+
+                @if (task.description) {
+                  <p>{{ task.description }}</p>
+                }
+
+                <footer>
+                  <span>{{ task.assignedTo.name }}</span>
+                  <time>{{ task.dueDate | date: 'dd/MM HH:mm' }}</time>
+                </footer>
+              </article>
+            } @empty {
+              <p class="planner-page__empty">Nada encaixado nesta faixa agora.</p>
+            }
+          </div>
+        </mat-card>
+      }
+    </section>
+  }
+</div>

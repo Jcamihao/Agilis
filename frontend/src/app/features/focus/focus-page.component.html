@@ -1,0 +1,223 @@
+<div class="focus-page">
+  <agilis-section-header
+    eyebrow="Assistente de trabalho"
+    title="Meu foco hoje"
+    subtitle="O Agilis cruza prazo, ritmo, atraso e cobrancas para dizer o que deve andar primeiro hoje."
+  >
+    <a mat-stroked-button routerLink="/app/planner">Abrir planner</a>
+    <a mat-flat-button color="primary" routerLink="/app/tasks">Abrir kanban</a>
+  </agilis-section-header>
+
+  @if (loading()) {
+    <mat-card class="card focus-page__loading">
+      <mat-progress-bar mode="indeterminate" />
+      <p>Montando o foco do dia...</p>
+    </mat-card>
+  } @else {
+    @if (overview(); as data) {
+      <section class="focus-page__stats">
+        <agilis-stat-card
+          title="Fila aberta"
+          [value]="data.myFocusToday.totalOpen.toString()"
+          helper="Cards seus ainda em execucao"
+          icon="target"
+          accent="sky"
+        />
+
+        <agilis-stat-card
+          title="Vencem hoje"
+          [value]="data.myFocusToday.dueToday.toString()"
+          helper="Entregas que precisam andar agora"
+          icon="today"
+          accent="gold"
+        />
+
+        <agilis-stat-card
+          title="Criticas"
+          [value]="data.myFocusToday.critical.toString()"
+          helper="Prioridade maxima calculada pelo motor"
+          icon="priority_high"
+          accent="rose"
+        />
+
+        <agilis-stat-card
+          title="Cobrancas pendentes"
+          [value]="data.collectionCenter.pendingCharges.toString()"
+          helper="Automacoes prestes a agir"
+          icon="bolt"
+          accent="teal"
+        />
+      </section>
+
+      <section class="focus-page__layout">
+        <mat-card class="card focus-page__panel focus-page__panel--focus">
+          <header class="focus-page__panel-head">
+            <div>
+              <span class="focus-page__kicker">Minha fila priorizada</span>
+              <h2>O que atacar hoje</h2>
+            </div>
+            <p>
+              Cards seus ordenados por urgencia real, levando em conta prazo, atraso,
+              inercia operacional e cobrancas automaticas.
+            </p>
+          </header>
+
+          <div class="focus-page__task-list">
+            @for (task of focusTasks(); track trackTask($index, task)) {
+              <article class="focus-page__task-card">
+                <div class="focus-page__task-top">
+                  <div>
+                    <strong>{{ task.title }}</strong>
+                    <p>{{ task.description || 'Sem descricao registrada.' }}</p>
+                  </div>
+
+                  <span [class]="'focus-page__priority ' + priorityClass(task.priority.label)">
+                    {{ priorityLabel(task.priority.label) }}
+                  </span>
+                </div>
+
+                <div class="focus-page__meta-row">
+                  <mat-chip>{{ task.status }}</mat-chip>
+                  <mat-chip>Score {{ task.priority.score }}</mat-chip>
+                  <mat-chip>{{ task.dueDate | date: 'dd/MM HH:mm' }}</mat-chip>
+                  @if (task.automation.escalationLevel > 0) {
+                    <mat-chip color="warn" highlighted>
+                      Escalonada nivel {{ task.automation.escalationLevel }}
+                    </mat-chip>
+                  }
+                </div>
+
+                <div class="focus-page__reason-list">
+                  @for (reason of task.priority.reasons.slice(0, 3); track reason) {
+                    <span>{{ reason }}</span>
+                  }
+                </div>
+
+                <footer class="focus-page__task-footer">
+                  <span>{{ task.assignedTo.name }}</span>
+                  <strong>{{ task.priority.recommendedAction }}</strong>
+                </footer>
+              </article>
+            } @empty {
+              <p class="focus-page__empty">
+                Sem cards seus em aberto agora. O board esta sob controle.
+              </p>
+            }
+          </div>
+        </mat-card>
+
+        <section class="focus-page__side">
+          <mat-card class="card focus-page__panel">
+            <header class="focus-page__panel-head">
+              <div>
+                <span class="focus-page__kicker">Motor de prioridade</span>
+                <h2>Fila da operacao</h2>
+              </div>
+              <p>Top tarefas da organizacao segundo score automatico.</p>
+            </header>
+
+            <div class="focus-page__summary-grid">
+              @for (item of data.priorityEngine.summary; track item.label) {
+                <article class="focus-page__summary-item">
+                  <span>{{ item.label }}</span>
+                  <strong>{{ item.total }}</strong>
+                </article>
+              }
+            </div>
+
+            <div class="focus-page__mini-list">
+              @for (task of priorityTasks(); track trackTask($index, task)) {
+                <article class="focus-page__mini-card">
+                  <div class="focus-page__mini-head">
+                    <strong>{{ task.title }}</strong>
+                    <span [class]="'focus-page__priority ' + priorityClass(task.priority.label)">
+                      {{ priorityLabel(task.priority.label) }}
+                    </span>
+                  </div>
+                  <p>{{ task.priority.recommendedAction }}</p>
+                  <footer>
+                    <span>{{ task.assignedTo.name }}</span>
+                    <time>{{ task.dueDate | date: 'dd/MM HH:mm' }}</time>
+                  </footer>
+                </article>
+              }
+            </div>
+          </mat-card>
+
+          <mat-card class="card focus-page__panel">
+            <header class="focus-page__panel-head">
+              <div>
+                <span class="focus-page__kicker">Central de cobrancas</span>
+                <h2>Automacoes com escalonamento</h2>
+              </div>
+              <p>
+                O sistema cobra o responsavel, sobe para gestores e registra o rastro
+                operacional automaticamente.
+              </p>
+            </header>
+
+            <div class="focus-page__collection-metrics">
+              <article class="focus-page__collection-stat">
+                <span>Pendentes</span>
+                <strong>{{ data.collectionCenter.pendingCharges }}</strong>
+              </article>
+
+              <article class="focus-page__collection-stat">
+                <span>Escalonadas</span>
+                <strong>{{ data.collectionCenter.escalatedTasks }}</strong>
+              </article>
+
+              <article class="focus-page__collection-stat">
+                <span>Hoje</span>
+                <strong>{{ data.collectionCenter.remindersSentToday }}</strong>
+              </article>
+            </div>
+
+            <div class="focus-page__collection-list">
+              @for (item of collectionItems(); track trackCollectionItem($index, item)) {
+                <article class="focus-page__collection-card">
+                  <div class="focus-page__collection-head">
+                    <strong>{{ item.task.title }}</strong>
+                    <span>{{ item.lastActionLabel }}</span>
+                  </div>
+                  <p>{{ item.nextStep }}</p>
+                  <footer>
+                    <span>{{ item.task.assignedTo.name }}</span>
+                    <time>
+                      @if (item.lastActionAt) {
+                        {{ item.lastActionAt | date: 'dd/MM HH:mm' }}
+                      } @else {
+                        Sem acao ainda
+                      }
+                    </time>
+                  </footer>
+                </article>
+              } @empty {
+                <p class="focus-page__empty">
+                  Nenhuma cobranca automatica em andamento agora.
+                </p>
+              }
+            </div>
+
+            <div class="focus-page__timeline">
+              @for (event of recentEvents(); track trackEvent($index, event)) {
+                <article class="focus-page__timeline-item">
+                  <span class="material-symbols-outlined">bolt</span>
+                  <div>
+                    <strong>{{ eventLabel(event.action) }} • {{ event.taskTitle }}</strong>
+                    <p>{{ event.description }}</p>
+                  </div>
+                  <time>{{ event.createdAt | date: 'dd/MM HH:mm' }}</time>
+                </article>
+              } @empty {
+                <p class="focus-page__empty">
+                  O historico de cobrancas automaticas aparecera aqui conforme o cron agir.
+                </p>
+              }
+            </div>
+          </mat-card>
+        </section>
+      </section>
+    }
+  }
+</div>
