@@ -6,6 +6,7 @@ import {
   TaskPriorityResponseDto,
   TaskUserSummaryDto,
 } from '../tasks/dto/task-response.dto';
+import { buildTaskAssigneeLabel } from '../tasks/task-assignees.util';
 import {
   buildTaskOperationalSnapshot,
   compareTasksByPriority,
@@ -23,12 +24,19 @@ import {
 } from './dto/work-assistant-overview.dto';
 
 const assistantTaskInclude = {
-  assignedTo: {
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
+  assignments: {
+    orderBy: {
+      createdAt: 'asc',
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
     },
   },
   logs: {
@@ -107,7 +115,10 @@ export class WorkAssistantService {
     }));
 
     const myOpenTasks = operationalTasks.filter(
-      ({ task }) => task.assignedToId === user.id && task.status !== TaskStatus.DONE,
+      ({ task }) =>
+        task.status !== TaskStatus.DONE &&
+        (task.assignedToAll ||
+          task.assignments.some((assignment) => assignment.userId === user.id)),
     );
     const myFocusToday: MyFocusTodayDto = {
       totalOpen: myOpenTasks.length,
@@ -196,13 +207,19 @@ export class WorkAssistantService {
     task: AssistantTaskSource,
     snapshot: ReturnType<typeof buildTaskOperationalSnapshot>,
   ): WorkAssistantTaskDto {
+    const assignees = task.assignments.map((assignment) =>
+      TaskUserSummaryDto.fromUser(assignment.user),
+    );
+
     return WorkAssistantTaskDto.fromValues({
       id: task.id,
       title: task.title,
       description: task.description ?? undefined,
       status: task.status,
       dueDate: task.dueDate,
-      assignedTo: TaskUserSummaryDto.fromUser(task.assignedTo),
+      assignees,
+      assignedToAll: task.assignedToAll,
+      assigneeLabel: buildTaskAssigneeLabel(task.assignedToAll, assignees),
       priority: TaskPriorityResponseDto.fromSnapshot(snapshot.priority),
       automation: TaskAutomationResponseDto.fromSnapshot(snapshot.automation),
     });
@@ -228,7 +245,7 @@ export class WorkAssistantService {
         snapshot.automation.pendingEscalationLevel > 0
           ? 'Escalonar automaticamente para a lideranca no proximo ciclo.'
           : snapshot.automation.pendingReminder
-            ? 'Enviar nova cobranca automatica ao responsavel.'
+            ? 'Enviar nova cobranca automatica aos responsaveis.'
             : snapshot.priority.recommendedAction,
     };
   }

@@ -1,13 +1,6 @@
-import { Role, TaskLogAction, TaskStatus } from '@prisma/client';
+import { TaskLogAction, TaskStatus } from '@prisma/client';
 
 export type TaskPriorityLabel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-
-export interface TaskInsightUser {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-}
 
 export interface TaskInsightLog {
   action: TaskLogAction;
@@ -21,7 +14,6 @@ export interface TaskInsightSource {
   status: TaskStatus;
   dueDate: Date;
   createdAt: Date;
-  assignedTo: TaskInsightUser;
   logs: TaskInsightLog[];
 }
 

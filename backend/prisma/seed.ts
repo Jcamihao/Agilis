@@ -14,7 +14,8 @@ interface SeedTaskInput {
   description: string;
   status: TaskStatus;
   dueDate: Date;
-  assignedToId: string;
+  assignedToAll: boolean;
+  assignedToIds: string[];
   createdById: string;
   organizationId: string;
 }
@@ -88,7 +89,8 @@ async function main(): Promise<void> {
       description: 'Validar prioridades, gargalos e tarefas em risco da operacao.',
       status: TaskStatus.IN_PROGRESS,
       dueDate: new Date(Date.now() + 1000 * 60 * 60 * 18),
-      assignedToId: manager.id,
+      assignedToAll: true,
+      assignedToIds: [],
       createdById: admin.id,
       organizationId: organization.id,
     },
@@ -97,7 +99,8 @@ async function main(): Promise<void> {
       description: 'Entrar em contato com o cliente e registrar retorno no fluxo.',
       status: TaskStatus.PENDING,
       dueDate: new Date(Date.now() + 1000 * 60 * 60 * 8),
-      assignedToId: collaborator.id,
+      assignedToAll: false,
+      assignedToIds: [collaborator.id, manager.id],
       createdById: manager.id,
       organizationId: organization.id,
     },
@@ -106,7 +109,8 @@ async function main(): Promise<void> {
       description: 'Consolidar os dados finais para a reuniao da manha.',
       status: TaskStatus.DONE,
       dueDate: new Date(Date.now() - 1000 * 60 * 60 * 12),
-      assignedToId: collaborator.id,
+      assignedToAll: false,
+      assignedToIds: [collaborator.id],
       createdById: admin.id,
       organizationId: organization.id,
     },
@@ -115,7 +119,8 @@ async function main(): Promise<void> {
       description: 'Tarefa deliberadamente vencida para demonstrar o cron automatico.',
       status: TaskStatus.DELAYED,
       dueDate: new Date(Date.now() - 1000 * 60 * 60 * 30),
-      assignedToId: manager.id,
+      assignedToAll: false,
+      assignedToIds: [manager.id],
       createdById: admin.id,
       organizationId: organization.id,
     },
@@ -123,7 +128,23 @@ async function main(): Promise<void> {
 
   for (const taskInput of tasksToSeed) {
     const task = await prisma.task.create({
-      data: taskInput,
+      data: {
+        title: taskInput.title,
+        description: taskInput.description,
+        status: taskInput.status,
+        dueDate: taskInput.dueDate,
+        assignedToAll: taskInput.assignedToAll,
+        createdById: taskInput.createdById,
+        organizationId: taskInput.organizationId,
+        assignments:
+          taskInput.assignedToIds.length > 0
+            ? {
+                create: taskInput.assignedToIds.map((userId) => ({
+                  userId,
+                })),
+              }
+            : undefined,
+      },
     });
 
     await prisma.taskLog.create({

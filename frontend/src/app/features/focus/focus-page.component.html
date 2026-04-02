@@ -94,7 +94,7 @@
                 </div>
 
                 <footer class="focus-page__task-footer">
-                  <span>{{ task.assignedTo.name }}</span>
+                  <span>{{ task.assigneeLabel }}</span>
                   <strong>{{ task.priority.recommendedAction }}</strong>
                 </footer>
               </article>
@@ -136,7 +136,7 @@
                   </div>
                   <p>{{ task.priority.recommendedAction }}</p>
                   <footer>
-                    <span>{{ task.assignedTo.name }}</span>
+                    <span>{{ task.assigneeLabel }}</span>
                     <time>{{ task.dueDate | date: 'dd/MM HH:mm' }}</time>
                   </footer>
                 </article>
@@ -151,7 +151,7 @@
                 <h2>Automacoes com escalonamento</h2>
               </div>
               <p>
-                O sistema cobra o responsavel, sobe para gestores e registra o rastro
+                O sistema cobra os responsáveis, sobe para gestores e registra o rastro
                 operacional automaticamente.
               </p>
             </header>
@@ -182,7 +182,7 @@
                   </div>
                   <p>{{ item.nextStep }}</p>
                   <footer>
-                    <span>{{ item.task.assignedTo.name }}</span>
+                    <span>{{ item.task.assigneeLabel }}</span>
                     <time>
                       @if (item.lastActionAt) {
                         {{ item.lastActionAt | date: 'dd/MM HH:mm' }}

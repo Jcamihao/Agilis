@@ -48,10 +48,14 @@ export class TasksPageComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
+  protected readonly allAssigneesValue = '__ALL__';
+  protected readonly allUsersFilterValue = '';
   protected readonly currentUser = this.authService.currentUser;
   protected readonly loading = signal(true);
   protected readonly submitting = signal(false);
   protected readonly search = signal('');
+  protected readonly selectedUserFilter = signal('');
+  protected readonly editingTaskId = signal<string | null>(null);
   protected readonly tasks = signal<Task[]>([]);
   protected readonly users = signal<User[]>([]);
   protected readonly kanbanStatuses: TaskStatusOption[] = [
@@ -61,24 +65,59 @@ export class TasksPageComponent {
     { key: 'DONE', label: 'Concluídas', accent: 'teal' },
   ];
   protected readonly connectedDropLists = this.kanbanStatuses.map((status) => status.key);
-  protected readonly displayedColumns = ['title', 'priority', 'assignedTo', 'dueDate', 'status'];
+  protected readonly displayedColumns = ['title', 'priority', 'assignees', 'dueDate', 'status'];
+  protected readonly filterUsers = computed(() => {
+    const explicitUsers = this.users();
+
+    if (explicitUsers.length > 0) {
+      return [...explicitUsers].sort((left, right) => left.name.localeCompare(right.name));
+    }
+
+    const uniqueUsers = new Map<string, User>();
+
+    for (const task of this.tasks()) {
+      for (const assignee of task.assignees) {
+        if (!uniqueUsers.has(assignee.id)) {
+          uniqueUsers.set(assignee.id, {
+            id: assignee.id,
+            name: assignee.name,
+            email: assignee.email,
+            role: assignee.role,
+            organizationId: '',
+            createdAt: '',
+            updatedAt: '',
+          });
+        }
+      }
+    }
+
+    return [...uniqueUsers.values()].sort((left, right) => left.name.localeCompare(right.name));
+  });
   protected readonly filteredTasks = computed(() => {
     const term = this.search().trim().toLowerCase();
-
-    if (!term) {
-      return this.tasks();
-    }
+    const selectedUserId = this.selectedUserFilter();
 
     return this.tasks().filter(
       (task) =>
-        task.title.toLowerCase().includes(term) ||
-        task.assignedTo.name.toLowerCase().includes(term) ||
-        (task.description?.toLowerCase().includes(term) ?? false),
+        this.matchesUserFilter(task, selectedUserId) &&
+        (!term ||
+          task.title.toLowerCase().includes(term) ||
+          task.assigneeLabel.toLowerCase().includes(term) ||
+          (task.description?.toLowerCase().includes(term) ?? false)),
     );
   });
   protected readonly canManageTasks = computed(() => {
     const role = this.currentUser()?.role;
     return role === 'ADMIN' || role === 'MANAGER';
+  });
+  protected readonly editingTask = computed(() => {
+    const taskId = this.editingTaskId();
+
+    if (!taskId) {
+      return null;
+    }
+
+    return this.tasks().find((task) => task.id === taskId) ?? null;
   });
   protected readonly statusTotals = computed<Record<TaskStatus, number>>(() => {
     const totals: Record<TaskStatus, number> = {
@@ -106,7 +145,7 @@ export class TasksPageComponent {
     const currentUserId = this.currentUser()?.id;
     const myCards = currentUserId
       ? tasks.filter(
-          (task) => task.assignedTo.id === currentUserId && task.status !== 'DONE',
+          (task) => this.isAssignedToUser(task, currentUserId) && task.status !== 'DONE',
         ).length
       : 0;
 
@@ -149,7 +188,9 @@ export class TasksPageComponent {
     title: ['', [Validators.required, Validators.minLength(3)]],
     description: [''],
     dueDate: ['', [Validators.required]],
-    assignedToId: ['', [Validators.required]],
+    assignedToIds: this.formBuilder.nonNullable.control<string[]>([], [
+      Validators.required,
+    ]),
   });
 
   constructor() {
@@ -158,6 +199,10 @@ export class TasksPageComponent {
 
   protected setSearch(value: string): void {
     this.search.set(value);
+  }
+
+  protected setUserFilter(userId: string): void {
+    this.selectedUserFilter.set(userId);
   }
 
   protected tasksByStatus(status: TaskStatus): Task[] {
@@ -191,26 +236,35 @@ export class TasksPageComponent {
     }
 
     const raw = this.taskForm.getRawValue();
+    const editingTaskId = this.editingTaskId();
+    const assignedToAll = raw.assignedToIds.includes(this.allAssigneesValue);
     this.submitting.set(true);
 
-    this.tasksService
-      .create({
-        title: raw.title,
-        description: raw.description || undefined,
-        assignedToId: raw.assignedToId,
-        dueDate: new Date(raw.dueDate).toISOString(),
-      })
+    const payload = {
+      title: raw.title,
+      description: raw.description || undefined,
+      assignedToAll,
+      assignedToIds: assignedToAll ? [] : raw.assignedToIds,
+      dueDate: new Date(raw.dueDate).toISOString(),
+    };
+
+    const request$ = editingTaskId
+      ? this.tasksService.update(editingTaskId, payload)
+      : this.tasksService.create(payload);
+
+    request$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (task) => {
-          this.tasks.update((tasks) => [task, ...tasks]);
-          this.taskForm.reset({
-            title: '',
-            description: '',
-            dueDate: '',
-            assignedToId: raw.assignedToId,
-          });
-          this.notificationService.success('Tarefa criada com sucesso.');
+          this.tasks.update((tasks) =>
+            editingTaskId
+              ? tasks.map((currentTask) => (currentTask.id === task.id ? task : currentTask))
+              : [task, ...tasks],
+          );
+          this.resetTaskForm();
+          this.notificationService.success(
+            editingTaskId ? 'Card atualizado com sucesso.' : 'Tarefa criada com sucesso.',
+          );
         },
         error: () => {
           this.submitting.set(false);
@@ -219,6 +273,22 @@ export class TasksPageComponent {
           this.submitting.set(false);
         },
       });
+  }
+
+  protected startEditingTask(task: Task): void {
+    this.editingTaskId.set(task.id);
+    this.taskForm.reset({
+      title: task.title,
+      description: task.description ?? '',
+      dueDate: this.toDateTimeLocalValue(task.dueDate),
+      assignedToIds: task.assignedToAll
+        ? [this.allAssigneesValue]
+        : task.assignees.map((assignee) => assignee.id),
+    });
+  }
+
+  protected cancelEditing(): void {
+    this.resetTaskForm();
   }
 
   protected updateStatus(taskId: string, status: TaskStatus): void {
@@ -242,6 +312,38 @@ export class TasksPageComponent {
 
     const task = event.previousContainer.data[event.previousIndex];
     this.updateStatus(task.id, targetStatus);
+  }
+
+  protected handleAssigneeSelection(values: string[]): void {
+    const normalizedValues = values.includes(this.allAssigneesValue)
+      ? [this.allAssigneesValue]
+      : values.filter((value) => value !== this.allAssigneesValue);
+
+    this.taskForm.controls.assignedToIds.setValue(normalizedValues, {
+      emitEvent: false,
+    });
+  }
+
+  protected isAllAssigneesSelected(): boolean {
+    return this.taskForm.controls.assignedToIds.value.includes(this.allAssigneesValue);
+  }
+
+  protected selectedAssigneeLabel(): string {
+    const selectedValues = this.taskForm.controls.assignedToIds.value;
+
+    if (selectedValues.includes(this.allAssigneesValue)) {
+      return 'TODOS';
+    }
+
+    const names = this.users()
+      .filter((user) => selectedValues.includes(user.id))
+      .map((user) => user.name);
+
+    if (names.length === 0) {
+      return 'Selecione os responsáveis';
+    }
+
+    return names.join(', ');
   }
 
   protected trackTask(_: number, task: Task): string {
@@ -301,7 +403,20 @@ export class TasksPageComponent {
   }
 
   protected isAssignedToCurrentUser(task: Task): boolean {
-    return task.assignedTo.id === this.currentUser()?.id;
+    const currentUserId = this.currentUser()?.id;
+    return currentUserId ? this.isAssignedToUser(task, currentUserId) : false;
+  }
+
+  private matchesUserFilter(task: Task, userId: string): boolean {
+    if (!userId) {
+      return true;
+    }
+
+    return this.isAssignedToUser(task, userId);
+  }
+
+  private isAssignedToUser(task: Task, userId: string): boolean {
+    return task.assignedToAll || task.assignees.some((assignee) => assignee.id === userId);
   }
 
   private isDueWithinHours(task: Task, hours: number): boolean {
@@ -309,6 +424,27 @@ export class TasksPageComponent {
     const now = Date.now();
 
     return dueDate >= now && dueDate <= now + 1000 * 60 * 60 * hours;
+  }
+
+  private resetTaskForm(): void {
+    this.editingTaskId.set(null);
+    this.taskForm.reset({
+      title: '',
+      description: '',
+      dueDate: '',
+      assignedToIds: [],
+    });
+  }
+
+  private toDateTimeLocalValue(value: string): string {
+    const date = new Date(value);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
   private loadPage(): void {
@@ -338,8 +474,7 @@ export class TasksPageComponent {
         next: ({ tasks, users }) => {
           this.tasks.set(tasks);
           this.users.set(users);
-          const assignedUserId = users[0]?.id ?? '';
-          this.taskForm.patchValue({ assignedToId: assignedUserId });
+          this.resetTaskForm();
           this.loading.set(false);
         },
         error: () => {

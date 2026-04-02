@@ -11,7 +11,9 @@ export class WorkAssistantTaskDto {
   description?: string;
   status!: TaskStatus;
   dueDate!: Date;
-  assignedTo!: TaskUserSummaryDto;
+  assignees!: TaskUserSummaryDto[];
+  assignedToAll!: boolean;
+  assigneeLabel!: string;
   priority!: TaskPriorityResponseDto;
   automation!: TaskAutomationResponseDto;
 

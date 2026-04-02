@@ -17,6 +17,7 @@ import { AuthenticatedUser } from '../common/interfaces/authenticated-user.inter
 import { CreateTaskDto } from './dto/create-task.dto';
 import { ListTasksQueryDto } from './dto/list-tasks-query.dto';
 import { TaskResponseDto } from './dto/task-response.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { TasksService } from './tasks.service';
 
@@ -40,6 +41,16 @@ export class TasksController {
     @Body() dto: CreateTaskDto,
   ): Promise<TaskResponseDto> {
     return this.tasksService.create(user.organizationId, user, dto);
+  }
+
+  @Patch(':id')
+  @Roles(Role.ADMIN, Role.MANAGER)
+  update(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') taskId: string,
+    @Body() dto: UpdateTaskDto,
+  ): Promise<TaskResponseDto> {
+    return this.tasksService.update(user.organizationId, taskId, dto);
   }
 
   @Patch(':id/status')

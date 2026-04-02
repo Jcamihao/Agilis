@@ -53,7 +53,9 @@ export interface Task {
   status: TaskStatus;
   dueDate: string;
   organizationId: string;
-  assignedTo: TaskUserSummary;
+  assignees: TaskUserSummary[];
+  assignedToAll: boolean;
+  assigneeLabel: string;
   createdBy: TaskUserSummary;
   logs: TaskLog[];
   priority: TaskPriority;
@@ -66,7 +68,16 @@ export interface CreateTaskPayload {
   title: string;
   description?: string;
   dueDate: string;
-  assignedToId: string;
+  assignedToAll: boolean;
+  assignedToIds: string[];
+}
+
+export interface UpdateTaskPayload {
+  title: string;
+  description?: string;
+  dueDate: string;
+  assignedToAll: boolean;
+  assignedToIds: string[];
 }
 
 export interface UpdateTaskStatusPayload {

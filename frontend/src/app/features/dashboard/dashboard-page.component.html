@@ -84,7 +84,7 @@
               <article class="dashboard-page__task">
                 <div>
                   <strong>{{ task.title }}</strong>
-                  <p>{{ task.assignedTo.name }} • vence {{ task.dueDate | date: 'dd/MM HH:mm' }}</p>
+                  <p>{{ task.assigneeLabel }} • vence {{ task.dueDate | date: 'dd/MM HH:mm' }}</p>
                 </div>
                 <mat-chip color="warn" highlighted>Atrasada</mat-chip>
               </article>
@@ -107,7 +107,7 @@
               <article class="dashboard-page__task dashboard-page__task--soft">
                 <div>
                   <strong>{{ task.title }}</strong>
-                  <p>{{ task.assignedTo.name }} • {{ task.dueDate | date: 'dd/MM HH:mm' }}</p>
+                  <p>{{ task.assigneeLabel }} • {{ task.dueDate | date: 'dd/MM HH:mm' }}</p>
                 </div>
                 <span class="dashboard-page__soft-badge">Em foco</span>
               </article>

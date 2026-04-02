@@ -4,10 +4,22 @@
     title="Kanban operacional"
     subtitle="O board é o centro da operação: mova cards, revele gargalos e use a lista apenas como visão complementar."
   >
-    <mat-form-field appearance="outline" class="tasks-page__search">
-      <mat-label>Buscar tarefa</mat-label>
-      <input #searchInput matInput [value]="search()" (input)="setSearch(searchInput.value)" />
-    </mat-form-field>
+    <div class="tasks-page__header-filters">
+      <mat-form-field appearance="outline" class="tasks-page__search">
+        <mat-label>Buscar tarefa</mat-label>
+        <input #searchInput matInput [value]="search()" (input)="setSearch(searchInput.value)" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="tasks-page__user-filter">
+        <mat-label>Filtrar por usuário</mat-label>
+        <mat-select [value]="selectedUserFilter()" (selectionChange)="setUserFilter($event.value)">
+          <mat-option [value]="allUsersFilterValue">Todos os usuários</mat-option>
+          @for (user of filterUsers(); track trackUser($index, user)) {
+            <mat-option [value]="user.id">{{ user.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
   </agilis-section-header>
 
   @if (loading()) {
@@ -92,8 +104,21 @@
                       </span>
 
                       <footer>
-                        <span>{{ task.assignedTo.name }}</span>
-                        <time>{{ task.dueDate | date: 'dd/MM HH:mm' }}</time>
+                        <div class="tasks-page__footer-copy">
+                          <span>{{ task.assigneeLabel }}</span>
+                          <time>{{ task.dueDate | date: 'dd/MM HH:mm' }}</time>
+                        </div>
+
+                        @if (canManageTasks()) {
+                          <button
+                            mat-stroked-button
+                            type="button"
+                            (mousedown)="$event.stopPropagation()"
+                            (click)="startEditingTask(task)"
+                          >
+                            Editar
+                          </button>
+                        }
                       </footer>
                     </article>
                   } @empty {
@@ -138,9 +163,9 @@
                 </td>
               </ng-container>
 
-              <ng-container matColumnDef="assignedTo">
-                <th mat-header-cell *matHeaderCellDef>Responsável</th>
-                <td mat-cell *matCellDef="let task">{{ task.assignedTo.name }}</td>
+              <ng-container matColumnDef="assignees">
+                <th mat-header-cell *matHeaderCellDef>Responsáveis</th>
+                <td mat-cell *matCellDef="let task">{{ task.assigneeLabel }}</td>
               </ng-container>
 
               <ng-container matColumnDef="dueDate">
@@ -173,10 +198,20 @@
 
       @if (canManageTasks()) {
         <mat-card class="card tasks-page__composer">
-          <span class="tasks-page__kicker">Nova tarefa</span>
-          <h2>Acionar uma nova entrega</h2>
+          <span class="tasks-page__kicker">
+            {{ editingTask() ? 'Editar card' : 'Nova tarefa' }}
+          </span>
+          <h2>
+            {{ editingTask() ? 'Atualizar card do kanban' : 'Acionar uma nova entrega' }}
+          </h2>
           <p class="tasks-page__composer-copy">
-            Crie uma tarefa já orientada para entrar no board e puxar a operação para a próxima etapa.
+            @if (editingTask(); as task) {
+              Ajuste responsáveis, prazo e contexto do card <strong>{{ task.title }}</strong> sem
+              tirar o board de vista.
+            } @else {
+              Crie uma tarefa já orientada para entrar no board, com múltiplos responsáveis ou a
+              opção TODOS para acionar a operação inteira.
+            }
           </p>
           <form [formGroup]="taskForm" (ngSubmit)="submitTask()">
             <mat-form-field appearance="outline">
@@ -190,10 +225,18 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Responsável</mat-label>
-              <mat-select formControlName="assignedToId">
+              <mat-label>Responsáveis</mat-label>
+              <mat-select
+                formControlName="assignedToIds"
+                multiple
+                (selectionChange)="handleAssigneeSelection($event.value)"
+              >
+                <mat-select-trigger>{{ selectedAssigneeLabel() }}</mat-select-trigger>
+                <mat-option [value]="allAssigneesValue">TODOS</mat-option>
                 @for (user of users(); track trackUser($index, user)) {
-                  <mat-option [value]="user.id">{{ user.name }} • {{ user.role }}</mat-option>
+                  <mat-option [value]="user.id" [disabled]="isAllAssigneesSelected()">
+                    {{ user.name }} • {{ user.role }}
+                  </mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -203,13 +246,21 @@
               <input matInput type="datetime-local" formControlName="dueDate" />
             </mat-form-field>
 
-            <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
-              @if (submitting()) {
-                Salvando...
-              } @else {
-                Criar tarefa
+            <div class="tasks-page__form-actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+                @if (submitting()) {
+                  Salvando...
+                } @else if (editingTask()) {
+                  Salvar alteracoes
+                } @else {
+                  Criar tarefa
+                }
+              </button>
+
+              @if (editingTask()) {
+                <button mat-button type="button" (click)="cancelEditing()">Cancelar</button>
               }
-            </button>
+            </div>
           </form>
         </mat-card>
       } @else {

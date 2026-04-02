@@ -6,6 +6,7 @@ import {
   CreateTaskPayload,
   Task,
   TaskStatus,
+  UpdateTaskPayload,
   UpdateTaskStatusPayload,
 } from '../models/task.model';
 
@@ -37,6 +38,10 @@ export class TasksService {
 
   create(payload: CreateTaskPayload): Observable<Task> {
     return this.http.post<Task>(`${environment.apiUrl}/tasks`, payload);
+  }
+
+  update(taskId: string, payload: UpdateTaskPayload): Observable<Task> {
+    return this.http.patch<Task>(`${environment.apiUrl}/tasks/${taskId}`, payload);
   }
 
   updateStatus(taskId: string, payload: UpdateTaskStatusPayload): Observable<Task> {

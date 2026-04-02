@@ -5,14 +5,22 @@ import {
   TaskPrioritySnapshot,
   buildTaskOperationalSnapshot,
 } from '../task-insights.util';
+import { buildTaskAssigneeLabel } from '../task-assignees.util';
 
 const taskResponseInclude = {
-  assignedTo: {
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
+  assignments: {
+    orderBy: {
+      createdAt: 'asc',
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
     },
   },
   createdBy: {
@@ -155,7 +163,9 @@ export class TaskResponseDto {
   status!: TaskStatus;
   dueDate!: Date;
   organizationId!: string;
-  assignedTo!: TaskUserSummaryDto;
+  assignees!: TaskUserSummaryDto[];
+  assignedToAll!: boolean;
+  assigneeLabel!: string;
   createdBy!: TaskUserSummaryDto;
   logs!: TaskLogResponseDto[];
   priority!: TaskPriorityResponseDto;
@@ -167,6 +177,9 @@ export class TaskResponseDto {
 
   static fromTask(task: TaskResponseSource): TaskResponseDto {
     const operationalSnapshot = buildTaskOperationalSnapshot(task);
+    const assignees = task.assignments.map((assignment) =>
+      TaskUserSummaryDto.fromUser(assignment.user),
+    );
 
     return {
       id: task.id,
@@ -175,7 +188,9 @@ export class TaskResponseDto {
       status: task.status,
       dueDate: task.dueDate,
       organizationId: task.organizationId,
-      assignedTo: TaskUserSummaryDto.fromUser(task.assignedTo),
+      assignees,
+      assignedToAll: task.assignedToAll,
+      assigneeLabel: buildTaskAssigneeLabel(task.assignedToAll, assignees),
       createdBy: TaskUserSummaryDto.fromUser(task.createdBy),
       logs: task.logs.map((log) => TaskLogResponseDto.fromLog(log)),
       priority: TaskPriorityResponseDto.fromSnapshot(operationalSnapshot.priority),

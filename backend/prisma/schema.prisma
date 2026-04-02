@@ -25,7 +25,7 @@ model User {
   role           Role         @default(USER)
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  assignedTasks  Task[]       @relation("AssignedTasks")
+  taskAssignments TaskAssignment[]
   createdTasks   Task[]       @relation("CreatedTasks")
   taskLogs       TaskLog[]    @relation("TaskLogActors")
   createdAt      DateTime     @default(now())
@@ -40,8 +40,8 @@ model Task {
   description    String?
   status         TaskStatus   @default(PENDING)
   dueDate        DateTime
-  assignedToId   String
-  assignedTo     User         @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: Restrict)
+  assignedToAll  Boolean      @default(false)
+  assignments    TaskAssignment[]
   createdById    String
   createdBy      User         @relation("CreatedTasks", fields: [createdById], references: [id], onDelete: Restrict)
   organizationId String
@@ -51,8 +51,18 @@ model Task {
   updatedAt      DateTime     @updatedAt
 
   @@index([organizationId, status])
-  @@index([assignedToId])
   @@index([dueDate])
+}
+
+model TaskAssignment {
+  taskId     String
+  userId     String
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([taskId, userId])
+  @@index([userId])
 }
 
 model TaskLog {

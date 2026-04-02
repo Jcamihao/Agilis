@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -8,18 +9,18 @@ import { Prisma, Role, TaskLogAction, TaskStatus } from '@prisma/client';
 import { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
 import { PrismaService } from '../prisma/prisma.service';
 import { TaskLogsService } from '../task-logs/task-logs.service';
-import { UsersService } from '../users/users.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { ListTasksQueryDto } from './dto/list-tasks-query.dto';
 import { TaskResponseDto, TaskResponseSource } from './dto/task-response.dto';
+import { buildTaskAssigneeLabel } from './task-assignees.util';
 import { buildTaskOperationalSnapshot } from './task-insights.util';
+import { UpdateTaskDto } from './dto/update-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 
 @Injectable()
 export class TasksService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly usersService: UsersService,
     private readonly taskLogsService: TaskLogsService,
   ) {}
 
@@ -28,7 +29,20 @@ export class TasksService {
     actor: AuthenticatedUser,
     dto: CreateTaskDto,
   ): Promise<TaskResponseDto> {
-    await this.usersService.findByIdWithinOrganization(dto.assignedToId, organizationId);
+    const assignment = await this.resolveTaskAssignmentInput(
+      organizationId,
+      {
+        assignedToAll: dto.assignedToAll,
+        assignedToIds: dto.assignedToIds,
+      },
+      true,
+    );
+
+    if (!assignment) {
+      throw new BadRequestException(
+        'Selecione ao menos um responsavel ou a opcao TODOS.',
+      );
+    }
 
     const task = await this.prisma.$transaction(async (transaction) => {
       const createdTask = await transaction.task.create({
@@ -36,9 +50,17 @@ export class TasksService {
           title: dto.title,
           description: dto.description,
           dueDate: new Date(dto.dueDate),
-          assignedToId: dto.assignedToId,
+          assignedToAll: assignment.assignedToAll,
           createdById: actor.id,
           organizationId,
+          assignments:
+            assignment.assignedToIds.length > 0
+              ? {
+                  create: assignment.assignedToIds.map((userId) => ({
+                    userId,
+                  })),
+                }
+              : undefined,
         },
       });
 
@@ -58,6 +80,67 @@ export class TasksService {
     return this.findOneById(task.id, organizationId);
   }
 
+  async update(
+    organizationId: string,
+    taskId: string,
+    dto: UpdateTaskDto,
+  ): Promise<TaskResponseDto> {
+    const task = await this.prisma.task.findFirst({
+      where: {
+        id: taskId,
+        organizationId,
+      },
+    });
+
+    if (!task) {
+      throw new NotFoundException('Tarefa nao encontrada.');
+    }
+
+    const assignment = await this.resolveTaskAssignmentInput(
+      organizationId,
+      {
+        assignedToAll: dto.assignedToAll,
+        assignedToIds: dto.assignedToIds,
+      },
+      false,
+    );
+
+    await this.prisma.$transaction(async (transaction) => {
+      await transaction.task.update({
+        where: { id: task.id },
+        data: {
+          title: dto.title,
+          description: dto.description === undefined ? undefined : dto.description || null,
+          dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+          assignedToAll: assignment?.assignedToAll,
+        },
+      });
+
+      if (!assignment) {
+        return;
+      }
+
+      await transaction.taskAssignment.deleteMany({
+        where: {
+          taskId: task.id,
+        },
+      });
+
+      if (assignment.assignedToIds.length === 0) {
+        return;
+      }
+
+      await transaction.taskAssignment.createMany({
+        data: assignment.assignedToIds.map((userId) => ({
+          taskId: task.id,
+          userId,
+        })),
+      });
+    });
+
+    return this.findOneById(task.id, organizationId);
+  }
+
   async findAll(
     organizationId: string,
     query: ListTasksQueryDto,
@@ -66,7 +149,18 @@ export class TasksService {
       where: {
         organizationId,
         status: query.status,
-        assignedToId: query.assignedToId,
+        OR: query.assignedToId
+          ? [
+              { assignedToAll: true },
+              {
+                assignments: {
+                  some: {
+                    userId: query.assignedToId,
+                  },
+                },
+              },
+            ]
+          : undefined,
         title: query.search
           ? {
               contains: query.search,
@@ -99,13 +193,24 @@ export class TasksService {
         id: taskId,
         organizationId,
       },
+      include: {
+        assignments: {
+          select: {
+            userId: true,
+          },
+        },
+      },
     });
 
     if (!task) {
       throw new NotFoundException('Tarefa nao encontrada.');
     }
 
-    this.assertCanUpdateTask(actor, task.assignedToId);
+    this.assertCanUpdateTask(
+      actor,
+      task.assignedToAll,
+      task.assignments.map((assignment) => assignment.userId),
+    );
 
     if (task.status === dto.status) {
       return this.findOneById(taskId, organizationId);
@@ -188,12 +293,19 @@ export class TasksService {
         },
       },
       include: {
-        assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
+        assignments: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
           },
         },
         logs: {
@@ -221,10 +333,13 @@ export class TasksService {
             status: task.status,
             dueDate: task.dueDate,
             createdAt: task.createdAt,
-            assignedTo: task.assignedTo,
             logs: task.logs,
           },
           now,
+        );
+        const assigneeLabel = buildTaskAssigneeLabel(
+          task.assignedToAll,
+          task.assignments.map((assignment) => assignment.user),
         );
 
         if (
@@ -241,7 +356,7 @@ export class TasksService {
               taskId: task.id,
               organizationId: task.organizationId,
               action: TaskLogAction.AUTO_REMINDER_SENT,
-              description: `Cobranca automatica enviada para ${task.assignedTo.name}. Acao recomendada: ${snapshot.priority.recommendedAction}`,
+              description: `Cobranca automatica enviada para ${assigneeLabel}. Acao recomendada: ${snapshot.priority.recommendedAction}`,
             });
           }
 
@@ -285,12 +400,80 @@ export class TasksService {
     return TaskResponseDto.fromTask(task as TaskResponseSource);
   }
 
-  private assertCanUpdateTask(actor: AuthenticatedUser, assignedToId: string): void {
+  private async resolveTaskAssignmentInput(
+    organizationId: string,
+    input: {
+      assignedToAll?: boolean;
+      assignedToIds?: string[];
+    },
+    required: boolean,
+  ): Promise<{
+    assignedToAll: boolean;
+    assignedToIds: string[];
+  } | null> {
+    const includesAllFlag = input.assignedToAll !== undefined;
+    const includesIds = input.assignedToIds !== undefined;
+
+    if (!includesAllFlag && !includesIds) {
+      if (required) {
+        throw new BadRequestException(
+          'Selecione ao menos um responsavel ou a opcao TODOS.',
+        );
+      }
+
+      return null;
+    }
+
+    const assignedToAll = input.assignedToAll ?? false;
+    const assignedToIds = [...new Set((input.assignedToIds ?? []).filter(Boolean))];
+
+    if (assignedToAll) {
+      return {
+        assignedToAll: true,
+        assignedToIds: [],
+      };
+    }
+
+    if (assignedToIds.length === 0) {
+      throw new BadRequestException(
+        'Selecione ao menos um responsavel ou a opcao TODOS.',
+      );
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: {
+          in: assignedToIds,
+        },
+        organizationId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (users.length !== assignedToIds.length) {
+      throw new NotFoundException(
+        'Um ou mais responsaveis nao pertencem a organizacao.',
+      );
+    }
+
+    return {
+      assignedToAll: false,
+      assignedToIds,
+    };
+  }
+
+  private assertCanUpdateTask(
+    actor: AuthenticatedUser,
+    assignedToAll: boolean,
+    assignedToIds: string[],
+  ): void {
     if (actor.role === Role.ADMIN || actor.role === Role.MANAGER) {
       return;
     }
 
-    if (actor.id === assignedToId) {
+    if (assignedToAll || assignedToIds.includes(actor.id)) {
       return;
     }
 
