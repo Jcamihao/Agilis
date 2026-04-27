@@ -1,148 +1,79 @@
 <div class="shell">
-  <aside class="shell__rail">
-    <a class="shell__rail-brand" routerLink="/app/tasks" aria-label="Abrir Agilis">
-      <span>A</span>
-    </a>
+  <aside class="shell__sidebar">
+    <div class="shell__brand">
+      <div class="shell__brand-mark">
+        <span class="material-symbols-outlined">change_history</span>
+      </div>
+      <div>
+        <strong>{{ brand.name }}</strong>
+        <span>Enterprise</span>
+      </div>
+    </div>
 
-    <nav class="shell__rail-nav">
+    <nav class="shell__nav">
       @for (item of railNavigation(); track trackNavigation($index, item)) {
-        <a
-          [routerLink]="item.link"
-          routerLinkActive="is-active"
-          class="shell__rail-link"
-          [attr.aria-label]="item.label"
-        >
+        <a [routerLink]="item.link" routerLinkActive="is-active" class="shell__nav-link">
           <span class="material-symbols-outlined">{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
         </a>
       }
     </nav>
 
-    <button
-      mat-icon-button
-      type="button"
-      class="shell__rail-logout"
-      aria-label="Sair"
-      (click)="logout()"
-    >
-      <span class="material-symbols-outlined">logout</span>
-    </button>
-  </aside>
-
-  <aside class="shell__sidebar">
-    <div class="shell__workspace">
-      <span class="shell__workspace-kicker">Projeto de software</span>
-      <h1>{{ brand.name }}</h1>
-      <p>{{ brand.slogan }}</p>
+    <div class="shell__footer-nav">
+      <a class="shell__new-project" routerLink="/app/tasks">
+        <span class="material-symbols-outlined">add</span>
+        New Project
+      </a>
+      <a class="shell__nav-link shell__nav-link--muted" routerLink="/app/settings">
+        <span class="material-symbols-outlined">help</span>
+        <span>Support</span>
+      </a>
+      <button class="shell__nav-link shell__nav-link--muted" type="button" (click)="logout()">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Log out</span>
+      </button>
     </div>
-
-    <section class="shell__sidebar-group">
-      <span class="shell__sidebar-label">Entrega</span>
-      <nav class="shell__nav">
-        @for (item of deliveryNavigation(); track trackNavigation($index, item)) {
-          <a
-            [routerLink]="item.link"
-            routerLinkActive="is-active"
-            class="shell__nav-link"
-          >
-            <span class="material-symbols-outlined">{{ item.icon }}</span>
-            <div>
-              <strong>{{ item.label }}</strong>
-              <small>{{ item.description }}</small>
-            </div>
-          </a>
-        }
-      </nav>
-    </section>
-
-    <section class="shell__sidebar-group">
-      <span class="shell__sidebar-label">Visibilidade</span>
-      <nav class="shell__nav">
-        @for (item of visibilityNavigation(); track trackNavigation($index, item)) {
-          <a
-            [routerLink]="item.link"
-            routerLinkActive="is-active"
-            class="shell__nav-link"
-          >
-            <span class="material-symbols-outlined">{{ item.icon }}</span>
-            <div>
-              <strong>{{ item.label }}</strong>
-              <small>{{ item.description }}</small>
-            </div>
-          </a>
-        }
-      </nav>
-    </section>
-
-    @if (administrationNavigation().length > 0) {
-      <section class="shell__sidebar-group">
-        <span class="shell__sidebar-label">Administração</span>
-        <nav class="shell__nav">
-          @for (item of administrationNavigation(); track trackNavigation($index, item)) {
-            <a
-              [routerLink]="item.link"
-              routerLinkActive="is-active"
-              class="shell__nav-link"
-            >
-              <span class="material-symbols-outlined">{{ item.icon }}</span>
-              <div>
-                <strong>{{ item.label }}</strong>
-                <small>{{ item.description }}</small>
-              </div>
-            </a>
-          }
-        </nav>
-      </section>
-    }
-
-    <section class="shell__insight">
-      <span class="shell__insight-kicker">Workspace principal</span>
-      <h2>Kanban primeiro</h2>
-      <p>Use o board como fonte única de status e volte para o dashboard só quando precisar de resumo executivo.</p>
-      <a mat-stroked-button routerLink="/app/tasks">Abrir board</a>
-    </section>
   </aside>
 
   <main class="shell__main">
     <header class="shell__topbar">
-      <div class="shell__breadcrumbs">
-        <span>Projects</span>
-        <span class="material-symbols-outlined">chevron_right</span>
-        <span>{{ brand.name }}</span>
-        <span class="material-symbols-outlined">chevron_right</span>
-        <strong>{{ currentSection().label }}</strong>
-      </div>
-
+      <a class="shell__mobile-brand" routerLink="/app/dashboard">Agilis</a>
       <div class="shell__toolbar">
         <label class="shell__search">
           <span class="material-symbols-outlined">search</span>
-          <input type="search" placeholder="Pesquisar cards, pessoas e páginas" />
+          <input type="search" placeholder="Search tasks, docs, team..." />
         </label>
 
-        <a mat-stroked-button routerLink="/app/dashboard">Relatórios</a>
-        <a mat-flat-button color="primary" routerLink="/app/tasks">Criar no board</a>
+        <button class="shell__icon-button" type="button" aria-label="Notifications" (click)="showNotifications()">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <a class="shell__icon-button" routerLink="/app/settings" aria-label="Settings">
+          <span class="material-symbols-outlined">settings</span>
+        </a>
 
         @if (currentUser(); as user) {
           <div class="shell__profile">
             <span class="shell__profile-avatar">{{ user.name.slice(0, 1) }}</span>
             <div>
               <strong>{{ user.name }}</strong>
-              <span>{{ user.role }}</span>
+              <span>{{ user.role === 'ADMIN' ? 'Product Lead' : user.role }}</span>
             </div>
           </div>
         }
       </div>
     </header>
 
-    <section class="shell__page-head">
-      <div>
-        <span class="shell__page-kicker">{{ categoryLabel(currentSection().category) }}</span>
-        <h2>{{ currentSection().label }}</h2>
-      </div>
-      <p>{{ currentSection().description }}</p>
-    </section>
-
     <section class="shell__page">
       <router-outlet />
     </section>
   </main>
+
+  <nav class="shell__mobile-nav">
+    @for (item of railNavigation().slice(0, 4); track trackNavigation($index, item)) {
+      <a [routerLink]="item.link" routerLinkActive="is-active">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
 </div>

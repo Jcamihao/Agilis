@@ -5,6 +5,7 @@ import { forkJoin } from 'rxjs';
 import { DashboardOverview } from '../../core/models/dashboard.model';
 import { Task, TaskLog, TaskStatus } from '../../core/models/task.model';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { TasksService } from '../../core/services/tasks.service';
 import { materialImports } from '../../shared/material/material.imports';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
@@ -19,6 +20,7 @@ import { StatCardComponent } from '../../shared/components/stat-card/stat-card.c
 })
 export class DashboardPageComponent {
   private readonly dashboardService = inject(DashboardService);
+  private readonly notificationService = inject(NotificationService);
   private readonly tasksService = inject(TasksService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -134,5 +136,9 @@ export class DashboardPageComponent {
 
   protected trackTask(_: number, task: Task): string {
     return task.id;
+  }
+
+  protected applyLastSevenDays(): void {
+    this.notificationService.success('Dashboard filtrado para os últimos 7 dias.');
   }
 }

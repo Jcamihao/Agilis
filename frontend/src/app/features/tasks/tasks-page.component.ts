@@ -55,6 +55,8 @@ export class TasksPageComponent {
   protected readonly submitting = signal(false);
   protected readonly search = signal('');
   protected readonly selectedUserFilter = signal('');
+  protected readonly currentPage = signal(1);
+  protected readonly pageSize = 8;
   protected readonly editingTaskId = signal<string | null>(null);
   protected readonly tasks = signal<Task[]>([]);
   protected readonly users = signal<User[]>([]);
@@ -105,6 +107,14 @@ export class TasksPageComponent {
           task.assigneeLabel.toLowerCase().includes(term) ||
           (task.description?.toLowerCase().includes(term) ?? false)),
     );
+  });
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.filteredTasks().length / this.pageSize)),
+  );
+  protected readonly pagedTasks = computed(() => {
+    const page = Math.min(this.currentPage(), this.totalPages());
+    const start = (page - 1) * this.pageSize;
+    return this.filteredTasks().slice(start, start + this.pageSize);
   });
   protected readonly canManageTasks = computed(() => {
     const role = this.currentUser()?.role;
@@ -199,10 +209,24 @@ export class TasksPageComponent {
 
   protected setSearch(value: string): void {
     this.search.set(value);
+    this.currentPage.set(1);
   }
 
   protected setUserFilter(userId: string): void {
     this.selectedUserFilter.set(userId);
+    this.currentPage.set(1);
+  }
+
+  protected previousPage(): void {
+    this.currentPage.update((page) => Math.max(1, page - 1));
+  }
+
+  protected nextPage(): void {
+    this.currentPage.update((page) => Math.min(this.totalPages(), page + 1));
+  }
+
+  protected setPage(page: number): void {
+    this.currentPage.set(Math.min(this.totalPages(), Math.max(1, page)));
   }
 
   protected tasksByStatus(status: TaskStatus): Task[] {
@@ -261,6 +285,7 @@ export class TasksPageComponent {
               ? tasks.map((currentTask) => (currentTask.id === task.id ? task : currentTask))
               : [task, ...tasks],
           );
+          this.currentPage.set(1);
           this.resetTaskForm();
           this.notificationService.success(
             editingTaskId ? 'Card atualizado com sucesso.' : 'Tarefa criada com sucesso.',

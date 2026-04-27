@@ -8,6 +8,8 @@ import { User, UserRole } from '../../core/models/user.model';
 import { materialImports } from '../../shared/material/material.imports';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 
+type TeamFilter = 'all' | 'developers' | 'designers' | 'product' | 'operations';
+
 @Component({
   selector: 'agilis-users-page',
   standalone: true,
@@ -25,7 +27,26 @@ export class UsersPageComponent {
   protected readonly currentUser = this.authService.currentUser;
   protected readonly loading = signal(true);
   protected readonly submitting = signal(false);
+  protected readonly selectedTeamFilter = signal<TeamFilter>('all');
   protected readonly users = signal<User[]>([]);
+  protected readonly filteredUsers = computed(() => {
+    const filter = this.selectedTeamFilter();
+
+    return this.users().filter((user) => {
+      switch (filter) {
+        case 'developers':
+          return user.role === 'USER';
+        case 'product':
+          return user.role === 'MANAGER' || user.role === 'ADMIN';
+        case 'operations':
+          return user.role === 'MANAGER' || user.role === 'USER';
+        case 'designers':
+          return user.name.toLowerCase().includes('design');
+        default:
+          return true;
+      }
+    });
+  });
   protected readonly roleOptions = computed<UserRole[]>(() => {
     const role = this.currentUser()?.role;
     return role === 'MANAGER' ? ['USER'] : ['ADMIN', 'MANAGER', 'USER'];
@@ -84,6 +105,14 @@ export class UsersPageComponent {
           this.notificationService.success('Papel atualizado.');
         },
       });
+  }
+
+  protected setTeamFilter(filter: TeamFilter): void {
+    this.selectedTeamFilter.set(filter);
+  }
+
+  protected showMemberActions(user: User): void {
+    this.notificationService.success(`${user.name}: use o seletor de papel para alterar acesso.`);
   }
 
   protected isSelf(userId: string): boolean {

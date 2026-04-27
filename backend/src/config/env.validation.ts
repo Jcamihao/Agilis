@@ -3,7 +3,6 @@ import {
   IsInt,
   IsOptional,
   IsString,
-  IsUrl,
   Min,
   MinLength,
   validateSync,
@@ -27,12 +26,9 @@ class EnvironmentVariables {
   @Min(1)
   PORT?: number;
 
-  @IsOptional()
-  @IsUrl({
-    require_protocol: true,
-    require_tld: false,
-  })
-  FRONTEND_URL?: string;
+  @IsString()
+  @MinLength(1)
+  FRONTEND_URL!: string;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {

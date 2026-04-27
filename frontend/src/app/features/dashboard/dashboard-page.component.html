@@ -1,145 +1,153 @@
 <div class="dashboard-page">
-  <agilis-section-header
-    eyebrow="Cockpit de apoio"
-    title="Dashboard executivo"
-    subtitle="O Kanban é o centro da operação. Este painel resume saúde, risco e ritmo para apoiar as decisões antes de voltar ao board."
-  >
-    <a mat-flat-button color="primary" routerLink="/app/tasks">Abrir kanban</a>
-  </agilis-section-header>
+  <section class="dashboard-page__hero">
+    <div>
+      <h1>Dashboard Overview</h1>
+      <p>Welcome back. Your productivity is up {{ completionRate() }}% this cycle.</p>
+    </div>
+    <div class="dashboard-page__actions">
+      <button type="button" (click)="applyLastSevenDays()">
+        <span class="material-symbols-outlined">calendar_today</span>
+        Last 7 Days
+      </button>
+      <a routerLink="/app/tasks">
+        <span class="material-symbols-outlined">rocket_launch</span>
+        Open Tasks
+      </a>
+    </div>
+  </section>
 
   @if (loading()) {
-    <mat-card class="dashboard-page__loading card">
+    <mat-card class="dashboard-page__loading">
       <mat-progress-bar mode="indeterminate" />
-      <p>Carregando visão operacional...</p>
+      <p>Loading operational intelligence...</p>
     </mat-card>
   } @else {
     @if (overview(); as summary) {
-      <section class="dashboard-page__stats">
-        <agilis-stat-card
-          title="Total de tarefas"
-          [value]="summary.totalTasks.toString()"
-          helper="Base operacional da organização"
-          icon="assignment"
-          accent="sky"
-        />
+      <section class="dashboard-page__metrics">
+        <article class="dashboard-page__metric dashboard-page__metric--primary">
+          <span>Productivity</span>
+          <div>
+            <strong>{{ completionRate() }}</strong>
+            <small>%</small>
+          </div>
+          <progress max="100" [value]="completionRate()"></progress>
+        </article>
 
-        <agilis-stat-card
-          title="Concluídas"
-          [value]="summary.completedTasks.toString()"
-          [helper]="completionRate() + '% do fluxo entregue'"
-          icon="task_alt"
-          accent="teal"
-        />
+        <article class="dashboard-page__metric">
+          <span>Pending Tasks</span>
+          <div>
+            <strong>{{ summary.totalTasks - summary.completedTasks }}</strong>
+            <small>open</small>
+          </div>
+          <div class="dashboard-page__bars">
+            <i></i><i></i><i></i>
+          </div>
+        </article>
 
-        <agilis-stat-card
-          title="Atrasadas"
-          [value]="summary.delayedTasks.toString()"
-          helper="Pontos de atenção imediata"
-          icon="warning"
-          accent="rose"
-        />
+        <article class="dashboard-page__metric">
+          <span>Completed</span>
+          <div>
+            <strong>{{ summary.completedTasks }}</strong>
+            <small>total</small>
+          </div>
+          <div class="dashboard-page__avatars">
+            <span>SC</span><span>AR</span><span>+{{ summary.totalUsers }}</span>
+          </div>
+        </article>
 
-        <agilis-stat-card
-          title="Usuários ativos"
-          [value]="summary.totalUsers.toString()"
-          helper="Equipe conectada à operação"
-          icon="groups"
-          accent="gold"
-        />
+        <article class="dashboard-page__metric dashboard-page__metric--action">
+          <span>Quick Action</span>
+          <h2>Create new sprint retrospective</h2>
+          <a routerLink="/app/tasks">Launch now</a>
+        </article>
       </section>
 
-      <section class="dashboard-page__grid">
-        <mat-card class="card dashboard-page__panel">
-          <div class="dashboard-page__panel-header">
+      <section class="dashboard-page__main-grid">
+        <article class="dashboard-page__trend">
+          <header>
             <div>
-              <span class="dashboard-page__kicker">Saúde do fluxo</span>
-              <h2>Distribuição por status</h2>
+              <h2>Productivity Trend</h2>
+              <p>Daily output performance over time</p>
             </div>
-            <strong>{{ completionRate() }}%</strong>
-          </div>
-
-          <div class="dashboard-page__progress-list">
-            @for (status of statusOrder; track status) {
-              <div class="dashboard-page__progress-item">
-                <div>
-                  <span>{{ statusConfig[status].label }}</span>
-                  <small>{{ statusConfig[status].progress() }}% do total</small>
-                </div>
-                <mat-progress-bar [value]="statusConfig[status].progress()" />
-              </div>
-            }
-          </div>
-        </mat-card>
-
-        <mat-card class="card dashboard-page__panel">
-          <div class="dashboard-page__panel-header">
-            <div>
-              <span class="dashboard-page__kicker">Ação imediata</span>
-              <h2>Tarefas atrasadas</h2>
+            <div class="dashboard-page__legend">
+              <span><i></i> High</span>
+              <span><i></i> Avg</span>
             </div>
-          </div>
+          </header>
 
-          <div class="dashboard-page__list">
-            @for (task of delayedTasks(); track trackTask($index, task)) {
-              <article class="dashboard-page__task">
-                <div>
-                  <strong>{{ task.title }}</strong>
-                  <p>{{ task.assigneeLabel }} • vence {{ task.dueDate | date: 'dd/MM HH:mm' }}</p>
-                </div>
-                <mat-chip color="warn" highlighted>Atrasada</mat-chip>
-              </article>
-            } @empty {
-              <p class="dashboard-page__empty">Nenhuma tarefa atrasada no momento.</p>
-            }
-          </div>
-        </mat-card>
-
-        <mat-card class="card dashboard-page__panel">
-          <div class="dashboard-page__panel-header">
-            <div>
-              <span class="dashboard-page__kicker">Próximo ciclo</span>
-              <h2>Prazo chegando</h2>
+          <div class="dashboard-page__chart" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+            <svg preserveAspectRatio="none" viewBox="0 0 800 240">
+              <defs>
+                <linearGradient id="dashboardGrad" x1="0%" x2="0%" y1="0%" y2="100%">
+                  <stop offset="0%" stop-color="#b2c5ff" stop-opacity="0.28" />
+                  <stop offset="100%" stop-color="#b2c5ff" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path d="M0,180 Q100,160 200,100 T400,120 T600,60 T800,40" fill="none" stroke="#b2c5ff" stroke-width="4" />
+              <path d="M0,180 Q100,160 200,100 T400,120 T600,60 T800,40 V240 H0 Z" fill="url(#dashboardGrad)" />
+            </svg>
+            <div class="dashboard-page__days">
+              <b>Mon</b><b>Tue</b><b>Wed</b><b>Thu</b><b>Fri</b><b>Sat</b><b>Sun</b>
             </div>
           </div>
+        </article>
 
-          <div class="dashboard-page__list">
+        <article class="dashboard-page__recent">
+          <header>
+            <h2>Recent Tasks</h2>
+            <span class="material-symbols-outlined">more_horiz</span>
+          </header>
+
+          <div class="dashboard-page__recent-list">
             @for (task of dueSoonTasks(); track trackTask($index, task)) {
-              <article class="dashboard-page__task dashboard-page__task--soft">
+              <a routerLink="/app/tasks">
+                <span class="material-symbols-outlined">assignment</span>
                 <div>
                   <strong>{{ task.title }}</strong>
-                  <p>{{ task.assigneeLabel }} • {{ task.dueDate | date: 'dd/MM HH:mm' }}</p>
+                  <small>{{ task.dueDate | date: 'dd/MM HH:mm' }} • {{ task.assigneeLabel }}</small>
                 </div>
-                <span class="dashboard-page__soft-badge">Em foco</span>
-              </article>
+                <i></i>
+              </a>
             } @empty {
-              <p class="dashboard-page__empty">Nenhum prazo crítico nas próximas 48 horas.</p>
+              @for (task of tasks().slice(0, 4); track trackTask($index, task)) {
+                <a routerLink="/app/tasks">
+                  <span class="material-symbols-outlined">verified</span>
+                  <div>
+                    <strong>{{ task.title }}</strong>
+                    <small>{{ task.status }} • {{ task.assigneeLabel }}</small>
+                  </div>
+                  <i></i>
+                </a>
+              }
             }
           </div>
-        </mat-card>
+        </article>
+      </section>
 
-        <mat-card class="card dashboard-page__panel">
-          <div class="dashboard-page__panel-header">
-            <div>
-              <span class="dashboard-page__kicker">Rastro operacional</span>
-              <h2>Últimas movimentações</h2>
-            </div>
+      <section class="dashboard-page__bottom">
+        <article class="dashboard-page__insight">
+          <div>
+            <span>Enterprise Insight</span>
+            <h2>Optimize your team's velocity with live operational data.</h2>
+            <a routerLink="/app/tasks">Review bottlenecks</a>
           </div>
+        </article>
 
-          <div class="dashboard-page__activity-list">
-            @for (log of recentLogs(); track trackLog($index, log)) {
-              <article class="dashboard-page__activity">
-                <span class="material-symbols-outlined">bolt</span>
-                <div>
-                  <strong>{{ log.taskTitle }}</strong>
-                  <p>{{ log.description }}</p>
-                </div>
-                <time>{{ log.createdAt | date: 'dd/MM HH:mm' }}</time>
-              </article>
-            } @empty {
-              <p class="dashboard-page__empty">Sem atividades registradas ainda.</p>
-            }
+        <article class="dashboard-page__availability">
+          <h2>Team Availability</h2>
+          <div>
+            <section>
+              <span>AR</span>
+              <div><strong>Alex Rivera</strong><small>Available</small></div>
+            </section>
+            <section>
+              <span>EV</span>
+              <div><strong>Elena Vance</strong><small>In Meeting</small></div>
+            </section>
           </div>
-        </mat-card>
+          <a routerLink="/app/users">Manage Team Access</a>
+        </article>
       </section>
     }
   }

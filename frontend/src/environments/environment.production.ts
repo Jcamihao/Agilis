@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3000/api',
+  apiUrl: '/api',
   brand: {
     name: 'Agilis',
     slogan: 'Disciplina que gera resultado',

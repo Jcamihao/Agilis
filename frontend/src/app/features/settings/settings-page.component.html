@@ -1,0 +1,149 @@
+<form class="settings-page" [formGroup]="profileForm" (ngSubmit)="saveChanges()">
+  <section class="settings-page__hero">
+    <div>
+      <h1>Account Settings</h1>
+      <p>Manage personal information, security preferences and global application behavior.</p>
+    </div>
+  </section>
+
+  <nav class="settings-page__tabs" aria-label="Settings sections">
+    <button type="button" [class.is-active]="activeTab() === 'profile'" (click)="setActiveTab('profile')">
+      <span class="material-symbols-outlined">person</span>Profile
+    </button>
+    <button type="button" [class.is-active]="activeTab() === 'password'" (click)="setActiveTab('password')">
+      <span class="material-symbols-outlined">lock</span>Password
+    </button>
+    <button type="button" [class.is-active]="activeTab() === 'preferences'" (click)="setActiveTab('preferences')">
+      <span class="material-symbols-outlined">tune</span>Preferences
+    </button>
+    <button type="button" [class.is-active]="activeTab() === 'notifications'" (click)="setActiveTab('notifications')">
+      <span class="material-symbols-outlined">notifications_active</span>Notifications
+    </button>
+  </nav>
+
+  @if (loading()) {
+    <mat-card class="settings-page__loading">
+      <mat-progress-bar mode="indeterminate" />
+      <p>Loading account settings...</p>
+    </mat-card>
+  }
+
+  <section class="settings-page__grid">
+    <div class="settings-page__left">
+      <article class="settings-page__panel">
+        <header>
+          <h2><i></i>Personal Information</h2>
+          <button type="button" (click)="editPhoto()">Edit Photo</button>
+        </header>
+
+        <div class="settings-page__profile">
+          <div class="settings-page__avatar">
+            <span>{{ profileForm.controls.name.value.slice(0, 2).toUpperCase() }}</span>
+            <button type="button" aria-label="Change photo" (click)="editPhoto()">
+              <span class="material-symbols-outlined">photo_camera</span>
+            </button>
+          </div>
+
+          <div class="settings-page__fields">
+            <label>
+              <span>Full Name</span>
+              <input formControlName="name" />
+            </label>
+            <label>
+              <span>Email Address</span>
+              <input type="email" formControlName="email" />
+            </label>
+            <label>
+              <span>Role</span>
+              <input formControlName="role" />
+            </label>
+            <label>
+              <span>Timezone</span>
+              <select formControlName="timezone">
+                <option value="America/Sao_Paulo">America/Sao_Paulo</option>
+                <option value="America/New_York">Eastern Standard Time</option>
+                <option value="Europe/Lisbon">Western European Time</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <article class="settings-page__panel">
+        <h2><i class="is-tertiary"></i>Security & Access</h2>
+        <section class="settings-page__security-row">
+          <span class="material-symbols-outlined">key</span>
+          <div>
+            <strong>Change Password</strong>
+            <small>Last changed 4 months ago</small>
+          </div>
+          <button type="button" (click)="updatePassword()">Update</button>
+        </section>
+        <section class="settings-page__security-row">
+          <span class="material-symbols-outlined">security</span>
+          <div>
+            <strong>Two-Factor Authentication</strong>
+            <small>Add an extra layer of security</small>
+          </div>
+          <label class="settings-page__switch">
+            <input type="checkbox" formControlName="twoFactor" />
+            <i></i>
+          </label>
+        </section>
+      </article>
+    </div>
+
+    <aside class="settings-page__right">
+      <article class="settings-page__panel">
+        <h2>Preferences</h2>
+        <div class="settings-page__appearance">
+          <span>Appearance</span>
+          <div>
+            <button type="button" [class.is-active]="appearanceMode() === 'dark'" (click)="setAppearance('dark')"><i></i>Dark Mode</button>
+            <button type="button" [class.is-active]="appearanceMode() === 'light'" (click)="setAppearance('light')"><i></i>Light Mode</button>
+          </div>
+        </div>
+        <section class="settings-page__preference-row">
+          <span>Density Mode</span>
+          <strong>{{ profileForm.controls.density.value }}</strong>
+        </section>
+        <section class="settings-page__preference-row">
+          <span>Auto-Save</span>
+          <label class="settings-page__switch">
+            <input type="checkbox" formControlName="autosave" />
+            <i></i>
+          </label>
+        </section>
+      </article>
+
+      <article class="settings-page__panel">
+        <h2>Integrations</h2>
+        <section class="settings-page__integration">
+          <span>G</span>
+          <div><strong>Google Workspace</strong><small>Connected</small></div>
+          <button type="button" (click)="manageIntegration('Google Workspace')" aria-label="Manage Google Workspace">
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+        </section>
+        <section class="settings-page__integration is-muted">
+          <span>S</span>
+          <div><strong>Slack</strong><small>Disconnected</small></div>
+          <button type="button" (click)="manageIntegration('Slack')" aria-label="Connect Slack">
+            <span class="material-symbols-outlined">add</span>
+          </button>
+        </section>
+      </article>
+    </aside>
+  </section>
+
+  <footer class="settings-page__actions">
+    <button type="button" (click)="discardChanges()">Discard Changes</button>
+    <button type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        Saving...
+      } @else {
+        Save Changes
+      }
+    </button>
+  </footer>
+</form>

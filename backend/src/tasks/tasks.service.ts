@@ -142,25 +142,27 @@ export class TasksService {
   }
 
   async findAll(
-    organizationId: string,
+    actor: AuthenticatedUser,
     query: ListTasksQueryDto,
   ): Promise<TaskResponseDto[]> {
+    if (
+      actor.role === Role.USER &&
+      query.assignedToId &&
+      query.assignedToId !== actor.id
+    ) {
+      throw new ForbiddenException(
+        'Voce nao possui permissao para visualizar tarefas de outro usuario.',
+      );
+    }
+
     const tasks = await this.prisma.task.findMany({
       where: {
-        organizationId,
+        organizationId: actor.organizationId,
         status: query.status,
-        OR: query.assignedToId
-          ? [
-              { assignedToAll: true },
-              {
-                assignments: {
-                  some: {
-                    userId: query.assignedToId,
-                  },
-                },
-              },
-            ]
-          : undefined,
+        AND: [
+          this.buildVisibilityFilter(actor),
+          this.buildAssigneeFilter(query.assignedToId),
+        ].filter((filter): filter is Prisma.TaskWhereInput => Boolean(filter)),
         title: query.search
           ? {
               contains: query.search,
@@ -480,5 +482,45 @@ export class TasksService {
     throw new ForbiddenException(
       'Voce nao possui permissao para atualizar esta tarefa.',
     );
+  }
+
+  private buildVisibilityFilter(actor: AuthenticatedUser): Prisma.TaskWhereInput | undefined {
+    if (actor.role === Role.ADMIN || actor.role === Role.MANAGER) {
+      return undefined;
+    }
+
+    return {
+      OR: [
+        { assignedToAll: true },
+        {
+          assignments: {
+            some: {
+              userId: actor.id,
+            },
+          },
+        },
+      ],
+    };
+  }
+
+  private buildAssigneeFilter(
+    assignedToId?: string,
+  ): Prisma.TaskWhereInput | undefined {
+    if (!assignedToId) {
+      return undefined;
+    }
+
+    return {
+      OR: [
+        { assignedToAll: true },
+        {
+          assignments: {
+            some: {
+              userId: assignedToId,
+            },
+          },
+        },
+      ],
+    };
   }
 }

@@ -31,7 +31,7 @@ export class TasksController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListTasksQueryDto,
   ): Promise<TaskResponseDto[]> {
-    return this.tasksService.findAll(user.organizationId, query);
+    return this.tasksService.findAll(user, query);
   }
 
   @Post()

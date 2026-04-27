@@ -13,6 +13,7 @@ model Organization {
   users     User[]
   tasks     Task[]
   taskLogs  TaskLog[]
+  authSessions AuthSession[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -28,10 +29,46 @@ model User {
   taskAssignments TaskAssignment[]
   createdTasks   Task[]       @relation("CreatedTasks")
   taskLogs       TaskLog[]    @relation("TaskLogActors")
+  authSessions   AuthSession[]
+  settings       UserSettings?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   @@index([organizationId])
+}
+
+model UserSettings {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timezone  String   @default("America/Sao_Paulo")
+  density   String   @default("Comfortable")
+  appearance String  @default("dark")
+  autosave  Boolean  @default(false)
+  twoFactor Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model AuthSession {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  refreshTokenHash String    @unique
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([expiresAt])
 }
 
 model Task {

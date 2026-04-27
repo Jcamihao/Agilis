@@ -6,6 +6,7 @@ import { LoginPageComponent } from './features/auth/login-page.component';
 import { DashboardPageComponent } from './features/dashboard/dashboard-page.component';
 import { FocusPageComponent } from './features/focus/focus-page.component';
 import { PlannerPageComponent } from './features/planner/planner-page.component';
+import { SettingsPageComponent } from './features/settings/settings-page.component';
 import { TasksPageComponent } from './features/tasks/tasks-page.component';
 import { UsersPageComponent } from './features/users/users-page.component';
 import { AppShellComponent } from './core/layout/app-shell.component';
@@ -46,19 +47,23 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'settings',
+        component: SettingsPageComponent,
+      },
+      {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'tasks',
+        redirectTo: 'dashboard',
       },
     ],
   },
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'app/tasks',
+    redirectTo: 'app/dashboard',
   },
   {
     path: '**',
-    redirectTo: 'app/tasks',
+    redirectTo: 'app/dashboard',
   },
 ];

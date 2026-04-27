@@ -6,6 +6,7 @@ import { validateEnv } from './config/env.validation';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SettingsModule } from './settings/settings.module';
 import { TaskLogsModule } from './task-logs/task-logs.module';
 import { TasksModule } from './tasks/tasks.module';
 import { UsersModule } from './users/users.module';
@@ -22,6 +23,7 @@ import { WorkAssistantModule } from './work-assistant/work-assistant.module';
     AuthModule,
     UsersModule,
     TaskLogsModule,
+    SettingsModule,
     TasksModule,
     WorkAssistantModule,
     DashboardModule,

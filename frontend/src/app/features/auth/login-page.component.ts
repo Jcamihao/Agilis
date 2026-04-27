@@ -22,12 +22,19 @@ export class LoginPageComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly brand = environment.brand;
+  protected readonly showDemoCredentials = !environment.production;
   protected readonly loginLoading = signal(false);
   protected readonly registerLoading = signal(false);
 
   protected readonly loginForm = this.formBuilder.nonNullable.group({
-    email: ['admin@agilis.local', [Validators.required, Validators.email]],
-    password: ['Agilis@123', [Validators.required, Validators.minLength(8)]],
+    email: [
+      environment.production ? '' : 'admin@agilis.local',
+      [Validators.required, Validators.email],
+    ],
+    password: [
+      environment.production ? '' : 'Agilis@123',
+      [Validators.required, Validators.minLength(8)],
+    ],
   });
 
   protected readonly registerForm = this.formBuilder.nonNullable.group({

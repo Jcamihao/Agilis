@@ -10,16 +10,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../services/auth.service';
+import { NotificationService } from '../services/notification.service';
 import { materialImports } from '../../shared/material/material.imports';
-
-type NavigationCategory = 'delivery' | 'visibility' | 'administration';
 
 interface NavigationItem {
   label: string;
   icon: string;
   link: string;
-  description: string;
-  category: NavigationCategory;
   roles?: Array<'ADMIN' | 'MANAGER' | 'USER'>;
 }
 
@@ -32,6 +29,7 @@ interface NavigationItem {
 })
 export class AppShellComponent {
   private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly currentUrl = signal(this.router.url);
@@ -45,15 +43,6 @@ export class AppShellComponent {
     }),
   );
   protected readonly railNavigation = computed(() => this.availableNavigation());
-  protected readonly deliveryNavigation = computed(() =>
-    this.availableNavigation().filter((item) => item.category === 'delivery'),
-  );
-  protected readonly visibilityNavigation = computed(() =>
-    this.availableNavigation().filter((item) => item.category === 'visibility'),
-  );
-  protected readonly administrationNavigation = computed(() =>
-    this.availableNavigation().filter((item) => item.category === 'administration'),
-  );
   protected readonly currentSection = computed((): NavigationItem => {
     const currentUrl = this.currentUrl();
     return (
@@ -65,40 +54,35 @@ export class AppShellComponent {
 
   private readonly navigationItems: NavigationItem[] = [
     {
-      label: 'Meu foco',
-      icon: 'target',
-      link: '/app/focus',
-      description: 'Fila pessoal do dia, prioridades calculadas e cobrancas automaticas em curso.',
-      category: 'delivery',
+      label: 'Dashboard',
+      icon: 'grid_view',
+      link: '/app/dashboard',
     },
     {
-      label: 'Kanban',
-      icon: 'view_kanban',
+      label: 'Tasks',
+      icon: 'assignment',
       link: '/app/tasks',
-      description: 'Board principal da operação, com cards, responsáveis e status do fluxo.',
-      category: 'delivery',
+    },
+    {
+      label: 'Team',
+      icon: 'group',
+      link: '/app/users',
+      roles: ['ADMIN', 'MANAGER'],
+    },
+    {
+      label: 'Focus',
+      icon: 'track_changes',
+      link: '/app/focus',
     },
     {
       label: 'Planner',
-      icon: 'calendar_month',
+      icon: 'account_tree',
       link: '/app/planner',
-      description: 'Fila temporal para priorização, vencimentos e ritmo semanal.',
-      category: 'delivery',
     },
     {
-      label: 'Dashboard',
-      icon: 'space_dashboard',
-      link: '/app/dashboard',
-      description: 'Visão executiva com throughput, atrasos e saúde geral da operação.',
-      category: 'visibility',
-    },
-    {
-      label: 'Users',
-      icon: 'groups',
-      link: '/app/users',
-      description: 'Gestão de membros, papéis e capacidade do time.',
-      category: 'administration',
-      roles: ['ADMIN', 'MANAGER'],
+      label: 'Settings',
+      icon: 'settings',
+      link: '/app/settings',
     },
   ];
 
@@ -126,20 +110,11 @@ export class AppShellComponent {
     return item.link;
   }
 
-  protected categoryLabel(category: NavigationCategory | undefined): string {
-    switch (category) {
-      case 'delivery':
-        return 'Entrega';
-      case 'visibility':
-        return 'Visibilidade';
-      case 'administration':
-        return 'Administração';
-      default:
-        return 'Operação';
-    }
-  }
-
   protected logout(): void {
     this.authService.logout();
+  }
+
+  protected showNotifications(): void {
+    this.notificationService.success('Nenhuma notificação nova no momento.');
   }
 }

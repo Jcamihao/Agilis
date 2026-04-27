@@ -1,278 +1,174 @@
 <div class="tasks-page">
-  <agilis-section-header
-    eyebrow="Feature principal"
-    title="Kanban operacional"
-    subtitle="O board é o centro da operação: mova cards, revele gargalos e use a lista apenas como visão complementar."
-  >
-    <div class="tasks-page__header-filters">
-      <mat-form-field appearance="outline" class="tasks-page__search">
-        <mat-label>Buscar tarefa</mat-label>
-        <input #searchInput matInput [value]="search()" (input)="setSearch(searchInput.value)" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="tasks-page__user-filter">
-        <mat-label>Filtrar por usuário</mat-label>
-        <mat-select [value]="selectedUserFilter()" (selectionChange)="setUserFilter($event.value)">
-          <mat-option [value]="allUsersFilterValue">Todos os usuários</mat-option>
-          @for (user of filterUsers(); track trackUser($index, user)) {
-            <mat-option [value]="user.id">{{ user.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+  <section class="tasks-page__header">
+    <div>
+      <span><span class="material-symbols-outlined">assignment</span> Project Management</span>
+      <h1>Tasks Workspace</h1>
     </div>
-  </agilis-section-header>
+    <div class="tasks-page__actions">
+      <label>
+        <span class="material-symbols-outlined">search</span>
+        <input #searchInput [value]="search()" (input)="setSearch(searchInput.value)" placeholder="Search tasks, docs, team..." />
+      </label>
+      <select #userFilter [value]="selectedUserFilter()" (change)="setUserFilter(userFilter.value)">
+        <option [value]="allUsersFilterValue">All members</option>
+        @for (user of filterUsers(); track trackUser($index, user)) {
+          <option [value]="user.id">{{ user.name }}</option>
+        }
+      </select>
+    </div>
+  </section>
 
   @if (loading()) {
-    <mat-card class="card tasks-page__loading">
+    <mat-card class="tasks-page__loading">
       <mat-progress-bar mode="indeterminate" />
-      <p>Carregando tarefas...</p>
+      <p>Loading tasks...</p>
     </mat-card>
   } @else {
+    <section class="tasks-page__stats">
+      @for (metric of boardMetrics(); track trackMetric($index, metric)) {
+        <article>
+          <span>{{ metric.label }}</span>
+          <strong>{{ metric.value }}</strong>
+          <small>{{ metric.helper }}</small>
+        </article>
+      }
+    </section>
+
     <section class="tasks-page__layout">
-      <section class="tasks-page__workspace">
-        <mat-card class="card tasks-page__board-shell">
-          <div class="tasks-page__board-head">
-            <div>
-              <span class="tasks-page__kicker">Centro do fluxo</span>
-              <h2>Board vivo da operação</h2>
-              <p>
-                Arraste tarefas entre etapas, use o score automatico para puxar o que importa
-                primeiro e deixe o atraso explicito para toda a equipe.
-              </p>
-            </div>
+      <article class="tasks-page__table">
+        <header>
+          <span>Task Details</span>
+          <span>Assignee</span>
+          <span>Priority</span>
+          <span>Deadline</span>
+          <span>Status</span>
+        </header>
 
-            <div class="tasks-page__metric-grid">
-              @for (metric of boardMetrics(); track trackMetric($index, metric)) {
-                <article [class]="'tasks-page__metric tasks-page__metric--' + metric.accent">
-                  <span>{{ metric.label }}</span>
-                  <strong>{{ metric.value }}</strong>
-                  <small>{{ metric.helper }}</small>
-                </article>
-              }
-            </div>
-          </div>
-
-          <div cdkDropListGroup class="tasks-page__kanban">
-            @for (status of kanbanStatuses; track status.key) {
-              <section class="tasks-page__column">
-                <header [class]="'tasks-page__column-header tasks-page__column-header--' + status.accent">
-                  <div>
-                    <strong>{{ status.label }}</strong>
-                    <span>{{ statusTotal(status.key) }} cards • {{ statusShare(status.key) }}% do board</span>
-                  </div>
-                </header>
-
-                <div
-                  cdkDropList
-                  [cdkDropListData]="tasksByStatus(status.key)"
-                  [cdkDropListConnectedTo]="connectedDropLists"
-                  [id]="status.key"
-                  class="tasks-page__dropzone"
-                  (cdkDropListDropped)="drop($event, status.key)"
-                >
-                  @for (task of tasksByStatus(status.key); track trackTask($index, task)) {
-                    <article [class]="'tasks-page__task-card tasks-page__task-card--' + dueMeta(task).tone" cdkDrag>
-                      <div class="tasks-page__task-meta">
-                        <div class="tasks-page__meta-badges">
-                          <span [class]="'tasks-page__due tasks-page__due--' + dueMeta(task).tone">
-                            {{ dueMeta(task).label }}
-                          </span>
-                          <span [class]="'tasks-page__priority tasks-page__priority--' + task.priority.label.toLowerCase()">
-                            {{ priorityLabel(task.priority.label) }}
-                          </span>
-                        </div>
-
-                        <div class="tasks-page__meta-badges">
-                          @if (task.automation.escalationLevel > 0) {
-                            <span class="tasks-page__automation">Escalada {{ task.automation.escalationLevel }}</span>
-                          }
-
-                          @if (isAssignedToCurrentUser(task)) {
-                            <span class="tasks-page__mine">Meu card</span>
-                          }
-                        </div>
-                      </div>
-
-                      <strong>{{ task.title }}</strong>
-
-                      @if (task.description) {
-                        <p>{{ task.description }}</p>
-                      }
-
-                      <span class="tasks-page__recommended-action">
-                        {{ task.priority.recommendedAction }}
-                      </span>
-
-                      <footer>
-                        <div class="tasks-page__footer-copy">
-                          <span>{{ task.assigneeLabel }}</span>
-                          <time>{{ task.dueDate | date: 'dd/MM HH:mm' }}</time>
-                        </div>
-
-                        @if (canManageTasks()) {
-                          <button
-                            mat-stroked-button
-                            type="button"
-                            (mousedown)="$event.stopPropagation()"
-                            (click)="startEditingTask(task)"
-                          >
-                            Editar
-                          </button>
-                        }
-                      </footer>
-                    </article>
-                  } @empty {
-                    <p class="tasks-page__empty-column">Sem tarefas nesta etapa.</p>
-                  }
+        <div class="tasks-page__rows">
+          @for (task of pagedTasks(); track trackTask($index, task)) {
+            <section class="tasks-page__row">
+              <div class="tasks-page__task-title">
+                <button type="button" (click)="updateStatus(task.id, 'DONE')" [disabled]="task.status === 'DONE'">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <div>
+                  <strong>{{ task.title }}</strong>
+                  <small>{{ task.description || 'Operational card' }}</small>
                 </div>
-              </section>
-            }
-          </div>
-        </mat-card>
+              </div>
 
-        <mat-card class="card tasks-page__table-panel">
-          <div class="tasks-page__panel-head">
-            <div>
-              <span class="tasks-page__kicker">Visão complementar</span>
-              <h2>Lista operacional</h2>
-            </div>
-            <p>Use a tabela para auditoria rápida, conferência de prazos e troca direta de status.</p>
-          </div>
+              <div class="tasks-page__assignee">
+                <span>{{ task.assigneeLabel.slice(0, 2).toUpperCase() }}</span>
+                <small>{{ task.assigneeLabel }}</small>
+              </div>
 
-          <div class="tasks-page__table-wrap">
-            <table mat-table [dataSource]="filteredTasks()">
-              <ng-container matColumnDef="title">
-                <th mat-header-cell *matHeaderCellDef>Tarefa</th>
-                <td mat-cell *matCellDef="let task">
-                  <div class="tasks-page__title-cell">
-                    <strong>{{ task.title }}</strong>
-                    <span>{{ task.description || 'Sem descrição' }}</span>
-                  </div>
-                </td>
-              </ng-container>
+              <div>
+                <span [class]="'tasks-page__priority tasks-page__priority--' + task.priority.label.toLowerCase()">
+                  <i></i>{{ priorityLabel(task.priority.label) }}
+                </span>
+              </div>
 
-              <ng-container matColumnDef="priority">
-                <th mat-header-cell *matHeaderCellDef>Prioridade</th>
-                <td mat-cell *matCellDef="let task">
-                  <div class="tasks-page__table-priority">
-                    <span [class]="'tasks-page__priority tasks-page__priority--' + task.priority.label.toLowerCase()">
-                      {{ priorityLabel(task.priority.label) }}
-                    </span>
-                    <small>Score {{ task.priority.score }}</small>
-                  </div>
-                </td>
-              </ng-container>
+              <time [class.tasks-page__deadline--hot]="dueMeta(task).tone === 'critical'">
+                {{ task.dueDate | date: 'dd/MM HH:mm' }}
+              </time>
 
-              <ng-container matColumnDef="assignees">
-                <th mat-header-cell *matHeaderCellDef>Responsáveis</th>
-                <td mat-cell *matCellDef="let task">{{ task.assigneeLabel }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="dueDate">
-                <th mat-header-cell *matHeaderCellDef>Prazo</th>
-                <td mat-cell *matCellDef="let task">{{ task.dueDate | date: 'dd/MM HH:mm' }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let task">
-                  <mat-form-field appearance="outline" class="tasks-page__status-field">
-                    <mat-select
-                      [value]="task.status"
-                      (selectionChange)="updateStatus(task.id, $event.value)"
-                    >
-                      @for (status of kanbanStatuses; track status.key) {
-                        <mat-option [value]="status.key">{{ status.label }}</mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-            </table>
-          </div>
-        </mat-card>
-      </section>
-
-      @if (canManageTasks()) {
-        <mat-card class="card tasks-page__composer">
-          <span class="tasks-page__kicker">
-            {{ editingTask() ? 'Editar card' : 'Nova tarefa' }}
-          </span>
-          <h2>
-            {{ editingTask() ? 'Atualizar card do kanban' : 'Acionar uma nova entrega' }}
-          </h2>
-          <p class="tasks-page__composer-copy">
-            @if (editingTask(); as task) {
-              Ajuste responsáveis, prazo e contexto do card <strong>{{ task.title }}</strong> sem
-              tirar o board de vista.
-            } @else {
-              Crie uma tarefa já orientada para entrar no board, com múltiplos responsáveis ou a
-              opção TODOS para acionar a operação inteira.
-            }
-          </p>
-          <form [formGroup]="taskForm" (ngSubmit)="submitTask()">
-            <mat-form-field appearance="outline">
-              <mat-label>Título</mat-label>
-              <input matInput formControlName="title" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Descrição</mat-label>
-              <textarea matInput rows="4" formControlName="description"></textarea>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Responsáveis</mat-label>
-              <mat-select
-                formControlName="assignedToIds"
-                multiple
-                (selectionChange)="handleAssigneeSelection($event.value)"
-              >
-                <mat-select-trigger>{{ selectedAssigneeLabel() }}</mat-select-trigger>
-                <mat-option [value]="allAssigneesValue">TODOS</mat-option>
-                @for (user of users(); track trackUser($index, user)) {
-                  <mat-option [value]="user.id" [disabled]="isAllAssigneesSelected()">
-                    {{ user.name }} • {{ user.role }}
-                  </mat-option>
+              <div class="tasks-page__status-cell">
+                <select [value]="task.status" (change)="updateStatus(task.id, $any($event.target).value)">
+                  @for (status of kanbanStatuses; track status.key) {
+                    <option [value]="status.key">{{ status.label }}</option>
+                  }
+                </select>
+                @if (canManageTasks()) {
+                  <button type="button" (click)="startEditingTask(task)" aria-label="Edit task">
+                    <span class="material-symbols-outlined">more_horiz</span>
+                  </button>
                 }
-              </mat-select>
-            </mat-form-field>
+              </div>
+            </section>
+          } @empty {
+            <p class="tasks-page__empty">No tasks match this filter.</p>
+          }
+        </div>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Prazo</mat-label>
-              <input matInput type="datetime-local" formControlName="dueDate" />
-            </mat-form-field>
+        <footer>
+          <span>Showing {{ filteredTasks().length }} of {{ tasks().length }} tasks</span>
+          <div>
+            <button type="button" [disabled]="currentPage() === 1" (click)="previousPage()">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button type="button" class="is-active" (click)="setPage(currentPage())">{{ currentPage() }}</button>
+            @if (currentPage() < totalPages()) {
+              <button type="button" (click)="setPage(currentPage() + 1)">{{ currentPage() + 1 }}</button>
+            }
+            <button type="button" [disabled]="currentPage() === totalPages()" (click)="nextPage()">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+        </footer>
+      </article>
 
-            <div class="tasks-page__form-actions">
-              <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">
+      <aside class="tasks-page__side">
+        @if (canManageTasks()) {
+          <article class="tasks-page__composer">
+            <span>{{ editingTask() ? 'Edit Task' : 'New Task' }}</span>
+            <h2>{{ editingTask() ? 'Update workspace card' : 'Create a new task' }}</h2>
+
+            <form [formGroup]="taskForm" (ngSubmit)="submitTask()">
+              <label>
+                <span>Title</span>
+                <input formControlName="title" />
+              </label>
+
+              <label>
+                <span>Description</span>
+                <textarea rows="4" formControlName="description"></textarea>
+              </label>
+
+              <label>
+                <span>Assignees</span>
+                <select multiple formControlName="assignedToIds" (change)="handleAssigneeSelection(taskForm.controls.assignedToIds.value)">
+                  <option [value]="allAssigneesValue">TODOS</option>
+                  @for (user of users(); track trackUser($index, user)) {
+                    <option [value]="user.id" [disabled]="isAllAssigneesSelected()">{{ user.name }} • {{ user.role }}</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                <span>Deadline</span>
+                <input type="datetime-local" formControlName="dueDate" />
+              </label>
+
+              <button class="tasks-page__submit" type="submit" [disabled]="submitting()">
                 @if (submitting()) {
-                  Salvando...
+                  Saving...
                 } @else if (editingTask()) {
-                  Salvar alteracoes
+                  Save changes
                 } @else {
-                  Criar tarefa
+                  New Task
                 }
               </button>
 
               @if (editingTask()) {
-                <button mat-button type="button" (click)="cancelEditing()">Cancelar</button>
+                <button class="tasks-page__cancel" type="button" (click)="cancelEditing()">Cancel</button>
               }
-            </div>
-          </form>
-        </mat-card>
-      } @else {
-        <mat-card class="card tasks-page__composer tasks-page__composer--support">
-          <span class="tasks-page__kicker">Como usar</span>
-          <h2>Seu foco está no board</h2>
-          <p class="tasks-page__composer-copy">
-            Arraste seus cards entre as etapas, acompanhe os vencimentos e mantenha sua fila
-            em movimento sem depender de cobrança manual.
-          </p>
-        </mat-card>
-      }
+            </form>
+          </article>
+        }
+
+        <article class="tasks-page__board-summary">
+          <h2>Board Health</h2>
+          @for (status of kanbanStatuses; track status.key) {
+            <section>
+              <div>
+                <strong>{{ status.label }}</strong>
+                <span>{{ statusTotal(status.key) }} cards</span>
+              </div>
+              <progress max="100" [value]="statusShare(status.key)"></progress>
+            </section>
+          }
+        </article>
+      </aside>
     </section>
   }
 </div>

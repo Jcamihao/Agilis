@@ -1,38 +1,60 @@
 .planner-page {
   display: grid;
-  gap: 1rem;
+  gap: 2rem;
 }
 
-.planner-page__hero {
-  background: linear-gradient(135deg, #dcfce7 0%, #dcebff 100%);
-  border: 1px solid rgba(20, 184, 166, 0.12);
-  padding: 1.5rem;
-}
-
-.planner-page__hero-content {
-  display: grid;
-  gap: 0.8rem;
-  max-width: 46rem;
-}
-
-.planner-page__hero-kicker {
-  color: #475569;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+.planner-page__hero span,
+.planner-page__banner span {
+  align-items: center;
+  color: var(--ag-primary);
+  display: flex;
+  font-size: 0.68rem;
+  font-weight: 800;
+  gap: 0.4rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.planner-page__hero h2 {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: clamp(1.45rem, 2.4vw, 2rem);
-  font-weight: 700;
-  margin: 0;
+.planner-page__hero h1 {
+  font-size: clamp(2rem, 4vw, 2.7rem);
+  letter-spacing: -0.05em;
+  margin: 0.35rem 0 0;
 }
 
-.planner-page__hero p {
-  color: #64748b;
-  margin: 0;
+.planner-page__hero p,
+.planner-page__banner p,
+.planner-page__group header p,
+.planner-page__task p,
+.planner-page__empty,
+.planner-page__loading p {
+  color: var(--ag-soft);
+}
+
+.planner-page__banner,
+.planner-page__group,
+.planner-page__loading {
+  background: var(--ag-surface);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.planner-page__banner {
+  background:
+    linear-gradient(90deg, #1f1f24 0%, rgba(31, 31, 36, 0.84) 58%, rgba(31, 31, 36, 0.25)),
+    url('https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80') center/cover;
+  min-height: 15rem;
+  padding: 1.5rem;
+}
+
+.planner-page__banner h2 {
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
+  letter-spacing: -0.05em;
+  margin: 0.75rem 0 0.5rem;
+  max-width: 38rem;
+}
+
+.planner-page__banner p {
+  max-width: 35rem;
 }
 
 .planner-page__grid {
@@ -44,34 +66,29 @@
 .planner-page__group {
   display: grid;
   gap: 1rem;
+  padding: 1.25rem;
 }
 
 .planner-page__group header {
-  align-items: flex-start;
+  align-items: start;
   display: flex;
+  gap: 1rem;
   justify-content: space-between;
 }
 
-.planner-page__group h3 {
-  font-family: 'IBM Plex Sans', sans-serif;
+.planner-page__group h2 {
   font-size: 1.15rem;
-  font-weight: 700;
+  letter-spacing: -0.04em;
   margin: 0;
-}
-
-.planner-page__group header p,
-.planner-page__task p,
-.planner-page__empty {
-  color: #64748b;
 }
 
 .planner-page__group header span {
   align-items: center;
-  background: rgba(20, 184, 166, 0.12);
+  background: rgba(178, 197, 255, 0.12);
   border-radius: 999px;
-  color: #0f766e;
+  color: var(--ag-primary);
   display: inline-flex;
-  font-weight: 700;
+  font-weight: 800;
   height: 2.2rem;
   justify-content: center;
   min-width: 2.2rem;
@@ -83,13 +100,15 @@
 }
 
 .planner-page__task {
-  background: #f5f7fa;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 10px;
+  background: var(--ag-surface-low);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.75rem;
   padding: 1rem;
 }
 
-.planner-page__task-topline,
+.planner-page__task > div,
 .planner-page__task footer {
   align-items: center;
   display: flex;
@@ -97,18 +116,46 @@
   justify-content: space-between;
 }
 
+.planner-page__task strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planner-page__task > div span {
+  background: var(--ag-surface-high);
+  border-radius: 999px;
+  color: var(--ag-primary);
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.35rem 0.65rem;
+}
+
+.planner-page__task p {
+  margin: 0;
+}
+
 .planner-page__task footer {
-  color: #94a3b8;
-  font-size: 0.9rem;
-  margin-top: 0.85rem;
+  color: var(--ag-muted);
+  font-size: 0.86rem;
 }
 
 .planner-page__loading {
-  padding: 1rem;
+  padding: 1.25rem;
 }
 
 @media (max-width: 1024px) {
   .planner-page__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .planner-page__group header,
+  .planner-page__task > div,
+  .planner-page__task footer {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

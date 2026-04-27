@@ -9,8 +9,10 @@ import {
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { RateLimit } from '../common/decorators/rate-limit.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RateLimitGuard } from '../common/guards/rate-limit.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -30,6 +32,8 @@ export class UsersController {
   }
 
   @Post()
+  @RateLimit({ limit: 10, windowMs: 15 * 60 * 1000 })
+  @UseGuards(RateLimitGuard)
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateUserDto,
