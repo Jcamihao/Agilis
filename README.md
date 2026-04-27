@@ -2,7 +2,7 @@
 
 Disciplina que gera resultado
 
-Agilis e um SaaS B2B de gestao operacional da codeStage Solucoes focado em reduzir atrasos, aumentar produtividade e automatizar a cobranca de tarefas vencidas.
+Agilis e um SaaS B2B de gestao operacional da codeStage Solucoes focado em reduzir atrasos, aumentar produtividade e automatizar a cobranca de tarefas vencidas. A versao 1.1.0 adiciona sessoes de autenticacao, configuracoes do usuario e uma interface mais completa para operacao diaria.
 
 ## Visao geral
 
@@ -24,6 +24,7 @@ agilis/
       dashboard/
       health/
       prisma/
+      settings/
       task-logs/
       tasks/
       users/
@@ -40,6 +41,7 @@ agilis/
           auth/
           dashboard/
           planner/
+          settings/
           tasks/
           users/
         shared/
@@ -60,7 +62,8 @@ agilis/
 - TypeScript
 - Prisma ORM
 - PostgreSQL
-- JWT Auth
+- JWT Auth com sessoes persistidas
+- Rate limit em rotas sensiveis
 - class-validator
 - class-transformer
 
@@ -70,6 +73,7 @@ agilis/
 - Angular Material
 - SCSS
 - Design system com sidebar fixa e cards premium
+- Pagina de configuracoes do usuario
 
 ### Infra
 
@@ -120,8 +124,11 @@ URLs locais:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `POST /api/auth/logout`
 - `GET /api/auth/me`
 - `GET /api/dashboard/overview`
+- `GET /api/settings/me`
+- `PATCH /api/settings/me`
 - `GET /api/tasks`
 - `POST /api/tasks`
 - `PATCH /api/tasks/:id/status`
@@ -135,6 +142,7 @@ URLs locais:
 - Login
 - Dashboard
 - Planner
+- Settings
 - Tasks
 - Users
 
@@ -152,11 +160,14 @@ O seed tambem cria tarefas exemplo em `PENDING`, `IN_PROGRESS`, `DONE` e `DELAYE
 - Todo usuario pertence a uma organizacao.
 - Apenas `ADMIN` e `MANAGER` gerenciam usuarios.
 - Toda acao relevante de tarefa gera log.
+- A sessao autenticada pode ser encerrada com logout e invalidacao no backend.
+- Preferencias do usuario ficam vinculadas ao usuario autenticado.
 - Um cron executa a cada minuto e marca tarefas vencidas como `DELAYED`.
 
 ## Documentacao complementar
 
 - Arquitetura detalhada em `docs/architecture.md`
+- Release notes 1.1.0 em `docs/releases/v1.1.0.md`
 
 ## Troubleshooting
 

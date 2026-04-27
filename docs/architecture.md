@@ -48,6 +48,8 @@ backend/
       dto/
     health/
     prisma/
+    settings/
+      dto/
     task-logs/
       interfaces/
     tasks/
@@ -60,7 +62,8 @@ backend/
 
 ### Modulos do backend
 
-- `auth`: registro da primeira organizacao, login JWT e leitura do usuario autenticado.
+- `auth`: registro da primeira organizacao, login JWT, sessoes e leitura do usuario autenticado.
+- `settings`: leitura e atualizacao das preferencias do usuario autenticado.
 - `users`: gestao de usuarios por `ADMIN` e `MANAGER`, sempre limitada a organizacao atual.
 - `tasks`: criacao, listagem e mudanca de status de tarefas.
 - `task-logs`: geracao e persistencia dos logs de auditoria de tarefas.
@@ -78,15 +81,20 @@ backend/
 - Apenas `ADMIN` e `MANAGER` gerenciam usuarios.
 - `MANAGER` so promove ou altera usuarios do tipo `USER`.
 - Toda criacao ou alteracao relevante de tarefa gera `TaskLog`.
+- Login cria sessao persistida e logout invalida a sessao no backend.
+- Preferencias operacionais ficam isoladas por usuario.
+- Rotas sensiveis podem usar rate limit declarativo por decorator.
 - Um cron roda a cada minuto para marcar tarefas vencidas como `DELAYED`.
 
 ### Fluxo de autenticacao
 
 1. `POST /api/auth/register` cria a organizacao e o primeiro usuario administrador.
 2. `POST /api/auth/login` autentica o usuario e devolve JWT.
-3. O token carrega `sub`, `role` e `organizationId`.
+3. O token carrega `sub`, `role`, `organizationId` e `sessionId`.
 4. Guards validam autenticacao e permissao por papel.
-5. `GET /api/auth/me` reidrata o estado autenticado no frontend.
+5. A estrategia JWT valida a sessao persistida antes de aceitar o usuario.
+6. `POST /api/auth/logout` invalida a sessao atual.
+7. `GET /api/auth/me` reidrata o estado autenticado no frontend.
 
 ## Frontend
 
@@ -112,6 +120,7 @@ frontend/
         auth/
         dashboard/
         planner/
+        settings/
         tasks/
         users/
       shared/
@@ -131,7 +140,7 @@ frontend/
 - `core/services`: acesso HTTP e estado da sessao.
 - `shared/components`: componentes visuais reutilizaveis.
 - `shared/material`: agrupamento central dos imports de Angular Material.
-- `features/*`: telas de login, dashboard, planner, tasks e users.
+- `features/*`: telas de login, dashboard, planner, settings, tasks e users.
 
 ## Infra local
 
@@ -165,8 +174,11 @@ Fluxo local recomendado:
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `POST /api/auth/logout`
 - `GET /api/auth/me`
 - `GET /api/dashboard/overview`
+- `GET /api/settings/me`
+- `PATCH /api/settings/me`
 - `GET /api/tasks`
 - `POST /api/tasks`
 - `PATCH /api/tasks/:id/status`
