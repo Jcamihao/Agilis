@@ -1,8 +1,0 @@
-node_modules
-.pnpm-store
-dist
-.env
-coverage
-.angular
-.DS_Store
-backend/generated
