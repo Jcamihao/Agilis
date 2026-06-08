@@ -1,0 +1,549 @@
+<!-- ═══════ HEADER ═══════ -->
+<div class="flex flex-col" style="height: calc(100vh - 8rem)">
+  <div class="flex items-end justify-between mb-5 flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <a routerLink="/projects"
+        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white hover:text-[--text-secondary] transition-colors">
+        <span class="material-symbols-rounded text-xl">arrow_back</span>
+      </a>
+      <div>
+        <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight">
+          @if (project()) { {{ project()!.name }} } @else { Lista de Tarefas }
+        </h2>
+        <p class="text-sm text-[--text-secondary] mt-0.5">
+          {{ displayedTasks().length }} tarefa(s) · ordene, filtre e edite inline
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- View toggle -->
+      <div class="flex items-center bg-white border border-[rgba(0,0,0,0.08)] rounded-xl overflow-hidden shadow-sm">
+        <a [routerLink]="['/projects', id, 'kanban']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">view_kanban</span>
+          Kanban
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <button class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold bg-primary-50 text-primary-600 cursor-default">
+          <span class="material-symbols-rounded text-base">table_rows</span>
+          Lista
+        </button>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'gantt']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">account_tree</span>
+          Gantt
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'time-report']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">schedule</span>
+          Tempo
+        </a>
+      </div>
+
+      <button (click)="openCreate()" class="ag-btn ag-btn--primary flex items-center gap-2">
+        <span class="material-symbols-rounded text-base">add</span>
+        Nova Tarefa
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ FILTER BAR ═══════ -->
+  <div class="flex items-center gap-3 bg-white rounded-xl border border-[rgba(0,0,0,0.08)] p-2 mb-4 flex-shrink-0 shadow-sm flex-wrap">
+    <!-- Search -->
+    <div class="flex-1 min-w-[180px] relative">
+      <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+      <input type="text" placeholder="Buscar tarefas..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        class="w-full bg-transparent border-none outline-none text-sm text-[--text-primary] pl-10 py-2 placeholder-slate-400" />
+    </div>
+
+    <div class="w-px h-6 bg-slate-100"></div>
+
+    <!-- Status filter -->
+    <select [value]="filterStatus()"
+      (change)="filterStatus.set($any($event.target).value)"
+      class="appearance-none text-sm font-medium px-3 py-1.5 rounded-lg border-none bg-transparent cursor-pointer outline-none text-[--text-secondary] hover:bg-slate-50 transition-colors">
+      <option value="">Todos os status</option>
+      @for (opt of statusOptions; track opt.key) {
+        <option [value]="opt.key">{{ opt.label }}</option>
+      }
+    </select>
+
+    <!-- Priority filter -->
+    <select [value]="filterPriority()"
+      (change)="filterPriority.set($any($event.target).value)"
+      class="appearance-none text-sm font-medium px-3 py-1.5 rounded-lg border-none bg-transparent cursor-pointer outline-none text-[--text-secondary] hover:bg-slate-50 transition-colors">
+      <option value="">Todas as prioridades</option>
+      @for (opt of priorityOptions; track opt.key) {
+        <option [value]="opt.key">{{ opt.label }}</option>
+      }
+    </select>
+
+    <!-- Sprint filter -->
+    <div class="relative flex items-center">
+      <span class="material-symbols-rounded absolute left-2.5 text-base pointer-events-none"
+        [class.text-primary-600]="selectedSprintId()"
+        [class.text-slate-400]="!selectedSprintId()">sprint</span>
+      <select [value]="selectedSprintId()"
+        (change)="selectedSprintId.set($any($event.target).value)"
+        class="appearance-none pl-8 pr-5 py-1.5 text-sm font-medium rounded-lg border-none bg-transparent cursor-pointer outline-none"
+        [class.text-primary-600]="selectedSprintId()"
+        [class.text-[--text-secondary]]="!selectedSprintId()">
+        <option value="">Todos</option>
+        @for (s of sprints(); track s.id) {
+          <option [value]="s.id">{{ s.name }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Assignee filter -->
+    @if (companyMembers().length > 0) {
+      <select [value]="filterAssigneeId()"
+        (change)="filterAssigneeId.set($any($event.target).value)"
+        class="appearance-none text-sm font-medium px-3 py-1.5 rounded-lg border-none bg-transparent cursor-pointer outline-none text-[--text-secondary] hover:bg-slate-50 transition-colors">
+        <option value="">Todos os membros</option>
+        @for (m of companyMembers(); track m.id) {
+          <option [value]="m.id">{{ m.name }}</option>
+        }
+      </select>
+    }
+  </div>
+
+  <!-- ═══════ BULK BAR ═══════ -->
+  @if (someSelected()) {
+    <div class="flex items-center gap-3 bg-primary-50 border border-primary-200 rounded-xl px-4 py-2.5 mb-3 flex-shrink-0 animate-fade-in">
+      <span class="text-sm font-semibold text-primary-700">
+        {{ selectedIds().size }} selecionada(s)
+      </span>
+      <div class="w-px h-4 bg-primary-200"></div>
+
+      <!-- Bulk status change -->
+      <select [value]="bulkStatus()"
+        (change)="bulkChangeStatus($any($event.target).value)"
+        class="appearance-none text-sm font-medium px-3 py-1 rounded-lg border border-primary-200 bg-white cursor-pointer outline-none text-primary-700">
+        <option value="" disabled>Mover para status...</option>
+        @for (opt of statusOptions; track opt.key) {
+          <option [value]="opt.key">{{ opt.label }}</option>
+        }
+      </select>
+
+      <button (click)="bulkDelete()"
+        class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors border border-red-200">
+        <span class="material-symbols-rounded text-base">delete</span>
+        Deletar
+      </button>
+
+      <button (click)="clearSelection()"
+        class="ml-auto p-1 rounded text-primary-400 hover:text-primary-700 transition-colors">
+        <span class="material-symbols-rounded text-lg">close</span>
+      </button>
+    </div>
+  }
+
+  <!-- ═══════ TABLE ═══════ -->
+  <div class="flex-1 min-h-0 overflow-auto bg-white rounded-xl border border-[rgba(0,0,0,0.08)] shadow-sm">
+    @if (loading()) {
+      <!-- Skeleton -->
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="border-b border-[rgba(0,0,0,0.07)] bg-slate-50">
+            <th class="w-10 px-4 py-3"></th>
+            @for (i of [1,2,3,4,5,6]; track i) {
+              <th class="px-4 py-3">
+                <div class="h-3 bg-slate-200 rounded ag-skeleton w-20"></div>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <tr class="border-b border-[rgba(0,0,0,0.05)]">
+              <td class="px-4 py-3.5"><div class="h-4 w-4 bg-slate-100 rounded ag-skeleton"></div></td>
+              <td class="px-4 py-3.5"><div class="h-4 bg-slate-100 rounded ag-skeleton" [style.width.px]="120 + i * 15"></div></td>
+              <td class="px-4 py-3.5"><div class="h-5 w-24 bg-slate-100 rounded-full ag-skeleton"></div></td>
+              <td class="px-4 py-3.5"><div class="h-5 w-16 bg-slate-100 rounded-md ag-skeleton"></div></td>
+              <td class="px-4 py-3.5"><div class="h-5 w-28 bg-slate-100 rounded ag-skeleton"></div></td>
+              <td class="px-4 py-3.5"><div class="h-4 w-20 bg-slate-100 rounded ag-skeleton"></div></td>
+              <td class="px-4 py-3.5"><div class="h-4 w-16 bg-slate-100 rounded ag-skeleton"></div></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else if (displayedTasks().length === 0) {
+      <!-- Empty state -->
+      <div class="flex flex-col items-center justify-center h-full py-24 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
+          <span class="material-symbols-rounded text-3xl text-slate-300">table_rows</span>
+        </div>
+        <p class="text-base font-semibold text-[--text-secondary] mb-1">Nenhuma tarefa encontrada</p>
+        <p class="text-sm text-[--text-tertiary] mb-5">
+          @if (searchQuery() || filterStatus() || filterPriority() || filterAssigneeId()) {
+            Tente remover alguns filtros.
+          } @else {
+            Crie sua primeira tarefa para começar.
+          }
+        </p>
+        @if (!searchQuery() && !filterStatus() && !filterPriority() && !filterAssigneeId()) {
+          <button (click)="openCreate()" class="ag-btn ag-btn--primary">Nova Tarefa</button>
+        }
+      </div>
+    } @else {
+      <table class="w-full border-collapse text-sm">
+        <!-- Sticky header -->
+        <thead class="sticky top-0 z-10">
+          <tr class="bg-slate-50 border-b border-[rgba(0,0,0,0.07)]">
+            <!-- Select all -->
+            <th class="w-10 px-4 py-3 text-left">
+              <input type="checkbox"
+                [checked]="allSelected()"
+                (change)="toggleSelectAll()"
+                class="w-4 h-4 rounded border-slate-300 text-primary-600 cursor-pointer" />
+            </th>
+
+            <!-- Title -->
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] min-w-[280px] cursor-pointer hover:text-[--text-primary] transition-colors"
+              (click)="sort('title')">
+              <div class="flex items-center gap-1.5">
+                Título
+                <span class="material-symbols-rounded text-base text-slate-400">{{ sortIcon('title') }}</span>
+              </div>
+            </th>
+
+            <!-- Status -->
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] w-40 cursor-pointer hover:text-[--text-primary] transition-colors"
+              (click)="sort('status')">
+              <div class="flex items-center gap-1.5">
+                Status
+                <span class="material-symbols-rounded text-base text-slate-400">{{ sortIcon('status') }}</span>
+              </div>
+            </th>
+
+            <!-- Priority -->
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] w-36 cursor-pointer hover:text-[--text-primary] transition-colors"
+              (click)="sort('priority')">
+              <div class="flex items-center gap-1.5">
+                Prioridade
+                <span class="material-symbols-rounded text-base text-slate-400">{{ sortIcon('priority') }}</span>
+              </div>
+            </th>
+
+            <!-- Assignee -->
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] w-44 cursor-pointer hover:text-[--text-primary] transition-colors"
+              (click)="sort('assignee')">
+              <div class="flex items-center gap-1.5">
+                Responsável
+                <span class="material-symbols-rounded text-base text-slate-400">{{ sortIcon('assignee') }}</span>
+              </div>
+            </th>
+
+            <!-- Sprint -->
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] w-36 cursor-pointer hover:text-[--text-primary] transition-colors"
+              (click)="sort('sprint')">
+              <div class="flex items-center gap-1.5">
+                Sprint
+                <span class="material-symbols-rounded text-base text-slate-400">{{ sortIcon('sprint') }}</span>
+              </div>
+            </th>
+
+            <!-- Due date -->
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] w-36 cursor-pointer hover:text-[--text-primary] transition-colors"
+              (click)="sort('dueDate')">
+              <div class="flex items-center gap-1.5">
+                Entrega
+                <span class="material-symbols-rounded text-base text-slate-400">{{ sortIcon('dueDate') }}</span>
+              </div>
+            </th>
+
+            <!-- Metadata -->
+            <th class="px-4 py-3 w-20"></th>
+
+            <!-- Actions -->
+            <th class="px-4 py-3 w-12"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (task of displayedTasks(); track task.id; let odd = $odd) {
+            <tr
+              class="border-b border-[rgba(0,0,0,0.04)] transition-colors group"
+              [class.bg-white]="!odd"
+              [class.bg-slate-50/60]="odd"
+              [class.hover:bg-primary-50/40]="!selectedIds().has(task.id)"
+              [class.bg-primary-50]="selectedIds().has(task.id)"
+            >
+              <!-- Checkbox -->
+              <td class="px-4 py-3 align-middle">
+                <input type="checkbox"
+                  [checked]="selectedIds().has(task.id)"
+                  (change)="toggleSelect(task.id)"
+                  (click)="$event.stopPropagation()"
+                  class="w-4 h-4 rounded border-slate-300 text-primary-600 cursor-pointer" />
+              </td>
+
+              <!-- Title (inline edit on double-click) -->
+              <td class="px-4 py-3 align-middle">
+                @if (editingTitleId() === task.id) {
+                  <input
+                    [formControl]="titleControl"
+                    (blur)="saveTitle(task)"
+                    (keydown.enter)="saveTitle(task)"
+                    (keydown.escape)="cancelTitle()"
+                    class="ag-input ag-input--sm w-full text-sm font-medium"
+                    autofocus />
+                } @else {
+                  <div class="flex items-center gap-2 min-w-0">
+                    <!-- Status dot -->
+                    <div class="w-2 h-2 rounded-full flex-shrink-0"
+                      [style.background]="STATUS_CONFIG[task.status].color"></div>
+
+                    <span
+                      (dblclick)="startEditTitle(task)"
+                      class="text-sm font-medium text-[--text-primary] truncate cursor-text hover:text-primary-700 transition-colors"
+                      [class.line-through]="task.status === 'DONE'"
+                      [class.text-slate-400]="task.status === 'DONE'"
+                      [title]="task.title">
+                      {{ task.title }}
+                    </span>
+
+                    @if (subtaskCount(task) > 0) {
+                      <span class="flex-shrink-0 text-[10px] text-slate-400 flex items-center gap-0.5">
+                        <span class="material-symbols-rounded text-[12px]">checklist</span>
+                        {{ subtaskCount(task) }}
+                      </span>
+                    }
+                  </div>
+                }
+              </td>
+
+              <!-- Status inline select -->
+              <td class="px-4 py-3 align-middle">
+                <div class="relative">
+                  <span
+                    class="absolute left-2 top-1/2 -translate-y-1/2 material-symbols-rounded text-[13px] pointer-events-none"
+                    [style.color]="STATUS_CONFIG[task.status].color">
+                    {{ STATUS_CONFIG[task.status].icon }}
+                  </span>
+                  <select
+                    [value]="task.status"
+                    (change)="updateStatus(task, $event)"
+                    (click)="$event.stopPropagation()"
+                    class="appearance-none pl-6 pr-4 py-1 text-xs font-semibold rounded-full border cursor-pointer outline-none transition-all w-full"
+                    [style.color]="STATUS_CONFIG[task.status].color"
+                    [style.background]="STATUS_CONFIG[task.status].color + '15'"
+                    [style.border-color]="STATUS_CONFIG[task.status].color + '40'">
+                    @for (opt of statusOptions; track opt.key) {
+                      <option [value]="opt.key">{{ opt.label }}</option>
+                    }
+                  </select>
+                </div>
+              </td>
+
+              <!-- Priority inline select -->
+              <td class="px-4 py-3 align-middle">
+                <div class="relative">
+                  <span
+                    class="absolute left-1.5 top-1/2 -translate-y-1/2 material-symbols-rounded text-[13px] pointer-events-none"
+                    [style.color]="PRIORITY_CONFIG[task.priority].color">
+                    {{ PRIORITY_CONFIG[task.priority].icon }}
+                  </span>
+                  <select
+                    [value]="task.priority"
+                    (change)="updatePriority(task, $event)"
+                    (click)="$event.stopPropagation()"
+                    class="appearance-none pl-6 pr-3 py-1 text-xs font-semibold rounded-md border-none cursor-pointer outline-none transition-all bg-transparent"
+                    [style.color]="PRIORITY_CONFIG[task.priority].color">
+                    @for (opt of priorityOptions; track opt.key) {
+                      <option [value]="opt.key">{{ opt.label }}</option>
+                    }
+                  </select>
+                </div>
+              </td>
+
+              <!-- Assignee inline select -->
+              <td class="px-4 py-3 align-middle">
+                <div class="flex items-center gap-2">
+                  @if (task.assignee) {
+                    <div class="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden">
+                      @if (task.assignee.avatarUrl) {
+                        <img [src]="task.assignee.avatarUrl" class="w-full h-full object-cover" />
+                      } @else {
+                        {{ initials(task.assignee.name) }}
+                      }
+                    </div>
+                  }
+                  <select
+                    [value]="task.assigneeId ?? ''"
+                    (change)="updateAssignee(task, $event)"
+                    (click)="$event.stopPropagation()"
+                    class="flex-1 appearance-none bg-transparent text-xs text-[--text-secondary] border-none outline-none cursor-pointer hover:text-[--text-primary] transition-colors min-w-0 truncate">
+                    <option value="">Sem responsável</option>
+                    @for (m of companyMembers(); track m.id) {
+                      <option [value]="m.id">{{ m.name }}</option>
+                    }
+                  </select>
+                </div>
+              </td>
+
+              <!-- Sprint -->
+              <td class="px-4 py-3 align-middle">
+                @if (task.sprint) {
+                  <span class="inline-flex items-center gap-1 text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-md border border-violet-100 font-medium">
+                    <span class="material-symbols-rounded text-[11px]">sprint</span>
+                    {{ task.sprint.name }}
+                  </span>
+                } @else {
+                  <span class="text-xs text-slate-300 italic">—</span>
+                }
+              </td>
+
+              <!-- Due date inline input -->
+              <td class="px-4 py-3 align-middle">
+                <div class="relative group/date">
+                  <input type="date"
+                    [value]="task.dueDate ? task.dueDate.substring(0, 10) : ''"
+                    (change)="updateDueDate(task, $event)"
+                    (click)="$event.stopPropagation()"
+                    class="opacity-0 absolute inset-0 w-full cursor-pointer" />
+                  <div class="flex items-center gap-1 text-xs font-medium pointer-events-none"
+                    [class.text-red-500]="isOverdue(task.dueDate)"
+                    [class.text-slate-400]="!isOverdue(task.dueDate) && !task.dueDate"
+                    [class.text-[--text-secondary]]="task.dueDate && !isOverdue(task.dueDate)">
+                    <span class="material-symbols-rounded text-sm">
+                      {{ isOverdue(task.dueDate) ? 'event_busy' : 'calendar_today' }}
+                    </span>
+                    {{ task.dueDate ? formatDate(task.dueDate) : 'Sem data' }}
+                  </div>
+                </div>
+              </td>
+
+              <!-- Counts -->
+              <td class="px-4 py-3 align-middle">
+                <div class="flex items-center gap-2 text-[11px] text-slate-400">
+                  @if (task._count?.comments) {
+                    <span class="flex items-center gap-0.5">
+                      <span class="material-symbols-rounded text-sm">chat_bubble_outline</span>
+                      {{ task._count!.comments }}
+                    </span>
+                  }
+                  @if (task._count?.timeEntries) {
+                    <span class="flex items-center gap-0.5">
+                      <span class="material-symbols-rounded text-sm">schedule</span>
+                      {{ task._count!.timeEntries }}
+                    </span>
+                  }
+                </div>
+              </td>
+
+              <!-- Row actions -->
+              <td class="px-4 py-3 align-middle">
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <a [routerLink]="['/projects', id, 'kanban']"
+                    [queryParams]="{ task: task.id }"
+                    (click)="$event.stopPropagation()"
+                    title="Abrir no Kanban"
+                    class="p-1 rounded text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition-all">
+                    <span class="material-symbols-rounded text-sm">open_in_new</span>
+                  </a>
+                  <button (click)="deleteTask(task, $event)"
+                    title="Deletar"
+                    class="p-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
+                    <span class="material-symbols-rounded text-sm">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<!-- ═══════ CREATE MODAL ═══════ -->
+@if (showCreateModal()) {
+  <div (click)="closeCreate()" class="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 animate-fade-in"></div>
+
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+    <div (click)="$event.stopPropagation()"
+      class="bg-white rounded-2xl shadow-2xl w-full max-w-lg pointer-events-auto animate-scale-in">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[rgba(0,0,0,0.07)]">
+        <h3 class="text-base font-bold text-[--text-primary]">Nova Tarefa</h3>
+        <button (click)="closeCreate()" class="p-1.5 rounded-lg text-[--text-tertiary] hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-rounded text-lg">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="createForm" (ngSubmit)="createTask()" class="px-6 py-5 space-y-4">
+        <div>
+          <label class="ag-label">Título *</label>
+          <input formControlName="title" type="text" class="ag-input" placeholder="Nome da tarefa" autofocus />
+        </div>
+
+        <div>
+          <label class="ag-label">Descrição</label>
+          <textarea formControlName="description" rows="2" class="ag-input resize-none" placeholder="Opcional..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="ag-label">Status</label>
+            <select formControlName="status" class="ag-input">
+              @for (opt of statusOptions; track opt.key) {
+                <option [value]="opt.key">{{ opt.label }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="ag-label">Prioridade</label>
+            <select formControlName="priority" class="ag-input">
+              @for (opt of priorityOptions; track opt.key) {
+                <option [value]="opt.key">{{ opt.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="ag-label">Responsável</label>
+            <select formControlName="assigneeId" class="ag-input">
+              <option value="">Sem responsável</option>
+              @for (m of companyMembers(); track m.id) {
+                <option [value]="m.id">{{ m.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="ag-label">Sprint</label>
+            <select formControlName="sprintId" class="ag-input">
+              <option value="">Sem sprint</option>
+              @for (s of sprints(); track s.id) {
+                <option [value]="s.id">{{ s.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="ag-label">Data de entrega</label>
+          <input formControlName="dueDate" type="date" class="ag-input" />
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" (click)="closeCreate()" class="ag-btn ag-btn--ghost">Cancelar</button>
+          <button type="submit" [disabled]="createForm.invalid || creating()" class="ag-btn ag-btn--primary">
+            @if (creating()) {
+              <span class="ag-spinner"></span>
+            } @else {
+              Criar Tarefa
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

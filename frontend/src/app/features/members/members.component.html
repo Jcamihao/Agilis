@@ -1,0 +1,302 @@
+<div class="flex flex-col gap-6 w-full">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div>
+      <h1 class="ag-page-title">Membros</h1>
+      <p class="ag-page-subtitle">Gerencie quem tem acesso à sua organização.</p>
+    </div>
+    @if (isAdmin()) {
+      <button (click)="showInvite.set(true)"
+              class="ag-btn ag-btn--primary flex items-center gap-2 shadow-sm self-start sm:self-auto">
+        <span class="material-symbols-rounded text-lg">person_add</span>
+        Convidar Membro
+      </button>
+    }
+  </div>
+
+  <!-- Skeleton -->
+  @if (loading()) {
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="ag-card p-4 flex items-center gap-3">
+          <div class="ag-skeleton w-9 h-9 rounded-xl flex-shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="ag-skeleton h-6 w-12 rounded-lg"></div>
+            <div class="ag-skeleton h-3 w-20 rounded"></div>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="space-y-3">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="ag-card p-4 flex items-center gap-4">
+          <div class="ag-skeleton w-10 h-10 rounded-full flex-shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="ag-skeleton h-4 w-40 rounded"></div>
+            <div class="ag-skeleton h-3 w-56 rounded"></div>
+          </div>
+          <div class="ag-skeleton h-6 w-20 rounded-full"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Stats -->
+  @if (!loading()) {
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="ag-card p-4 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-rounded text-lg">group</span>
+        </div>
+        <div>
+          <p class="text-xl font-bold text-[--text-primary]">{{ stats().total }}</p>
+          <p class="text-xs text-[--text-tertiary]">Total de membros</p>
+        </div>
+      </div>
+      <div class="ag-card p-4 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-rounded text-lg">shield_person</span>
+        </div>
+        <div>
+          <p class="text-xl font-bold text-[--text-primary]">{{ stats().owners + stats().admins }}</p>
+          <p class="text-xs text-[--text-tertiary]">Administradores</p>
+        </div>
+      </div>
+      <div class="ag-card p-4 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-rounded text-lg">badge</span>
+        </div>
+        <div>
+          <p class="text-xl font-bold text-[--text-primary]">{{ stats().total - stats().owners - stats().admins }}</p>
+          <p class="text-xs text-[--text-tertiary]">Membros comuns</p>
+        </div>
+      </div>
+      <div class="ag-card p-4 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-rounded text-lg">task_alt</span>
+        </div>
+        <div>
+          <p class="text-xl font-bold text-[--text-primary]">{{ stats().tasks }}</p>
+          <p class="text-xs text-[--text-tertiary]">Tarefas ativas</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Search + Table -->
+  <div class="ag-card overflow-hidden">
+    <!-- Table header controls -->
+    <div class="p-4 border-b border-slate-100 flex items-center gap-3">
+      <div class="relative flex-1 max-w-72">
+        <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+        <input type="text" placeholder="Buscar por nome ou email..."
+               [value]="search()"
+               (input)="search.set($any($event.target).value)"
+               class="ag-input pl-9 py-2 text-sm" />
+      </div>
+      <span class="text-sm text-[--text-tertiary] ml-auto">
+        {{ filteredMembers().length }} membro{{ filteredMembers().length !== 1 ? 's' : '' }}
+      </span>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="divide-y divide-slate-100">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="flex items-center gap-4 px-5 py-4">
+            <div class="ag-skeleton w-10 h-10 rounded-full"></div>
+            <div class="flex-1 space-y-2">
+              <div class="ag-skeleton h-4 w-40 rounded"></div>
+              <div class="ag-skeleton h-3 w-56 rounded"></div>
+            </div>
+            <div class="ag-skeleton h-6 w-20 rounded-full"></div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty -->
+    @else if (filteredMembers().length === 0) {
+      <div class="ag-empty py-16">
+        <span class="material-symbols-rounded ag-empty__icon">group_off</span>
+        <p class="ag-empty__title">Nenhum membro encontrado</p>
+        <p class="ag-empty__desc">Tente ajustar a busca ou convide novos membros.</p>
+      </div>
+    }
+
+    <!-- Members list -->
+    @else {
+      <div class="divide-y divide-slate-100">
+        @for (member of filteredMembers(); track member.id) {
+          <div class="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors group"
+               [class.bg-primary-50/40]="isMe(member)">
+
+            <!-- Avatar -->
+            <div class="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden relative">
+              @if (member.avatarUrl) {
+                <img [src]="member.avatarUrl" [alt]="member.name" class="w-full h-full object-cover" />
+              } @else {
+                {{ member.name.charAt(0).toUpperCase() }}
+              }
+              @if (isMe(member)) {
+                <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white"></div>
+              }
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-sm font-semibold text-[--text-primary] truncate">{{ member.name }}</p>
+                @if (isMe(member)) {
+                  <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">Você</span>
+                }
+              </div>
+              <p class="text-xs text-[--text-tertiary] truncate">{{ member.email }}</p>
+              <div class="flex items-center gap-3 mt-1 flex-wrap">
+                @if (member.teamMemberships.length) {
+                  <div class="flex items-center gap-1 text-[10px] text-[--text-tertiary]">
+                    <span class="material-symbols-rounded text-xs">groups</span>
+                    @for (tm of member.teamMemberships.slice(0, 2); track tm.team.id) {
+                      <span class="px-1.5 py-0.5 rounded" [style.background]="tm.team.color + '20'" [style.color]="tm.team.color">
+                        {{ tm.team.name }}
+                      </span>
+                    }
+                    @if (member.teamMemberships.length > 2) {
+                      <span class="text-[--text-tertiary]">+{{ member.teamMemberships.length - 2 }}</span>
+                    }
+                  </div>
+                }
+                <span class="text-[10px] text-[--text-tertiary] flex items-center gap-0.5">
+                  <span class="material-symbols-rounded text-xs">schedule</span>
+                  Entrou {{ joinedAgo(member.joinedAt) }}
+                </span>
+                @if (member._count.assignedTasks) {
+                  <span class="text-[10px] text-[--text-tertiary] flex items-center gap-0.5">
+                    <span class="material-symbols-rounded text-xs">task_alt</span>
+                    {{ member._count.assignedTasks }} tarefa{{ member._count.assignedTasks !== 1 ? 's' : '' }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            <!-- Role badge -->
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0"
+                  [ngClass]="roleCfg(member.role).badgeClass">
+              {{ roleCfg(member.role).label }}
+            </span>
+
+            <!-- Actions (admin only, not for owner, not for self when not owner) -->
+            @if (isAdmin() && !isOwner(member) && !isMe(member)) {
+              <div class="relative">
+                <button (click)="toggleMenu(member.id, $event)"
+                        class="p-1.5 rounded-lg text-[--text-tertiary] hover:bg-slate-100 hover:text-[--text-primary] transition-colors opacity-0 group-hover:opacity-100">
+                  <span class="material-symbols-rounded text-lg">more_vert</span>
+                </button>
+
+                @if (openMenuId() === member.id) {
+                  <div class="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-20 overflow-hidden animate-scale-in">
+                    <div class="p-2 border-b border-slate-100">
+                      <p class="text-[10px] font-semibold text-[--text-tertiary] uppercase tracking-wider px-2 py-1">Alterar papel</p>
+                      @for (r of roleOptions; track r.key) {
+                        <button (click)="changeRole(member, r.key)"
+                                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-slate-50 transition-colors text-left"
+                                [class.text-primary-600]="member.role === r.key"
+                                [class.font-semibold]="member.role === r.key">
+                          @if (member.role === r.key) {
+                            <span class="material-symbols-rounded text-sm text-primary-500">check</span>
+                          } @else {
+                            <span class="w-4"></span>
+                          }
+                          {{ r.label }}
+                        </button>
+                      }
+                    </div>
+                    <div class="p-2">
+                      <button (click)="remove(member)"
+                              class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg hover:bg-red-50 text-red-500 transition-colors text-left">
+                        <span class="material-symbols-rounded text-sm">person_remove</span>
+                        Remover da organização
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>
+
+<!-- ══════ INVITE MODAL ══════ -->
+@if (showInvite()) {
+  <div (click)="showInvite.set(false)"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div (click)="$event.stopPropagation()"
+         class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+
+      <div class="flex items-center justify-between p-6 border-b border-slate-100">
+        <div>
+          <h2 class="text-lg font-bold text-[--text-primary]">Convidar Membro</h2>
+          <p class="text-sm text-[--text-secondary] mt-0.5">O usuário terá acesso imediato à organização.</p>
+        </div>
+        <button (click)="showInvite.set(false)"
+                class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="inviteForm" (ngSubmit)="invite()" class="p-6 flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label ag-label--required">Email</label>
+          <input type="email" formControlName="email" class="ag-input" placeholder="usuario@empresa.com" />
+          @if (inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched) {
+            <p class="text-xs text-red-500">Email inválido</p>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Nome <span class="text-[--text-tertiary] font-normal">(opcional)</span></label>
+          <input type="text" formControlName="name" class="ag-input" placeholder="Nome do usuário" />
+          <p class="text-[11px] text-[--text-tertiary]">Se o email não estiver cadastrado, uma conta será criada automaticamente.</p>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Papel</label>
+          <div class="grid grid-cols-3 gap-2">
+            @for (r of roleOptions; track r.key) {
+              <label class="cursor-pointer">
+                <input type="radio" formControlName="role" [value]="r.key" class="peer sr-only" />
+                <div class="py-2.5 px-3 border border-slate-200 rounded-xl text-center text-sm font-medium text-[--text-secondary] peer-checked:border-primary-400 peer-checked:bg-primary-50 peer-checked:text-primary-700 transition-all">
+                  {{ r.label }}
+                </div>
+              </label>
+            }
+          </div>
+          <p class="text-[11px] text-[--text-tertiary]">
+            @if (inviteForm.get('role')?.value === 'ADMIN') { Admin pode convidar e remover membros. }
+            @else if (inviteForm.get('role')?.value === 'VIEWER') { Visualizador não pode criar ou editar nada. }
+            @else { Membro pode criar e editar tarefas e projetos. }
+          </p>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="showInvite.set(false)"
+                  class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
+          <button type="submit" [disabled]="inviteForm.invalid || inviting()"
+                  class="flex-1 ag-btn ag-btn--primary justify-center">
+            @if (inviting()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded text-lg">person_add</span>
+            }
+            Convidar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
