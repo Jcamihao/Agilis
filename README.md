@@ -1,183 +1,125 @@
-# Agilis
+# Agilis — Plataforma de Gestão Operacional
 
-Disciplina que gera resultado
-
-Agilis e um SaaS B2B de gestao operacional da codeStage Solucoes focado em reduzir atrasos, aumentar produtividade e automatizar a cobranca de tarefas vencidas. A versao 1.1.0 adiciona sessoes de autenticacao, configuracoes do usuario e uma interface mais completa para operacao diaria.
-
-## Visao geral
-
-- Backend em NestJS 10 com Prisma, PostgreSQL, JWT e validacao com DTOs.
-- Frontend em Angular 17 standalone com Angular Material e SCSS.
-- Estrutura inspirada no Velo, com `backend/` e `frontend/` na raiz.
-- Infra local simplificada: Docker apenas para o PostgreSQL.
-
-## Estrutura do projeto
-
-```text
-agilis/
-  backend/
-    prisma/
-    src/
-      auth/
-      common/
-      config/
-      dashboard/
-      health/
-      prisma/
-      settings/
-      task-logs/
-      tasks/
-      users/
-  frontend/
-    src/
-      app/
-        core/
-          guards/
-          interceptors/
-          layout/
-          models/
-          services/
-        features/
-          auth/
-          dashboard/
-          planner/
-          settings/
-          tasks/
-          users/
-        shared/
-          components/
-          material/
-  docs/
-  docker-compose.yml
-  package.json
-  package-lock.json
-  .env.example
-```
+Uma plataforma moderna de gestão operacional inspirada em ClickUp, Linear, Jira e Notion.
 
 ## Stack
 
-### Backend
+**Backend:** NestJS · Prisma · PostgreSQL · JWT
 
-- NestJS 10
-- TypeScript
-- Prisma ORM
-- PostgreSQL
-- JWT Auth com sessoes persistidas
-- Rate limit em rotas sensiveis
-- class-validator
-- class-transformer
+**Frontend:** Angular 20 · Angular Material · TailwindCSS · Angular CDK
 
-### Frontend
+## Funcionalidades V1
 
-- Angular 17 standalone
-- Angular Material
-- SCSS
-- Design system com sidebar fixa e cards premium
-- Pagina de configuracoes do usuario
+- ✅ Autenticação JWT (login, cadastro)
+- ✅ Multiempresa (multi-tenant)
+- ✅ Equipes com membros e roles
+- ✅ Projetos com cores e ícones
+- ✅ Kanban Board com Drag & Drop
+- ✅ Tarefas com prioridade, status, data de vencimento
+- ✅ Dashboard com estatísticas
+- ✅ Minhas Tarefas com filtros
+- ✅ Perfil do usuário
+- ✅ Design System próprio
+- ✅ Animações e microinterações
+- ✅ Layout responsivo
 
-### Infra
-
-- Docker Compose apenas para o PostgreSQL local
-- npm workspaces na raiz
-
-## Scripts da raiz
-
-- `npm run db:up`: sobe o PostgreSQL local via Docker.
-- `npm run db:down`: derruba os containers locais do banco.
-- `npm run db:migrate`: executa `prisma migrate dev` no backend.
-- `npm run db:seed`: popula a base com organizacao, usuarios e tarefas demo.
-- `npm run dev`: sobe backend e frontend juntos.
-- `npm run dev:backend`: sobe apenas o backend.
-- `npm run dev:frontend`: sobe apenas o frontend.
-- `npm run build`: builda backend e frontend.
-
-## Como rodar localmente
-
-1. Instale Node.js 20 e npm 10.
-2. Copie `.env.example` para `.env`.
-3. Suba o PostgreSQL com `npm run db:up`.
-4. Instale as dependencias com `npm install`.
-5. O backend e o Prisma leem automaticamente o `.env` da raiz do projeto.
-6. Execute as migracoes com `npm run db:migrate`.
-7. Popule a base com `npm run db:seed`.
-8. Suba a aplicacao com `npm run dev`.
-
-Versao minima suportada:
-
-- Node.js `20.9+`
-- npm `10+`
-
-URLs locais:
-
-- Frontend: `http://localhost:4200`
-- API: `http://localhost:3000/api`
-- Healthcheck: `http://localhost:3000/api/health`
-
-## Como rodar backend e frontend separadamente
-
-1. Suba o banco com `npm run db:up`.
-2. Garanta que o `.env` exista na raiz do projeto.
-3. Em um terminal, rode `npm run dev:backend`.
-4. Em outro terminal, rode `npm run dev:frontend`.
-
-## Endpoints principais
-
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `GET /api/auth/me`
-- `GET /api/dashboard/overview`
-- `GET /api/settings/me`
-- `PATCH /api/settings/me`
-- `GET /api/tasks`
-- `POST /api/tasks`
-- `PATCH /api/tasks/:id/status`
-- `GET /api/users`
-- `POST /api/users`
-- `PATCH /api/users/:id/role`
-- `GET /api/health`
-
-## Telas implementadas
-
-- Login
-- Dashboard
-- Planner
-- Settings
-- Tasks
-- Users
-
-## Credenciais seed
-
-- Admin: `admin@agilis.local` / `Agilis@123`
-- Gestor: `gestor@agilis.local` / `Agilis@123`
-- Colaborador: `colaborador@agilis.local` / `Agilis@123`
-
-O seed tambem cria tarefas exemplo em `PENDING`, `IN_PROGRESS`, `DONE` e `DELAYED`, com logs para alimentar Dashboard, Planner e Tasks logo no primeiro acesso.
-
-## Regras de negocio
-
-- Toda tarefa pertence a uma organizacao.
-- Todo usuario pertence a uma organizacao.
-- Apenas `ADMIN` e `MANAGER` gerenciam usuarios.
-- Toda acao relevante de tarefa gera log.
-- A sessao autenticada pode ser encerrada com logout e invalidacao no backend.
-- Preferencias do usuario ficam vinculadas ao usuario autenticado.
-- Um cron executa a cada minuto e marca tarefas vencidas como `DELAYED`.
-
-## Documentacao complementar
-
-- Arquitetura detalhada em `docs/architecture.md`
-- Release notes 1.1.0 em `docs/releases/v1.1.0.md`
-
-## Troubleshooting
-
-Se aparecer erro de Angular CLI pedindo Node mais novo, ou erro de modulo nativo do `bcrypt`, sua instalacao provavelmente foi feita com Node antigo.
-
-Fluxo recomendado para corrigir:
+## Início Rápido
 
 ```bash
-rm -rf node_modules frontend/node_modules
-npm install
+# 1. Setup inicial
+chmod +x setup.sh && ./setup.sh
+
+# 2. Iniciar banco de dados (Docker)
+docker-compose up -d postgres
+
+# 3. Migrations e seed
+cd agilis-backend
+npx prisma migrate dev --name init
+npm run prisma:seed
+
+# 4. Iniciar backend
+npm run start:dev
+
+# 5. Iniciar frontend (outro terminal)
+cd ../agilis-frontend
+npm start
 ```
 
-Antes disso, confirme que o terminal esta usando Node 20.19.5 ou superior.
+## URLs
+
+| Serviço | URL |
+|---------|-----|
+| Frontend | http://localhost:4200 |
+| Backend API | http://localhost:3000/api/v1 |
+| Swagger Docs | http://localhost:3000/docs |
+| Prisma Studio | `npx prisma studio` |
+
+## Credenciais Demo
+
+```
+Email: admin@agilis.app
+Senha: Admin@123
+```
+
+## Estrutura
+
+```
+Agilis/
+├── agilis-backend/          # NestJS API
+│   ├── src/
+│   │   ├── auth/            # Autenticação JWT
+│   │   ├── users/           # Usuários
+│   │   ├── companies/       # Empresas (multi-tenant)
+│   │   ├── teams/           # Equipes
+│   │   ├── projects/        # Projetos
+│   │   ├── tasks/           # Tarefas + Kanban
+│   │   ├── prisma/          # Prisma service
+│   │   └── common/          # Filtros, interceptors
+│   └── prisma/
+│       ├── schema.prisma    # Modelo de dados
+│       └── seed.ts          # Dados iniciais
+│
+├── agilis-frontend/         # Angular 20 SPA
+│   └── src/app/
+│       ├── core/            # Services, models, guards
+│       ├── features/        # Telas da aplicação
+│       │   ├── auth/        # Login + Cadastro
+│       │   ├── dashboard/   # Dashboard analítico
+│       │   ├── companies/   # Gestão de empresas
+│       │   ├── teams/       # Gestão de equipes
+│       │   ├── projects/    # Gestão de projetos
+│       │   ├── kanban/      # Kanban com drag & drop
+│       │   ├── my-tasks/    # Minhas tarefas
+│       │   └── profile/     # Perfil do usuário
+│       ├── layout/          # Sidebar + Topbar
+│       └── shared/          # Componentes reutilizáveis
+│
+└── docker-compose.yml       # Orquestração de containers
+```
+
+## API Endpoints
+
+### Auth
+- `POST /api/v1/auth/login` — Login
+- `POST /api/v1/auth/register` — Cadastro
+- `GET  /api/v1/auth/me` — Perfil autenticado
+
+### Companies
+- `GET  /api/v1/companies` — Listar empresas
+- `POST /api/v1/companies` — Criar empresa
+- `GET  /api/v1/companies/:id/dashboard` — Stats
+
+### Teams
+- `GET  /api/v1/teams?companyId=` — Listar equipes
+- `POST /api/v1/teams` — Criar equipe
+- `POST /api/v1/teams/:id/members` — Adicionar membro
+
+### Projects
+- `GET  /api/v1/projects?companyId=` — Listar projetos
+- `POST /api/v1/projects` — Criar projeto
+
+### Tasks
+- `GET  /api/v1/tasks/kanban/:projectId` — Board Kanban
+- `GET  /api/v1/tasks/my-tasks` — Minhas tarefas
+- `POST /api/v1/tasks` — Criar tarefa
+- `PATCH /api/v1/tasks/:id/move` — Mover no Kanban

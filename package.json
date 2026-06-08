@@ -1,33 +1,65 @@
 {
   "name": "agilis",
+  "version": "1.0.0",
+  "description": "Agilis — Plataforma de Gestão Operacional",
   "private": true,
-  "packageManager": "npm@10.8.2",
-  "engines": {
-    "node": ">=20.9.0",
-    "npm": ">=10.0.0"
-  },
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "scripts": {
-    "preinstall": "node ./scripts/check-node.js",
-    "predev": "node ./scripts/check-node.js",
-    "prebuild": "node ./scripts/check-node.js",
-    "predev:backend": "node ./scripts/check-node.js",
-    "predev:frontend": "node ./scripts/check-node.js",
-    "predb:migrate": "node ./scripts/check-node.js",
-    "predb:seed": "node ./scripts/check-node.js",
-    "postinstall": "npm --prefix backend run prisma:generate",
-    "dev": "sh -c 'npm run dev:backend & npm run dev:frontend'",
-    "build": "sh -c 'npm run build:backend && npm run build:frontend'",
-    "db:up": "docker compose up -d postgres",
-    "db:down": "docker compose down",
-    "db:migrate": "npm --prefix backend run prisma:migrate",
-    "db:seed": "npm --prefix backend run prisma:seed",
-    "dev:backend": "npm --prefix backend run start:dev",
-    "dev:frontend": "npm --prefix frontend run start",
-    "build:backend": "npm --prefix backend run build",
-    "build:frontend": "npm --prefix frontend run build"
+    "predev": "node scripts/ensure-deps.js",
+    "dev": "npm run infra:up && concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" --kill-others-on-fail \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "dev:no-infra": "node scripts/ensure-deps.js && concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" --kill-others-on-fail \"npm run backend:dev\" \"npm run frontend:dev\"",
+
+    "backend:dev": "npm --prefix backend run start:dev",
+    "backend:build": "npm --prefix backend run build",
+    "backend:start": "npm --prefix backend run start:prod",
+    "backend:install": "npm --prefix backend install",
+    "backend:migrate": "npm --prefix backend run prisma:migrate",
+    "backend:seed": "npm --prefix backend run prisma:seed",
+    "backend:studio": "npm --prefix backend run prisma:studio",
+    "backend:test": "npm --prefix backend run test",
+
+    "frontend:dev": "npm --prefix frontend start",
+    "frontend:build": "npm --prefix frontend run build:prod",
+    "frontend:install": "npm --prefix frontend install",
+    "frontend:test": "npm --prefix frontend run test:ci",
+
+    "infra:up": "docker compose up -d postgres && node scripts/wait-db.js",
+    "infra:down": "docker compose down",
+    "infra:reset": "docker compose down -v && docker compose up -d postgres && node scripts/wait-db.js",
+    "infra:logs": "docker compose logs -f",
+    "infra:status": "docker compose ps",
+
+    "n8n:up": "docker compose up -d n8n && echo \"\\n✅ N8N disponível em http://localhost:5678 (admin / agilis123)\"",
+    "n8n:down": "docker compose stop n8n",
+    "n8n:logs": "docker compose logs -f n8n",
+
+    "ollama:up": "docker compose up -d ollama && echo \"\\n✅ Ollama disponível em http://localhost:11434\"",
+    "ollama:down": "docker compose stop ollama",
+    "ollama:logs": "docker compose logs -f ollama",
+    "ollama:pull": "docker exec agilis-ollama ollama pull mistral",
+    "ollama:pull:llama": "docker exec agilis-ollama ollama pull llama3.2:3b",
+    "ollama:list": "docker exec agilis-ollama ollama list",
+
+    "uptime:up": "docker compose up -d uptime-kuma && echo \"\\n✅ Uptime Kuma disponível em http://localhost:3002\"",
+    "uptime:down": "docker compose stop uptime-kuma",
+    "uptime:logs": "docker compose logs -f uptime-kuma",
+
+    "evolution:up": "docker compose up -d evolution && echo \"\\n✅ Evolution API disponível em http://localhost:8080\\n   API Key: agilis_evolution_key\"",
+    "evolution:down": "docker compose stop evolution",
+    "evolution:logs": "docker compose logs -f evolution",
+
+    "install:all": "npm install && npm run backend:install && npm run frontend:install",
+    "build:all": "npm run backend:build && npm run frontend:build",
+    "test:all": "npm run backend:test && npm run frontend:test",
+
+    "db:migrate": "npm run backend:migrate",
+    "db:seed": "npm run backend:seed",
+    "db:reset": "npm run infra:reset && npm run db:migrate && npm run db:seed",
+    "db:studio": "npm run backend:studio",
+
+    "setup": "npm run install:all && npm run infra:up && npm run db:migrate && npm run db:seed",
+    "clean": "rm -rf backend/dist backend/node_modules frontend/dist frontend/node_modules node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

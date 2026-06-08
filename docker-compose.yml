@@ -1,20 +1,118 @@
+version: '3.9'
+
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: agilis-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: agilis
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d agilis"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      POSTGRES_USER: agilis
+      POSTGRES_PASSWORD: agilis123
+      POSTGRES_DB: agilis_db
     ports:
-      - "${POSTGRES_HOST_PORT:-5432}:5432"
+      - '5432:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - agilis-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U agilis -d agilis_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: agilis-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - agilis-redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agilis-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://agilis:agilis123@postgres:5432/agilis_db?schema=public
+      JWT_SECRET: jOXckDUB8pAPwLyTfsEZG/quKL7/VZbH+5KQd41adZw=
+      JWT_EXPIRES_IN: 7d
+      NODE_ENV: production
+      PORT: 3000
+      API_PREFIX: api/v1
+      CORS_ORIGIN: http://localhost:4200
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MAIL_PROVIDER: resend
+      RESEND_API_KEY: re_DUJS2K8A_Ks1MZ3kNjxziojyVsAQLy55c
+      MAIL_FROM: Agilis <onboarding@resend.dev>
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: agilis-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '4200:80'
+
+  n8n:
+    image: n8nio/n8n
+    container_name: agilis-n8n
+    restart: unless-stopped
+    ports:
+      - '5678:5678'
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=agilis123
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+    volumes:
+      - agilis-n8n-data:/home/node/.n8n
+
+  ollama:
+    image: ollama/ollama
+    container_name: agilis-ollama
+    restart: unless-stopped
+    ports:
+      - '11434:11434'
+    volumes:
+      - agilis-ollama-data:/root/.ollama
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: agilis-uptime
+    restart: unless-stopped
+    ports:
+      - '3002:3001'
+    volumes:
+      - agilis-kuma-data:/app/data
 
 volumes:
-  postgres_data:
+  agilis-postgres-data:
+  agilis-redis-data:
+  agilis-n8n-data:
+  agilis-ollama-data:
+  agilis-kuma-data:
