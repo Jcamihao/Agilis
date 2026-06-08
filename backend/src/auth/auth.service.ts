@@ -1,219 +1,144 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Role, User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-import { createHash, randomBytes } from 'crypto';
-import { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
-import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserResponseDto } from '../users/dto/user-response.dto';
-import { UsersService } from '../users/users.service';
-import { AuthResponseDto } from './dto/auth-response.dto';
+import { RedisService } from '../redis/redis.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-
-const REFRESH_TOKEN_TTL_DAYS = 30;
-
-export interface AuthRequestContext {
-  ipAddress?: string;
-  userAgent?: string;
-}
-
-export interface AuthSessionResponse extends AuthResponseDto {
-  refreshToken: string;
-}
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly redis: RedisService,
   ) {}
 
-  async register(
-    dto: RegisterDto,
-    context: AuthRequestContext,
-  ): Promise<AuthSessionResponse> {
-    const existingUser = await this.usersService.findByEmail(dto.email);
-
-    if (existingUser) {
-      throw new ConflictException('Ja existe um usuario com este email.');
-    }
-
-    const password = await bcrypt.hash(dto.password, 10);
-
-    const user = await this.prisma.$transaction(async (transaction) => {
-      const organization = await transaction.organization.create({
-        data: {
-          name: dto.organizationName,
-        },
-      });
-
-      return transaction.user.create({
-        data: {
-          name: dto.name,
-          email: dto.email,
-          password,
-          role: Role.ADMIN,
-          organizationId: organization.id,
-        },
-      });
-    });
-
-    return this.buildAuthResponse(user, context);
-  }
-
-  async login(
-    dto: LoginDto,
-    context: AuthRequestContext,
-  ): Promise<AuthSessionResponse> {
-    const user = await this.validateCredentials(dto.email, dto.password);
-    return this.buildAuthResponse(user, context);
-  }
-
-  async refresh(
-    refreshToken: string | undefined,
-    context: AuthRequestContext,
-  ): Promise<AuthSessionResponse> {
-    if (!refreshToken) {
-      throw new UnauthorizedException('Sessao expirada.');
-    }
-
-    const refreshTokenHash = this.hashRefreshToken(refreshToken);
-    const session = await this.prisma.authSession.findUnique({
-      where: { refreshTokenHash },
-      include: { user: true },
-    });
-
-    if (!session || session.revokedAt || session.expiresAt <= new Date()) {
-      throw new UnauthorizedException('Sessao expirada.');
-    }
-
-    const nextRefreshToken = this.createRefreshToken();
-    const nextRefreshTokenHash = this.hashRefreshToken(nextRefreshToken);
-    const nextExpiresAt = this.getRefreshTokenExpiresAt();
-
-    await this.prisma.authSession.update({
-      where: { id: session.id },
-      data: {
-        refreshTokenHash: nextRefreshTokenHash,
-        expiresAt: nextExpiresAt,
-        ipAddress: context.ipAddress,
-        userAgent: context.userAgent,
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      include: {
+        companies: { include: { company: true } },
       },
     });
-
-    const accessToken = await this.signAccessToken(session.user, session.id);
-
-    return {
-      accessToken,
-      refreshToken: nextRefreshToken,
-      user: UserResponseDto.fromUser(session.user),
-    };
-  }
-
-  async logout(refreshToken: string | undefined): Promise<void> {
-    if (!refreshToken) {
-      return;
-    }
-
-    await this.prisma.authSession.updateMany({
-      where: {
-        refreshTokenHash: this.hashRefreshToken(refreshToken),
-        revokedAt: null,
-      },
-      data: {
-        revokedAt: new Date(),
-      },
-    });
-  }
-
-  async me(user: AuthenticatedUser): Promise<UserResponseDto> {
-    const currentUser = await this.usersService.findByIdWithinOrganization(
-      user.id,
-      user.organizationId,
-    );
-
-    return UserResponseDto.fromUser(currentUser);
-  }
-
-  private async validateCredentials(email: string, password: string): Promise<User> {
-    const user = await this.usersService.findByEmail(email);
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais invalidas.');
+      throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const passwordMatches = await bcrypt.compare(password, user.password);
-
-    if (!passwordMatches) {
-      throw new UnauthorizedException('Credenciais invalidas.');
+    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    return user;
+    const tokens = this.generateTokens(user.id, user.email);
+
+    const { password, ...userWithoutPassword } = user;
+
+    return {
+      ...tokens,
+      user: userWithoutPassword,
+    };
   }
 
-  private async buildAuthResponse(
-    user: User,
-    context: AuthRequestContext,
-  ): Promise<AuthSessionResponse> {
-    const refreshToken = this.createRefreshToken();
-    const session = await this.prisma.authSession.create({
-      data: {
-        userId: user.id,
-        organizationId: user.organizationId,
-        refreshTokenHash: this.hashRefreshToken(refreshToken),
-        expiresAt: this.getRefreshTokenExpiresAt(),
-        ipAddress: context.ipAddress,
-        userAgent: context.userAgent,
+  async register(dto: RegisterDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email já cadastrado');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const slug = dto.companyName
+      ? dto.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
+      : `empresa-${Date.now()}`;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          name:             dto.name,
+          email:            dto.email,
+          password:         hashedPassword,
+          phone:            dto.phone            ?? null,
+          cpfCnpj:          dto.cpfCnpj          ?? null,
+          cep:              dto.cep              ?? null,
+          uf:               dto.uf               ?? null,
+          address:          dto.address          ?? null,
+          addressNumber:    dto.addressNumber    ?? null,
+          addressComplement:dto.addressComplement?? null,
+        },
+      });
+
+      const company = await tx.company.create({
+        data: {
+          name: dto.companyName || `Empresa de ${dto.name}`,
+          slug: `${slug}-${user.id.slice(0, 8)}`,
+          users: {
+            create: { userId: user.id, role: 'OWNER' },
+          },
+        },
+        include: { users: true },
+      });
+
+      return { user, company };
+    });
+
+    const tokens = this.generateTokens(result.user.id, result.user.email);
+    const { password, ...userWithoutPassword } = result.user;
+
+    const userCompany = await this.prisma.userCompany.findFirst({
+      where: { userId: result.user.id, companyId: result.company.id },
+      include: { company: true },
+    });
+
+    return {
+      ...tokens,
+      user: {
+        ...userWithoutPassword,
+        companies: [{ ...userCompany, company: result.company }],
+      },
+    };
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        companies: { include: { company: true } },
+        teamMemberships: { include: { team: true } },
       },
     });
 
-    const accessToken = await this.signAccessToken(user, session.id);
+    if (!user) throw new UnauthorizedException('Usuário não encontrado');
 
-    return {
-      accessToken,
-      refreshToken,
-      user: UserResponseDto.fromUser(user),
-    };
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
-  private async signAccessToken(user: User, sessionId: string): Promise<string> {
-    const payload: JwtPayload = {
-      sub: user.id,
-      sessionId,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      organizationId: user.organizationId,
-    };
-
-    const accessToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.getOrThrow<string>('JWT_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN') ?? '15m',
-    });
-
-    return accessToken;
+  async logout(token: string): Promise<void> {
+    try {
+      const decoded = this.jwtService.decode(token) as any;
+      if (!decoded?.jti || !decoded?.exp) return;
+      const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+      if (ttl > 0) await this.redis.blacklistToken(decoded.jti, ttl);
+    } catch {}
   }
 
-  private createRefreshToken(): string {
-    return randomBytes(64).toString('hex');
-  }
+  private generateTokens(userId: string, email: string) {
+    const jti = randomUUID();
+    const expiresIn = this.configService.get('JWT_EXPIRES_IN', '7d');
 
-  private hashRefreshToken(refreshToken: string): string {
-    return createHash('sha256').update(refreshToken).digest('hex');
-  }
+    const accessToken = this.jwtService.sign(
+      { sub: userId, email, jti },
+      { secret: this.configService.get('JWT_SECRET'), expiresIn },
+    );
 
-  private getRefreshTokenExpiresAt(): Date {
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_TTL_DAYS);
-    return expiresAt;
+    return { accessToken };
   }
 }

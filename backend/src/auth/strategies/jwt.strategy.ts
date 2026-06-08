@@ -1,59 +1,41 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AuthenticatedUser } from '../../common/interfaces/authenticated-user.interface';
-import { JwtPayload } from '../../common/interfaces/jwt-payload.interface';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
+      secretOrKey: configService.get<string>('JWT_SECRET'),
     });
   }
 
-  async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        id: payload.sub,
-        organizationId: payload.organizationId,
-        authSessions: {
-          some: {
-            id: payload.sessionId,
-            revokedAt: null,
-            expiresAt: {
-              gt: new Date(),
-            },
-          },
-        },
-      },
+  async validate(payload: { sub: string; email: string; jti?: string }) {
+    if (payload.jti && await this.redis.isBlacklisted(payload.jti)) {
+      throw new UnauthorizedException('Token revogado');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true,
-        organizationId: true,
+        avatarUrl: true,
+        companies: { include: { company: true } },
       },
     });
 
-    if (!user) {
-      throw new UnauthorizedException('Sessao invalida.');
-    }
-
-    return {
-      id: user.id,
-      sessionId: payload.sessionId,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      organizationId: user.organizationId,
-    };
+    if (!user) throw new UnauthorizedException('Token inválido');
+    return user;
   }
 }
