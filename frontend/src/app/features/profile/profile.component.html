@@ -1,0 +1,422 @@
+<div class="flex flex-col xl:flex-row gap-6 w-full max-w-[1400px] mx-auto">
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="fixed top-4 right-4 z-50 px-4 py-3 rounded-lg bg-slate-900 text-white text-sm font-medium shadow-lg flex items-center gap-2 animate-fade-in-up">
+      <span class="material-symbols-rounded text-base text-emerald-400">check_circle</span>
+      {{ toast() }}
+    </div>
+  }
+
+  <!-- LEFT: Profile Form -->
+  <div class="flex-1 flex flex-col gap-5">
+    <div>
+      <h1 class="text-2xl font-bold text-[--text-primary] tracking-tight">Configurações de Perfil</h1>
+      <p class="text-sm text-[--text-secondary] mt-1">Gerencie suas informações pessoais e credenciais de segurança.</p>
+    </div>
+
+    <!-- Avatar & Basic Info -->
+    <div class="ag-card p-5 flex flex-col sm:flex-row gap-6 items-start">
+      <!-- Avatar -->
+      <div class="flex flex-col items-center gap-2 shrink-0">
+        <div class="relative group cursor-pointer">
+          <div class="w-24 h-24 rounded-full border border-[rgba(0,0,0,0.1)] overflow-hidden bg-primary-100 flex items-center justify-center">
+            @if (avatarPreview() || user()?.avatarUrl) {
+              <img [src]="avatarPreview() || user()!.avatarUrl" class="w-full h-full object-cover" />
+            } @else {
+              <span class="text-3xl font-bold text-primary-600">{{ user()?.name?.charAt(0) | uppercase }}</span>
+            }
+          </div>
+          <input #avatarInput type="file" accept="image/*" class="hidden" (change)="onAvatarChange($event)" />
+          <div (click)="avatarInput.click()"
+               class="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+            <span class="material-symbols-rounded text-white">photo_camera</span>
+          </div>
+          <button type="button" (click)="avatarInput.click()"
+                  class="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow border border-slate-200">
+            <div class="bg-primary-600 text-white w-6 h-6 rounded-full flex items-center justify-center">
+              @if (uploadingAvatar()) {
+                <div class="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+              } @else {
+                <span class="material-symbols-rounded text-sm">edit</span>
+              }
+            </div>
+          </button>
+        </div>
+        <span class="text-[11px] text-[--text-tertiary] font-medium text-center">JPG, GIF ou PNG. Max 2MB.</span>
+      </div>
+
+      <!-- Form -->
+      <div class="flex-1 flex flex-col gap-4 w-full">
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="flex flex-col gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="ag-label ag-label--required">Nome</label>
+              <input type="text" formControlName="firstName" class="ag-input" placeholder="João" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="ag-label">Sobrenome</label>
+              <input type="text" formControlName="lastName" class="ag-input" placeholder="Silva" />
+            </div>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label">Email Profissional</label>
+            <div class="relative">
+              <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">mail</span>
+              <input type="email" [value]="user()?.email ?? ''" disabled
+                     class="ag-input pl-10 opacity-60 cursor-not-allowed bg-slate-50" />
+            </div>
+            <span class="text-[11px] text-[--text-tertiary]">O email é gerido pela sua empresa. Contate o admin para alterar.</span>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" [disabled]="saving() || profileForm.invalid || profileForm.pristine"
+                    class="ag-btn ag-btn--primary flex items-center gap-2">
+              @if (saving()) {
+                <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+              } @else {
+                <span class="material-symbols-rounded text-lg">save</span>
+              }
+              Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Dados Pessoais -->
+    <div class="ag-card p-5 flex flex-col gap-5">
+      <div class="flex items-center gap-3 border-b border-[rgba(0,0,0,0.07)] pb-4">
+        <div class="w-8 h-8 rounded-full bg-violet-50 flex items-center justify-center text-violet-600">
+          <span class="material-symbols-rounded text-lg">badge</span>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-[--text-primary]">Dados Pessoais</h2>
+          <p class="text-sm text-[--text-secondary]">Documento, contato e endereço para uso nos processos da empresa.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="personalForm" (ngSubmit)="savePersonal()" class="flex flex-col gap-4">
+        <!-- CPF/CNPJ + Telefone -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label">CPF / CNPJ</label>
+            <input type="text" formControlName="cpfCnpj" (input)="onCpfCnpjInput($event)"
+                   class="ag-input font-mono" placeholder="000.000.000-00 ou 00.000.000/0001-00" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label">Telefone</label>
+            <div class="relative flex items-center">
+              <span class="absolute left-3 text-sm text-slate-400 font-mono pointer-events-none select-none">+55</span>
+              <input type="text" formControlName="phone" (input)="onPhoneInput($event)"
+                     class="ag-input pl-12" placeholder="(11) 99999-8888" />
+            </div>
+            <p class="text-xs text-slate-400">Usado para notificações via WhatsApp.</p>
+          </div>
+        </div>
+
+        <!-- CEP + UF -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label">CEP</label>
+            <div class="relative">
+              <input type="text" formControlName="cep" (input)="onCepInput($event)"
+                     class="ag-input pr-8" placeholder="00000-000" maxlength="9" />
+              @if (lookingUpCep()) {
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin"></div>
+              }
+            </div>
+            @if (cepError()) {
+              <span class="text-xs text-red-500">{{ cepError() }}</span>
+            }
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label">UF</label>
+            <input type="text" formControlName="uf" class="ag-input uppercase"
+                   placeholder="SP" maxlength="2" />
+          </div>
+          <div class="flex flex-col gap-1.5 md:col-span-1">
+            <!-- spacer on small screens -->
+          </div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Endereço (Logradouro)</label>
+          <input type="text" formControlName="address" class="ag-input" placeholder="Rua, Avenida..." />
+        </div>
+
+        <!-- Número + Complemento -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label">Número</label>
+            <input type="text" formControlName="addressNumber" class="ag-input" placeholder="123" />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label">Complemento</label>
+            <input type="text" formControlName="addressComplement" class="ag-input" placeholder="Apto, Sala..." />
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" [disabled]="savingPersonal() || personalForm.pristine"
+                  class="ag-btn ag-btn--primary flex items-center gap-2">
+            @if (savingPersonal()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded text-lg">save</span>
+            }
+            Salvar Dados Pessoais
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Security / Password -->
+    <div class="ag-card p-5 flex flex-col gap-5">
+      <div class="flex items-center gap-3 border-b border-[rgba(0,0,0,0.07)] pb-4">
+        <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+          <span class="material-symbols-rounded text-lg">lock</span>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-[--text-primary]">Segurança</h2>
+          <p class="text-sm text-[--text-secondary]">Atualize sua senha para manter sua conta segura.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row gap-5">
+          <div class="flex-1 flex flex-col gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label class="ag-label ag-label--required">Senha Atual</label>
+              <input type="password" formControlName="currentPassword" class="ag-input" placeholder="••••••••" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="ag-label ag-label--required">Nova Senha</label>
+              <input type="password" formControlName="newPassword" class="ag-input" placeholder="Mínimo 8 caracteres" />
+            </div>
+          </div>
+
+          <!-- Password requirements -->
+          <div class="md:w-64 bg-slate-50 rounded-lg p-4 border border-slate-200 self-start shrink-0">
+            <span class="text-xs font-bold text-[--text-primary] mb-3 block uppercase tracking-wider">Requisitos da senha:</span>
+            <ul class="flex flex-col gap-2">
+              <li class="flex items-center gap-2 text-sm"
+                  [class.text-primary-600]="pwdReqs().length"
+                  [class.text-[--text-tertiary]]="!pwdReqs().length">
+                <span class="material-symbols-rounded text-base">{{ pwdReqs().length ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                Mínimo de 8 caracteres
+              </li>
+              <li class="flex items-center gap-2 text-sm"
+                  [class.text-primary-600]="pwdReqs().number"
+                  [class.text-[--text-tertiary]]="!pwdReqs().number">
+                <span class="material-symbols-rounded text-base">{{ pwdReqs().number ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                Pelo menos um número
+              </li>
+              <li class="flex items-center gap-2 text-sm"
+                  [class.text-primary-600]="pwdReqs().special"
+                  [class.text-[--text-tertiary]]="!pwdReqs().special">
+                <span class="material-symbols-rounded text-base">{{ pwdReqs().special ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                Um caractere especial
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        @if (passwordError()) {
+          <p class="text-sm text-red-500 flex items-center gap-1">
+            <span class="material-symbols-rounded text-sm">error</span>
+            {{ passwordError() }}
+          </p>
+        }
+
+        <div class="flex justify-end pt-1">
+          <button type="submit" [disabled]="savingPassword() || passwordForm.invalid"
+                  class="ag-btn ag-btn--secondary flex items-center gap-2">
+            @if (savingPassword()) {
+              <div class="w-4 h-4 border-2 border-slate-400/40 border-t-slate-600 rounded-full animate-spin"></div>
+            }
+            Atualizar Senha
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Telegram -->
+    <div class="ag-card p-5 flex flex-col gap-5">
+      <div class="flex items-center gap-3 border-b border-[rgba(0,0,0,0.07)] pb-4">
+        <div class="w-8 h-8 rounded-full bg-sky-50 flex items-center justify-center text-sky-600">
+          <span class="material-symbols-rounded text-lg">send</span>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-[--text-primary]">Notificações via Telegram</h2>
+          <p class="text-sm text-[--text-secondary]">Receba alertas de tarefas diretamente no seu Telegram.</p>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="bg-sky-50 border border-sky-200 rounded-lg p-4 text-sm text-sky-800 flex flex-col gap-2">
+        <p class="font-semibold flex items-center gap-2">
+          <span class="material-symbols-rounded text-base">info</span>
+          Como conectar:
+        </p>
+        <ol class="list-decimal list-inside flex flex-col gap-1 text-sky-700 pl-1">
+          <li>Abra o Telegram e pesquise pelo seu bot.</li>
+          <li>Envie qualquer mensagem (ex: <code class="bg-sky-100 px-1 rounded">/start</code>).</li>
+          <li>Clique em <strong>Detectar meu Chat ID</strong> abaixo.</li>
+          <li>Selecione seu nome na lista e salve.</li>
+        </ol>
+      </div>
+
+      <form [formGroup]="telegramForm" (ngSubmit)="saveTelegram()" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Chat ID do Telegram</label>
+          <div class="flex gap-2">
+            <input type="text" formControlName="telegramChatId" class="ag-input flex-1"
+                   placeholder="Ex: 123456789" />
+            <button type="button" (click)="detectChatId()"
+                    class="ag-btn ag-btn--secondary flex items-center gap-1.5 whitespace-nowrap"
+                    [disabled]="detectingChatId()">
+              @if (detectingChatId()) {
+                <div class="w-4 h-4 border-2 border-slate-400/40 border-t-slate-600 rounded-full animate-spin"></div>
+              } @else {
+                <span class="material-symbols-rounded text-base">manage_search</span>
+              }
+              Detectar meu Chat ID
+            </button>
+          </div>
+
+          <!-- Dropdown de usuários detectados -->
+          @if (telegramUpdates().length > 0) {
+            <div class="border border-sky-200 rounded-lg overflow-hidden shadow-sm mt-1">
+              @for (u of telegramUpdates(); track u.chatId) {
+                <button type="button" (click)="selectChatId(u.chatId)"
+                        class="w-full text-left px-4 py-2.5 hover:bg-sky-50 flex items-center justify-between gap-3 border-b border-sky-100 last:border-0 transition-colors">
+                  <span class="font-medium text-sm text-[--text-primary]">{{ u.name }}</span>
+                  <div class="flex items-center gap-2 shrink-0">
+                    @if (u.username) {
+                      <span class="text-xs text-sky-600">&#64;{{ u.username }}</span>
+                    }
+                    <span class="text-xs text-[--text-tertiary] font-mono bg-slate-100 px-1.5 py-0.5 rounded">{{ u.chatId }}</span>
+                  </div>
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" [disabled]="savingTelegram() || telegramForm.pristine"
+                  class="ag-btn ag-btn--primary flex items-center gap-2">
+            @if (savingTelegram()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded text-lg">save</span>
+            }
+            Salvar Chat ID
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="bg-red-50 rounded-xl border border-red-200 p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h3 class="text-base font-bold text-red-600 flex items-center gap-2">
+          <span class="material-symbols-rounded">warning</span>
+          Zona de Perigo
+        </h3>
+        <p class="text-sm text-[--text-secondary] mt-1 max-w-md">
+          Ao deletar sua conta, todos os seus dados pessoais serão removidos. Dados de projetos corporativos serão transferidos para o Admin.
+        </p>
+      </div>
+      <button (click)="deleteAccount()"
+              class="ag-btn border border-red-400 text-red-600 hover:bg-red-600 hover:text-white transition-colors whitespace-nowrap shrink-0">
+        Deletar Conta
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT: Notifications Panel -->
+  <div class="w-full xl:w-96 shrink-0">
+    <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.08)] shadow-md flex flex-col overflow-hidden xl:sticky xl:top-20"
+         style="max-height: calc(100vh - 6rem);">
+
+      <!-- Header -->
+      <div class="p-4 border-b border-[rgba(0,0,0,0.07)] bg-white z-10">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-[--text-primary] flex items-center gap-2">
+            <span class="material-symbols-rounded text-primary-600" style="font-variation-settings:'FILL' 1">notifications</span>
+            Notificações
+          </h2>
+          @if (unreadCount() > 0) {
+            <span class="bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full text-xs font-bold">
+              {{ unreadCount() }} Não {{ unreadCount() === 1 ? 'Lida' : 'Lidas' }}
+            </span>
+          }
+        </div>
+        <div class="flex items-center justify-between">
+          <button (click)="markAllRead()" class="text-xs font-semibold text-primary-600 hover:text-primary-800 flex items-center gap-1 transition-colors">
+            <span class="material-symbols-rounded text-sm">done_all</span>
+            Marcar tudo como lido
+          </button>
+          <button (click)="clearNotifications()" class="text-xs font-medium text-[--text-tertiary] hover:text-red-500 flex items-center gap-1 transition-colors">
+            <span class="material-symbols-rounded text-sm">delete_sweep</span>
+            Limpar
+          </button>
+        </div>
+      </div>
+
+      <!-- List -->
+      <div class="flex-1 overflow-y-auto">
+        @if (notifLoading()) {
+          <div class="p-6 flex items-center justify-center">
+            <div class="w-6 h-6 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+          </div>
+        } @else if (notifications().length === 0) {
+          <div class="p-8 text-center text-[--text-tertiary]">
+            <span class="material-symbols-rounded text-4xl text-slate-200">notifications_off</span>
+            <p class="text-sm mt-2">Nenhuma notificação</p>
+          </div>
+        } @else {
+          @for (notif of notifications(); track notif.id) {
+            <div (click)="markRead(notif)"
+                 class="p-4 border-b border-[rgba(0,0,0,0.05)] hover:bg-slate-50 transition-colors relative cursor-pointer"
+                 [class.bg-primary-50]="!notif.isRead"
+                 [class.opacity-75]="notif.isRead">
+              @if (!notif.isRead) {
+                <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-500 rounded-r-full"></div>
+              }
+              <div class="flex gap-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                     [style.background]="getNotifColor(notif.type) + '20'">
+                  <span class="material-symbols-rounded text-lg" [style.color]="getNotifColor(notif.type)">
+                    {{ getNotifIcon(notif.type) }}
+                  </span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-start gap-2">
+                    <span class="text-xs font-bold text-[--text-primary]">{{ notif.title }}</span>
+                    <span class="text-[10px] shrink-0"
+                          [class.text-primary-600]="!notif.isRead"
+                          [class.text-[--text-tertiary]]="notif.isRead">
+                      {{ timeAgo(notif.createdAt) }}
+                    </span>
+                  </div>
+                  <p class="text-sm text-[--text-secondary] mt-0.5 leading-snug">{{ notif.content }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- Footer -->
+        <div class="p-3 text-center border-t border-[rgba(0,0,0,0.05)]">
+          <a routerLink="/notifications"
+             class="text-sm font-semibold text-primary-600 hover:text-primary-800 transition-colors p-2 w-full rounded-lg hover:bg-primary-50 inline-block">
+            Ver histórico completo
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

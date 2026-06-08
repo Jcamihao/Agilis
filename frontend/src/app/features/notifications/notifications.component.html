@@ -1,0 +1,95 @@
+    <div class="max-w-2xl mx-auto space-y-5">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h1 class="ag-page-title">Notificações</h1>
+          @if (page()?.unread) {
+            <p class="text-sm text-[--text-secondary] mt-0.5">{{ page()!.unread }} não lidas</p>
+          }
+        </div>
+        <div class="flex items-center gap-2">
+          <button (click)="markAllRead()" [disabled]="!page()?.unread"
+                  class="ag-btn ag-btn--secondary ag-btn--sm">
+            <span class="material-symbols-rounded text-base">done_all</span>
+            Marcar todas como lidas
+          </button>
+          <button (click)="deleteOld()"
+                  class="ag-btn ag-btn--ghost ag-btn--sm text-[--text-tertiary]">
+            <span class="material-symbols-rounded text-base">delete_sweep</span>
+            Limpar antigas
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex gap-2">
+        @for (f of filters; track f.key) {
+          <button (click)="activeFilter.set(f.key)"
+                  class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  [class.bg-primary-600]="activeFilter() === f.key"
+                  [class.text-white]="activeFilter() === f.key"
+                  [class.bg-white]="activeFilter() !== f.key"
+                  [class.text-slate-600]="activeFilter() !== f.key"
+                  [class.border]="activeFilter() !== f.key"
+                  [class.border-slate-200]="activeFilter() !== f.key">
+            {{ f.label }}
+          </button>
+        }
+      </div>
+
+      <!-- List -->
+      @if (loading()) {
+        <div class="space-y-3">
+          @for (i of [1,2,3,4,5]; track i) { <div class="ag-skeleton h-20 rounded-2xl"></div> }
+        </div>
+      } @else if (filteredNotifs().length === 0) {
+        <div class="ag-empty">
+          <span class="material-symbols-rounded ag-empty__icon">notifications_off</span>
+          <p class="ag-empty__title">Sem notificações</p>
+          <p class="ag-empty__desc">Você está em dia com tudo.</p>
+        </div>
+      } @else {
+        <div class="ag-card overflow-hidden">
+          <div class="divide-y divide-surface-border">
+            @for (notif of filteredNotifs(); track notif.id) {
+              <div (click)="markRead(notif)"
+                   class="flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors hover:bg-[#F5F5F5]"
+                   [class.bg-primary-50/40]="!notif.isRead">
+
+                <!-- Icon -->
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                     [style.background]="getColor(notif.type) + '20'">
+                  <span class="material-symbols-rounded text-lg" [style.color]="getColor(notif.type)">
+                    {{ getIcon(notif.type) }}
+                  </span>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm text-[--text-primary] leading-snug" [class.font-semibold]="!notif.isRead">
+                    {{ notif.title }}
+                  </p>
+                  <p class="text-sm text-[--text-secondary] mt-0.5">{{ notif.content }}</p>
+                  <p class="text-xs text-[--text-tertiary] mt-1.5">{{ timeAgo(notif.createdAt) }}</p>
+                </div>
+
+                <!-- Unread indicator -->
+                @if (!notif.isRead) {
+                  <div class="w-2.5 h-2.5 bg-primary-500 rounded-full flex-shrink-0 mt-2"></div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Load more -->
+        @if (hasMore()) {
+          <div class="text-center">
+            <button (click)="loadMore()" [disabled]="loading()"
+                    class="ag-btn ag-btn--secondary">
+              Carregar mais
+            </button>
+          </div>
+        }
+      }
+    </div>

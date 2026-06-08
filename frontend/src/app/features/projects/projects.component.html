@@ -1,0 +1,573 @@
+<div class="flex flex-col gap-6 w-full">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      <h1 class="ag-page-title">Projetos</h1>
+      <p class="ag-page-subtitle">
+        Gerencie e acompanhe o progresso de {{ projects().length }} projeto{{ projects().length !== 1 ? 's' : '' }} ativo{{ projects().length !== 1 ? 's' : '' }}.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+        <button (click)="viewMode.set('grid')"
+                class="p-1.5 rounded transition-all flex items-center justify-center"
+                [class.bg-white]="viewMode() === 'grid'"
+                [class.shadow-sm]="viewMode() === 'grid'"
+                [class.text-primary-600]="viewMode() === 'grid'"
+                [class.text-slate-400]="viewMode() !== 'grid'">
+          <span class="material-symbols-rounded text-xl">grid_view</span>
+        </button>
+        <button (click)="viewMode.set('list')"
+                class="p-1.5 rounded transition-all flex items-center justify-center"
+                [class.bg-white]="viewMode() === 'list'"
+                [class.shadow-sm]="viewMode() === 'list'"
+                [class.text-primary-600]="viewMode() === 'list'"
+                [class.text-slate-400]="viewMode() !== 'list'">
+          <span class="material-symbols-rounded text-xl">view_list</span>
+        </button>
+      </div>
+      <button (click)="openCreateModal()" class="ag-btn ag-btn--primary flex items-center gap-2 shadow-sm">
+        <span class="material-symbols-rounded text-lg">add</span>
+        Novo Projeto
+      </button>
+    </div>
+  </div>
+
+  <!-- Company Filter -->
+  @if (userCompanies().length > 1) {
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-xs font-semibold text-[--text-tertiary] uppercase tracking-wider mr-1">Empresa:</span>
+      <button (click)="setCompanyFilter('all')"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+              [class.bg-slate-900]="companyFilter() === 'all'"
+              [class.text-white]="companyFilter() === 'all'"
+              [class.border-slate-900]="companyFilter() === 'all'"
+              [class.bg-white]="companyFilter() !== 'all'"
+              [class.text-[--text-secondary]]="companyFilter() !== 'all'"
+              [class.border-slate-200]="companyFilter() !== 'all'"
+              [class.hover:border-slate-400]="companyFilter() !== 'all'">
+        <span class="material-symbols-rounded text-sm">apps</span>
+        Todas
+      </button>
+      @for (uc of userCompanies(); track uc.companyId) {
+        <button (click)="setCompanyFilter(uc.companyId)"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                [class.bg-indigo-600]="companyFilter() === uc.companyId"
+                [class.text-white]="companyFilter() === uc.companyId"
+                [class.border-indigo-600]="companyFilter() === uc.companyId"
+                [class.bg-white]="companyFilter() !== uc.companyId"
+                [class.text-[--text-secondary]]="companyFilter() !== uc.companyId"
+                [class.border-slate-200]="companyFilter() !== uc.companyId">
+          <span class="material-symbols-rounded text-sm">corporate_fare</span>
+          {{ uc.company.name }}
+          <span class="ml-0.5 opacity-70">
+            ({{ projectCountFor(uc.companyId) }})
+          </span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="ag-skeleton h-52 rounded-2xl"></div>
+      }
+    </div>
+  }
+
+  <!-- Grid View -->
+  @else if (viewMode() === 'grid') {
+    @if (projects().length === 0) {
+      <div class="ag-empty">
+        <span class="material-symbols-rounded ag-empty__icon">folder_open</span>
+        <p class="ag-empty__title">Nenhum projeto encontrado</p>
+        <p class="ag-empty__desc">Crie seu primeiro projeto para começar a organizar suas tarefas</p>
+        <button (click)="openCreateModal()" class="ag-btn ag-btn--primary">
+          <span class="material-symbols-rounded">add</span>
+          Criar Projeto
+        </button>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (project of projects(); track project.id) {
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:shadow-[0px_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col group relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1" [style.background]="project.color"></div>
+
+            <div class="p-6 pt-7 flex flex-col flex-1">
+              <!-- Icon + Menu -->
+              <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                     [style.background]="project.color + '18'">
+                  <span class="material-symbols-rounded text-lg" [style.color]="project.color">
+                    {{ project.icon }}
+                  </span>
+                </div>
+                <button (click)="openSettings(project)"
+                        class="text-slate-400 hover:text-[--text-primary] transition-colors opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:bg-slate-100">
+                  <span class="material-symbols-rounded text-xl">more_horiz</span>
+                </button>
+              </div>
+
+              <!-- Status + Title + Description -->
+              <div class="mb-4 flex-1">
+                <div class="mb-2">
+                  @if (project.isArchived) {
+                    <span class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide uppercase border border-slate-200">
+                      Arquivado
+                    </span>
+                  } @else {
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide uppercase border"
+                          [style.background]="project.color + '15'"
+                          [style.color]="project.color"
+                          [style.border-color]="project.color + '30'">
+                      Em Andamento
+                    </span>
+                  }
+                </div>
+                <h3 class="font-semibold text-base text-[--text-primary] mb-1 group-hover:text-primary-600 transition-colors">
+                  {{ project.name }}
+                </h3>
+                @if (userCompanies().length > 1 && companyFilter() === 'all' && project.company) {
+                  <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full mt-1">
+                    <span class="material-symbols-rounded" style="font-size:11px">corporate_fare</span>
+                    {{ project.company.name }}
+                  </span>
+                }
+                @if (project.description) {
+                  <p class="text-sm text-[--text-secondary] line-clamp-2">{{ project.description }}</p>
+                }
+              </div>
+
+              <!-- Progress -->
+              <div class="mb-6">
+                <div class="flex justify-between text-[11px] font-medium text-[--text-secondary] mb-2">
+                  <span>Progresso</span>
+                  <span [style.color]="project.color">{{ Math.min(100, (project._count?.tasks || 0) * 10) }}%</span>
+                </div>
+                <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500"
+                       [style.background]="project.color"
+                       [style.width.%]="Math.min(100, (project._count?.tasks || 0) * 10)"></div>
+                </div>
+              </div>
+
+              <!-- Footer: avatars + link -->
+              <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <div class="flex -space-x-2">
+                  @for (m of (project.members || []).slice(0, 3); track m.id) {
+                    <div class="w-8 h-8 rounded-full border-2 border-white overflow-hidden flex items-center justify-center text-[10px] font-bold text-white"
+                         [style.background]="project.color"
+                         [title]="m.user.name">
+                      @if (m.user.avatarUrl) {
+                        <img [src]="m.user.avatarUrl" [alt]="m.user.name" class="w-full h-full object-cover" />
+                      } @else {
+                        {{ m.user.name.charAt(0).toUpperCase() }}
+                      }
+                    </div>
+                  }
+                  @if ((project._count?.members ?? 0) > 3) {
+                    <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[10px] font-semibold text-[--text-secondary]">
+                      +{{ (project._count?.members ?? 0) - 3 }}
+                    </div>
+                  }
+                </div>
+                <div class="flex items-center gap-2">
+                  <a [routerLink]="['/projects', project.id, 'time-report']"
+                     class="text-sm font-medium text-[--text-secondary] hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                    <span class="material-symbols-rounded text-base">schedule</span>
+                    Tempo
+                  </a>
+                  <a [routerLink]="['/projects', project.id, 'gantt']"
+                     class="text-sm font-medium text-[--text-secondary] hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                    <span class="material-symbols-rounded text-base">account_tree</span>
+                    Gantt
+                  </a>
+                  <a [routerLink]="['/projects', project.id, 'list']"
+                     class="text-sm font-medium text-[--text-secondary] hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                    <span class="material-symbols-rounded text-base">table_rows</span>
+                    Lista
+                  </a>
+                  <a [routerLink]="['/projects', project.id, 'kanban']"
+                     class="text-sm font-semibold text-primary-600 hover:bg-primary-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                    <span class="material-symbols-rounded text-base">view_kanban</span>
+                    Kanban
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- List View -->
+  @else {
+    <div class="ag-card overflow-hidden">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-slate-100 bg-slate-50">
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary]">Projeto</th>
+            @if (userCompanies().length > 1) {
+              <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] hidden lg:table-cell">Empresa</th>
+            }
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] hidden md:table-cell">Equipe</th>
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] hidden sm:table-cell">Tarefas</th>
+            <th class="px-4 py-3 text-left font-semibold text-[--text-secondary]">Status</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (project of projects(); track project.id) {
+            <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
+              <td class="px-4 py-3.5">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                       [style.background]="project.color + '18'">
+                    <span class="material-symbols-rounded text-base" [style.color]="project.color">{{ project.icon }}</span>
+                  </div>
+                  <div>
+                    <p class="font-medium text-[--text-primary]">{{ project.name }}</p>
+                    @if (project.description) {
+                      <p class="text-xs text-[--text-tertiary] truncate max-w-xs">{{ project.description }}</p>
+                    }
+                  </div>
+                </div>
+              </td>
+              @if (userCompanies().length > 1) {
+                <td class="px-4 py-3.5 hidden lg:table-cell">
+                  @if (project.company) {
+                    <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                      <span class="material-symbols-rounded" style="font-size:12px">corporate_fare</span>
+                      {{ project.company.name }}
+                    </span>
+                  }
+                </td>
+              }
+              <td class="px-4 py-3.5 text-[--text-secondary] hidden md:table-cell">{{ project.team?.name || '—' }}</td>
+              <td class="px-4 py-3.5 text-[--text-secondary] hidden sm:table-cell">{{ project._count?.tasks || 0 }} tarefas</td>
+              <td class="px-4 py-3.5">
+                @if (project.isArchived) {
+                  <span class="ag-badge ag-badge--neutral">Arquivado</span>
+                } @else {
+                  <span class="ag-badge ag-badge--success">Ativo</span>
+                }
+              </td>
+              <td class="px-4 py-3.5 text-right">
+                <div class="flex items-center justify-end gap-1.5">
+                  <a [routerLink]="['/projects', project.id, 'gantt']" class="ag-btn ag-btn--ghost ag-btn--sm" title="Gantt">
+                    <span class="material-symbols-rounded text-base">account_tree</span>
+                  </a>
+                  <a [routerLink]="['/projects', project.id, 'list']" class="ag-btn ag-btn--ghost ag-btn--sm" title="Lista">
+                    <span class="material-symbols-rounded text-base">table_rows</span>
+                  </a>
+                  <a [routerLink]="['/projects', project.id, 'kanban']" class="ag-btn ag-btn--ghost ag-btn--sm" title="Kanban">
+                    <span class="material-symbols-rounded text-base">view_kanban</span>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── Archived Section ── -->
+  <div class="border border-slate-200 rounded-2xl overflow-hidden">
+    <!-- Toggle header -->
+    <button (click)="toggleArchived()"
+            class="w-full flex items-center justify-between px-5 py-4 bg-slate-50 hover:bg-slate-100 transition-colors text-left">
+      <div class="flex items-center gap-3">
+        <span class="material-symbols-rounded text-xl"
+              [class.text-[--text-tertiary]]="!archivedError()"
+              [class.text-amber-500]="archivedError()">
+          {{ archivedError() ? 'warning' : 'inventory_2' }}
+        </span>
+        <div>
+          <p class="text-sm font-semibold text-[--text-secondary]">Projetos Arquivados</p>
+          @if (archivedError()) {
+            <p class="text-xs text-amber-500">Erro ao carregar — clique para tentar novamente</p>
+          } @else if (archivedLoaded()) {
+            <p class="text-xs text-[--text-tertiary]">{{ archivedProjects().length }} projeto{{ archivedProjects().length !== 1 ? 's' : '' }} arquivado{{ archivedProjects().length !== 1 ? 's' : '' }}</p>
+          } @else {
+            <p class="text-xs text-[--text-tertiary]">Clique para carregar</p>
+          }
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        @if (archivedLoaded() && showArchived()) {
+          <button (click)="$event.stopPropagation(); loadArchived()"
+                  class="p-1.5 rounded-lg text-[--text-tertiary] hover:bg-slate-200 hover:text-[--text-primary] transition-colors"
+                  title="Recarregar">
+            <span class="material-symbols-rounded text-base">refresh</span>
+          </button>
+        }
+        <span class="material-symbols-rounded text-[--text-tertiary] transition-transform duration-200"
+              [class.rotate-180]="showArchived()">expand_more</span>
+      </div>
+    </button>
+
+    <!-- Content -->
+    @if (showArchived()) {
+      <div class="p-5 border-t border-slate-200">
+
+        @if (loadingArchived()) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for (i of [1,2,3]; track i) {
+              <div class="ag-skeleton h-28 rounded-xl"></div>
+            }
+          </div>
+        } @else if (archivedError()) {
+          <div class="flex flex-col items-center gap-3 py-8 text-[--text-tertiary]">
+            <span class="material-symbols-rounded text-4xl text-amber-200">cloud_off</span>
+            <p class="text-sm">Não foi possível carregar os projetos arquivados.</p>
+            <button (click)="loadArchived()" class="ag-btn ag-btn--secondary ag-btn--sm">
+              <span class="material-symbols-rounded text-base">refresh</span>
+              Tentar novamente
+            </button>
+          </div>
+        } @else if (!archivedProjects().length) {
+          <div class="flex flex-col items-center gap-2 py-8 text-[--text-tertiary]">
+            <span class="material-symbols-rounded text-4xl text-slate-200">inventory_2</span>
+            <p class="text-sm">Nenhum projeto arquivado</p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for (project of archivedProjects(); track project.id) {
+              <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-start gap-3 opacity-75 hover:opacity-100 transition-opacity">
+                <!-- Icon -->
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                     [style.background]="project.color + '18'">
+                  <span class="material-symbols-rounded text-base" [style.color]="project.color">{{ project.icon }}</span>
+                </div>
+                <!-- Info -->
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-[--text-primary] truncate">{{ project.name }}</p>
+                  @if (project.description) {
+                    <p class="text-xs text-[--text-tertiary] truncate">{{ project.description }}</p>
+                  }
+                  <p class="text-xs text-[--text-tertiary] mt-1">{{ project._count?.tasks || 0 }} tarefas</p>
+                </div>
+                <!-- Restore button -->
+                <button (click)="restoreProject(project)"
+                        [disabled]="restoringId() === project.id"
+                        class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-primary-200 text-primary-600 hover:bg-primary-50 transition-colors disabled:opacity-50">
+                  @if (restoringId() === project.id) {
+                    <div class="w-3.5 h-3.5 border-2 border-primary-300 border-t-primary-600 rounded-full animate-spin"></div>
+                  } @else {
+                    <span class="material-symbols-rounded text-base">unarchive</span>
+                  }
+                  Restaurar
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>
+
+<!-- Settings Modal -->
+@if (showSettingsModal() && editingProject()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-6 border-b border-slate-100">
+        <h2 class="text-lg font-bold text-[--text-primary]">Configurações do Projeto</h2>
+        <button (click)="showSettingsModal.set(false)" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="p-6 flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label ag-label--required">Nome do Projeto</label>
+          <input type="text" formControlName="name" class="ag-input" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Descrição</label>
+          <textarea formControlName="description" rows="3" class="ag-input resize-none" placeholder="Descreva o objetivo do projeto..."></textarea>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Cor do Projeto</label>
+          <div class="flex gap-2 flex-wrap">
+            @for (color of projectColors; track color) {
+              <button type="button" (click)="settingsForm.patchValue({ color })"
+                      class="w-7 h-7 rounded-lg border-2 transition-all"
+                      [style.background]="color"
+                      [class.border-slate-800]="settingsForm.get('color')?.value === color"
+                      [class.border-transparent]="settingsForm.get('color')?.value !== color">
+              </button>
+            }
+          </div>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="showSettingsModal.set(false)" class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
+          <button type="submit" [disabled]="updatingProject() || settingsForm.invalid || settingsForm.pristine"
+                  class="flex-1 ag-btn ag-btn--primary justify-center">
+            @if (updatingProject()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            }
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Create Modal -->
+@if (showCreateModal()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-6 border-b border-slate-100">
+        <h2 class="text-lg font-bold text-[--text-primary]">Novo Projeto</h2>
+        <button (click)="showCreateModal.set(false); selectedMemberIds.set([])"
+                class="p-2 rounded-lg text-slate-400 hover:bg-slate-100">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="createForm" (ngSubmit)="createProject()" class="p-6 flex flex-col gap-4">
+
+        <!-- Empresa -->
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label ag-label--required">Empresa</label>
+          @if (userCompanies().length === 1) {
+            <div class="ag-input flex items-center gap-2 bg-slate-50 cursor-default opacity-80">
+              <span class="material-symbols-rounded text-base text-slate-400">corporate_fare</span>
+              <span class="text-sm font-medium text-[--text-primary]">{{ userCompanies()[0].company.name }}</span>
+            </div>
+          } @else {
+            <div class="relative">
+              <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">corporate_fare</span>
+              <select formControlName="companyId"
+                      (change)="onCompanyChange(createForm.get('companyId')!.value ?? '')"
+                      class="ag-input pl-10 pr-8 appearance-none cursor-pointer">
+                <option value="" disabled>Selecione uma empresa...</option>
+                @for (uc of userCompanies(); track uc.companyId) {
+                  <option [value]="uc.companyId">{{ uc.company.name }}</option>
+                }
+              </select>
+              <span class="material-symbols-rounded absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">expand_more</span>
+            </div>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label ag-label--required">Nome do Projeto</label>
+          <input type="text" formControlName="name" placeholder="Ex: Redesign do Site" class="ag-input" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Descrição</label>
+          <textarea formControlName="description" placeholder="Descreva o objetivo do projeto..." class="ag-input resize-none" rows="3"></textarea>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Cor do Projeto</label>
+          <div class="flex gap-2 flex-wrap">
+            @for (color of projectColors; track color) {
+              <button type="button" (click)="createForm.patchValue({ color })"
+                      class="w-7 h-7 rounded-lg border-2 transition-all"
+                      [style.background]="color"
+                      [class.border-slate-800]="createForm.get('color')?.value === color"
+                      [class.border-transparent]="createForm.get('color')?.value !== color">
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Teams -->
+        <div class="flex flex-col gap-2">
+          <label class="ag-label">Equipes <span class="text-[--text-tertiary] font-normal">(opcional)</span></label>
+          @if (!companyTeams().length) {
+            <p class="text-xs text-[--text-tertiary]">Nenhuma equipe criada ainda.</p>
+          } @else {
+            <div class="flex flex-wrap gap-2">
+              @for (team of companyTeams(); track team.id) {
+                <button type="button" (click)="toggleTeam(team.id)"
+                        class="flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all"
+                        [style.border-color]="isTeamSelected(team.id) ? team.color : '#e2e8f0'"
+                        [style.background]="isTeamSelected(team.id) ? (team.color + '18') : 'white'"
+                        [style.color]="isTeamSelected(team.id) ? team.color : '#64748b'">
+                  <span class="w-2 h-2 rounded-full" [style.background]="team.color"></span>
+                  {{ team.name }}
+                  @if (isTeamSelected(team.id)) {
+                    <span class="material-symbols-rounded text-xs">check</span>
+                  }
+                </button>
+              }
+            </div>
+            @if (selectedTeamIds().length > 0) {
+              <p class="text-xs text-primary-600 font-medium">
+                {{ selectedTeamIds().length }} equipe{{ selectedTeamIds().length > 1 ? 's' : '' }} selecionada{{ selectedTeamIds().length > 1 ? 's' : '' }}
+              </p>
+            }
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="ag-label">Membros da equipe</label>
+          @if (loadingMembers()) {
+            <div class="flex gap-2">
+              @for (i of [1,2,3]; track i) {
+                <div class="ag-skeleton w-8 h-8 rounded-full"></div>
+              }
+            </div>
+          } @else if (companyMembers().length === 0) {
+            <p class="text-xs text-[--text-tertiary]">Nenhum membro encontrado na empresa.</p>
+          } @else {
+            <div class="flex flex-wrap gap-2">
+              @for (member of companyMembers(); track member.id) {
+                <button type="button" (click)="toggleMember(member.id)"
+                        class="relative flex flex-col items-center gap-1 group"
+                        [title]="member.name">
+                  <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150"
+                       [style.background]="isMemberSelected(member.id) ? '#6366f1' : '#e5e7eb'"
+                       [style.color]="isMemberSelected(member.id) ? 'white' : '#6b7280'"
+                       [style.box-shadow]="isMemberSelected(member.id) ? '0 0 0 2px #fff, 0 0 0 4px #6366f1' : 'none'">
+                    @if (member.avatarUrl) {
+                      <img [src]="member.avatarUrl" [alt]="member.name"
+                           class="w-full h-full rounded-full object-cover"
+                           [style.opacity]="isMemberSelected(member.id) ? '1' : '0.6'" />
+                    } @else {
+                      {{ member.name.charAt(0).toUpperCase() }}
+                    }
+                  </div>
+                  <span class="text-[10px] text-[--text-tertiary] max-w-[44px] truncate leading-none">
+                    {{ member.name.split(' ')[0] }}
+                  </span>
+                  @if (isMemberSelected(member.id)) {
+                    <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary-500 rounded-full flex items-center justify-center">
+                      <span class="material-symbols-rounded text-white" style="font-size: 10px;">check</span>
+                    </span>
+                  }
+                </button>
+              }
+            </div>
+            @if (selectedMemberIds().length > 0) {
+              <p class="text-xs text-primary-600 font-medium mt-1">
+                {{ selectedMemberIds().length }} membro{{ selectedMemberIds().length > 1 ? 's' : '' }} selecionado{{ selectedMemberIds().length > 1 ? 's' : '' }}
+              </p>
+            }
+          }
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="showCreateModal.set(false)" class="flex-1 ag-btn ag-btn--secondary justify-center">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="creating() || createForm.invalid" class="flex-1 ag-btn ag-btn--primary justify-center">
+            @if (creating()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            }
+            Criar Projeto
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
