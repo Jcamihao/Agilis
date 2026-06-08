@@ -1,0 +1,1600 @@
+<!-- ═══════ BOARD ═══════ -->
+<div class="flex flex-col" style="height: calc(100vh - 8rem)">
+  <!-- Page Header -->
+  <div class="flex items-end justify-between mb-5 flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <a
+        routerLink="/projects"
+        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white hover:text-[--text-secondary] transition-colors"
+      >
+        <span class="material-symbols-rounded text-xl">arrow_back</span>
+      </a>
+      <div>
+        <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight">
+          Minhas Tarefas
+        </h2>
+        @if (project()) {
+          <p class="text-sm text-[--text-secondary] mt-0.5">
+            Visualize e organize suas demandas do Sprint atual.
+          </p>
+        }
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Member avatars -->
+      <div class="hidden sm:flex -space-x-2">
+        @for (col of columns(); track col.key; let i = $index) {
+          @if (i < 3 && col.tasks[0]?.assignee) {
+            <div
+              class="w-8 h-8 rounded-full border-2 border-white bg-primary-100 flex items-center justify-center text-xs font-bold text-primary-700"
+              [title]="col.tasks[0].assignee!.name"
+            >
+              {{ col.tasks[0].assignee!.name.charAt(0) }}
+            </div>
+          }
+        }
+        <div
+          class="w-8 h-8 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-500"
+        >
+          +3
+        </div>
+      </div>
+      <!-- View toggle -->
+      <div class="flex items-center bg-white border border-[rgba(0,0,0,0.08)] rounded-xl overflow-hidden shadow-sm">
+        <button class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold bg-primary-50 text-primary-600 cursor-default">
+          <span class="material-symbols-rounded text-base">view_kanban</span>
+          Kanban
+        </button>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'list']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">table_rows</span>
+          Lista
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'gantt']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">account_tree</span>
+          Gantt
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'time-report']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">schedule</span>
+          Tempo
+        </a>
+      </div>
+
+      <button (click)="openCreate()" class="ag-btn ag-btn--primary flex items-center gap-2">
+        <span class="material-symbols-rounded text-base">add</span>
+        Nova Tarefa
+      </button>
+      <button (click)="openSprintModal()" class="ag-btn ag-btn--secondary flex items-center gap-2">
+        <span class="material-symbols-rounded text-base">sprint</span>
+        Nova Sprint
+      </button>
+      <button (click)="openConfig()" class="ag-btn ag-btn--secondary flex items-center gap-2">
+        <span class="material-symbols-rounded text-base">settings</span>
+        Configurar
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div
+    class="flex items-center gap-3 bg-white rounded-xl border border-[rgba(0,0,0,0.08)] p-2 mb-5 flex-shrink-0 shadow-sm"
+  >
+    <div class="flex-1 relative">
+      <span
+        class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
+        >search</span
+      >
+      <input
+        type="text"
+        placeholder="Buscar tarefas..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        class="w-full bg-transparent border-none outline-none text-sm text-[--text-primary] pl-10 py-2 placeholder-slate-400"
+      />
+    </div>
+    <div class="w-px h-6 bg-slate-100"></div>
+    <div class="relative flex items-center">
+      <span class="material-symbols-rounded absolute left-2.5 text-base pointer-events-none"
+            [class.text-primary-600]="selectedSprintId()"
+            [class.text-slate-400]="!selectedSprintId()">sprint</span>
+      <select
+        [value]="selectedSprintId()"
+        (change)="selectedSprintId.set($any($event.target).value)"
+        class="appearance-none pl-8 pr-6 py-1.5 text-sm font-medium rounded-lg border-none bg-transparent cursor-pointer outline-none transition-colors"
+        [class.text-primary-600]="selectedSprintId()"
+        [class.bg-primary-50]="selectedSprintId()"
+        [class.text-[--text-secondary]]="!selectedSprintId()"
+      >
+        <option value="">Todos</option>
+        @for (s of sprints(); track s.id) {
+          <option [value]="s.id">{{ s.name }}</option>
+        }
+      </select>
+      <span class="material-symbols-rounded absolute right-0.5 text-sm pointer-events-none text-slate-400">expand_more</span>
+    </div>
+    <div class="w-px h-6 bg-slate-100"></div>
+    <button
+      (click)="filterBy('member')"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-slate-50 text-[--text-secondary] text-sm font-medium transition-colors"
+      [class.bg-primary-50]="activeFilter() === 'member'"
+      [class.text-primary-600]="activeFilter() === 'member'"
+    >
+      <span class="material-symbols-rounded text-base">person</span>
+      Membro
+    </button>
+    <button
+      (click)="filterBy('label')"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-slate-50 text-[--text-secondary] text-sm font-medium transition-colors"
+      [class.bg-primary-50]="activeFilter() === 'label'"
+      [class.text-primary-600]="activeFilter() === 'label'"
+    >
+      <span class="material-symbols-rounded text-base">sell</span>
+      Label
+    </button>
+    <button
+      (click)="filterBy('more')"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium"
+      [class.bg-slate-100]="activeFilter() !== 'more'"
+      [class.bg-primary-50]="activeFilter() === 'more'"
+      [class.text-primary-600]="activeFilter() === 'more'"
+      [class.text-[--text-secondary]]="activeFilter() !== 'more'"
+    >
+      <span class="material-symbols-rounded text-base">filter_list</span>
+      Mais Filtros
+    </button>
+  </div>
+
+  <!-- Columns -->
+  @if (loading()) {
+    <div class="flex gap-5 overflow-x-auto pb-4">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="flex-shrink-0 w-80 ag-skeleton h-[28rem] rounded-xl"></div>
+      }
+    </div>
+  } @else {
+    <div class="flex gap-5 overflow-x-auto pb-4 flex-1 min-h-0">
+      @for (column of columns(); track column.key) {
+        <div
+          class="kanban-col flex-shrink-0 w-80 flex flex-col h-full max-h-full"
+        >
+          <!-- Column header -->
+          <div class="flex items-center justify-between mb-3 px-1">
+            <div class="flex items-center gap-2">
+              <div
+                class="w-3 h-3 rounded-full flex-shrink-0"
+                [style.background]="column.color"
+              ></div>
+              <h3 class="text-[15px] font-bold text-[--text-primary]">
+                {{ column.label }}
+              </h3>
+              <span
+                class="px-2 py-0.5 rounded-full text-xs font-semibold"
+                [style.background]="column.color + '18'"
+                [style.color]="column.color"
+              >
+                {{ filteredTasks(column).length }}
+              </span>
+            </div>
+            <button
+              (click)="openCreate(column.key)"
+              class="text-slate-400 hover:text-[--text-primary] transition-colors"
+            >
+              <span class="material-symbols-rounded text-base">more_horiz</span>
+            </button>
+          </div>
+
+          <!-- Drop zone -->
+          <div
+            class="drop-zone flex-1 bg-slate-50 rounded-xl p-2 overflow-y-auto flex flex-col gap-3 min-h-[120px] transition-colors"
+            [id]="column.key"
+            [class.opacity-70]="column.key === 'DONE'"
+            cdkDropList
+            [cdkDropListData]="column.tasks"
+            [cdkDropListConnectedTo]="connectedLists"
+            (cdkDropListDropped)="onDrop($event, column.key)"
+          >
+            @for (task of filteredTasks(column); track task.id) {
+              <!-- Task card -->
+              <div
+                cdkDrag
+                [cdkDragData]="task"
+                (cdkDragStarted)="onDragStart()"
+                (cdkDragEnded)="onDragEnd()"
+                (click)="openDetailWithSubtasks(task)"
+                class="task-card bg-white rounded-xl p-4 border border-[rgba(0,0,0,0.07)] cursor-pointer select-none transition-all duration-150 group relative"
+                [class.border-primary-200]="column.key === 'IN_PROGRESS'"
+                [class.opacity-80]="column.key === 'DONE'"
+              >
+                <!-- Drag handle -->
+                <div
+                  cdkDragHandle
+                  (click)="$event.stopPropagation()"
+                  class="drag-indicator absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab text-slate-300"
+                >
+                  <span class="material-symbols-rounded text-base"
+                    >drag_indicator</span
+                  >
+                </div>
+
+                <!-- CDK placeholder ghost -->
+                <div
+                  *cdkDragPlaceholder
+                  class="bg-primary-50 border-2 border-dashed border-primary-200 rounded-xl min-h-[100px]"
+                ></div>
+
+                <!-- Top row: priority + sprint + done -->
+                <div class="flex items-center gap-1.5 mb-2.5 flex-wrap">
+                  <span
+                    class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
+                    [style.background]="priorityCfg(task.priority).color + '1a'"
+                    [style.color]="priorityCfg(task.priority).color"
+                  >
+                    <span class="material-symbols-rounded text-[11px]">{{ priorityCfg(task.priority).icon }}</span>
+                    {{ priorityCfg(task.priority).label }}
+                  </span>
+                  @if (task.sprint) {
+                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-violet-50 text-violet-600 border border-violet-100">
+                      <span class="material-symbols-rounded text-[11px]">sprint</span>
+                      {{ task.sprint.name }}
+                    </span>
+                  }
+                  @if (column.key === 'DONE') {
+                    <span class="material-symbols-rounded text-emerald-500 text-base ml-auto">check_circle</span>
+                  }
+                  @if (isBlocked(task)) {
+                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-50 text-red-500 border border-red-100 ml-auto">
+                      <span class="material-symbols-rounded text-[11px]">block</span>
+                      Bloqueada
+                    </span>
+                  }
+                </div>
+
+                <!-- Title -->
+                <p
+                  class="text-sm font-semibold text-[--text-primary] leading-snug mb-3 pr-5"
+                  [class.line-through]="column.key === 'DONE'"
+                  [class.text-slate-400]="column.key === 'DONE'"
+                  style="-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden"
+                >
+                  {{ task.title }}
+                </p>
+
+                <!-- Assignee row -->
+                <div class="flex items-center gap-2 mb-2.5">
+                  @if (task.assignee) {
+                    <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 overflow-hidden">
+                      @if (task.assignee.avatarUrl) {
+                        <img [src]="task.assignee.avatarUrl" class="w-full h-full object-cover" />
+                      } @else {
+                        {{ task.assignee.name.charAt(0) }}
+                      }
+                    </div>
+                    <span class="text-xs text-slate-500 font-medium truncate">{{ task.assignee.name }}</span>
+                  } @else {
+                    <span class="material-symbols-rounded text-slate-300 text-base">person_outline</span>
+                    <span class="text-xs text-slate-300 italic">Sem responsável</span>
+                  }
+                </div>
+
+                <!-- Footer: metadata + delete -->
+                <div class="flex items-center justify-between pt-2 border-t border-slate-50">
+                  <div class="flex items-center gap-2.5 flex-wrap">
+                    @if (task.dueDate) {
+                      <div class="flex items-center gap-0.5 text-[11px] font-medium"
+                           [class.text-red-500]="isOverdue(task.dueDate)"
+                           [class.text-slate-400]="!isOverdue(task.dueDate)">
+                        <span class="material-symbols-rounded text-sm">{{ isOverdue(task.dueDate) ? 'event_busy' : 'calendar_today' }}</span>
+                        {{ isOverdue(task.dueDate) ? 'Atrasada' : formatDate(task.dueDate) }}
+                      </div>
+                    } @else {
+                      <div class="flex items-center gap-0.5 text-[11px] font-medium text-slate-300">
+                        <span class="material-symbols-rounded text-sm">calendar_today</span>
+                        Sem data de entrega
+                      </div>
+                    }
+                    @if (task._count?.comments) {
+                      <div class="flex items-center gap-0.5 text-[11px] text-slate-400">
+                        <span class="material-symbols-rounded text-sm">chat_bubble_outline</span>
+                        {{ task._count!.comments }}
+                      </div>
+                    }
+                    @if (subtaskCount(task) > 0) {
+                      <div class="flex items-center gap-0.5 text-[11px] text-slate-400">
+                        <span class="material-symbols-rounded text-sm">checklist</span>
+                        {{ subtaskCount(task) }}
+                      </div>
+                    }
+                    @if (task._count?.timeEntries) {
+                      <div class="flex items-center gap-0.5 text-[11px] text-slate-400">
+                        <span class="material-symbols-rounded text-sm">schedule</span>
+                        {{ task._count!.timeEntries }}
+                      </div>
+                    }
+                  </div>
+                  <button
+                    (click)="$event.stopPropagation(); deleteTask(task)"
+                    class="opacity-0 group-hover:opacity-100 p-1 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
+                  >
+                    <span class="material-symbols-rounded text-sm">delete</span>
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Empty state -->
+            @if (filteredTasks(column).length === 0) {
+              <div
+                class="flex flex-col items-center justify-center py-10 opacity-40 pointer-events-none"
+              >
+                <span
+                  class="material-symbols-rounded text-4xl text-slate-300"
+                  >{{ column.icon }}</span
+                >
+                <p class="text-xs text-[--text-tertiary] mt-2">
+                  Arraste uma tarefa aqui
+                </p>
+              </div>
+            }
+          </div>
+
+          <!-- Nova Tarefa inline -->
+          <button
+            (click)="openCreate(column.key)"
+            class="mt-3 flex items-center justify-center gap-2 text-[--text-tertiary] hover:text-[--text-primary] text-sm font-medium px-2 py-2 hover:bg-slate-100 rounded-xl w-full transition-colors"
+          >
+            <span class="material-symbols-rounded text-base">add</span>
+            Nova Tarefa
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- ═══════ TASK DETAIL MODAL ═══════ -->
+@if (detailTask()) {
+  <div
+    (click)="closeDetail()"
+    class="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50 animate-fade-in"
+  ></div>
+
+  <div
+    class="fixed inset-y-0 right-0 z-50 flex w-full max-w-7xl shadow-2xl animate-slide-in-right"
+  >
+    <div class="flex flex-col flex-1 bg-white overflow-hidden rounded-l-2xl">
+      <!-- Modal header -->
+      <div
+        class="flex items-center justify-between px-6 py-4 border-b border-b-[rgba(0,0,0,0.07)] flex-shrink-0"
+      >
+        <div
+          class="flex items-center gap-2 text-sm text-[--text-tertiary] min-w-0"
+        >
+          @if (project()) {
+            <div class="flex items-center gap-1.5">
+              <div
+                class="w-4 h-4 rounded flex-shrink-0"
+                [style.background]="project()!.color"
+              ></div>
+              <span class="truncate">{{ project()!.name }}</span>
+            </div>
+            <span class="material-symbols-rounded text-base"
+              >chevron_right</span
+            >
+          }
+          <span class="text-[--text-secondary] font-medium truncate">{{
+            detailTask()!.title
+          }}</span>
+        </div>
+        <button
+          (click)="closeDetail()"
+          class="p-2 rounded-lg text-[--text-tertiary] hover:bg-[#F5F5F5] hover:text-[--text-secondary] transition-colors"
+        >
+          <span class="material-symbols-rounded text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="flex flex-1 min-h-0 overflow-hidden">
+        <!-- LEFT: main content -->
+        <div class="flex-1 overflow-y-auto px-8 py-6 space-y-6 min-w-0">
+          <!-- Title -->
+          @if (editingTitle()) {
+            <input
+              [formControl]="titleControl"
+              (blur)="saveTitle()"
+              (keydown.enter)="saveTitle()"
+              (keydown.escape)="cancelTitle()"
+              class="ag-input text-xl font-bold w-full"
+              autofocus
+            />
+          } @else {
+            <h2
+              (click)="startEditTitle()"
+              class="text-xl font-bold text-slate-900 leading-snug cursor-text hover:bg-[#F5F5F5] rounded-lg px-2 py-1 -mx-2 transition-colors group"
+            >
+              {{ detailTask()!.title }}
+              <span
+                class="material-symbols-rounded text-sm text-slate-300 opacity-0 group-hover:opacity-100 ml-2"
+                >edit</span
+              >
+            </h2>
+          }
+
+          <!-- Description -->
+          <div>
+            <h3
+              class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2"
+            >
+              Descrição
+            </h3>
+            @if (editingDesc()) {
+              <div>
+                <textarea
+                  [formControl]="descControl"
+                  rows="4"
+                  class="ag-input resize-none w-full text-sm"
+                  placeholder="Adicione uma descrição..."
+                ></textarea>
+                <div class="flex gap-2 mt-2">
+                  <button
+                    (click)="saveDesc()"
+                    class="ag-btn ag-btn--primary ag-btn--sm"
+                  >
+                    Salvar
+                  </button>
+                  <button
+                    (click)="cancelDesc()"
+                    class="ag-btn ag-btn--ghost ag-btn--sm"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div
+                (click)="startEditDesc()"
+                class="min-h-[60px] px-3 py-2 rounded-lg text-sm text-[--text-secondary] leading-relaxed cursor-text hover:bg-[#F5F5F5] transition-colors group"
+              >
+                @if (detailTask()!.description) {
+                  <span class="whitespace-pre-wrap">{{
+                    detailTask()!.description
+                  }}</span>
+                } @else {
+                  <span class="text-[--text-tertiary] italic"
+                    >Adicione uma descrição... (clique para editar)</span
+                  >
+                }
+                <span
+                  class="material-symbols-rounded text-xs text-slate-300 opacity-0 group-hover:opacity-100 ml-2"
+                  >edit</span
+                >
+              </div>
+            }
+          </div>
+
+          <div class="border-t border-[rgba(0,0,0,0.08)]"></div>
+
+          <!-- Subtasks -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider">
+                Subtarefas
+                @if (subtasks().length > 0) {
+                  <span class="ml-1.5 text-[--text-tertiary] normal-case font-normal">
+                    {{ subtasks().filter(s => s.status === 'DONE').length }}/{{ subtasks().length }}
+                  </span>
+                }
+              </h3>
+            </div>
+
+            @if (subtasks().length > 0) {
+              <!-- Progress bar -->
+              <div class="h-1.5 bg-slate-100 rounded-full mb-3 overflow-hidden">
+                <div
+                  class="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                  [style.width.%]="subtaskProgress()"
+                ></div>
+              </div>
+
+              <!-- Subtask list -->
+              <div class="space-y-1 mb-3">
+                @for (sub of subtasks(); track sub.id) {
+                  <div class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 group/sub">
+                    <button
+                      (click)="toggleSubtaskDone(sub)"
+                      class="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                      [class.border-emerald-500]="sub.status === 'DONE'"
+                      [class.bg-emerald-500]="sub.status === 'DONE'"
+                      [class.border-slate-300]="sub.status !== 'DONE'"
+                    >
+                      @if (sub.status === 'DONE') {
+                        <span class="material-symbols-rounded text-white text-[10px]">check</span>
+                      }
+                    </button>
+                    <span
+                      class="flex-1 text-sm text-[--text-secondary] min-w-0 truncate"
+                      [class.line-through]="sub.status === 'DONE'"
+                      [class.text-slate-400]="sub.status === 'DONE'"
+                    >{{ sub.title }}</span>
+                    @if (sub.assignee) {
+                      <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 overflow-hidden">
+                        @if (sub.assignee.avatarUrl) {
+                          <img [src]="sub.assignee.avatarUrl" class="w-full h-full object-cover" />
+                        } @else {
+                          {{ sub.assignee.name.charAt(0) }}
+                        }
+                      </div>
+                    }
+                    <button
+                      (click)="removeSubtask(sub)"
+                      class="opacity-0 group-hover/sub:opacity-100 p-0.5 rounded text-slate-300 hover:text-red-500 transition-all flex-shrink-0"
+                    >
+                      <span class="material-symbols-rounded text-sm">close</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (subtasksLoading()) {
+              <div class="space-y-2 mb-3">
+                @for (i of [1,2]; track i) {
+                  <div class="h-8 bg-slate-100 rounded-lg ag-skeleton"></div>
+                }
+              </div>
+            }
+
+            <!-- Add subtask input -->
+            <div class="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Adicionar subtarefa..."
+                class="ag-input ag-input--sm flex-1 text-sm"
+                [value]="newSubtaskTitle()"
+                (input)="newSubtaskTitle.set($any($event.target).value)"
+                (keydown.enter)="addSubtask()"
+                (keydown.escape)="newSubtaskTitle.set('')"
+              />
+              <button
+                (click)="addSubtask()"
+                [disabled]="!newSubtaskTitle().trim() || creatingSubtask()"
+                class="ag-btn ag-btn--primary ag-btn--sm"
+              >
+                <span class="material-symbols-rounded text-sm">add</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Blocked-by section -->
+          @if (dependencies().blockedBy.length > 0) {
+            <div>
+              <h3 class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2">
+                Bloqueada por
+              </h3>
+              <div class="space-y-1.5">
+                @for (dep of dependencies().blockedBy; track dep.id) {
+                  <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 border border-red-100">
+                    <span class="material-symbols-rounded text-red-400 text-base">block</span>
+                    <span class="flex-1 text-sm text-red-700 font-medium truncate">{{ dep.dependsOn.title }}</span>
+                    <span
+                      class="text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase"
+                      [class.bg-emerald-100]="dep.dependsOn.status === 'DONE'"
+                      [class.text-emerald-700]="dep.dependsOn.status === 'DONE'"
+                      [class.bg-orange-100]="dep.dependsOn.status !== 'DONE'"
+                      [class.text-orange-700]="dep.dependsOn.status !== 'DONE'"
+                    >{{ dep.dependsOn.status === 'DONE' ? 'Concluída' : 'Pendente' }}</span>
+                    <button
+                      (click)="tasksService.removeDependency(detailTask()!.id, dep.dependsOnId).subscribe({ next: () => loadDependencies(detailTask()!.id) })"
+                      class="text-red-300 hover:text-red-600 transition-colors"
+                    >
+                      <span class="material-symbols-rounded text-sm">close</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="border-t border-[rgba(0,0,0,0.08)]"></div>
+
+          <!-- Time Tracker -->
+          <ag-time-tracker [taskId]="detailTask()!.id" />
+
+          <div class="border-t border-[rgba(0,0,0,0.08)]"></div>
+
+          <!-- Comments -->
+          <ag-comment-section [taskId]="detailTask()!.id" />
+        </div>
+
+        <!-- RIGHT: sidebar -->
+        <div
+          class="w-[296px] flex-shrink-0 border-l border-[rgba(0,0,0,0.08)] overflow-y-auto px-5 py-6 space-y-5 bg-[#fafafa]"
+        >
+          <!-- Status -->
+          <div>
+            <p
+              class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2"
+            >
+              Status
+            </p>
+            <select
+              [value]="detailTask()!.status"
+              (change)="updateStatus($event)"
+              class="w-full ag-input text-sm py-2 font-medium"
+              [style.color]="STATUS_CONFIG[detailTask()!.status].color"
+              [style.border-color]="
+                STATUS_CONFIG[detailTask()!.status].color + '50'
+              "
+              [style.background]="
+                STATUS_CONFIG[detailTask()!.status].color + '10'
+              "
+            >
+              @for (s of statusOptions; track s.key) {
+                <option [value]="s.key">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Priority -->
+          <div>
+            <p
+              class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2"
+            >
+              Prioridade
+            </p>
+            <select
+              [value]="detailTask()!.priority"
+              (change)="updatePriority($event)"
+              class="w-full ag-input text-sm py-2 font-medium"
+              [style.color]="PRIORITY_CONFIG[detailTask()!.priority].color"
+              [style.border-color]="
+                PRIORITY_CONFIG[detailTask()!.priority].color + '50'
+              "
+              [style.background]="
+                PRIORITY_CONFIG[detailTask()!.priority].color + '10'
+              "
+            >
+              @for (p of priorityOptions; track p.key) {
+                <option [value]="p.key">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Assignee -->
+          <div class="relative">
+            <p
+              class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2"
+            >
+              Responsável
+            </p>
+            <button
+              (click)="toggleAssigneePicker()"
+              class="w-full flex items-center gap-2.5 p-2.5 bg-white rounded-xl border border-[rgba(0,0,0,0.08)] hover:border-primary-300 hover:bg-primary-50/30 transition-colors group text-left"
+            >
+              @if (detailTask()!.assignee) {
+                <div class="ag-avatar ag-avatar--md flex-shrink-0">
+                  @if (detailTask()!.assignee!.avatarUrl) {
+                    <img
+                      [src]="detailTask()!.assignee!.avatarUrl"
+                      class="w-full h-full rounded-full object-cover"
+                    />
+                  } @else {
+                    {{ detailTask()!.assignee!.name.charAt(0) }}
+                  }
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p
+                    class="text-sm font-semibold text-[--text-primary] truncate"
+                  >
+                    {{ detailTask()!.assignee!.name }}
+                  </p>
+                  <p class="text-xs text-[--text-tertiary]">
+                    Clique para alterar
+                  </p>
+                </div>
+              } @else {
+                <span
+                  class="material-symbols-rounded text-lg text-[--text-tertiary]"
+                  >person_add</span
+                >
+                <span class="text-sm text-[--text-tertiary]"
+                  >Atribuir responsável</span
+                >
+              }
+              <span
+                class="material-symbols-rounded text-sm text-[--text-tertiary] opacity-0 group-hover:opacity-100 ml-auto"
+                >edit</span
+              >
+            </button>
+
+            @if (showAssigneePicker()) {
+              <div
+                class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-20 overflow-hidden animate-scale-in"
+              >
+                <div class="p-2 border-b border-slate-100">
+                  <p
+                    class="text-xs font-semibold text-[--text-secondary] px-2 py-1"
+                  >
+                    Selecionar responsável
+                  </p>
+                </div>
+                <div class="max-h-48 overflow-y-auto">
+                  @if (detailTask()!.assignee) {
+                    <button
+                      (click)="removeAssignee()"
+                      class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-red-50 text-left transition-colors"
+                    >
+                      <span
+                        class="material-symbols-rounded text-base text-red-400"
+                        >person_remove</span
+                      >
+                      <span class="text-sm text-red-500 font-medium"
+                        >Remover responsável</span
+                      >
+                    </button>
+                  }
+                  @for (m of companyMembers(); track m.id) {
+                    <button
+                      (click)="selectAssignee(m)"
+                      class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 text-left transition-colors"
+                      [class.bg-primary-50]="
+                        detailTask()!.assignee?.id === m.id
+                      "
+                    >
+                      <div class="ag-avatar ag-avatar--sm flex-shrink-0">
+                        @if (m.avatarUrl) {
+                          <img
+                            [src]="m.avatarUrl"
+                            class="w-full h-full rounded-full object-cover"
+                          />
+                        } @else {
+                          {{ m.name.charAt(0) }}
+                        }
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p
+                          class="text-sm font-medium text-[--text-primary] truncate"
+                        >
+                          {{ m.name }}
+                        </p>
+                        <p class="text-xs text-[--text-tertiary] truncate">
+                          {{ m.email }}
+                        </p>
+                      </div>
+                      @if (detailTask()!.assignee?.id === m.id) {
+                        <span
+                          class="material-symbols-rounded text-sm text-primary-600"
+                          >check</span
+                        >
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Co-participantes -->
+          <div class="relative">
+            <p
+              class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2"
+            >
+              Co-participantes
+            </p>
+
+            @if (participantsOf().length > 0) {
+              <div class="flex flex-col gap-1.5 mb-2">
+                @for (p of participantsOf(); track p.id) {
+                  <div
+                    class="flex items-center gap-2 p-2 bg-white rounded-lg border border-[rgba(0,0,0,0.06)] group"
+                  >
+                    <div class="ag-avatar ag-avatar--sm flex-shrink-0">
+                      @if (p.user?.avatarUrl) {
+                        <img
+                          [src]="p.user.avatarUrl"
+                          class="w-full h-full rounded-full object-cover"
+                        />
+                      } @else {
+                        {{ p.user?.name?.charAt(0) ?? '?' }}
+                      }
+                    </div>
+                    <span
+                      class="text-sm text-[--text-primary] truncate flex-1"
+                      >{{ p.user?.name }}</span
+                    >
+                    <button
+                      (click)="removeParticipant(p.userId)"
+                      class="opacity-0 group-hover:opacity-100 text-[--text-tertiary] hover:text-red-500 transition-all"
+                    >
+                      <span class="material-symbols-rounded text-sm"
+                        >close</span
+                      >
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <button
+              (click)="toggleParticipantPicker()"
+              class="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-[rgba(0,0,0,0.08)] text-[--text-tertiary] hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50/30 transition-colors text-sm"
+            >
+              <span class="material-symbols-rounded text-base">group_add</span>
+              Adicionar participante
+            </button>
+
+            @if (showParticipantPicker()) {
+              <div
+                class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-20 overflow-hidden animate-scale-in"
+              >
+                <div class="p-2 border-b border-slate-100">
+                  <p
+                    class="text-xs font-semibold text-[--text-secondary] px-2 py-1"
+                  >
+                    Adicionar participante
+                  </p>
+                </div>
+                <div class="max-h-48 overflow-y-auto">
+                  @if (!availableMembersForParticipant().length) {
+                    <p
+                      class="text-sm text-[--text-tertiary] px-3 py-3 text-center"
+                    >
+                      Todos os membros já foram adicionados
+                    </p>
+                  } @else {
+                    @for (m of availableMembersForParticipant(); track m.id) {
+                      <button
+                        (click)="addParticipant(m)"
+                        class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 text-left transition-colors"
+                      >
+                        <div class="ag-avatar ag-avatar--sm flex-shrink-0">
+                          @if (m.avatarUrl) {
+                            <img
+                              [src]="m.avatarUrl"
+                              class="w-full h-full rounded-full object-cover"
+                            />
+                          } @else {
+                            {{ m.name.charAt(0) }}
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p
+                            class="text-sm font-medium text-[--text-primary] truncate"
+                          >
+                            {{ m.name }}
+                          </p>
+                          <p class="text-xs text-[--text-tertiary] truncate">
+                            {{ m.email }}
+                          </p>
+                        </div>
+                        <span
+                          class="material-symbols-rounded text-base text-[--text-tertiary]"
+                          >add</span
+                        >
+                      </button>
+                    }
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Due Date -->
+          <div>
+            <p
+              class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2"
+            >
+              Data de Entrega
+            </p>
+            <div
+              class="p-3 bg-white rounded-xl border border-[rgba(0,0,0,0.08)]"
+              [class.border-red-200]="
+                detailTask()!.dueDate && isOverdue(detailTask()!.dueDate!)
+              "
+              [class.bg-red-50]="
+                detailTask()!.dueDate && isOverdue(detailTask()!.dueDate!)
+              "
+            >
+              @if (detailTask()!.dueDate) {
+                <div class="flex items-center gap-2">
+                  <span
+                    class="material-symbols-rounded text-base flex-shrink-0"
+                    [class.text-red-500]="isOverdue(detailTask()!.dueDate!)"
+                    [class.text-slate-400]="!isOverdue(detailTask()!.dueDate!)"
+                    >event</span
+                  >
+                  <div>
+                    <p
+                      class="text-sm font-semibold"
+                      [class.text-red-600]="isOverdue(detailTask()!.dueDate!)"
+                      [class.text-slate-800]="
+                        !isOverdue(detailTask()!.dueDate!)
+                      "
+                    >
+                      {{ formatFullDate(detailTask()!.dueDate!) }}
+                    </p>
+                    @if (isOverdue(detailTask()!.dueDate!)) {
+                      <p class="text-xs text-red-500 font-medium">Atrasada</p>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <div class="flex items-center gap-2 text-[--text-tertiary]">
+                  <span class="material-symbols-rounded text-base"
+                    >event_busy</span
+                  >
+                  <span class="text-sm">Sem prazo definido</span>
+                </div>
+              }
+              <input
+                type="date"
+                [value]="
+                  detailTask()!.dueDate
+                    ? detailTask()!.dueDate!.slice(0, 10)
+                    : ''
+                "
+                (change)="updateDueDate($event)"
+                class="mt-2 ag-input text-xs py-1.5"
+              />
+            </div>
+          </div>
+
+          <!-- Sprint -->
+          <div>
+            <p class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2">
+              Sprint
+            </p>
+            <select
+              [value]="detailTask()!.sprintId ?? ''"
+              (change)="assignTaskToSprint($any($event.target).value || null)"
+              class="w-full ag-input text-sm py-2"
+            >
+              <option value="">Sem sprint</option>
+              @for (s of sprints(); track s.id) {
+                <option [value]="s.id">{{ s.name }}</option>
+              }
+            </select>
+            @if (detailTask()!.sprint) {
+              <div class="mt-2 flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
+                      [style.background]="sprintStatusColor[detailTask()!.sprint!.status] + '18'"
+                      [style.color]="sprintStatusColor[detailTask()!.sprint!.status]">
+                  <span class="w-1.5 h-1.5 rounded-full" [style.background]="sprintStatusColor[detailTask()!.sprint!.status]"></span>
+                  {{ sprintStatusLabel[detailTask()!.sprint!.status] }}
+                </span>
+                @if (detailTask()!.sprint!.startDate || detailTask()!.sprint!.endDate) {
+                  <span class="text-xs text-[--text-tertiary]">
+                    @if (detailTask()!.sprint!.startDate) { {{ formatDate(detailTask()!.sprint!.startDate!) }} }
+                    @if (detailTask()!.sprint!.startDate && detailTask()!.sprint!.endDate) { → }
+                    @if (detailTask()!.sprint!.endDate) { {{ formatDate(detailTask()!.sprint!.endDate!) }} }
+                  </span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Created at -->
+          <div>
+            <p
+              class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2"
+            >
+              Criado em
+            </p>
+            <div
+              class="flex items-center gap-2 p-3 bg-white rounded-xl border border-[rgba(0,0,0,0.08)]"
+            >
+              <span
+                class="material-symbols-rounded text-base text-[--text-tertiary]"
+                >history</span
+              >
+              <p class="text-sm text-[--text-primary]">
+                {{ formatFullDate(detailTask()!.createdAt) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Project -->
+          @if (project()) {
+            <div>
+              <p
+                class="text-xs font-semibold text-[--text-secondary] uppercase tracking-wider mb-2"
+              >
+                Projeto
+              </p>
+              <div
+                class="flex items-center gap-2.5 p-2.5 bg-white rounded-xl border border-[rgba(0,0,0,0.08)]"
+              >
+                <div
+                  class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                  [style.background]="project()!.color + '20'"
+                >
+                  <span
+                    class="material-symbols-rounded text-sm"
+                    [style.color]="project()!.color"
+                    >{{ project()!.icon }}</span
+                  >
+                </div>
+                <span
+                  class="text-sm font-medium text-[--text-primary] truncate"
+                  >{{ project()!.name }}</span
+                >
+              </div>
+            </div>
+          }
+
+          <!-- Delete -->
+          <div class="pt-2 border-t border-[rgba(0,0,0,0.08)]">
+            <button
+              (click)="deleteDetailTask()"
+              class="w-full ag-btn ag-btn--ghost ag-btn--sm justify-center text-red-500 hover:bg-red-50"
+            >
+              <span class="material-symbols-rounded text-base">delete</span>
+              Excluir Tarefa
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══════ CREATE TASK MODAL ═══════ -->
+@if (showCreateModal()) {
+  <div
+    (click)="closeModal()"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
+  >
+    <div
+      (click)="$event.stopPropagation()"
+      class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in"
+    >
+      <div
+        class="flex items-center justify-between p-6 border-b border-b-[rgba(0,0,0,0.07)]"
+      >
+        <h2 class="text-[15px] font-semibold text-[--text-primary]">
+          Nova Tarefa
+        </h2>
+        <button
+          (click)="closeModal()"
+          class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]"
+        >
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <form
+        [formGroup]="createForm"
+        (ngSubmit)="createTask()"
+        class="p-6 space-y-4"
+      >
+        <div>
+          <label class="ag-label ag-label--required">Título</label>
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Descreva a tarefa..."
+            class="ag-input"
+            autofocus
+          />
+          @if (
+            createForm.get('title')?.invalid && createForm.get('title')?.touched
+          ) {
+            <p class="text-xs text-red-500 mt-1">Título é obrigatório</p>
+          }
+        </div>
+
+        <div>
+          <label class="ag-label">Descrição</label>
+          <textarea
+            formControlName="description"
+            rows="2"
+            placeholder="Detalhes adicionais..."
+            class="ag-input resize-none"
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="ag-label">Status</label>
+            <select formControlName="status" class="ag-input">
+              @for (s of statusOptions; track s.key) {
+                <option [value]="s.key">{{ s.label }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="ag-label">Prioridade</label>
+            <select formControlName="priority" class="ag-input">
+              @for (p of priorityOptions; track p.key) {
+                <option [value]="p.key">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="ag-label">Data de Vencimento</label>
+            <input type="date" formControlName="dueDate" class="ag-input" />
+          </div>
+          <div>
+            <label class="ag-label">Sprint</label>
+            <select formControlName="sprintId" class="ag-input">
+              <option value="">Sem sprint</option>
+              @for (s of sprints(); track s.id) {
+                <option [value]="s.id">{{ s.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Responsável + Co-participantes -->
+        <div class="grid grid-cols-2 gap-3">
+
+          <!-- Responsável -->
+          <div>
+            <label class="ag-label">Responsável</label>
+            <div class="relative">
+              <button type="button" (click)="toggleCreateAssigneePicker()"
+                class="ag-input w-full flex items-center gap-2 text-left h-[38px]">
+                @if (createAssignee()) {
+                  <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 overflow-hidden">
+                    @if (createAssignee()!.avatarUrl) {
+                      <img [src]="createAssignee()!.avatarUrl" class="w-full h-full object-cover" />
+                    } @else {
+                      {{ createAssignee()!.name.charAt(0) }}
+                    }
+                  </div>
+                  <span class="text-sm text-slate-700 truncate flex-1">{{ createAssignee()!.name }}</span>
+                  <span (click)="$event.stopPropagation(); clearCreateAssignee()"
+                    class="material-symbols-rounded text-sm text-slate-400 hover:text-red-500">close</span>
+                } @else {
+                  <span class="material-symbols-rounded text-slate-400 text-base">person_add</span>
+                  <span class="text-sm text-slate-400 flex-1">Atribuir</span>
+                  <span class="material-symbols-rounded text-sm text-slate-300">expand_more</span>
+                }
+              </button>
+              @if (showCreateAssigneePicker()) {
+                <div class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-30 overflow-hidden">
+                  <div class="max-h-44 overflow-y-auto">
+                    @for (m of companyMembers(); track m.id) {
+                      <button type="button" (click)="setCreateAssignee(m)"
+                        class="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-50 text-left"
+                        [class.bg-primary-50]="createAssignee()?.id === m.id">
+                        <div class="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden">
+                          @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="w-full h-full object-cover" /> }
+                          @else { {{ m.name.charAt(0) }} }
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-sm font-medium text-slate-700 truncate">{{ m.name }}</p>
+                          <p class="text-xs text-slate-400 truncate">{{ m.email }}</p>
+                        </div>
+                        @if (createAssignee()?.id === m.id) {
+                          <span class="material-symbols-rounded text-sm text-primary-600 ml-auto">check</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Co-participantes -->
+          <div>
+            <label class="ag-label">Co-participantes</label>
+            <div class="relative">
+              <button type="button" (click)="toggleCreateParticipantPicker()"
+                class="ag-input w-full flex items-center gap-2 text-left h-[38px]">
+                @if (createParticipants().length) {
+                  <div class="flex items-center -space-x-1 flex-shrink-0">
+                    @for (m of createParticipants().slice(0,3); track m.id) {
+                      <div class="w-5 h-5 rounded-full bg-violet-600 flex items-center justify-center text-white text-[9px] font-bold ring-1 ring-white overflow-hidden">
+                        @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="w-full h-full object-cover" /> }
+                        @else { {{ m.name.charAt(0) }} }
+                      </div>
+                    }
+                  </div>
+                  <span class="text-sm text-slate-700 flex-1">{{ createParticipants().length }} pessoa{{ createParticipants().length > 1 ? 's' : '' }}</span>
+                } @else {
+                  <span class="material-symbols-rounded text-slate-400 text-base">group_add</span>
+                  <span class="text-sm text-slate-400 flex-1">Adicionar</span>
+                  <span class="material-symbols-rounded text-sm text-slate-300">expand_more</span>
+                }
+              </button>
+              @if (showCreateParticipantPicker()) {
+                <div class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-30 overflow-hidden">
+                  <div class="max-h-44 overflow-y-auto">
+                    @for (m of createParticipantCandidates(); track m.id) {
+                      <button type="button" (click)="toggleCreateParticipant(m)"
+                        class="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-50 text-left"
+                        [class.bg-violet-50]="isCreateParticipantSelected(m.id)">
+                        <div class="w-6 h-6 rounded-full bg-violet-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden">
+                          @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="w-full h-full object-cover" /> }
+                          @else { {{ m.name.charAt(0) }} }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-slate-700 truncate">{{ m.name }}</p>
+                          <p class="text-xs text-slate-400 truncate">{{ m.email }}</p>
+                        </div>
+                        <span class="material-symbols-rounded text-sm ml-auto"
+                          [class.text-violet-600]="isCreateParticipantSelected(m.id)"
+                          [class.text-slate-200]="!isCreateParticipantSelected(m.id)">
+                          {{ isCreateParticipantSelected(m.id) ? 'check_box' : 'check_box_outline_blank' }}
+                        </span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="flex-1 ag-btn ag-btn--secondary justify-center"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="creating() || createForm.invalid"
+            class="flex-1 ag-btn ag-btn--primary justify-center"
+          >
+            @if (creating()) {
+              <div
+                class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"
+              ></div>
+            }
+            Criar Tarefa
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ═══════ SPRINT MODAL ═══════ -->
+@if (showSprintModal()) {
+  <div (click)="closeSprintModal()"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div (click)="$event.stopPropagation()"
+         class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(0,0,0,0.07)]">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-rounded text-primary-600">sprint</span>
+          <h2 class="text-[15px] font-semibold text-[--text-primary]">Nova Sprint</h2>
+        </div>
+        <button (click)="closeSprintModal()"
+                class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="sprintForm" (ngSubmit)="createSprint()" class="p-6 space-y-4">
+        <div>
+          <label class="ag-label ag-label--required">Nome da Sprint</label>
+          <input type="text" formControlName="name" placeholder="Ex: Sprint 1 — Autenticação"
+                 class="ag-input" autofocus />
+        </div>
+        <div>
+          <label class="ag-label">Objetivo</label>
+          <textarea formControlName="goal" rows="2"
+                    placeholder="Qual é o objetivo desta sprint?"
+                    class="ag-input resize-none"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="ag-label">Início</label>
+            <input type="date" formControlName="startDate" class="ag-input" />
+          </div>
+          <div>
+            <label class="ag-label">Fim</label>
+            <input type="date" formControlName="endDate" class="ag-input" />
+          </div>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="closeSprintModal()"
+                  class="flex-1 ag-btn ag-btn--secondary justify-center">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="creatingSprint() || sprintForm.invalid"
+                  class="flex-1 ag-btn ag-btn--primary justify-center">
+            @if (creatingSprint()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            }
+            Criar Sprint
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ═══════ CONFIG MODAL ═══════ -->
+@if (configToast()) {
+  <div class="fixed top-4 right-4 z-[60] px-4 py-3 rounded-lg bg-emerald-600 text-white text-sm font-medium shadow-lg flex items-center gap-2 animate-fade-in-up">
+    <span class="material-symbols-rounded text-base">check_circle</span>
+    {{ configToast() }}
+  </div>
+}
+
+@if (showConfig()) {
+  <div (click)="closeConfig()"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div (click)="$event.stopPropagation()"
+         class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in flex flex-col overflow-hidden"
+         style="max-height: 88vh;">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+        <div class="flex items-center gap-3">
+          @if (project()) {
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" [style.background]="project()!.color + '20'">
+              <span class="material-symbols-rounded text-base" [style.color]="project()!.color">{{ project()!.icon }}</span>
+            </div>
+          }
+          <div>
+            <h2 class="text-base font-bold text-[--text-primary]">Configurações do Projeto</h2>
+            <p class="text-xs text-[--text-tertiary]">{{ project()?.name }}</p>
+          </div>
+        </div>
+        <button (click)="closeConfig()" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex border-b border-slate-100 shrink-0 px-6 gap-1 overflow-x-auto">
+        @for (tab of [{k:'general',l:'Geral',i:'tune'},{k:'columns',l:'Colunas',i:'view_column'},{k:'members',l:'Membros',i:'group'},{k:'danger',l:'Perigo',i:'warning'}]; track tab.k) {
+          <button (click)="configTab.set($any(tab.k))"
+                  class="flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px whitespace-nowrap shrink-0"
+                  [class.border-primary-600]="configTab() === tab.k"
+                  [class.text-primary-600]="configTab() === tab.k"
+                  [class.border-red-500]="configTab() === tab.k && tab.k === 'danger'"
+                  [class.text-red-500]="configTab() === tab.k && tab.k === 'danger'"
+                  [class.border-transparent]="configTab() !== tab.k"
+                  [class.text-slate-500]="configTab() !== tab.k">
+            <span class="material-symbols-rounded text-base">{{ tab.i }}</span>
+            {{ tab.l }}
+          </button>
+        }
+      </div>
+
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto">
+
+        <!-- ── Geral ── -->
+        @if (configTab() === 'general') {
+          <form [formGroup]="configForm" (ngSubmit)="saveGeneral()" class="p-6 flex flex-col gap-5">
+            <div class="flex flex-col gap-1.5">
+              <label class="ag-label ag-label--required">Nome do Projeto</label>
+              <input type="text" formControlName="name" class="ag-input" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="ag-label">Descrição</label>
+              <textarea formControlName="description" rows="3" class="ag-input resize-none" placeholder="Descreva o objetivo do projeto..."></textarea>
+            </div>
+            <div class="flex flex-col gap-3">
+              <label class="ag-label">Cor</label>
+              <div class="flex gap-2 flex-wrap">
+                @for (color of projectColors; track color) {
+                  <button type="button" (click)="configForm.patchValue({ color })"
+                          class="w-8 h-8 rounded-xl border-4 transition-all hover:scale-110"
+                          [style.background]="color"
+                          [class.border-slate-800]="configForm.get('color')?.value === color"
+                          [class.scale-110]="configForm.get('color')?.value === color"
+                          [class.border-transparent]="configForm.get('color')?.value !== color">
+                  </button>
+                }
+              </div>
+              <!-- Preview -->
+              <div class="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                     [style.background]="(configForm.get('color')?.value || project()?.color) + '20'">
+                  <span class="material-symbols-rounded text-base" [style.color]="configForm.get('color')?.value || project()?.color">
+                    {{ configForm.get('icon')?.value || project()?.icon }}
+                  </span>
+                </div>
+                <div class="h-1.5 flex-1 rounded-full" [style.background]="configForm.get('color')?.value || project()?.color"></div>
+                <p class="text-sm font-semibold text-[--text-primary] truncate max-w-48">{{ configForm.get('name')?.value || project()?.name }}</p>
+              </div>
+            </div>
+            <div class="flex gap-3 pt-2 border-t border-slate-100">
+              <button type="button" (click)="closeConfig()" class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
+              <button type="submit" [disabled]="configSaving() || configForm.invalid || configForm.pristine"
+                      class="flex-1 ag-btn ag-btn--primary justify-center">
+                @if (configSaving()) { <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div> }
+                @else { <span class="material-symbols-rounded text-lg">save</span> }
+                Salvar
+              </button>
+            </div>
+          </form>
+        }
+
+        <!-- ── Colunas ── -->
+        @if (configTab() === 'columns') {
+          <div class="p-6 flex flex-col gap-5">
+            <p class="text-sm text-[--text-secondary]">Personalize os nomes exibidos em cada coluna do board. Os nomes são por projeto.</p>
+            <div class="flex flex-col gap-3">
+              @for (col of columns(); track col.key) {
+                <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <div class="w-3 h-3 rounded-full shrink-0" [style.background]="col.color"></div>
+                  <div class="flex-1">
+                    <p class="text-[10px] font-semibold text-[--text-tertiary] uppercase tracking-wider mb-1">{{ DEFAULT_COLUMNS[col.key] }}</p>
+                    <input type="text"
+                           [value]="columnLabels()[col.key]"
+                           (input)="setColumnLabel(col.key, $any($event.target).value)"
+                           class="ag-input py-1.5 text-sm font-medium" />
+                  </div>
+                  <button type="button" (click)="resetColumnLabel(col.key)"
+                          class="p-2 rounded-lg text-slate-400 hover:text-[--text-primary] hover:bg-white transition-colors"
+                          [title]="'Restaurar padrão: ' + DEFAULT_COLUMNS[col.key]">
+                    <span class="material-symbols-rounded text-lg">restart_alt</span>
+                  </button>
+                </div>
+              }
+            </div>
+            <div class="flex gap-3 pt-2 border-t border-slate-100">
+              <button type="button" (click)="resetAllColumns()" class="ag-btn ag-btn--ghost ag-btn--sm">Restaurar tudo</button>
+              <button (click)="saveColumns()" [disabled]="configSaving()" class="ml-auto ag-btn ag-btn--primary">
+                @if (configSaving()) { <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div> }
+                @else { <span class="material-symbols-rounded text-lg">save</span> }
+                Salvar Colunas
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ── Membros ── -->
+        @if (configTab() === 'members') {
+          <div class="p-6 flex flex-col gap-5">
+
+            <!-- Add member -->
+            <div class="flex flex-col gap-2">
+              <label class="ag-label">Adicionar membro</label>
+              <div class="relative">
+                <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                <input type="text" placeholder="Buscar por nome ou email..."
+                       [value]="addMemberSearch()"
+                       (input)="addMemberSearch.set($any($event.target).value)"
+                       class="ag-input pl-9" />
+              </div>
+              @if (addMemberSearch()) {
+                <div class="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden max-h-40 overflow-y-auto">
+                  @if (!availableToAddProject().length) {
+                    <p class="text-sm text-[--text-tertiary] text-center py-4">Nenhum membro disponível</p>
+                  } @else {
+                    @for (m of availableToAddProject(); track m.id) {
+                      <button (click)="addProjectMember(m)"
+                              class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-left transition-colors border-b border-slate-100 last:border-0">
+                        <div class="ag-avatar ag-avatar--sm shrink-0">
+                          @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="w-full h-full rounded-full object-cover" /> }
+                          @else { {{ m.name.charAt(0) }} }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-[--text-primary] truncate">{{ m.name }}</p>
+                          <p class="text-xs text-[--text-tertiary] truncate">{{ m.email }}</p>
+                        </div>
+                        <span class="material-symbols-rounded text-primary-500 text-lg shrink-0">add</span>
+                      </button>
+                    }
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Member list -->
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <label class="ag-label mb-0">Membros atuais ({{ projectMembers().length }})</label>
+                @if (hasManyProjectMembers()) {
+                  <div class="relative">
+                    <span class="material-symbols-rounded absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
+                    <input type="text" placeholder="Filtrar..." [value]="memberSearch()"
+                           (input)="memberSearch.set($any($event.target).value)"
+                           class="ag-input py-1.5 pl-7 pr-3 text-xs w-36" />
+                  </div>
+                }
+              </div>
+              <div class="flex flex-col gap-1.5 max-h-64 overflow-y-auto pr-1">
+                @for (m of projectMembers(); track m.id) {
+                  <div class="rounded-xl border transition-colors"
+                       [class.border-slate-200]="openMenuMemberId() === m.userId"
+                       [class.bg-white]="openMenuMemberId() === m.userId"
+                       [class.border-slate-100]="openMenuMemberId() !== m.userId"
+                       [class.bg-slate-50]="openMenuMemberId() !== m.userId">
+                    <div class="flex items-center gap-3 p-3 group">
+                      <div class="ag-avatar ag-avatar--md shrink-0">
+                        @if (m.user?.avatarUrl) { <img [src]="m.user.avatarUrl" class="w-full h-full rounded-full object-cover" /> }
+                        @else { {{ m.user?.name?.charAt(0) }} }
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-[--text-primary] truncate">{{ m.user?.name }}</p>
+                        <p class="text-xs text-[--text-tertiary] truncate">{{ m.user?.email }}</p>
+                      </div>
+                      <span class="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0"
+                            [class.bg-amber-100]="m.role === 'OWNER'"
+                            [class.text-amber-700]="m.role === 'OWNER'"
+                            [class.bg-purple-100]="m.role === 'ADMIN'"
+                            [class.text-purple-700]="m.role === 'ADMIN'"
+                            [class.bg-blue-100]="m.role === 'MEMBER' || m.role === 'VIEWER'"
+                            [class.text-blue-700]="m.role === 'MEMBER' || m.role === 'VIEWER'">
+                        {{ m.role }}
+                      </span>
+                      @if (m.role !== 'OWNER') {
+                        <button (click)="openMenuMemberId.set(openMenuMemberId() === m.userId ? null : m.userId)"
+                                class="p-1.5 rounded-lg text-[--text-tertiary] hover:bg-slate-200 transition-colors opacity-0 group-hover:opacity-100"
+                                [class.opacity-100]="openMenuMemberId() === m.userId">
+                          <span class="material-symbols-rounded text-lg">{{ openMenuMemberId() === m.userId ? 'expand_less' : 'more_vert' }}</span>
+                        </button>
+                      }
+                    </div>
+                    @if (openMenuMemberId() === m.userId) {
+                      <div class="px-3 pb-3 flex flex-col gap-2 animate-fade-in border-t border-slate-100 pt-2">
+                        <p class="text-[10px] font-semibold text-[--text-tertiary] uppercase tracking-wider px-1">Alterar papel</p>
+                        <div class="flex gap-2 flex-wrap">
+                          @for (r of projectRoleOptions.slice(1); track r.key) {
+                            <button (click)="changeProjectMemberRole(m.userId, r.key)"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors"
+                                    [class.bg-primary-600]="m.role === r.key" [class.text-white]="m.role === r.key" [class.border-primary-600]="m.role === r.key"
+                                    [class.bg-white]="m.role !== r.key" [class.text-slate-600]="m.role !== r.key" [class.border-slate-200]="m.role !== r.key">
+                              @if (m.role === r.key) { <span class="material-symbols-rounded text-xs">check</span> }
+                              {{ r.label }}
+                            </button>
+                          }
+                        </div>
+                        <button (click)="removeProjectMember(m.userId, m.user?.name)"
+                                class="self-start flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
+                          <span class="material-symbols-rounded text-xs">person_remove</span>
+                          Remover do projeto
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── Perigo ── -->
+        @if (configTab() === 'danger') {
+          <div class="p-6 flex flex-col gap-4">
+            <div class="bg-red-50 rounded-xl border border-red-200 p-5 flex flex-col gap-3">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-rounded text-red-500">archive</span>
+                </div>
+                <div>
+                  <h3 class="font-bold text-red-700">Arquivar Projeto</h3>
+                  <p class="text-sm text-[--text-secondary] mt-1">
+                    O projeto ficará oculto na listagem e no kanban. Todas as tarefas e dados são preservados.
+                    Um admin poderá restaurá-lo a qualquer momento na tela de Projetos.
+                  </p>
+                </div>
+              </div>
+              <button (click)="archiveProject()"
+                      class="self-start ag-btn border border-red-400 text-red-600 hover:bg-red-600 hover:text-white transition-colors">
+                <span class="material-symbols-rounded text-lg">archive</span>
+                Arquivar este Projeto
+              </button>
+            </div>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+}
+

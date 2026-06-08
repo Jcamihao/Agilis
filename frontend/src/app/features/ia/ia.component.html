@@ -1,0 +1,265 @@
+<div class="ia-layout">
+
+  <!-- ═══ Toast ═══ -->
+  @if (toast().msg) {
+    <div class="fixed top-4 right-4 z-[999] px-4 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2 animate-fade-in-up"
+         [class.bg-emerald-600]="toast().type === 'success'"
+         [class.bg-red-600]="toast().type === 'error'"
+         style="color: white">
+      <span class="material-symbols-rounded text-base">
+        {{ toast().type === 'success' ? 'check_circle' : 'error' }}
+      </span>
+      {{ toast().msg }}
+    </div>
+  }
+
+  <!-- ═══ Sidebar Histórico ═══ -->
+  <aside class="ia-sidebar">
+
+    <!-- Header sidebar -->
+    <div class="ia-sidebar__header">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+             style="background: linear-gradient(135deg, #6366f1, #8b5cf6)">
+          <span class="material-symbols-rounded text-white" style="font-size: 15px">smart_toy</span>
+        </div>
+        <span class="text-sm font-semibold text-[--text-primary]">Assistente IA</span>
+        <span class="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700">Ollama · phi4-mini</span>
+      </div>
+      <button (click)="newChat()"
+              class="mt-3 w-full ag-btn ag-btn--primary ag-btn--sm justify-center gap-2">
+        <span class="material-symbols-rounded text-base">add</span>
+        Nova conversa
+      </button>
+    </div>
+
+    <!-- Quick insights -->
+    <div class="px-3 pb-2">
+      <p class="text-[10px] font-bold uppercase tracking-wider text-[--text-tertiary] px-1 py-2">Análises rápidas</p>
+      <button (click)="runBottlenecks()" [disabled]="!!insightLoading()"
+              class="ia-insight-btn">
+        @if (insightLoading() === 'bottlenecks') {
+          <div class="w-4 h-4 border-2 border-red-300 border-t-red-600 rounded-full animate-spin flex-shrink-0"></div>
+        } @else {
+          <span class="material-symbols-rounded text-red-500 text-base flex-shrink-0">warning</span>
+        }
+        <span class="text-xs text-[--text-primary]">Identificar Gargalos</span>
+      </button>
+      <button (click)="openProjectPicker('actionPlan')" [disabled]="!!insightLoading()"
+              class="ia-insight-btn">
+        @if (insightLoading() === 'actionPlan') {
+          <div class="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin flex-shrink-0"></div>
+        } @else {
+          <span class="material-symbols-rounded text-blue-500 text-base flex-shrink-0">rocket_launch</span>
+        }
+        <span class="text-xs text-[--text-primary]">Plano de Ação</span>
+      </button>
+      <button (click)="openProjectPicker('summarize')" [disabled]="!!insightLoading()"
+              class="ia-insight-btn">
+        @if (insightLoading() === 'summarize') {
+          <div class="w-4 h-4 border-2 border-purple-300 border-t-purple-600 rounded-full animate-spin flex-shrink-0"></div>
+        } @else {
+          <span class="material-symbols-rounded text-purple-500 text-base flex-shrink-0">summarize</span>
+        }
+        <span class="text-xs text-[--text-primary]">Resumir Projeto</span>
+      </button>
+    </div>
+
+    <!-- Conversation history -->
+    <div class="flex-1 overflow-y-auto">
+      <p class="text-[10px] font-bold uppercase tracking-wider text-[--text-tertiary] px-4 pt-3 pb-2">Histórico</p>
+
+      @if (historyLoading()) {
+        @for (i of [1,2,3,4]; track i) {
+          <div class="px-3 py-2">
+            <div class="ag-skeleton h-3 w-4/5 rounded mb-1.5"></div>
+            <div class="ag-skeleton h-2.5 w-3/5 rounded"></div>
+          </div>
+        }
+      } @else if (conversations().length === 0) {
+        <p class="text-xs text-[--text-tertiary] text-center px-4 py-6">Nenhuma conversa ainda</p>
+      } @else {
+        @for (conv of conversations(); track conv.id) {
+          <button (click)="loadConversation(conv)"
+                  class="ia-history-item"
+                  [class.ia-history-item--active]="activeConvId() === conv.id">
+            <span class="material-symbols-rounded text-base flex-shrink-0 mt-0.5"
+                  [style.color]="activeConvId() === conv.id ? '#6366f1' : '#94a3b8'">chat_bubble</span>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-medium text-[--text-primary] truncate">{{ conv.title }}</p>
+              <p class="text-[11px] text-[--text-tertiary] truncate mt-0.5">{{ lastMessage(conv) }}</p>
+              <p class="text-[10px] text-[--text-tertiary] mt-0.5">{{ timeAgo(conv.updatedAt) }}</p>
+            </div>
+          </button>
+        }
+      }
+    </div>
+
+  </aside>
+
+  <!-- ═══ Main Chat ═══ -->
+  <main class="ia-main">
+
+    <!-- Chat header -->
+    <div class="ia-main__header">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center"
+             style="background: linear-gradient(135deg, #6366f1, #8b5cf6)">
+          <span class="material-symbols-rounded text-white text-[16px]">smart_toy</span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-[--text-primary]">Assistente Agilis IA</p>
+          <p class="text-xs text-[--text-secondary]">Powered by Ollama · phi4-mini · contexto do workspace em tempo real</p>
+        </div>
+      </div>
+      @if (messages().length > 0) {
+        <button (click)="newChat()"
+                class="ag-btn ag-btn--ghost ag-btn--sm flex items-center gap-1.5 text-[--text-tertiary] hover:text-red-500">
+          <span class="material-symbols-rounded text-base">delete_sweep</span>
+          Limpar
+        </button>
+      }
+    </div>
+
+    <!-- Messages -->
+    <div class="ia-messages">
+
+      @if (messages().length === 0) {
+        <!-- Empty state -->
+        <div class="ia-empty">
+          <div class="ia-empty__icon">
+            <span class="material-symbols-rounded text-4xl" style="color: #6366f1">smart_toy</span>
+          </div>
+          <h2 class="text-base font-semibold text-[--text-primary] mt-3">Como posso ajudar?</h2>
+          <p class="text-sm text-[--text-secondary] mt-1 text-center max-w-xs">
+            Pergunte sobre projetos, tarefas, gargalos ou peça análises do workspace.
+          </p>
+          <div class="ia-suggestions">
+            @for (s of suggestions; track s) {
+              <button (click)="sendMessage(s)" class="ia-suggestion-chip">
+                {{ s }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @for (msg of messages(); track $index) {
+        <div class="ia-message" [class.ia-message--user]="msg.role === 'user'">
+
+          @if (msg.role === 'assistant') {
+            <div class="ia-avatar">
+              <span class="material-symbols-rounded text-white" style="font-size: 13px">smart_toy</span>
+            </div>
+          }
+
+          <div class="ia-bubble"
+               [class.ia-bubble--user]="msg.role === 'user'"
+               [class.ia-bubble--assistant]="msg.role === 'assistant'">
+            @if (msg.loading) {
+              <div class="flex items-center gap-1.5 py-0.5 px-1">
+                <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay:0ms"></div>
+                <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay:150ms"></div>
+                <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay:300ms"></div>
+              </div>
+            } @else {
+              <p class="whitespace-pre-wrap text-sm leading-relaxed">{{ msg.content }}</p>
+            }
+          </div>
+
+        </div>
+      }
+
+      <div #chatEnd></div>
+    </div>
+
+    <!-- Input -->
+    <div class="ia-input-area">
+      <div class="ia-input-wrap">
+        <textarea
+          [(ngModel)]="chatInput"
+          (keydown)="onKeydown($event)"
+          [disabled]="chatLoading()"
+          placeholder="Pergunte sobre projetos, tarefas, equipes ou peça análises..."
+          rows="2"
+          class="ia-textarea"
+        ></textarea>
+        <button (click)="sendMessage()"
+                [disabled]="chatLoading() || !chatInput.trim()"
+                class="ia-send-btn">
+          @if (chatLoading()) {
+            <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+          } @else {
+            <span class="material-symbols-rounded text-[18px]">send</span>
+          }
+        </button>
+      </div>
+      <p class="text-[10px] text-[--text-tertiary] mt-1.5 pl-1">Enter para enviar · Shift+Enter para nova linha</p>
+    </div>
+
+  </main>
+
+</div>
+
+<!-- ═══ Modal: Insight Result ═══ -->
+@if (insightModal()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-5 border-b border-[rgba(0,0,0,0.07)]">
+        <h2 class="text-[15px] font-semibold text-[--text-primary]">{{ insightModal()!.title }}</h2>
+        <button (click)="insightModal.set(null)"
+                class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5">
+        <p class="text-sm text-[--text-primary] whitespace-pre-wrap leading-relaxed">{{ insightModal()!.content }}</p>
+      </div>
+      <div class="p-5 border-t border-[rgba(0,0,0,0.07)] flex gap-3 justify-end">
+        <button (click)="insightModal.set(null)" class="ag-btn ag-btn--secondary">Fechar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ Modal: Project Picker ═══ -->
+@if (showProjectPicker()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-5 border-b border-[rgba(0,0,0,0.07)]">
+        <div>
+          <h2 class="text-[15px] font-semibold text-[--text-primary]">Selecionar Projeto</h2>
+          <p class="text-xs text-[--text-secondary] mt-0.5">
+            {{ projectPickerMode() === 'actionPlan' ? 'Para qual projeto gerar o plano de ação?' : 'Qual projeto deseja resumir?' }}
+          </p>
+        </div>
+        <button (click)="showProjectPicker.set(false)"
+                class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="p-3 max-h-80 overflow-y-auto">
+        @if (projects().length === 0) {
+          <p class="text-sm text-[--text-secondary] text-center py-8">Nenhum projeto encontrado</p>
+        } @else {
+          @for (project of projects(); track project.id) {
+            <button (click)="runProjectInsight(project)"
+                    class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors group">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                   [style.background]="project.color + '25'">
+                <span class="material-symbols-rounded text-base" [style.color]="project.color">{{ project.icon }}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-[--text-primary] truncate">{{ project.name }}</p>
+                @if (project.team) {
+                  <p class="text-xs text-[--text-secondary]">{{ project.team.name }}</p>
+                }
+              </div>
+              <span class="material-symbols-rounded text-[--text-tertiary] text-base opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}

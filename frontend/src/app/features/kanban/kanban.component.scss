@@ -1,0 +1,63 @@
+:host { display: block; }
+
+/* ── Card base ─────────────────────────────────────────────── */
+.task-card {
+  /* Transitions isoladas — evita reflow ao arrastar */
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Hover só quando NÃO está sendo arrastado */
+.task-card:not(.cdk-drag-dragging):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+/* ── Preview (card fantasma que segue o cursor) ─────────────── */
+.cdk-drag-preview {
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  opacity: 0.97;
+  /* GPU-acelerado: sem transição durante o drag */
+  transform: rotate(1.5deg) scale(1.02);
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* ── Placeholder (slot vazio que aparece na coluna destino) ─── */
+.cdk-drag-placeholder {
+  background: rgb(99 102 241 / 0.06);
+  border: 2px dashed rgb(99 102 241 / 0.35);
+  border-radius: 12px;
+  min-height: 80px;
+  /* Remove qualquer animação no placeholder */
+  transition: none !important;
+}
+
+/* ── Animação de encaixe ao soltar ─────────────────────────── */
+.cdk-drag-animating {
+  /* Snap suave de volta ao lugar */
+  transition: transform 180ms cubic-bezier(0.2, 1, 0.4, 1) !important;
+}
+
+/* ── Drop zone highlight ao receber card ───────────────────── */
+.drop-zone.cdk-drop-list-receiving {
+  background: rgb(99 102 241 / 0.04);
+  outline: 1.5px solid rgb(99 102 241 / 0.25);
+  outline-offset: -2px;
+}
+
+/* ── Coluna dragging: outros cards ficam mais opacos ────────── */
+.drop-zone.cdk-drop-list-dragging .task-card:not(.cdk-drag-placeholder) {
+  transition: transform 180ms ease;
+}
+
+/* ── Drag indicator ──────────────────────────────────────────── */
+.drag-indicator {
+  cursor: grab;
+}
+.drag-indicator:active {
+  cursor: grabbing;
+}
