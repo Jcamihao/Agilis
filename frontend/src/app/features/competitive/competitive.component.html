@@ -1,0 +1,384 @@
+<div class="space-y-6">
+
+  <!-- ═══ Header ═══ -->
+  <div class="ag-page-header">
+    <div>
+      <div class="ag-section-badge">
+        <span class="ag-section-num">7</span>
+        <span class="ag-section-label">Inteligência</span>
+      </div>
+      <h1 class="ag-page-title">Centro de Inteligência</h1>
+      <p class="ag-page-subtitle">IA e automação integradas ao seu workspace em tempo real</p>
+    </div>
+  </div>
+
+  <!-- ═══ Toast ═══ -->
+  @if (toast().msg) {
+    <div class="fixed top-4 right-4 z-[999] px-4 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2 animate-fade-in-up"
+         [class.bg-emerald-600]="toast().type === 'success'"
+         [class.bg-red-600]="toast().type === 'error'"
+         style="color: white">
+      <span class="material-symbols-rounded text-base">
+        {{ toast().type === 'success' ? 'check_circle' : 'error' }}
+      </span>
+      {{ toast().msg }}
+    </div>
+  }
+
+  <!-- ═══ AI Quick Actions ═══ -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+    <!-- Gargalos -->
+    <button (click)="runBottlenecks()"
+            [disabled]="!!insightLoading()"
+            class="ag-card p-5 text-left flex items-start gap-4 hover:border-indigo-300 hover:shadow-md transition-all group disabled:opacity-60 disabled:cursor-not-allowed">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-100 group-hover:bg-red-200 transition-colors">
+        @if (insightLoading() === 'bottlenecks') {
+          <div class="w-5 h-5 border-2 border-red-400 border-t-red-700 rounded-full animate-spin"></div>
+        } @else {
+          <span class="material-symbols-rounded text-red-600 text-xl">warning</span>
+        }
+      </div>
+      <div class="min-w-0">
+        <p class="font-semibold text-[--text-primary] text-sm">Identificar Gargalos</p>
+        <p class="text-xs text-[--text-secondary] mt-0.5 leading-relaxed">Detecta bloqueios e atrasos no workspace</p>
+      </div>
+    </button>
+
+    <!-- Plano de Ação -->
+    <button (click)="openProjectPicker('actionPlan')"
+            [disabled]="!!insightLoading()"
+            class="ag-card p-5 text-left flex items-start gap-4 hover:border-indigo-300 hover:shadow-md transition-all group disabled:opacity-60 disabled:cursor-not-allowed">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-100 group-hover:bg-blue-200 transition-colors">
+        @if (insightLoading() === 'actionPlan') {
+          <div class="w-5 h-5 border-2 border-blue-400 border-t-blue-700 rounded-full animate-spin"></div>
+        } @else {
+          <span class="material-symbols-rounded text-blue-600 text-xl">rocket_launch</span>
+        }
+      </div>
+      <div class="min-w-0">
+        <p class="font-semibold text-[--text-primary] text-sm">Plano de Ação</p>
+        <p class="text-xs text-[--text-secondary] mt-0.5 leading-relaxed">Gera prioridades e próximos passos por projeto</p>
+      </div>
+    </button>
+
+    <!-- Resumir Projeto -->
+    <button (click)="openProjectPicker('summarize')"
+            [disabled]="!!insightLoading()"
+            class="ag-card p-5 text-left flex items-start gap-4 hover:border-indigo-300 hover:shadow-md transition-all group disabled:opacity-60 disabled:cursor-not-allowed">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-purple-100 group-hover:bg-purple-200 transition-colors">
+        @if (insightLoading() === 'summarize') {
+          <div class="w-5 h-5 border-2 border-purple-400 border-t-purple-700 rounded-full animate-spin"></div>
+        } @else {
+          <span class="material-symbols-rounded text-purple-600 text-xl">summarize</span>
+        }
+      </div>
+      <div class="min-w-0">
+        <p class="font-semibold text-[--text-primary] text-sm">Resumir Projeto</p>
+        <p class="text-xs text-[--text-secondary] mt-0.5 leading-relaxed">Resumo executivo do andamento de um projeto</p>
+      </div>
+    </button>
+
+  </div>
+
+  <!-- ═══ Main Grid: Chat + Processos ═══ -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+    <!-- Chat com IA -->
+    <div class="lg:col-span-7 ag-card flex flex-col" style="height: 540px">
+
+      <!-- Chat header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-[rgba(0,0,0,0.07)] flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+               style="background: linear-gradient(135deg, #6366f1, #8b5cf6)">
+            <span class="material-symbols-rounded text-white text-[18px]">smart_toy</span>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-[--text-primary]">Assistente IA</p>
+            <p class="text-xs text-[--text-secondary]">Contexto do workspace atualizado em tempo real</p>
+          </div>
+        </div>
+        @if (chatMessages().length > 0) {
+          <button (click)="clearChat()"
+                  class="text-xs text-[--text-tertiary] hover:text-red-500 flex items-center gap-1 transition-colors">
+            <span class="material-symbols-rounded text-sm">delete_sweep</span>
+            Limpar
+          </button>
+        }
+      </div>
+
+      <!-- Messages -->
+      <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+
+        <!-- Empty state -->
+        @if (chatMessages().length === 0) {
+          <div class="h-full flex flex-col items-center justify-center text-center gap-5">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center"
+                 style="background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))">
+              <span class="material-symbols-rounded text-3xl" style="color: #6366f1">smart_toy</span>
+            </div>
+            <div>
+              <p class="font-semibold text-[--text-primary] text-sm">Como posso ajudar hoje?</p>
+              <p class="text-xs text-[--text-secondary] mt-1">Pergunte sobre projetos, tarefas, equipe ou peça análises</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 w-full max-w-sm">
+              @for (suggestion of chatSuggestions; track suggestion) {
+                <button (click)="sendMessage(suggestion)"
+                        class="text-xs text-left px-3 py-2.5 rounded-xl border border-[rgba(0,0,0,0.08)] hover:border-indigo-300 hover:bg-indigo-50 text-[--text-secondary] hover:text-indigo-700 transition-all leading-relaxed">
+                  {{ suggestion }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Message list -->
+        @for (msg of chatMessages(); track $index) {
+          <div class="flex" [class.justify-end]="msg.role === 'user'">
+            @if (msg.role === 'assistant') {
+              <div class="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 mr-2 mt-0.5"
+                   style="background: linear-gradient(135deg, #6366f1, #8b5cf6)">
+                <span class="material-symbols-rounded text-white" style="font-size: 13px">smart_toy</span>
+              </div>
+            }
+            <div class="max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed"
+                 [class.chat-bubble-user]="msg.role === 'user'"
+                 [class.chat-bubble-assistant]="msg.role === 'assistant'">
+              @if (msg.loading) {
+                <div class="flex items-center gap-1.5 py-0.5">
+                  <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 0ms"></div>
+                  <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 150ms"></div>
+                  <div class="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style="animation-delay: 300ms"></div>
+                </div>
+              } @else {
+                <p class="whitespace-pre-wrap">{{ msg.content }}</p>
+              }
+            </div>
+          </div>
+        }
+
+        <div #chatEnd></div>
+      </div>
+
+      <!-- Input area -->
+      <div class="px-5 py-4 border-t border-[rgba(0,0,0,0.07)] flex-shrink-0">
+        <div class="flex gap-2 items-end">
+          <textarea
+            [(ngModel)]="chatInput"
+            (keydown)="onChatKeydown($event)"
+            [disabled]="chatLoading()"
+            placeholder="Pergunte sobre seus projetos, tarefas, equipes..."
+            rows="2"
+            class="ag-input flex-1 resize-none text-sm py-2.5"
+            style="min-height: 44px; max-height: 120px"
+          ></textarea>
+          <button (click)="sendMessage()"
+                  [disabled]="chatLoading() || !chatInput.trim()"
+                  class="ag-btn ag-btn--primary px-4 py-2.5 flex-shrink-0 self-end disabled:opacity-50">
+            @if (chatLoading()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded text-base">send</span>
+            }
+          </button>
+        </div>
+        <p class="text-[10px] text-[--text-tertiary] mt-1.5">Enter para enviar · Shift+Enter para nova linha</p>
+      </div>
+    </div>
+
+    <!-- Processos -->
+    <div class="lg:col-span-5 ag-card flex flex-col" style="height: 540px">
+
+      <!-- Header -->
+      <div class="px-5 py-4 border-b border-[rgba(0,0,0,0.07)] flex items-center justify-between gap-3 flex-shrink-0">
+        <h3 class="font-semibold text-[--text-primary] text-sm">Processos</h3>
+        <div class="relative">
+          <span class="material-symbols-rounded absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
+          <input type="text" placeholder="Buscar..."
+                 [value]="processSearch()"
+                 (input)="processSearch.set($any($event.target).value)"
+                 class="ag-input pl-8 text-sm py-2 w-40" />
+        </div>
+      </div>
+
+      <!-- List -->
+      <div class="flex-1 overflow-y-auto divide-y divide-[rgba(0,0,0,0.05)]">
+        @if (processesLoading()) {
+          @for (i of [1,2,3,4]; track i) {
+            <div class="px-5 py-4">
+              <div class="ag-skeleton h-4 w-3/4 rounded mb-2"></div>
+              <div class="ag-skeleton h-3 w-1/2 rounded"></div>
+            </div>
+          }
+        } @else if (filteredProcesses().length === 0) {
+          <div class="flex flex-col items-center justify-center h-full text-center px-6 py-10">
+            <span class="material-symbols-rounded text-4xl text-slate-300">category</span>
+            <p class="text-sm text-[--text-secondary] mt-3">
+              @if (processSearch()) { Nenhum processo encontrado } @else { Nenhum processo cadastrado ainda }
+            </p>
+          </div>
+        } @else {
+          @for (process of filteredProcesses(); track process.id) {
+            <div class="px-5 py-3.5 flex items-center gap-3 hover:bg-slate-50 transition-colors group relative">
+
+              <!-- Icon -->
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                   [style.background]="(process.color || '#6366f1') + '18'">
+                <span class="material-symbols-rounded text-base"
+                      [style.color]="process.color || '#6366f1'">
+                  {{ process.icon || 'category' }}
+                </span>
+              </div>
+
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-[--text-primary] truncate">{{ process.name }}</p>
+                @if (process.description) {
+                  <p class="text-xs text-[--text-secondary] truncate mt-0.5">{{ process.description }}</p>
+                }
+              </div>
+
+              <!-- Status badge -->
+              <div class="flex-shrink-0">
+                @if (process.status === 'ACTIVE') {
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ativo
+                  </span>
+                } @else if (process.status === 'DRAFT') {
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700">
+                    Pausado
+                  </span>
+                } @else {
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500">
+                    Arquivado
+                  </span>
+                }
+              </div>
+
+              <!-- Menu -->
+              <div class="relative flex-shrink-0">
+                <button (click)="toggleProcessMenu(process.id, $event)"
+                        class="p-1.5 rounded-lg text-[--text-tertiary] hover:text-[--text-primary] hover:bg-slate-100 transition-colors opacity-0 group-hover:opacity-100">
+                  <span class="material-symbols-rounded text-lg">more_vert</span>
+                </button>
+                @if (openMenuId() === process.id) {
+                  <div class="absolute right-0 top-full mt-1 w-44 bg-white border border-[rgba(0,0,0,0.1)] rounded-xl shadow-lg z-20 py-1 animate-scale-in"
+                       (click)="$event.stopPropagation()">
+                    @if (process.status !== 'ACTIVE') {
+                      <button (click)="activateProcess(process)"
+                              class="w-full text-left px-4 py-2.5 text-sm text-emerald-700 hover:bg-emerald-50 flex items-center gap-2">
+                        <span class="material-symbols-rounded text-base">play_arrow</span>
+                        Reativar
+                      </button>
+                    }
+                    @if (process.status === 'ACTIVE') {
+                      <button (click)="pauseProcess(process)"
+                              class="w-full text-left px-4 py-2.5 text-sm text-[--text-primary] hover:bg-slate-50 flex items-center gap-2">
+                        <span class="material-symbols-rounded text-base">pause</span>
+                        Pausar
+                      </button>
+                    }
+                    <button (click)="archiveProcess(process)"
+                            class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                      <span class="material-symbols-rounded text-base">archive</span>
+                      Arquivar
+                    </button>
+                  </div>
+                }
+              </div>
+
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Footer: create -->
+      <div class="px-5 py-4 border-t border-[rgba(0,0,0,0.07)] flex-shrink-0">
+        <button (click)="showCreateProcess.set(!showCreateProcess())"
+                class="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center gap-1.5 transition-colors">
+          <span class="material-symbols-rounded text-base">add</span>
+          Novo processo
+        </button>
+        @if (showCreateProcess()) {
+          <form (ngSubmit)="createProcess()" class="mt-3 space-y-2">
+            <input [(ngModel)]="processName" name="processName" required
+                   placeholder="Nome do processo" class="ag-input text-sm w-full" />
+            <input [(ngModel)]="processDescription" name="processDescription"
+                   placeholder="Descrição (opcional)" class="ag-input text-sm w-full" />
+            <div class="flex gap-2">
+              <button type="submit" [disabled]="!processName.trim()" class="ag-btn ag-btn--primary ag-btn--sm flex-1 justify-center">Criar</button>
+              <button type="button" (click)="showCreateProcess.set(false)" class="ag-btn ag-btn--secondary ag-btn--sm flex-1 justify-center">Cancelar</button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+
+  </div>
+
+
+</div>
+
+<!-- ═══ Modal: AI Insight Result ═══ -->
+@if (insightModal()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-5 border-b border-[rgba(0,0,0,0.07)]">
+        <h2 class="text-[15px] font-semibold text-[--text-primary]">{{ insightModal()!.title }}</h2>
+        <button (click)="insightModal.set(null)"
+                class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5">
+        <p class="text-sm text-[--text-primary] whitespace-pre-wrap leading-relaxed">{{ insightModal()!.content }}</p>
+      </div>
+      <div class="p-5 border-t border-[rgba(0,0,0,0.07)] flex justify-end">
+        <button (click)="insightModal.set(null)" class="ag-btn ag-btn--secondary">Fechar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ Modal: Project Picker ═══ -->
+@if (showProjectPicker()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-5 border-b border-[rgba(0,0,0,0.07)]">
+        <div>
+          <h2 class="text-[15px] font-semibold text-[--text-primary]">Selecionar Projeto</h2>
+          <p class="text-xs text-[--text-secondary] mt-0.5">
+            {{ projectPickerMode() === 'actionPlan' ? 'Para qual projeto gerar o plano de ação?' : 'Qual projeto deseja resumir?' }}
+          </p>
+        </div>
+        <button (click)="showProjectPicker.set(false)"
+                class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="p-3 max-h-80 overflow-y-auto">
+        @if (projects().length === 0) {
+          <p class="text-sm text-[--text-secondary] text-center py-8">Nenhum projeto encontrado</p>
+        } @else {
+          @for (project of projects(); track project.id) {
+            <button (click)="runProjectInsight(project)"
+                    class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                   [style.background]="project.color + '25'">
+                <span class="material-symbols-rounded text-base" [style.color]="project.color">{{ project.icon }}</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-[--text-primary] truncate">{{ project.name }}</p>
+                @if (project.team) {
+                  <p class="text-xs text-[--text-secondary]">{{ project.team.name }}</p>
+                }
+              </div>
+              <span class="material-symbols-rounded text-[--text-tertiary] text-base ml-auto">arrow_forward</span>
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}
