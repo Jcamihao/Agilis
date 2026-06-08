@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TaskLogsModule } from '../task-logs/task-logs.module';
-import { UsersModule } from '../users/users.module';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  imports: [UsersModule, TaskLogsModule],
+  imports: [AuditModule],
   controllers: [TasksController],
   providers: [TasksService],
   exports: [TasksService],
