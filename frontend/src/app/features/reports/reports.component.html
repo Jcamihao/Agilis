@@ -1,0 +1,95 @@
+    <div class="space-y-6">
+      <!-- Header -->
+      <div>
+        <h1 class="ag-page-title">Relatórios</h1>
+        <p class="ag-page-subtitle">Exporte dados em CSV ou Excel</p>
+      </div>
+
+      <!-- Date range filter -->
+      <div class="ag-card p-5">
+        <h3 class="font-semibold text-[--text-primary] mb-4 flex items-center gap-2">
+          <span class="material-symbols-rounded text-primary-500">filter_list</span>
+          Filtros Globais
+        </h3>
+        <form [formGroup]="filterForm" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="ag-label">De</label>
+            <input type="date" formControlName="from" class="ag-input">
+          </div>
+          <div>
+            <label class="ag-label">Até</label>
+            <input type="date" formControlName="to" class="ag-input">
+          </div>
+          <div>
+            <label class="ag-label">Status</label>
+            <select formControlName="status" class="ag-input">
+              <option value="">Todos</option>
+              <option value="BACKLOG">Backlog</option>
+              <option value="IN_PROGRESS">Em Andamento</option>
+              <option value="IN_REVIEW">Em Revisão</option>
+              <option value="DONE">Concluído</option>
+            </select>
+          </div>
+          <div>
+            <label class="ag-label">Prioridade</label>
+            <select formControlName="priority" class="ag-input">
+              <option value="">Todas</option>
+              <option value="LOW">Baixa</option>
+              <option value="MEDIUM">Média</option>
+              <option value="HIGH">Alta</option>
+              <option value="URGENT">Urgente</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <!-- Report cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        @for (report of reportCards; track report.key) {
+          <div class="ag-card ag-card--hoverable p-6 animate-fade-in-up">
+            <!-- Icon -->
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 flex-shrink-0"
+                 [style.background]="report.color + '20'">
+              <span class="material-symbols-rounded text-2xl" [style.color]="report.color">{{ report.icon }}</span>
+            </div>
+
+            <!-- Info -->
+            <h3 class="font-bold text-[--text-primary] mb-1">{{ report.title }}</h3>
+            <p class="text-sm text-[--text-secondary] mb-5 min-h-[40px]">{{ report.description }}</p>
+
+            <!-- Export buttons -->
+            <div class="flex gap-2">
+              <button (click)="export(report.key, 'csv')"
+                      [disabled]="downloading() === report.key + '_csv'"
+                      class="flex-1 ag-btn ag-btn--secondary ag-btn--sm justify-center">
+                @if (downloading() === report.key + '_csv') {
+                  <div class="w-4 h-4 border-2 border-slate-400 border-t-slate-600 rounded-full animate-spin"></div>
+                } @else {
+                  <span class="material-symbols-rounded text-base">description</span>
+                }
+                CSV
+              </button>
+              <button (click)="export(report.key, 'excel')"
+                      [disabled]="downloading() === report.key + '_excel'"
+                      class="flex-1 ag-btn ag-btn--primary ag-btn--sm justify-center">
+                @if (downloading() === report.key + '_excel') {
+                  <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                } @else {
+                  <span class="material-symbols-rounded text-base">table_view</span>
+                }
+                Excel
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Success toast -->
+      @if (downloadSuccess()) {
+        <div class="fixed bottom-6 right-6 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-lg
+                    flex items-center gap-2 animate-fade-in-up z-50">
+          <span class="material-symbols-rounded">check_circle</span>
+          Download iniciado!
+        </div>
+      }
+    </div>
