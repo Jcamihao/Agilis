@@ -1,0 +1,524 @@
+<div class="space-y-8">
+
+  <!-- ── Page Header ──────────────────────────────────── -->
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div>
+      <h2 class="text-[32px] sm:text-[48px] font-bold leading-[1.1] tracking-[-0.04em]"
+          style="color: #191c1d;">Diretório Organizacional</h2>
+      <p class="text-[16px] leading-[1.6] mt-2 max-w-2xl" style="color: #464554;">
+        Gerencie a estrutura de equipes internas e acompanhe as métricas de empresas clientes ativas na plataforma.
+      </p>
+    </div>
+    <div class="flex gap-3 flex-shrink-0">
+      <button class="px-4 py-2 text-[12px] font-medium rounded-lg transition-colors"
+              style="background: #ffffff; border: 1px solid rgba(199,196,215,0.6); color: #4648d4;
+                     box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+        Exportar Relatório
+      </button>
+      <button (click)="showModal.set(true)"
+              class="px-4 py-2 text-[12px] font-medium rounded-lg transition-colors flex items-center gap-2 text-white"
+              style="background: #4648d4; box-shadow: 0 1px 3px rgba(70,72,212,0.35);">
+        <span class="material-symbols-rounded" style="font-size:18px;">add</span>
+        Nova Equipe
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Tabs ─────────────────────────────────────────── -->
+  <div class="flex gap-6" style="border-bottom: 1px solid rgba(199,196,215,0.3);">
+    <span class="dir-tab dir-tab--active">
+      Equipes Internas ({{ teams().length }})
+    </span>
+    <a routerLink="/companies" class="dir-tab">
+      Empresas Clientes
+    </a>
+  </div>
+
+  <!-- ── Content ──────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="ag-skeleton rounded-2xl" style="height:220px;"></div>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+
+      @for (team of teams(); track team.id) {
+        <div class="dir-card animate-fade-in-up">
+          <!-- Color strip -->
+          <div class="absolute top-0 left-0 right-0 h-1" [style.background]="team.color"></div>
+
+          <div class="p-5 flex flex-col flex-1">
+            <!-- Icon + more -->
+            <div class="flex justify-between items-start mb-4">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                   [style.background]="team.color + '18'">
+                <span class="material-symbols-rounded" [style.color]="team.color">groups</span>
+              </div>
+              <button (click)="openManage(team)"
+                      class="p-1 rounded-lg transition-colors"
+                      style="color: #767586;"
+                      title="Gerenciar equipe">
+                <span class="material-symbols-rounded" style="font-size:20px;">more_horiz</span>
+              </button>
+            </div>
+
+            <!-- Name + description -->
+            <h3 class="text-[20px] font-semibold leading-[1.4] tracking-[-0.01em] mb-1"
+                style="color: #191c1d;">{{ team.name }}</h3>
+            <p class="text-[13px] leading-[1.5] flex-1 mb-4"
+               style="color: #767586; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+              {{ team._count?.members || team.members?.length || 0 }} membros
+              @if (team._count?.projects) { · {{ team._count!.projects }} projetos }
+            </p>
+
+            <!-- Footer: avatars + action -->
+            <div class="flex items-center justify-between pt-4"
+                 style="border-top: 1px solid rgba(199,196,215,0.2);">
+              <!-- Stacked avatars -->
+              <div class="flex items-center">
+                @if (team.members && team.members.length > 0) {
+                  @for (member of team.members.slice(0, 3); track member.id) {
+                    <div class="avatar-stacked"
+                         [style.background]="'linear-gradient(135deg, #818cf8, #6366f1)'"
+                         [title]="member.user.name">
+                      @if (member.user.avatarUrl) {
+                        <img [src]="member.user.avatarUrl" [alt]="member.user.name">
+                      } @else {
+                        {{ member.user.name.charAt(0).toUpperCase() }}
+                      }
+                    </div>
+                  }
+                  @if ((team._count?.members ?? team.members.length) > 3) {
+                    <div class="avatar-overflow">
+                      +{{ (team._count?.members ?? team.members.length) - 3 }}
+                    </div>
+                  }
+                } @else {
+                  <span class="text-[12px]" style="color: #767586;">Sem membros</span>
+                }
+              </div>
+
+              <button (click)="openManage(team)"
+                      class="text-[13px] font-semibold transition-colors"
+                      style="color: #4648d4;">
+                Gerenciar
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Add new team card -->
+      <div class="add-card" (click)="showModal.set(true)">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3"
+             style="background: rgba(199,196,215,0.3);">
+          <span class="material-symbols-rounded text-[24px]" style="color: #767586;">add_circle</span>
+        </div>
+        <h3 class="text-[16px] font-semibold mb-1" style="color: #191c1d;">Criar Nova Equipe</h3>
+        <p class="text-[13px]" style="color: #767586;">Configure permissões e membros.</p>
+      </div>
+
+    </div>
+
+    @if (teams().length === 0) {
+      <div class="ag-empty">
+        <span class="material-symbols-rounded ag-empty__icon">groups</span>
+        <p class="ag-empty__title">Nenhuma equipe criada</p>
+        <p class="ag-empty__desc">Crie equipes para organizar seus colaboradores por área</p>
+        <button (click)="showModal.set(true)" class="ag-btn ag-btn--primary">Criar Equipe</button>
+      </div>
+    }
+  }
+
+</div>
+
+<!-- ── Manage Modal ────────────────────────────────────── -->
+@if (showManageModal() && managingTeam()) {
+  <div (click)="closeManage()"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div (click)="$event.stopPropagation()"
+         class="bg-white rounded-2xl w-full max-w-2xl animate-scale-in flex flex-col overflow-hidden"
+         style="box-shadow: 0 20px 40px rgba(0,0,0,0.15); max-height: 90vh;">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+               [style.background]="managingTeam()!.color + '18'">
+            <span class="material-symbols-rounded" [style.color]="managingTeam()!.color">groups</span>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-[--text-primary]">{{ managingTeam()!.name }}</h2>
+            <p class="text-xs text-[--text-tertiary]">{{ (managingTeam()!.members ?? []).length }} membro{{ (managingTeam()!.members ?? []).length !== 1 ? 's' : '' }}</p>
+          </div>
+        </div>
+        <button (click)="closeManage()" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex border-b border-slate-100 shrink-0 px-6">
+        <button (click)="manageTab.set('settings')"
+                class="px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px"
+                [class.border-primary-600]="manageTab() === 'settings'"
+                [class.text-primary-600]="manageTab() === 'settings'"
+                [class.border-transparent]="manageTab() !== 'settings'"
+                [class.text-slate-500]="manageTab() !== 'settings'">
+          Configurações
+        </button>
+        <button (click)="manageTab.set('members')"
+                class="px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px flex items-center gap-2"
+                [class.border-primary-600]="manageTab() === 'members'"
+                [class.text-primary-600]="manageTab() === 'members'"
+                [class.border-transparent]="manageTab() !== 'members'"
+                [class.text-slate-500]="manageTab() !== 'members'">
+          Membros
+          <span class="text-xs px-1.5 py-0.5 rounded-full font-bold"
+                [class.bg-primary-100]="manageTab() === 'members'"
+                [class.text-primary-700]="manageTab() === 'members'"
+                [class.bg-slate-100]="manageTab() !== 'members'"
+                [class.text-slate-500]="manageTab() !== 'members'">
+            {{ (managingTeam()!.members ?? []).length }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto">
+
+        <!-- ── Tab: Configurações ── -->
+        @if (manageTab() === 'settings') {
+          <form [formGroup]="editForm" (ngSubmit)="saveTeamSettings()" class="p-6 flex flex-col gap-5">
+            <div class="flex flex-col gap-1.5">
+              <label class="ag-label ag-label--required">Nome da Equipe</label>
+              <input type="text" formControlName="name" class="ag-input" placeholder="Ex: Equipe de Produto" />
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <label class="ag-label">Cor da Equipe</label>
+              <div class="flex items-center gap-4 flex-wrap">
+                @for (color of colors; track color) {
+                  <button type="button" (click)="editForm.patchValue({ color })"
+                          class="w-9 h-9 rounded-xl border-4 transition-all duration-150 hover:scale-110"
+                          [style.background]="color"
+                          [class.border-slate-800]="editForm.get('color')?.value === color"
+                          [class.border-transparent]="editForm.get('color')?.value !== color"
+                          [class.scale-110]="editForm.get('color')?.value === color">
+                  </button>
+                }
+              </div>
+              <!-- Preview -->
+              <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                     [style.background]="(editForm.get('color')?.value || managingTeam()!.color) + '25'">
+                  <span class="material-symbols-rounded" [style.color]="editForm.get('color')?.value || managingTeam()!.color">groups</span>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-[--text-primary]">{{ editForm.get('name')?.value || managingTeam()!.name }}</p>
+                  <p class="text-xs text-[--text-tertiary]">Pré-visualização do card</p>
+                </div>
+                <div class="ml-auto h-1.5 w-16 rounded-full" [style.background]="editForm.get('color')?.value || managingTeam()!.color"></div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 pt-2 border-t border-slate-100">
+              <button type="button" (click)="closeManage()" class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
+              <button type="submit" [disabled]="savingTeam() || editForm.invalid || editForm.pristine"
+                      class="flex-1 ag-btn ag-btn--primary justify-center">
+                @if (savingTeam()) {
+                  <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                } @else {
+                  <span class="material-symbols-rounded text-lg">save</span>
+                }
+                Salvar Alterações
+              </button>
+            </div>
+          </form>
+        }
+
+        <!-- ── Tab: Membros ── -->
+        @if (manageTab() === 'members') {
+          <div class="p-6 flex flex-col gap-5">
+
+            <!-- Add member search -->
+            <div class="flex flex-col gap-2">
+              <label class="ag-label">Adicionar membro</label>
+              <div class="relative">
+                <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                <input type="text" placeholder="Buscar por nome ou email..."
+                       [value]="addMemberSearch()"
+                       (input)="addMemberSearch.set($any($event.target).value)"
+                       class="ag-input pl-9" />
+              </div>
+              @if (addMemberSearch()) {
+                <div class="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden max-h-44 overflow-y-auto">
+                  @if (!availableToAdd().length) {
+                    <p class="text-sm text-[--text-tertiary] text-center py-4">Nenhum membro disponível</p>
+                  } @else {
+                    @for (m of availableToAdd(); track m.id) {
+                      <button (click)="addMember(m)"
+                              class="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-left transition-colors">
+                        <div class="ag-avatar ag-avatar--sm shrink-0">
+                          @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="w-full h-full rounded-full object-cover" /> }
+                          @else { {{ m.name.charAt(0) }} }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium text-[--text-primary] truncate">{{ m.name }}</p>
+                          <p class="text-xs text-[--text-tertiary] truncate">{{ m.email }}</p>
+                        </div>
+                        <span class="material-symbols-rounded text-primary-500 text-lg">add</span>
+                      </button>
+                    }
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Current members list -->
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <label class="ag-label mb-0">Membros atuais</label>
+                @if ((managingTeam()!.members ?? []).length > 4) {
+                  <div class="relative">
+                    <span class="material-symbols-rounded absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
+                    <input type="text" placeholder="Filtrar..."
+                           [value]="memberSearch()"
+                           (input)="memberSearch.set($any($event.target).value)"
+                           class="ag-input py-1.5 pl-7 pr-3 text-xs w-40" />
+                  </div>
+                }
+              </div>
+
+              @if (!(managingTeam()!.members ?? []).length) {
+                <div class="text-center py-8 text-[--text-tertiary]">
+                  <span class="material-symbols-rounded text-4xl text-slate-200">group_off</span>
+                  <p class="text-sm mt-2">Nenhum membro nesta equipe.</p>
+                </div>
+              } @else {
+                <div class="flex flex-col gap-1.5 max-h-72 overflow-y-auto pr-1">
+                  @for (member of teamMembers(); track member.id) {
+                    <div class="rounded-xl border transition-colors"
+                         [class.border-slate-200]="openMenuMemberId() === member.userId"
+                         [class.bg-white]="openMenuMemberId() === member.userId"
+                         [class.border-slate-100]="openMenuMemberId() !== member.userId"
+                         [class.bg-slate-50]="openMenuMemberId() !== member.userId">
+
+                      <!-- Main row -->
+                      <div class="flex items-center gap-3 p-3 group">
+                        <div class="ag-avatar ag-avatar--md shrink-0">
+                          @if (member.user.avatarUrl) {
+                            <img [src]="member.user.avatarUrl" class="w-full h-full rounded-full object-cover" />
+                          } @else {
+                            {{ member.user.name.charAt(0) }}
+                          }
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-semibold text-[--text-primary] truncate">{{ member.user.name }}</p>
+                          <p class="text-xs text-[--text-tertiary] truncate">{{ member.user.email }}</p>
+                        </div>
+
+                        <!-- Role badge -->
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0"
+                              [class.bg-amber-100]="member.role === 'OWNER'"
+                              [class.text-amber-700]="member.role === 'OWNER'"
+                              [class.bg-purple-100]="member.role === 'ADMIN'"
+                              [class.text-purple-700]="member.role === 'ADMIN'"
+                              [class.bg-blue-100]="member.role === 'MEMBER' || member.role === 'VIEWER'"
+                              [class.text-blue-700]="member.role === 'MEMBER' || member.role === 'VIEWER'">
+                          {{ ROLE_LABELS[member.role] || member.role }}
+                        </span>
+
+                        <!-- Toggle expand button -->
+                        <button (click)="toggleMemberMenu(member.userId, $event)"
+                                class="p-1.5 rounded-lg text-[--text-tertiary] hover:bg-slate-200 hover:text-[--text-primary] transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                                [class.opacity-100]="openMenuMemberId() === member.userId"
+                                [class.text-primary-600]="openMenuMemberId() === member.userId"
+                                [class.bg-primary-50]="openMenuMemberId() === member.userId">
+                          <span class="material-symbols-rounded text-lg">
+                            {{ openMenuMemberId() === member.userId ? 'expand_less' : 'more_vert' }}
+                          </span>
+                        </button>
+                      </div>
+
+                      <!-- Inline actions panel (expands in-place, no overflow clipping) -->
+                      @if (openMenuMemberId() === member.userId) {
+                        <div class="px-3 pb-3 flex flex-col gap-2 animate-fade-in">
+                          <div class="border-t border-slate-100 pt-2">
+                            <p class="text-[10px] font-semibold text-[--text-tertiary] uppercase tracking-wider mb-2 px-1">Alterar papel</p>
+                            <div class="flex gap-2 flex-wrap">
+                              @for (r of roleOptions; track r.key) {
+                                <button (click)="changeRole(member.userId, r.key)"
+                                        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors"
+                                        [class.bg-primary-600]="member.role === r.key"
+                                        [class.text-white]="member.role === r.key"
+                                        [class.border-primary-600]="member.role === r.key"
+                                        [class.bg-white]="member.role !== r.key"
+                                        [class.text-slate-600]="member.role !== r.key"
+                                        [class.border-slate-200]="member.role !== r.key"
+                                        [class.hover:bg-slate-50]="member.role !== r.key">
+                                  @if (member.role === r.key) {
+                                    <span class="material-symbols-rounded text-xs">check</span>
+                                  }
+                                  {{ r.label }}
+                                </button>
+                              }
+                            </div>
+                          </div>
+                          <button (click)="removeMember(member.userId, member.user.name)"
+                                  class="self-start flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
+                            <span class="material-symbols-rounded text-xs">person_remove</span>
+                            Remover da equipe
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Create Team Modal ────────────────────────────────── -->
+@if (showModal()) {
+  <div (click)="showModal.set(false); selectedCreateMembers.set([]); createMemberSearch.set('')"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div (click)="$event.stopPropagation()"
+         class="bg-white rounded-2xl w-full max-w-lg animate-scale-in flex flex-col overflow-hidden"
+         style="box-shadow: 0 20px 40px rgba(0,0,0,0.15); max-height: 90vh;">
+
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
+        <h2 class="text-base font-bold text-[--text-primary]">Nova Equipe</h2>
+        <button (click)="showModal.set(false); selectedCreateMembers.set([]); createMemberSearch.set('')"
+                class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="createTeam()" class="flex flex-col overflow-hidden">
+        <div class="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+
+          <!-- Name -->
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label ag-label--required">Nome da Equipe</label>
+            <input type="text" formControlName="name" placeholder="Ex: Equipe de Produto" class="ag-input" />
+          </div>
+
+          <!-- Color -->
+          <div class="flex flex-col gap-3">
+            <label class="ag-label">Cor</label>
+            <div class="flex gap-2 flex-wrap">
+              @for (color of colors; track color) {
+                <button type="button" (click)="form.patchValue({ color })"
+                        class="w-8 h-8 rounded-xl border-4 transition-all hover:scale-110"
+                        [style.background]="color"
+                        [class.border-slate-800]="form.get('color')?.value === color"
+                        [class.scale-110]="form.get('color')?.value === color"
+                        [class.border-transparent]="form.get('color')?.value !== color">
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Member picker -->
+          <div class="flex flex-col gap-3">
+            <label class="ag-label">Membros <span class="text-[--text-tertiary] font-normal">(opcional)</span></label>
+
+            <!-- Search -->
+            <div class="relative">
+              <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+              <input type="text" placeholder="Buscar membros para adicionar..."
+                     [value]="createMemberSearch()"
+                     (input)="createMemberSearch.set($any($event.target).value)"
+                     class="ag-input pl-9" />
+            </div>
+
+            <!-- Suggestions -->
+            @if (createMemberSearch()) {
+              <div class="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden max-h-36 overflow-y-auto">
+                @if (!availableForCreate().length) {
+                  <p class="text-sm text-[--text-tertiary] text-center py-3">Nenhum membro encontrado</p>
+                } @else {
+                  @for (m of availableForCreate(); track m.id) {
+                    <button type="button" (click)="addToCreate(m)"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white text-left transition-colors border-b border-slate-100 last:border-0">
+                      <div class="ag-avatar ag-avatar--sm shrink-0">
+                        @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="w-full h-full rounded-full object-cover" /> }
+                        @else { {{ m.name.charAt(0) }} }
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-[--text-primary] truncate">{{ m.name }}</p>
+                        <p class="text-xs text-[--text-tertiary] truncate">{{ m.email }}</p>
+                      </div>
+                      <span class="material-symbols-rounded text-primary-500 text-lg shrink-0">add</span>
+                    </button>
+                  }
+                }
+              </div>
+            }
+
+            <!-- Selected members -->
+            @if (selectedCreateMembers().length) {
+              <div class="flex flex-col gap-2">
+                @for (item of selectedCreateMembers(); track item.member.id) {
+                  <div class="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <div class="ag-avatar ag-avatar--sm shrink-0">
+                      @if (item.member.avatarUrl) { <img [src]="item.member.avatarUrl" class="w-full h-full rounded-full object-cover" /> }
+                      @else { {{ item.member.name.charAt(0) }} }
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-[--text-primary] truncate">{{ item.member.name }}</p>
+                    </div>
+                    <!-- Role select -->
+                    <select [value]="item.role"
+                            (change)="setCreateRole(item.member.id, $any($event.target).value)"
+                            class="text-xs font-semibold border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-[--text-secondary] outline-none focus:border-primary-400 cursor-pointer shrink-0">
+                      @for (r of roleOptions; track r.key) {
+                        <option [value]="r.key">{{ r.label }}</option>
+                      }
+                    </select>
+                    <!-- Remove -->
+                    <button type="button" (click)="removeFromCreate(item.member.id)"
+                            class="p-1 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0">
+                      <span class="material-symbols-rounded text-base">close</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else if (!createMemberSearch()) {
+              <p class="text-xs text-[--text-tertiary] flex items-center gap-1.5">
+                <span class="material-symbols-rounded text-sm">info</span>
+                Você será adicionado como Líder automaticamente.
+              </p>
+            }
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex gap-3 px-6 py-4 border-t border-slate-100 shrink-0">
+          <button type="button"
+                  (click)="showModal.set(false); selectedCreateMembers.set([]); createMemberSearch.set('')"
+                  class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
+          <button type="submit" [disabled]="saving() || form.invalid"
+                  class="flex-1 ag-btn ag-btn--primary justify-center">
+            @if (saving()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded text-lg">group_add</span>
+            }
+            Criar Equipe
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

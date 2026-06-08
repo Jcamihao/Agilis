@@ -1,0 +1,249 @@
+<!-- ═══════ HEADER ═══════ -->
+<div class="space-y-6">
+  <!-- Breadcrumb + title -->
+  <div class="flex items-start justify-between">
+    <div class="flex items-center gap-3">
+      <a [routerLink]="['/projects', projectId(), 'kanban']"
+        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white hover:text-[--text-secondary] transition-colors">
+        <span class="material-symbols-rounded text-xl">arrow_back</span>
+      </a>
+      <div>
+        <h2 class="ag-page-title flex items-center gap-2">
+          <span class="material-symbols-rounded text-2xl text-primary-600">schedule</span>
+          Relatório de Tempo
+        </h2>
+        @if (project()) {
+          <p class="ag-page-subtitle">{{ project()!.name }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Links to other views -->
+    <div class="flex items-center gap-2">
+      <a [routerLink]="['/projects', projectId(), 'list']"
+        class="ag-btn ag-btn--ghost ag-btn--sm flex items-center gap-1.5">
+        <span class="material-symbols-rounded text-base">table_rows</span>
+        Lista
+      </a>
+      <a [routerLink]="['/projects', projectId(), 'kanban']"
+        class="ag-btn ag-btn--secondary ag-btn--sm flex items-center gap-1.5">
+        <span class="material-symbols-rounded text-base">view_kanban</span>
+        Kanban
+      </a>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <!-- Skeleton -->
+    <div class="grid grid-cols-3 gap-5">
+      @for (i of [1,2,3]; track i) {
+        <div class="ag-card h-24 ag-skeleton"></div>
+      }
+    </div>
+    <div class="ag-card h-64 ag-skeleton"></div>
+  } @else if (!report()) {
+    <div class="ag-empty">
+      <span class="material-symbols-rounded ag-empty__icon">schedule</span>
+      <p class="ag-empty__title">Nenhum dado disponível</p>
+    </div>
+  } @else {
+    <!-- ── KPI Cards ── -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <!-- Total -->
+      <div class="ag-card flex items-center gap-4">
+        <div class="w-11 h-11 rounded-xl bg-primary-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-rounded text-xl text-primary-600">timer</span>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-[--text-primary] tabular-nums">{{ fmt(report()!.totalMin) }}</p>
+          <p class="text-xs text-[--text-secondary] mt-0.5">Total registrado</p>
+        </div>
+      </div>
+
+      <!-- Tarefas com tempo -->
+      <div class="ag-card flex items-center gap-4">
+        <div class="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-rounded text-xl text-violet-600">task_alt</span>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-[--text-primary] tabular-nums">{{ report()!.byTask.length }}</p>
+          <p class="text-xs text-[--text-secondary] mt-0.5">Tarefas com tempo</p>
+        </div>
+      </div>
+
+      <!-- Colaboradores -->
+      <div class="ag-card flex items-center gap-4">
+        <div class="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-rounded text-xl text-emerald-600">group</span>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-[--text-primary] tabular-nums">{{ report()!.byUser.length }}</p>
+          <p class="text-xs text-[--text-secondary] mt-0.5">Colaboradores</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Tabs ── -->
+    <div class="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+      @for (tab of [
+        { key: 'tasks', label: 'Por Tarefa', icon: 'task_alt' },
+        { key: 'users', label: 'Por Membro', icon: 'group' },
+        { key: 'log',   label: 'Log Recente', icon: 'history' }
+      ]; track tab.key) {
+        <button
+          (click)="activeTab.set($any(tab.key))"
+          class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+          [class.bg-white]="activeTab() === tab.key"
+          [class.text-primary-700]="activeTab() === tab.key"
+          [class.shadow-sm]="activeTab() === tab.key"
+          [class.text-[--text-secondary]]="activeTab() !== tab.key"
+          [class.hover:text-[--text-primary]]="activeTab() !== tab.key">
+          <span class="material-symbols-rounded text-base">{{ tab.icon }}</span>
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <!-- ── Tab: Por Tarefa ── -->
+    @if (activeTab() === 'tasks') {
+      @if (report()!.byTask.length === 0) {
+        <div class="ag-empty"><p class="ag-empty__title">Nenhuma tarefa com tempo registrado</p></div>
+      } @else {
+        <div class="ag-card overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-100 bg-slate-50">
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary]">Tarefa</th>
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary] hidden md:table-cell">Status</th>
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary]">Entradas</th>
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary]">Total</th>
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary] hidden lg:table-cell w-48">Barra</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of report()!.byTask; track row.task.id; let odd = $odd) {
+                <tr class="border-b border-slate-50 transition-colors hover:bg-slate-50"
+                  [class.bg-slate-50/50]="odd">
+                  <td class="px-5 py-3.5">
+                    <a [routerLink]="['/projects', projectId(), 'kanban']"
+                      class="font-medium text-[--text-primary] hover:text-primary-600 transition-colors">
+                      {{ row.task.title }}
+                    </a>
+                  </td>
+                  <td class="px-5 py-3.5 hidden md:table-cell">
+                    <span class="ag-badge ag-badge--neutral text-[11px]">{{ row.task.status }}</span>
+                  </td>
+                  <td class="px-5 py-3.5 text-[--text-secondary]">{{ row.entries.length }}</td>
+                  <td class="px-5 py-3.5">
+                    <span class="font-semibold text-primary-700 tabular-nums">{{ fmt(row.totalMin) }}</span>
+                  </td>
+                  <td class="px-5 py-3.5 hidden lg:table-cell">
+                    <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden w-36">
+                      <div class="h-full bg-primary-400 rounded-full transition-all"
+                        [style.width.%]="pct(row.totalMin, report()!.totalMin)"></div>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- ── Tab: Por Membro ── -->
+    @if (activeTab() === 'users') {
+      @if (report()!.byUser.length === 0) {
+        <div class="ag-empty"><p class="ag-empty__title">Nenhum registro encontrado</p></div>
+      } @else {
+        <div class="space-y-3">
+          @for (row of report()!.byUser; track row.user.id) {
+            <div class="ag-card flex items-center gap-4">
+              <!-- Avatar -->
+              <div class="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 overflow-hidden">
+                @if (row.user.avatarUrl) {
+                  <img [src]="row.user.avatarUrl" class="w-full h-full object-cover" />
+                } @else {
+                  {{ initials(row.user.name) }}
+                }
+              </div>
+              <!-- Name + bar -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1.5">
+                  <p class="font-semibold text-[--text-primary] text-sm">{{ row.user.name }}</p>
+                  <span class="font-bold text-primary-700 tabular-nums text-sm">{{ fmt(row.totalMin) }}</span>
+                </div>
+                <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-primary-400 rounded-full transition-all duration-500"
+                    [style.width.%]="pct(row.totalMin, report()!.totalMin)"></div>
+                </div>
+                <p class="text-[11px] text-[--text-tertiary] mt-1">
+                  {{ pct(row.totalMin, report()!.totalMin) }}% do total
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- ── Tab: Log Recente ── -->
+    @if (activeTab() === 'log') {
+      @if (report()!.recentEntries.length === 0) {
+        <div class="ag-empty"><p class="ag-empty__title">Nenhuma entrada recente</p></div>
+      } @else {
+        <div class="ag-card overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-100 bg-slate-50">
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary]">Membro</th>
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary]">Tarefa</th>
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary] hidden md:table-cell">Início</th>
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary]">Duração</th>
+                <th class="px-5 py-3 text-left font-semibold text-[--text-secondary] hidden lg:table-cell">Descrição</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of report()!.recentEntries; track e.id; let odd = $odd) {
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors"
+                  [class.bg-slate-50/50]="odd">
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-2">
+                      <div class="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden">
+                        @if (e.user.avatarUrl) {
+                          <img [src]="e.user.avatarUrl" class="w-full h-full object-cover" />
+                        } @else {
+                          {{ initials(e.user.name) }}
+                        }
+                      </div>
+                      <span class="text-[--text-secondary] font-medium">{{ e.user.name }}</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3">
+                    <span class="text-[--text-primary] font-medium">{{ $any(e).task?.title }}</span>
+                  </td>
+                  <td class="px-5 py-3 text-[--text-tertiary] hidden md:table-cell">
+                    {{ formatDate(e.startedAt) }}
+                  </td>
+                  <td class="px-5 py-3">
+                    @if (e.durationMin) {
+                      <span class="font-semibold text-primary-700 tabular-nums">{{ fmt(e.durationMin) }}</span>
+                    } @else {
+                      <span class="text-emerald-500 font-semibold flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Ativo
+                      </span>
+                    }
+                  </td>
+                  <td class="px-5 py-3 text-[--text-tertiary] hidden lg:table-cell">
+                    {{ e.description ?? '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  }
+</div>
