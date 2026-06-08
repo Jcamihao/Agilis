@@ -1,0 +1,224 @@
+<div class="flex flex-col gap-6 animate-fade-in-up">
+
+  <!-- Title -->
+  <div class="flex flex-col gap-2 text-center">
+    @switch (currentStep()) {
+      @case (1) {
+        <h2 class="text-[32px] font-semibold leading-[1.2] tracking-[-0.02em]" style="color:#191c1d;">Criar nova conta</h2>
+        <p class="text-[14px] leading-[1.5]" style="color:#464554;">Junte-se ao Agilis e eleve a gestão da sua equipe.</p>
+      }
+      @case (2) {
+        <h2 class="text-[32px] font-semibold leading-[1.2] tracking-[-0.02em]" style="color:#191c1d;">Seus dados</h2>
+        <p class="text-[14px] leading-[1.5]" style="color:#464554;">Preencha suas informações de contato e endereço.</p>
+      }
+      @case (3) {
+        <h2 class="text-[32px] font-semibold leading-[1.2] tracking-[-0.02em]" style="color:#191c1d;">Quase lá!</h2>
+        <p class="text-[14px] leading-[1.5]" style="color:#464554;">Informe o nome da sua empresa para finalizar.</p>
+      }
+    }
+  </div>
+
+  <!-- Step indicator -->
+  <div class="flex items-center gap-1.5 justify-center">
+    @for (step of [1,2,3]; track step; let last = $last) {
+      <div class="flex items-center gap-1.5">
+        <div class="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all"
+             [style.background]="currentStep() >= step ? '#4648d4' : 'rgba(199,196,215,0.4)'"
+             [style.color]="currentStep() >= step ? '#fff' : '#767586'">
+          @if (currentStep() > step) {
+            <span class="material-symbols-rounded" style="font-size:14px">check</span>
+          } @else {
+            {{ step }}
+          }
+        </div>
+        <span class="text-[11px] font-medium transition-colors"
+              [style.color]="currentStep() >= step ? '#4648d4' : '#767586'">
+          {{ step === 1 ? 'Conta' : step === 2 ? 'Dados' : 'Empresa' }}
+        </span>
+      </div>
+      @if (!last) {
+        <div class="w-6 h-px mx-1" style="background:rgba(199,196,215,0.5);"></div>
+      }
+    }
+  </div>
+
+  <!-- Form Card -->
+  <div class="rounded-2xl p-6"
+       style="background:#ffffff; border:1px solid rgba(199,196,215,0.3); box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+
+      <!-- ── Step 1: Conta ── -->
+      @if (currentStep() === 1) {
+        <div class="flex flex-col gap-4 animate-fade-in">
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">Nome Completo</label>
+            <input type="text" formControlName="name" placeholder="Seu nome completo" class="auth-input"
+                   [class.auth-input--error]="invalid('name')">
+            @if (invalid('name')) {
+              <p class="text-[12px] mt-0.5" style="color:#ba1a1a;">Nome obrigatório (mín. 2 caracteres)</p>
+            }
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">Email Corporativo</label>
+            <input type="email" formControlName="email" placeholder="voce@empresa.com" class="auth-input"
+                   [class.auth-input--error]="invalid('email')">
+            @if (invalid('email')) {
+              <p class="text-[12px] mt-0.5" style="color:#ba1a1a;">Email inválido</p>
+            }
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">Senha</label>
+            <input type="password" formControlName="password" placeholder="Mínimo 6 caracteres" class="auth-input"
+                   [class.auth-input--error]="invalid('password')">
+            @if (invalid('password')) {
+              <p class="text-[12px] mt-0.5" style="color:#ba1a1a;">Mínimo 6 caracteres</p>
+            }
+          </div>
+
+          <button type="button" (click)="goToStep(2)"
+                  class="mt-1 w-full h-11 text-white text-[12px] font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                  style="background:linear-gradient(135deg,#4648d4 0%,#645efb 100%); box-shadow:0 1px 3px rgba(70,72,212,0.35);">
+            Continuar
+            <span class="material-symbols-rounded text-lg">arrow_forward</span>
+          </button>
+        </div>
+      }
+
+      <!-- ── Step 2: Dados pessoais ── -->
+      @if (currentStep() === 2) {
+        <div class="flex flex-col gap-4 animate-fade-in">
+
+          <!-- CPF / CNPJ + Telefone -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">
+                CPF / CNPJ <span style="color:#767586;">(opcional)</span>
+              </label>
+              <input type="text" formControlName="cpfCnpj" placeholder="000.000.000-00"
+                     class="auth-input" maxlength="18"
+                     (input)="onCpfCnpjInput($event)">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">
+                Telefone <span style="color:#767586;">(opcional)</span>
+              </label>
+              <input type="text" formControlName="phone" placeholder="(00) 00000-0000"
+                     class="auth-input" maxlength="15"
+                     (input)="onPhoneInput($event)">
+            </div>
+          </div>
+
+          <!-- CEP -->
+          <div class="flex flex-col gap-1">
+            <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">
+              CEP <span style="color:#767586;">(opcional)</span>
+            </label>
+            <div class="relative">
+              <input type="text" formControlName="cep" placeholder="00000-000"
+                     class="auth-input pr-8" maxlength="9"
+                     (input)="onCepInput($event)">
+              @if (lookingUpCep()) {
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-[#4648d4]/30 border-t-[#4648d4] rounded-full animate-spin"></div>
+              }
+            </div>
+            @if (cepError()) {
+              <p class="text-[12px] mt-0.5" style="color:#ba1a1a;">{{ cepError() }}</p>
+            }
+          </div>
+
+          <!-- UF + Endereço -->
+          <div class="grid grid-cols-[80px_1fr] gap-3">
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">UF</label>
+              <input type="text" formControlName="uf" placeholder="SP" maxlength="2"
+                     class="auth-input uppercase">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">Endereço</label>
+              <input type="text" formControlName="address" placeholder="Rua, Av..." class="auth-input">
+            </div>
+          </div>
+
+          <!-- Número + Complemento -->
+          <div class="grid grid-cols-[120px_1fr] gap-3">
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">Número</label>
+              <input type="text" formControlName="addressNumber" placeholder="123" class="auth-input">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">
+                Complemento <span style="color:#767586;">(opcional)</span>
+              </label>
+              <input type="text" formControlName="addressComplement" placeholder="Apto, Sala..." class="auth-input">
+            </div>
+          </div>
+
+          <div class="flex gap-3 mt-1">
+            <button type="button" (click)="goToStep(1)"
+                    class="flex-1 h-11 text-[12px] font-medium rounded-lg transition-all flex items-center justify-center gap-1.5"
+                    style="color:#464554; background:transparent;">
+              <span class="material-symbols-rounded text-base">arrow_back</span>
+              Voltar
+            </button>
+            <button type="button" (click)="goToStep(3)"
+                    class="flex-1 h-11 text-white text-[12px] font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+                    style="background:linear-gradient(135deg,#4648d4 0%,#645efb 100%); box-shadow:0 1px 3px rgba(70,72,212,0.35);">
+              Continuar
+              <span class="material-symbols-rounded text-lg">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ── Step 3: Empresa ── -->
+      @if (currentStep() === 3) {
+        <div class="flex flex-col gap-4 animate-fade-in">
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[12px] font-medium tracking-[0.02em]" style="color:#191c1d;">
+              Nome da Empresa <span style="color:#767586;">(opcional)</span>
+            </label>
+            <input type="text" formControlName="companyName" placeholder="Ex: TechNova Ltda" class="auth-input">
+          </div>
+
+          @if (error()) {
+            <div class="px-3 py-2.5 rounded-lg text-[13px]" style="background:#ffdad6; color:#93000a;">
+              {{ error() }}
+            </div>
+          }
+
+          <button type="submit" [disabled]="loading()"
+                  class="mt-1 w-full h-11 text-white text-[12px] font-medium rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                  style="background:linear-gradient(135deg,#4648d4 0%,#645efb 100%); box-shadow:0 1px 3px rgba(70,72,212,0.35);">
+            @if (loading()) {
+              <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded text-lg">check</span>
+            }
+            Criar conta
+          </button>
+
+          <button type="button" (click)="goToStep(2)"
+                  class="w-full h-10 text-[12px] font-medium rounded-lg transition-all flex items-center justify-center gap-1.5"
+                  style="color:#464554; background:transparent;">
+            <span class="material-symbols-rounded text-base">arrow_back</span>
+            Voltar
+          </button>
+        </div>
+      }
+
+    </form>
+  </div>
+
+  <!-- Toggle to Login -->
+  <div class="text-center">
+    <a routerLink="/auth/login" class="text-[12px] font-medium" style="color:#464554;">
+      Já possui uma conta?
+      <span class="font-semibold" style="color:#4648d4;">Faça login</span>
+    </a>
+  </div>
+
+</div>
