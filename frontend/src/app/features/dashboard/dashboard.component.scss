@@ -1,0 +1,70 @@
+// ── Dashboard card hover ──────────────────────────────────
+.dash-card {
+  background: #ffffff;
+  border: 1px solid rgba(199, 196, 215, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+
+  &:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+}
+
+// ── Stat card icon circle ────────────────────────────────
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 200ms ease;
+
+  .dash-card:hover & { transform: scale(1.1); }
+}
+
+// ── Chart axis placeholder ────────────────────────────────
+.chart-area {
+  position: relative;
+  flex: 1;
+
+  &__axis-x {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(199, 196, 215, 0.3);
+  }
+  &__axis-y {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background: rgba(199, 196, 215, 0.3);
+  }
+}
+
+// ── Activity timeline line ────────────────────────────────
+.activity-line {
+  position: absolute;
+  top: 40px;
+  left: 19px;
+  bottom: 0;
+  width: 2px;
+  background: #edeeef;
+}
+
+// ── Workload bar ──────────────────────────────────────────
+.workload-bar {
+  height: 6px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #edeeef;
+
+  &__fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 500ms ease;
+  }
+}
