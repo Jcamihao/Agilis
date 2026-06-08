@@ -1,0 +1,84 @@
+<div class="flex flex-1 w-full h-screen">
+
+  <!-- Left Panel: Dark Branding (lg+) -->
+  <div class="hidden lg:flex flex-col flex-1 relative overflow-hidden justify-between p-10"
+       style="background: #2e3132;">
+
+    <!-- Decorative orbs -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+      <div class="absolute -top-1/4 -left-1/4 w-1/2 h-1/2 rounded-full blur-[120px]"
+           style="background: #6063ee;"></div>
+      <div class="absolute bottom-0 right-0 w-1/2 h-1/2 rounded-full blur-[100px] mix-blend-screen"
+           style="background: #645efb;"></div>
+    </div>
+
+    <!-- Logo -->
+    <div class="relative z-10 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg flex items-center justify-center shadow-md"
+           style="background: linear-gradient(135deg, #4648d4 0%, #645efb 100%);">
+        <span class="material-symbols-rounded text-white text-lg">space_dashboard</span>
+      </div>
+      <span class="text-white font-bold text-2xl tracking-tight">Agilis</span>
+    </div>
+
+    <!-- Hero -->
+    <div class="relative z-10 flex flex-col gap-6 max-w-lg mb-20">
+      <h1 class="text-[48px] font-bold leading-[1.1] tracking-[-0.04em] text-white">
+        Gerenciamento Pro para
+        <span style="color: #c3c0ff;">Equipes de Alta Performance</span>
+      </h1>
+      <p class="text-[16px] leading-[1.6]" style="color: #c4c5d7;">
+        A plataforma B2B desenhada para desenvolvedores e gerentes que exigem precisão.
+        Reduza a carga cognitiva e alcance resultados excepcionais.
+      </p>
+
+      <!-- Stats -->
+      <div class="flex items-center gap-6 mt-2 pt-4 border-t"
+           style="border-color: rgba(255,255,255,0.1);">
+        <div class="flex flex-col gap-1">
+          <span class="text-[20px] font-semibold leading-tight text-white">99.9%</span>
+          <span class="text-[11px] font-medium uppercase tracking-[0.08em]"
+                style="color: #c4c5d7;">Uptime Garantido</span>
+        </div>
+        <div class="w-px h-10" style="background: rgba(255,255,255,0.1);"></div>
+        <div class="flex flex-col gap-1">
+          <span class="text-[20px] font-semibold leading-tight text-white">SOC 2</span>
+          <span class="text-[11px] font-medium uppercase tracking-[0.08em]"
+                style="color: #c4c5d7;">Certificação de Segurança</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Testimonial -->
+    <div class="relative z-10 flex items-center gap-4 p-4 rounded-xl w-max"
+         style="background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                backdrop-filter: blur(12px);">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
+           style="background: #e1e0ff; color: #4648d4;">AB</div>
+      <div>
+        <p class="text-[14px] text-white">"A interface mais limpa que já usamos."</p>
+        <p class="text-[12px] font-medium" style="color: #c4c5d7;">Ana Costa, CTO TechNova</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Form -->
+  <div class="flex-1 flex flex-col justify-center items-center p-6 lg:p-10 relative"
+       style="background: #f8f9fa;">
+
+    <!-- Mobile logo -->
+    <div class="lg:hidden flex items-center gap-3 absolute top-6 left-6">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+           style="background: linear-gradient(135deg, #4648d4, #645efb);">
+        <span class="material-symbols-rounded text-white" style="font-size: 16px;">space_dashboard</span>
+      </div>
+      <span class="font-bold text-lg" style="color: #191c1d;">Agilis</span>
+    </div>
+
+    <div class="w-full max-w-[400px]">
+      <router-outlet />
+    </div>
+  </div>
+
+</div>
