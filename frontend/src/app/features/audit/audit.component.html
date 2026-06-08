@@ -1,0 +1,194 @@
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="ag-page-header">
+        <div>
+                <div class="ag-section-badge">
+        <span class="ag-section-num">11</span>
+        <span class="ag-section-label">Auditoria</span>
+      </div>
+<h1 class="ag-page-title">Auditoria</h1>
+          @if (page()) {
+            <p class="ag-page-subtitle">{{ page()!.total }} registro{{ page()!.total !== 1 ? 's' : '' }}</p>
+          }
+        </div>
+        <button (click)="load()" class="ag-btn ag-btn--secondary ag-btn--sm">
+          <span class="material-symbols-rounded text-base">refresh</span> Atualizar
+        </button>
+      </div>
+
+      <!-- Stats cards -->
+      @if (stats()) {
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          @for (item of topActions(); track item.action) {
+            <div class="ag-card p-4 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                   [style.background]="getAction(item.action).color + '20'">
+                <span class="material-symbols-rounded text-base" [style.color]="getAction(item.action).color">
+                  {{ getAction(item.action).icon }}
+                </span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">{{ item._count.action }}</p>
+                <p class="text-xs text-[--text-tertiary] truncate">{{ getAction(item.action).label }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Filters -->
+      <div class="ag-card p-4">
+        <form [formGroup]="filterForm" (ngSubmit)="load()" class="flex flex-wrap gap-3 items-end">
+          <div class="flex-1 min-w-32">
+            <label class="ag-label">Ação</label>
+            <select formControlName="action" class="ag-input text-sm py-2">
+              <option value="">Todas as ações</option>
+              @for (a of actionOptions; track a.key) {
+                <option [value]="a.key">{{ a.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="flex-1 min-w-32">
+            <label class="ag-label">Entidade</label>
+            <select formControlName="entityType" class="ag-input text-sm py-2">
+              <option value="">Todas</option>
+              <option value="task">Tarefa</option>
+              <option value="project">Projeto</option>
+              <option value="team">Equipe</option>
+              <option value="comment">Comentário</option>
+            </select>
+          </div>
+          <div class="flex-1 min-w-32">
+            <label class="ag-label">De</label>
+            <input type="date" formControlName="from" class="ag-input text-sm py-2">
+          </div>
+          <div class="flex-1 min-w-32">
+            <label class="ag-label">Até</label>
+            <input type="date" formControlName="to" class="ag-input text-sm py-2">
+          </div>
+          <button type="submit" class="ag-btn ag-btn--primary ag-btn--sm">
+            <span class="material-symbols-rounded text-base">search</span> Filtrar
+          </button>
+          <button type="button" (click)="clearFilters()" class="ag-btn ag-btn--ghost ag-btn--sm">
+            Limpar
+          </button>
+        </form>
+      </div>
+
+      <!-- Log table -->
+      @if (loading()) {
+        <div class="space-y-2">
+          @for (i of [1,2,3,4,5]; track i) { <div class="ag-skeleton h-16 rounded-2xl"></div> }
+        </div>
+      } @else if (logs().length === 0) {
+        <div class="ag-empty py-16">
+          <span class="material-symbols-rounded ag-empty__icon">policy</span>
+          <p class="ag-empty__title">Nenhum log encontrado</p>
+          <p class="ag-empty__desc">Tente ajustar os filtros</p>
+        </div>
+      } @else {
+        <div class="ag-card overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-[#F5F5F5] border-b border-b-[rgba(0,0,0,0.07)]">
+                <th class="px-4 py-3 text-left font-semibold text-[--text-secondary]">Ação</th>
+                <th class="px-4 py-3 text-left font-semibold text-[--text-secondary]">Usuário</th>
+                <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] hidden md:table-cell">Entidade</th>
+                <th class="px-4 py-3 text-left font-semibold text-[--text-secondary] hidden lg:table-cell">Alteração</th>
+                <th class="px-4 py-3 text-left font-semibold text-[--text-secondary]">Quando</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-border">
+              @for (log of logs(); track log.id) {
+                <tr class="hover:bg-[#F5F5F5] transition-colors cursor-pointer"
+                    (click)="selectedLog.set(selectedLog()?.id === log.id ? null : log)">
+                  <td class="px-4 py-3.5">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                           [style.background]="getAction(log.action).color + '15'">
+                        <span class="material-symbols-rounded text-sm" [style.color]="getAction(log.action).color">
+                          {{ getAction(log.action).icon }}
+                        </span>
+                      </div>
+                      <span class="font-medium text-[--text-primary]">{{ getAction(log.action).label }}</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <div class="ag-avatar ag-avatar--sm">{{ log.user.name.charAt(0) }}</div>
+                      <div class="min-w-0 hidden sm:block">
+                        <p class="font-medium text-[--text-primary] truncate max-w-28">{{ log.user.name }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3.5 hidden md:table-cell">
+                    <span class="ag-badge ag-badge--neutral capitalize">{{ log.entityType }}</span>
+                  </td>
+                  <td class="px-4 py-3.5 hidden lg:table-cell">
+                    @if (log.oldValues || log.newValues) {
+                      <button (click)="$event.stopPropagation(); selectedLog.set(log)"
+                              class="text-xs text-primary-600 hover:text-primary-700 font-medium">
+                        Ver detalhes →
+                      </button>
+                    } @else {
+                      <span class="text-xs text-[--text-tertiary]">—</span>
+                    }
+                  </td>
+                  <td class="px-4 py-3.5 text-[--text-secondary] text-xs">{{ timeAgo(log.createdAt) }}</td>
+                </tr>
+
+                <!-- Expanded diff row -->
+                @if (selectedLog()?.id === log.id && (log.oldValues || log.newValues)) {
+                  <tr>
+                    <td colspan="5" class="px-4 pb-4">
+                      <div class="grid grid-cols-2 gap-3 mt-2">
+                        @if (log.oldValues) {
+                          <div class="bg-red-50 border border-red-200 rounded-xl p-3">
+                            <p class="text-xs font-semibold text-red-600 mb-2">Antes</p>
+                            @for (entry of getEntries(log.oldValues); track entry.key) {
+                              <div class="flex gap-2 text-xs">
+                                <span class="font-medium text-red-700 min-w-16">{{ entry.key }}:</span>
+                                <span class="text-red-600">{{ entry.value }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+                        @if (log.newValues) {
+                          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                            <p class="text-xs font-semibold text-emerald-600 mb-2">Depois</p>
+                            @for (entry of getEntries(log.newValues); track entry.key) {
+                              <div class="flex gap-2 text-xs">
+                                <span class="font-medium text-emerald-700 min-w-16">{{ entry.key }}:</span>
+                                <span class="text-emerald-600">{{ entry.value }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (page() && page()!.total > page()!.limit) {
+          <div class="flex items-center justify-between text-sm text-[--text-secondary]">
+            <span>{{ logs().length }} de {{ page()!.total }}</span>
+            <div class="flex gap-2">
+              <button (click)="prevPage()" [disabled]="currentPage() <= 1"
+                      class="ag-btn ag-btn--secondary ag-btn--sm" [class.opacity-50]="currentPage() <= 1">
+                <span class="material-symbols-rounded text-base">chevron_left</span> Anterior
+              </button>
+              <span class="px-3 py-2 text-[--text-secondary] font-medium">{{ currentPage() }}</span>
+              <button (click)="nextPage()" [disabled]="logs().length >= page()!.total"
+                      class="ag-btn ag-btn--secondary ag-btn--sm">
+                Próxima <span class="material-symbols-rounded text-base">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
