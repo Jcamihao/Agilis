@@ -1,0 +1,173 @@
+    <header class="sticky top-0 z-30 flex items-center gap-4 px-5"
+            style="height: 60px;
+                   background: rgba(249,250,251,0.88);
+                   backdrop-filter: blur(20px) saturate(180%);
+                   -webkit-backdrop-filter: blur(20px) saturate(180%);
+                   border-bottom: 1px solid rgba(0,0,0,0.06);">
+
+      <!-- Mobile menu -->
+      <button (click)="menuToggle.emit()"
+              class="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl text-[--text-tertiary] hover:bg-slate-100 hover:text-[--text-secondary] transition-colors">
+        <span class="material-symbols-rounded text-xl">menu</span>
+      </button>
+
+      <!-- Search -->
+      <div class="flex-1 max-w-sm">
+        <div class="relative">
+          <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-[--text-tertiary]"
+                style="font-size: 18px;">search</span>
+          <input type="text" placeholder="Buscar tarefas, projetos..."
+                 class="w-full pl-9 pr-4 py-2 text-[13px] rounded-xl outline-none transition-all duration-150"
+                 style="background: #f3f4f6;
+                        border: 1px solid transparent;
+                        color: #374151;"
+                 (focus)="onSearchFocus($event)"
+                 (blur)="onSearchBlur($event)">
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1 ml-auto">
+
+        <!-- Notification Bell -->
+        <div class="relative">
+          <button (click)="toggleNotifications()"
+                  class="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-150"
+                  [style.background]="showNotifications() ? 'rgba(99,102,241,0.08)' : 'transparent'"
+                  [style.color]="showNotifications() ? '#6366f1' : '#6b7280'">
+            <span class="material-symbols-rounded" style="font-size: 20px;">notifications</span>
+            @if (notifService.unreadCount() > 0) {
+              <span class="absolute top-1.5 right-1.5 min-w-[16px] h-[16px] px-[3px] text-white text-[9px] font-bold
+                           rounded-full flex items-center justify-center leading-none animate-bounce-soft"
+                    style="background: #ef4444;">
+                {{ notifService.unreadCount() > 99 ? '99+' : notifService.unreadCount() }}
+              </span>
+            }
+          </button>
+
+          @if (showNotifications()) {
+            <div class="absolute right-0 w-96 overflow-hidden animate-scale-in"
+                 style="top: 52px;
+                        background: #fff;
+                        border-radius: 16px;
+                        border: 1px solid rgba(0,0,0,0.07);
+                        box-shadow: 0 16px 40px -8px rgba(0,0,0,0.14), 0 4px 12px -4px rgba(0,0,0,0.08);
+                        z-index: 50;">
+
+              <div class="flex items-center justify-between px-4 py-3"
+                   style="border-bottom: 1px solid #f3f4f6;">
+                <div class="flex items-center gap-2">
+                  <h3 class="text-[14px] font-semibold text-[--text-primary]">Notificações</h3>
+                  @if (notifService.unreadCount() > 0) {
+                    <span class="ag-badge ag-badge--danger">{{ notifService.unreadCount() }} novas</span>
+                  }
+                </div>
+                <button (click)="markAllRead()"
+                        class="text-[12px] font-semibold transition-colors"
+                        style="color: #6366f1;">
+                  Marcar lidas
+                </button>
+              </div>
+
+              <div class="max-h-96 overflow-y-auto">
+                @if (notifLoading()) {
+                  <div class="space-y-2 p-3">
+                    @for (i of [1,2,3]; track i) { <div class="ag-skeleton h-14 rounded-xl"></div> }
+                  </div>
+                } @else if (notifications().length === 0) {
+                  <div class="py-10 text-center">
+                    <span class="material-symbols-rounded text-4xl text-slate-300">notifications_off</span>
+                    <p class="text-[13px] text-[--text-tertiary] mt-2">Sem notificações</p>
+                  </div>
+                } @else {
+                  <div>
+                    @for (notif of notifications(); track notif.id) {
+                      <div (click)="handleNotifClick(notif)"
+                           class="flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors"
+                           [style.background]="!notif.isRead ? 'rgba(99,102,241,0.04)' : 'transparent'"
+                           style="border-bottom: 1px solid #f9fafb;">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                             [style.background]="getNotifColor(notif.type) + '18'">
+                          <span class="material-symbols-rounded"
+                                style="font-size: 15px;"
+                                [style.color]="getNotifColor(notif.type)">
+                            {{ getNotifIcon(notif.type) }}
+                          </span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-[13px] leading-snug text-[--text-primary] truncate"
+                             [class.font-semibold]="!notif.isRead"
+                             [class.font-medium]="notif.isRead">
+                            {{ notif.title }}
+                          </p>
+                          <p class="text-[12px] text-[--text-secondary] mt-0.5 truncate">{{ notif.content }}</p>
+                          <p class="text-[11px] text-[--text-tertiary] mt-1">{{ timeAgo(notif.createdAt) }}</p>
+                        </div>
+                        @if (!notif.isRead) {
+                          <div class="w-2 h-2 rounded-full flex-shrink-0 mt-2"
+                               style="background: #6366f1;"></div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="px-4 py-2.5" style="border-top: 1px solid #f3f4f6; background: #fafafa;">
+                <a routerLink="/notifications" (click)="showNotifications.set(false)"
+                   class="text-[12px] font-semibold transition-colors"
+                   style="color: #6366f1;">
+                  Ver todas as notificações →
+                </a>
+              </div>
+            </div>
+
+            <div (click)="showNotifications.set(false)" class="fixed inset-0 z-40"></div>
+          }
+        </div>
+
+        <!-- Calendar shortcut -->
+        <a routerLink="/calendar"
+           class="w-9 h-9 flex items-center justify-center rounded-xl text-[--text-secondary] hover:bg-slate-100 hover:text-[--text-primary] transition-colors">
+          <span class="material-symbols-rounded" style="font-size: 20px;">calendar_month</span>
+        </a>
+
+        <!-- Divider -->
+        <div class="w-px h-5 mx-1" style="background: #e5e7eb;"></div>
+
+        <!-- User Menu -->
+        <button [matMenuTriggerFor]="userMenu"
+                class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+          <div class="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
+               style="background: linear-gradient(135deg, #818cf8, #6366f1, #4f46e5);">
+            @if (user()?.avatarUrl) {
+              <img [src]="user()!.avatarUrl" [alt]="user()!.name" class="w-full h-full object-cover">
+            } @else {
+              {{ user()?.name?.charAt(0) | uppercase }}
+            }
+          </div>
+          <span class="text-[13px] font-medium text-[--text-primary] hidden sm:block max-w-24 truncate tracking-[-0.01em]">
+            {{ user()?.name }}
+          </span>
+          <span class="material-symbols-rounded text-[--text-tertiary] hidden sm:block" style="font-size: 16px;">
+            keyboard_arrow_down
+          </span>
+        </button>
+
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="px-4 py-3" style="border-bottom: 1px solid #f3f4f6;">
+            <p class="text-[13px] font-semibold text-[--text-primary] tracking-[-0.01em]">{{ user()?.name }}</p>
+            <p class="text-[12px] text-[--text-secondary] mt-0.5">{{ user()?.email }}</p>
+          </div>
+          <a mat-menu-item routerLink="/profile">
+            <span class="material-symbols-rounded mr-2 text-lg">person</span>Meu Perfil
+          </a>
+          <a mat-menu-item routerLink="/companies">
+            <span class="material-symbols-rounded mr-2 text-lg">corporate_fare</span>Empresa
+          </a>
+          <div style="border-top: 1px solid #f3f4f6; margin: 4px 0;"></div>
+          <button mat-menu-item (click)="logout()" class="text-red-600">
+            <span class="material-symbols-rounded mr-2 text-lg">logout</span>Sair
+          </button>
+        </mat-menu>
+      </div>
+    </header>

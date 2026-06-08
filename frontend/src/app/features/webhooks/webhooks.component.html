@@ -1,0 +1,301 @@
+<div class="space-y-6">
+
+  <!-- ═══ Header ═══ -->
+  <div class="ag-page-header">
+    <div>
+      <div class="ag-section-badge">
+        <span class="ag-section-num">N8N</span>
+        <span class="ag-section-label">Integrações</span>
+      </div>
+      <h1 class="ag-page-title">Webhooks</h1>
+      <p class="ag-page-subtitle">Notifique sistemas externos quando eventos acontecem no Agilis</p>
+    </div>
+    <button (click)="openCreate()" class="ag-btn ag-btn--primary flex items-center gap-2">
+      <span class="material-symbols-rounded text-lg">add</span>
+      Novo Webhook
+    </button>
+  </div>
+
+  <!-- ═══ Toast ═══ -->
+  @if (toast().msg) {
+    <div class="fixed top-4 right-4 z-[999] px-4 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2 animate-fade-in-up"
+         [class.bg-emerald-600]="toast().type === 'success'"
+         [class.bg-red-600]="toast().type === 'error'"
+         style="color: white">
+      <span class="material-symbols-rounded text-base">{{ toast().type === 'success' ? 'check_circle' : 'error' }}</span>
+      {{ toast().msg }}
+    </div>
+  }
+
+  <!-- ═══ Como funciona ═══ -->
+  <div class="ag-card p-5 border-l-4 border-indigo-400 bg-indigo-50/50">
+    <div class="flex items-start gap-3">
+      <span class="material-symbols-rounded text-indigo-500 text-xl flex-shrink-0 mt-0.5">info</span>
+      <div class="space-y-1">
+        <p class="text-sm font-semibold text-indigo-900">Como funciona</p>
+        <p class="text-sm text-indigo-800 leading-relaxed">
+          Quando um evento acontece no Agilis, um <strong>POST</strong> é enviado para a URL cadastrada com o payload em JSON.
+          Use o header <code class="bg-indigo-100 px-1 rounded text-xs">X-Agilis-Signature: sha256=...</code> para verificar autenticidade no N8N.
+        </p>
+        <p class="text-xs text-indigo-600 mt-1">No N8N: crie um nó <strong>Webhook</strong>, copie a URL gerada e cole aqui. Depois use <strong>Header Auth</strong> para validar a assinatura.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Empty ═══ -->
+  @if (!loading() && webhooks().length === 0) {
+    <div class="ag-empty py-20">
+      <span class="material-symbols-rounded ag-empty__icon">webhook</span>
+      <p class="ag-empty__title">Nenhum webhook cadastrado</p>
+      <p class="ag-empty__desc">Crie um webhook para integrar o Agilis com N8N, Zapier ou qualquer sistema externo</p>
+      <button (click)="openCreate()" class="ag-btn ag-btn--primary">
+        <span class="material-symbols-rounded">add</span>
+        Criar primeiro webhook
+      </button>
+    </div>
+  }
+
+  <!-- ═══ Skeleton ═══ -->
+  @if (loading()) {
+    <div class="space-y-3">
+      @for (i of [1,2,3]; track i) { <div class="ag-skeleton h-32 rounded-2xl"></div> }
+    </div>
+  }
+
+  <!-- ═══ Webhooks list ═══ -->
+  @if (!loading()) {
+    <div class="space-y-3">
+      @for (w of webhooks(); track w.id) {
+        <div class="ag-card p-5 animate-fade-in-up">
+          <div class="flex items-start gap-4">
+
+            <!-- Toggle -->
+            <button (click)="toggle(w)"
+                    class="mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-all duration-200 relative"
+                    [class.bg-primary-500]="w.isActive"
+                    [class.bg-slate-200]="!w.isActive">
+              <div class="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-200"
+                   [class.left-5]="w.isActive" [class.left-1]="!w.isActive"></div>
+            </button>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2 flex-wrap">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="font-semibold text-[--text-primary]">{{ w.name }}</h3>
+                    <span class="ag-badge" [class.ag-badge--success]="w.isActive" [class.ag-badge--neutral]="!w.isActive">
+                      {{ w.isActive ? 'Ativo' : 'Inativo' }}
+                    </span>
+                  </div>
+                  <!-- URL -->
+                  <div class="flex items-center gap-1.5 mt-1">
+                    <span class="material-symbols-rounded text-sm text-[--text-tertiary]">link</span>
+                    <code class="text-xs text-[--text-secondary] break-all">{{ w.url }}</code>
+                    <button (click)="copyToClipboard(w.url)" class="text-[--text-tertiary] hover:text-primary-600 transition-colors flex-shrink-0">
+                      <span class="material-symbols-rounded text-sm">content_copy</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-1 flex-shrink-0">
+                  <button (click)="test(w)" [disabled]="testingId() === w.id"
+                          class="ag-btn ag-btn--ghost ag-btn--sm ag-btn--icon" title="Enviar evento de teste">
+                    @if (testingId() === w.id) {
+                      <div class="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+                    } @else {
+                      <span class="material-symbols-rounded text-base">play_circle</span>
+                    }
+                  </button>
+                  <button (click)="viewDeliveries(w)" class="ag-btn ag-btn--ghost ag-btn--sm ag-btn--icon" title="Ver entregas">
+                    <span class="material-symbols-rounded text-base">history</span>
+                  </button>
+                  <button (click)="openEdit(w)" class="ag-btn ag-btn--ghost ag-btn--sm ag-btn--icon" title="Editar">
+                    <span class="material-symbols-rounded text-base">edit</span>
+                  </button>
+                  <button (click)="delete(w)"
+                          class="ag-btn ag-btn--ghost ag-btn--sm ag-btn--icon text-red-400 hover:text-red-600 hover:bg-red-50" title="Remover">
+                    <span class="material-symbols-rounded text-base">delete</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Events chips -->
+              <div class="flex flex-wrap gap-1.5 mt-3">
+                @for (ev of w.events; track ev) {
+                  <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                    {{ eventLabel(ev) }}
+                  </span>
+                }
+              </div>
+
+              <!-- Secret + stats -->
+              <div class="flex items-center gap-4 mt-3 flex-wrap">
+                <!-- Secret -->
+                <div class="flex items-center gap-1.5 text-xs text-[--text-tertiary]">
+                  <span class="material-symbols-rounded text-sm">key</span>
+                  <code class="font-mono text-[11px]">{{ getSecret(w) }}</code>
+                  <button (click)="toggleSecret(w)" class="hover:text-[--text-primary] transition-colors">
+                    <span class="material-symbols-rounded text-sm">{{ isSecretVisible(w.id) ? 'visibility_off' : 'visibility' }}</span>
+                  </button>
+                  <button (click)="copyToClipboard(w.secret)" class="hover:text-[--text-primary] transition-colors" title="Copiar secret">
+                    <span class="material-symbols-rounded text-sm">content_copy</span>
+                  </button>
+                  <button (click)="regenerateSecret(w)" class="hover:text-amber-600 transition-colors" title="Regenerar secret">
+                    <span class="material-symbols-rounded text-sm">refresh</span>
+                  </button>
+                </div>
+
+                <!-- Delivery count -->
+                @if (w._count) {
+                  <span class="text-xs text-[--text-tertiary] flex items-center gap-1">
+                    <span class="material-symbols-rounded text-xs">send</span>
+                    {{ w._count.deliveries }} entregas
+                  </span>
+                }
+
+                <span class="text-xs text-[--text-tertiary]">Criado {{ timeAgo(w.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
+
+<!-- ═══ Modal: Criar/Editar ═══ -->
+@if (showModal()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-5 border-b border-[rgba(0,0,0,0.07)]">
+        <h2 class="text-[15px] font-semibold text-[--text-primary]">
+          {{ editingId() ? 'Editar Webhook' : 'Novo Webhook' }}
+        </h2>
+        <button (click)="showModal.set(false)" class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Nome -->
+        <div>
+          <label class="ag-label ag-label--required">Nome</label>
+          <input [(ngModel)]="form.name" type="text" placeholder="Ex: Notificações N8N" class="ag-input" />
+        </div>
+
+        <!-- URL -->
+        <div>
+          <label class="ag-label ag-label--required">URL do Webhook</label>
+          <input [(ngModel)]="form.url" type="url" placeholder="https://n8n.suaempresa.com/webhook/..." class="ag-input" />
+          <p class="text-xs text-[--text-tertiary] mt-1">Cole aqui a URL gerada pelo nó Webhook do N8N</p>
+        </div>
+
+        <!-- Eventos -->
+        <div>
+          <label class="ag-label ag-label--required">Eventos para escutar</label>
+          <div class="space-y-2 mt-2">
+            @for (ev of EVENTS; track ev.value) {
+              <label class="flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all"
+                     [class.border-indigo-300]="isEventSelected(ev.value)"
+                     [class.bg-indigo-50]="isEventSelected(ev.value)"
+                     [class.border-[rgba(0,0,0,0.08)]]="!isEventSelected(ev.value)"
+                     [class.hover:border-slate-300]="!isEventSelected(ev.value)">
+                <input type="checkbox" [checked]="isEventSelected(ev.value)"
+                       (change)="toggleEvent(ev.value)"
+                       class="mt-0.5 flex-shrink-0 accent-indigo-600" />
+                <div>
+                  <p class="text-sm font-medium text-[--text-primary]">{{ ev.label }}</p>
+                  <p class="text-xs text-[--text-secondary]">{{ ev.description }}</p>
+                </div>
+              </label>
+            }
+          </div>
+          @if (form.events.length === 0) {
+            <p class="text-xs text-red-500 mt-1">Selecione ao menos um evento</p>
+          }
+        </div>
+      </div>
+
+      <div class="flex gap-3 p-5 border-t border-[rgba(0,0,0,0.07)]">
+        <button (click)="showModal.set(false)" class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
+        <button (click)="save()"
+                [disabled]="saving() || !form.name || !form.url || form.events.length === 0"
+                class="flex-1 ag-btn ag-btn--primary justify-center disabled:opacity-50">
+          @if (saving()) { <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div> }
+          {{ editingId() ? 'Salvar' : 'Criar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══ Modal: Histórico de Entregas ═══ -->
+@if (selectedWebhook()) {
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-5 border-b border-[rgba(0,0,0,0.07)]">
+        <div>
+          <h2 class="text-[15px] font-semibold text-[--text-primary]">Histórico de Entregas</h2>
+          <p class="text-xs text-[--text-secondary] mt-0.5">{{ selectedWebhook()!.name }}</p>
+        </div>
+        <button (click)="selectedWebhook.set(null)" class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-5">
+        @if (deliveriesLoading()) {
+          <div class="space-y-2">
+            @for (i of [1,2,3]; track i) { <div class="ag-skeleton h-14 rounded-lg"></div> }
+          </div>
+        } @else if (deliveries().length === 0) {
+          <div class="text-center py-10 text-[--text-tertiary]">
+            <span class="material-symbols-rounded text-4xl text-slate-300">history</span>
+            <p class="mt-2 text-sm">Nenhuma entrega ainda</p>
+          </div>
+        } @else {
+          <div class="space-y-2">
+            @for (d of deliveries(); track d.id) {
+              <div class="flex items-start gap-3 p-3 rounded-xl border border-[rgba(0,0,0,0.08)]">
+                <!-- Status icon -->
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                     [class.bg-emerald-50]="d.success"
+                     [class.bg-red-50]="!d.success">
+                  <span class="material-symbols-rounded text-base"
+                        [class.text-emerald-600]="d.success"
+                        [class.text-red-500]="!d.success">
+                    {{ d.success ? 'check_circle' : 'error' }}
+                  </span>
+                </div>
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                          [class.bg-emerald-100]="d.success" [class.text-emerald-700]="d.success"
+                          [class.bg-red-100]="!d.success" [class.text-red-700]="!d.success">
+                      {{ d.success ? 'SUCCESS' : 'FAILED' }}
+                    </span>
+                    <span class="text-xs font-mono text-[--text-secondary]">{{ eventLabel(d.event) }}</span>
+                    @if (d.statusCode) {
+                      <span class="text-xs text-[--text-tertiary]">HTTP {{ d.statusCode }}</span>
+                    }
+                    @if (d.durationMs) {
+                      <span class="text-xs text-[--text-tertiary]">{{ d.durationMs }}ms</span>
+                    }
+                    <span class="text-xs text-[--text-tertiary] ml-auto">{{ timeAgo(d.createdAt) }}</span>
+                  </div>
+                  @if (d.error) {
+                    <p class="text-xs text-red-500 mt-1 font-mono truncate">{{ d.error }}</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
