@@ -1,142 +1,940 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
+// ─── Enums ───────────────────────────────────────────────────────────────────
 
-model Organization {
-  id        String    @id @default(uuid())
-  name      String
-  users     User[]
-  tasks     Task[]
-  taskLogs  TaskLog[]
-  authSessions AuthSession[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model User {
-  id             String       @id @default(uuid())
-  name           String
-  email          String       @unique
-  password       String
-  role           Role         @default(USER)
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  taskAssignments TaskAssignment[]
-  createdTasks   Task[]       @relation("CreatedTasks")
-  taskLogs       TaskLog[]    @relation("TaskLogActors")
-  authSessions   AuthSession[]
-  settings       UserSettings?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  @@index([organizationId])
-}
-
-model UserSettings {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  timezone  String   @default("America/Sao_Paulo")
-  density   String   @default("Comfortable")
-  appearance String  @default("dark")
-  autosave  Boolean  @default(false)
-  twoFactor Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-}
-
-model AuthSession {
-  id               String    @id @default(uuid())
-  userId           String
-  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId   String
-  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  refreshTokenHash String    @unique
-  expiresAt        DateTime
-  revokedAt        DateTime?
-  ipAddress        String?
-  userAgent        String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  @@index([userId])
-  @@index([organizationId])
-  @@index([expiresAt])
-}
-
-model Task {
-  id             String       @id @default(uuid())
-  title          String
-  description    String?
-  status         TaskStatus   @default(PENDING)
-  dueDate        DateTime
-  assignedToAll  Boolean      @default(false)
-  assignments    TaskAssignment[]
-  createdById    String
-  createdBy      User         @relation("CreatedTasks", fields: [createdById], references: [id], onDelete: Restrict)
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  logs           TaskLog[]
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  @@index([organizationId, status])
-  @@index([dueDate])
-}
-
-model TaskAssignment {
-  taskId     String
-  userId     String
-  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-
-  @@id([taskId, userId])
-  @@index([userId])
-}
-
-model TaskLog {
-  id             String        @id @default(uuid())
-  taskId         String
-  task           Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  organizationId String
-  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  action         TaskLogAction
-  description    String
-  fromStatus     TaskStatus?
-  toStatus       TaskStatus?
-  performedById  String?
-  performedBy    User?         @relation("TaskLogActors", fields: [performedById], references: [id], onDelete: SetNull)
-  createdAt      DateTime      @default(now())
-
-  @@index([taskId])
-  @@index([organizationId, createdAt])
-}
-
-enum Role {
-  ADMIN
-  MANAGER
-  USER
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 enum TaskStatus {
-  PENDING
+  BACKLOG
   IN_PROGRESS
+  IN_REVIEW
   DONE
-  DELAYED
 }
 
-enum TaskLogAction {
-  CREATED
-  STATUS_CHANGED
-  AUTO_DELAYED
-  AUTO_REMINDER_SENT
-  AUTO_ESCALATED
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  TASK_COMMENTED
+  TASK_MENTIONED
+  TASK_DUE_SOON
+  TASK_OVERDUE
+  TASK_STATUS_CHANGED
+  PROJECT_INVITE
+  AUTOMATION_TRIGGERED
+  WHATSAPP_SENT
+  INSIGHT_GENERATED
+}
+
+enum WidgetType {
+  MY_TASKS
+  OVERDUE_TASKS
+  COMPLETED_TASKS
+  ACTIVE_PROJECTS
+  PRODUCTIVITY_CHART
+  RECENT_ACTIVITY
+  TEAM_WORKLOAD
+}
+
+enum AutomationTrigger {
+  TASK_CREATED
+  TASK_STATUS_CHANGED
+  TASK_OVERDUE
+  COMMENT_CREATED
+  TASK_ASSIGNED
+}
+
+enum AutomationActionType {
+  CHANGE_STATUS
+  ASSIGN_USER
+  SEND_NOTIFICATION
+  CREATE_TASK
+  SEND_EMAIL
+  SEND_WHATSAPP
+  SEND_TELEGRAM
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+enum SprintStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  STATUS_CHANGE
+  ASSIGN
+  COMMENT
+}
+
+// V4 Enums
+
+enum InsightType {
+  RISK
+  BOTTLENECK
+  DELAY_PREDICTION
+  RECOMMENDATION
+  ACHIEVEMENT
+}
+
+enum InsightSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum WhatsAppStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+enum ProcessStepType {
+  DOCUMENTATION
+  CHECKLIST
+  TASK
+  APPROVAL
+}
+
+enum ProcessStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum HealthEntity {
+  COMPANY
+  TEAM
+  PROJECT
+}
+
+enum DependencyType {
+  BLOCKS
+  RELATES_TO
+  DUPLICATE
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users           UserCompany[]
+  teams           Team[]
+  projects        Project[]
+  statuses        TaskStatusConfig[]
+  automations     AutomationRule[]
+  auditLogs       AuditLog[]
+  insights        Insight[]
+  healthScores    HealthScore[]
+  whatsappConfig  WhatsAppConfig?
+  aiConversations AiConversation[]
+  processes       Process[]
+  webhooks        Webhook[]
+  chatRooms       ChatRoom[]
+
+  @@map("companies")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatarUrl          String?
+  bio                String?
+  phone              String?
+  telegramChatId     String?
+  cpfCnpj            String?
+  cep                String?
+  uf                 String?
+  address            String?
+  addressNumber      String?
+  addressComplement  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companies          UserCompany[]
+  assignedTasks      Task[]            @relation("assignedTasks")
+  createdTasks       Task[]            @relation("createdTasks")
+  teamMemberships    TeamMember[]
+  projectMemberships ProjectMember[]
+  activities         Activity[]
+  comments           Comment[]
+  mentions           Mention[]         @relation("mentionedUser")
+  notifications      Notification[]
+  dashboardWidgets   DashboardWidget[]
+  attachments          Attachment[]
+  auditLogs            AuditLog[]
+  aiMessages           AiMessage[]
+  taskParticipations   TaskParticipant[] @relation("taskParticipations")
+  timeEntries          TimeEntry[]
+  chatMessages         ChatMessage[]
+  chatRoomMembers      ChatRoomMember[]
+
+  @@map("users")
+}
+
+model UserCompany {
+  id        String   @id @default(uuid())
+  userId    String
+  companyId String
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+  @@map("user_companies")
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#6366f1")
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  members      TeamMember[]
+  projects     Project[]
+  projectLinks ProjectTeam[]
+  healthScores HealthScore[]
+
+  @@map("teams")
+}
+
+model ProjectTeam {
+  id        String @id @default(uuid())
+  projectId String
+  teamId    String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, teamId])
+  @@map("project_teams")
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String
+  userId    String
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  color        String   @default("#6366f1")
+  icon         String   @default("folder")
+  companyId    String
+  teamId       String?
+  isArchived   Boolean  @default(false)
+  columnConfig Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company      Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  team         Team?            @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  tasks        Task[]
+  sprints      Sprint[]
+  automations  AutomationRule[]
+  healthScores HealthScore[]
+  members      ProjectMember[]
+  teams        ProjectTeam[]
+  chatRooms    ChatRoom[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  role      UserRole @default(MEMBER)
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus @default(BACKLOG)
+  priority    Priority   @default(MEDIUM)
+  position    Float      @default(0)
+  startDate   DateTime?
+  dueDate     DateTime?
+  projectId   String
+  assigneeId  String?
+  creatorId   String
+  sprintId    String?
+  parentId    String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  project      Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee     User?                 @relation("assignedTasks", fields: [assigneeId], references: [id], onDelete: SetNull)
+  creator      User                  @relation("createdTasks", fields: [creatorId], references: [id])
+  sprint       Sprint?               @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  parent       Task?                 @relation("subtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks     Task[]                @relation("subtasks")
+  activities   Activity[]
+  labels       TaskLabel[]
+  comments     Comment[]
+  attachments  Attachment[]
+  sla          SlaRecord?
+  executions   AutomationExecution[]
+  participants TaskParticipant[]
+  blockedBy    TaskDependency[]      @relation("dependentTask")
+  blocking     TaskDependency[]      @relation("dependsOnTask")
+  timeEntries  TimeEntry[]
+
+  @@index([parentId])
+  @@map("tasks")
+}
+
+model TaskDependency {
+  id          String             @id @default(uuid())
+  taskId      String
+  dependsOnId String
+  type        DependencyType     @default(BLOCKS)
+  createdAt   DateTime           @default(now())
+
+  task        Task               @relation("dependentTask", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOn   Task               @relation("dependsOnTask", fields: [dependsOnId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnId])
+  @@map("task_dependencies")
+}
+
+model TimeEntry {
+  id          String    @id @default(uuid())
+  taskId      String
+  userId      String
+  startedAt   DateTime
+  endedAt     DateTime?
+  durationMin Int?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("time_entries")
+}
+
+model Sprint {
+  id        String       @id @default(uuid())
+  name      String
+  goal      String?
+  startDate DateTime?
+  endDate   DateTime?
+  status    SprintStatus @default(PLANNED)
+  projectId String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@index([projectId, status])
+  @@map("sprints")
+}
+
+model TaskParticipant {
+  id     String @id @default(uuid())
+  taskId String
+  userId String
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation("taskParticipations", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@map("task_participants")
+}
+
+// ─── V2 Models ───────────────────────────────────────────────────────────────
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  taskId    String
+  authorId  String
+  isEdited  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task     Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  mentions Mention[]
+
+  @@map("comments")
+}
+
+model Mention {
+  id          String   @id @default(uuid())
+  commentId   String
+  mentionedId String
+  createdAt   DateTime @default(now())
+
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  mentioned User    @relation("mentionedUser", fields: [mentionedId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, mentionedId])
+  @@map("mentions")
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  taskId       String
+  uploadedById String
+  fileName     String
+  fileUrl      String
+  fileSize     Int
+  mimeType     String
+  createdAt    DateTime @default(now())
+
+  task       Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy User @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@map("attachments")
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String
+  type       NotificationType
+  title      String
+  content    String
+  entityType String
+  entityId   String
+  isRead     Boolean          @default(false)
+  metadata   Json?
+  createdAt  DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+model DashboardWidget {
+  id         String     @id @default(uuid())
+  userId     String
+  widgetType WidgetType
+  position   Int        @default(0)
+  colSpan    Int        @default(1)
+  rowSpan    Int        @default(1)
+  isActive   Boolean    @default(true)
+  config     Json?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, widgetType])
+  @@map("dashboard_widgets")
+}
+
+// ─── V3 Models ───────────────────────────────────────────────────────────────
+
+model AutomationRule {
+  id          String            @id @default(uuid())
+  name        String
+  description String?
+  companyId   String
+  projectId   String?
+  trigger     AutomationTrigger
+  conditions  Json
+  actions     Json
+  isActive    Boolean           @default(true)
+  runCount    Int               @default(0)
+  lastRunAt   DateTime?
+  createdById String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  company    Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project    Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  executions AutomationExecution[]
+
+  @@index([companyId, isActive])
+  @@map("automation_rules")
+}
+
+model AutomationExecution {
+  id         String          @id @default(uuid())
+  ruleId     String
+  taskId     String?
+  status     ExecutionStatus @default(PENDING)
+  result     Json?
+  error      String?
+  durationMs Int?
+  createdAt  DateTime        @default(now())
+
+  rule AutomationRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  task Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([ruleId, createdAt(sort: Desc)])
+  @@map("automation_executions")
+}
+
+model SlaRecord {
+  id                String    @id @default(uuid())
+  taskId            String    @unique
+  firstResponseAt   DateTime?
+  resolvedAt        DateTime?
+  responseMinutes   Int?
+  resolutionMinutes Int?
+  delayMinutes      Int?
+  isBreached        Boolean   @default(false)
+  targetResponseMin Int?
+  targetResolveMin  Int?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("sla_records")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  userId     String
+  companyId  String?
+  action     AuditAction
+  entityType String
+  entityId   String
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+// ─── V4: IA Operacional ──────────────────────────────────────────────────────
+
+model AiConversation {
+  id        String   @id @default(uuid())
+  companyId String
+  userId    String?
+  title     String   @default("Nova conversa")
+  model     String   @default("gpt-4o-mini")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company  Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+
+  @@index([companyId, createdAt(sort: Desc)])
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String   @id @default(uuid())
+  conversationId String
+  role           String // 'user' | 'assistant' | 'system'
+  content        String
+  tokensUsed     Int?
+  userId         String?
+  createdAt      DateTime @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+// ─── V4: Health Score ────────────────────────────────────────────────────────
+
+model HealthScore {
+  id           String       @id @default(uuid())
+  entityType   HealthEntity
+  entityId     String
+  companyId    String
+  score        Int
+  breakdown    Json
+  trend        Json?
+  calculatedAt DateTime     @default(now())
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  team    Team?    @relation(fields: [entityId], references: [id], onDelete: Cascade, map: "hs_team_fk")
+  project Project? @relation(fields: [entityId], references: [id], onDelete: Cascade, map: "hs_project_fk")
+
+  @@index([entityType, entityId])
+  @@index([companyId, calculatedAt(sort: Desc)])
+  @@map("health_scores")
+}
+
+// ─── V4: WhatsApp ────────────────────────────────────────────────────────────
+
+model WhatsAppConfig {
+  id           String   @id @default(uuid())
+  companyId    String   @unique
+  instanceName String
+  apiUrl       String
+  apiKey       String
+  isActive     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company  Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  messages WhatsAppMessage[]
+
+  @@map("whatsapp_configs")
+}
+
+model WhatsAppMessage {
+  id           String         @id @default(uuid())
+  configId     String
+  phone        String
+  message      String
+  type         String // REMINDER | ALERT | CHARGE | OVERDUE
+  status       WhatsAppStatus @default(PENDING)
+  taskId       String?
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+
+  config WhatsAppConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId, status])
+  @@index([scheduledAt])
+  @@map("whatsapp_messages")
+}
+
+// ─── V4: Process Center ──────────────────────────────────────────────────────
+
+model Process {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  companyId   String
+  teamId      String?
+  status      ProcessStatus @default(DRAFT)
+  icon        String        @default("account_tree")
+  color       String        @default("#6366f1")
+  version     Int           @default(1)
+  createdById String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  company   Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  steps     ProcessStep[]
+  instances ProcessInstance[]
+
+  @@index([companyId, status])
+  @@map("processes")
+}
+
+model ProcessStep {
+  id           String          @id @default(uuid())
+  processId    String
+  title        String
+  description  String?
+  type         ProcessStepType
+  order        Int             @default(0)
+  content      Json?
+  isRequired   Boolean         @default(true)
+  estimatedMin Int?
+
+  process        Process               @relation(fields: [processId], references: [id], onDelete: Cascade)
+  checklistItems ChecklistItem[]
+  instanceSteps  ProcessInstanceStep[]
+
+  @@index([processId, order])
+  @@map("process_steps")
+}
+
+model ChecklistItem {
+  id         String  @id @default(uuid())
+  stepId     String
+  label      String
+  isRequired Boolean @default(false)
+  order      Int     @default(0)
+
+  step    ProcessStep           @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  answers ChecklistItemAnswer[]
+
+  @@map("checklist_items")
+}
+
+model ProcessInstance {
+  id            String    @id @default(uuid())
+  processId     String
+  triggeredById String
+  status        String    @default("RUNNING") // RUNNING | COMPLETED | CANCELLED
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  process Process               @relation(fields: [processId], references: [id], onDelete: Cascade)
+  steps   ProcessInstanceStep[]
+
+  @@index([processId, status])
+  @@map("process_instances")
+}
+
+model ProcessInstanceStep {
+  id          String    @id @default(uuid())
+  instanceId  String
+  stepId      String
+  status      String    @default("PENDING") // PENDING | IN_PROGRESS | DONE | SKIPPED
+  completedAt DateTime?
+  completedBy String?
+  notes       String?
+
+  instance ProcessInstance       @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  step     ProcessStep           @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  answers  ChecklistItemAnswer[]
+
+  @@unique([instanceId, stepId])
+  @@map("process_instance_steps")
+}
+
+model ChecklistItemAnswer {
+  id             String  @id @default(uuid())
+  instanceStepId String
+  itemId         String
+  isChecked      Boolean @default(false)
+
+  instanceStep ProcessInstanceStep @relation(fields: [instanceStepId], references: [id], onDelete: Cascade)
+  item         ChecklistItem       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([instanceStepId, itemId])
+  @@map("checklist_item_answers")
+}
+
+// ─── V4: Insights ────────────────────────────────────────────────────────────
+
+model Insight {
+  id          String          @id @default(uuid())
+  companyId   String
+  type        InsightType
+  severity    InsightSeverity @default(MEDIUM)
+  title       String
+  description String
+  entityType  String?
+  entityId    String?
+  metadata    Json?
+  isRead      Boolean         @default(false)
+  isDismissed Boolean         @default(false)
+  expiresAt   DateTime?
+  createdAt   DateTime        @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, isDismissed, createdAt(sort: Desc)])
+  @@index([companyId, type, severity])
+  @@map("insights")
+}
+
+// ─── Auxiliares ──────────────────────────────────────────────────────────────
+
+model Label {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#6366f1")
+  createdAt DateTime @default(now())
+
+  tasks TaskLabel[]
+
+  @@map("labels")
+}
+
+model TaskLabel {
+  taskId  String
+  labelId String
+
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+  @@map("task_labels")
+}
+
+model TaskStatusConfig {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#6366f1")
+  order     Int      @default(0)
+  companyId String
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("task_status_configs")
+}
+
+model Activity {
+  id         String   @id @default(uuid())
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  userId     String
+  taskId     String?
+  createdAt  DateTime @default(now())
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@map("activities")
+}
+
+// ─── Webhooks ─────────────────────────────────────────────────────────────────
+
+model Webhook {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  url       String
+  events    String[]
+  secret    String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company    Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([companyId])
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id         String   @id @default(uuid())
+  webhookId  String
+  event      String
+  payload    Json
+  statusCode Int?
+  success    Boolean
+  durationMs Int?
+  error      String?
+  createdAt  DateTime @default(now())
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, createdAt(sort: Desc)])
+  @@map("webhook_deliveries")
+}
+
+// ─── Chat ─────────────────────────────────────────────────────────────────────
+
+enum ChatRoomType {
+  GENERAL
+  PROJECT
+  DIRECT
+}
+
+model ChatRoom {
+  id        String       @id @default(uuid())
+  companyId String
+  projectId String?
+  name      String
+  type      ChatRoomType @default(GENERAL)
+  createdAt DateTime     @default(now())
+
+  company  Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  project  Project?         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  members  ChatRoomMember[]
+  messages ChatMessage[]
+
+  @@index([companyId])
+  @@index([projectId])
+  @@map("chat_rooms")
+}
+
+model ChatRoomMember {
+  id         String   @id @default(uuid())
+  roomId     String
+  userId     String
+  joinedAt   DateTime @default(now())
+  lastReadAt DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("chat_room_members")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  roomId    String
+  userId    String
+  content   String
+  editedAt  DateTime?
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt(sort: Desc)])
+  @@map("chat_messages")
 }
