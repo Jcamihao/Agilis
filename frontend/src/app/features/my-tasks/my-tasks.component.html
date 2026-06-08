@@ -1,0 +1,321 @@
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      <h1 class="ag-page-title">Minhas Tarefas</h1>
+      <p class="ag-page-subtitle">Gerencie seu trabalho e acompanhe os prazos.</p>
+    </div>
+    <button (click)="showCreateModal.set(true)" class="ag-btn ag-btn--primary flex items-center gap-2 self-start md:self-auto">
+      <span class="material-symbols-rounded text-lg">add</span>
+      Criar Tarefa
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.08)] shadow-sm p-2 flex flex-col sm:flex-row gap-3 items-center">
+    <div class="flex-1 w-full relative">
+      <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+      <input type="text" placeholder="Filtrar tarefas por nome..."
+             [value]="taskSearch()"
+             (input)="taskSearch.set($any($event.target).value)"
+             class="w-full bg-transparent border-none outline-none text-sm text-[--text-primary] pl-10 py-2 placeholder-slate-400" />
+    </div>
+    <div class="h-px w-full sm:w-px sm:h-8 bg-slate-100"></div>
+    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto px-1">
+
+      <!-- Status filter -->
+      <div class="relative">
+        <button (click)="toggleDropdown('status')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors"
+                [class.bg-primary-50]="selectedStatuses().length > 0"
+                [class.text-primary-700]="selectedStatuses().length > 0"
+                [class.border-primary-200]="selectedStatuses().length > 0"
+                [class.bg-white]="selectedStatuses().length === 0"
+                [class.text-slate-500]="selectedStatuses().length === 0"
+                [class.border-slate-200]="selectedStatuses().length === 0">
+          <span class="material-symbols-rounded text-base">filter_list</span>
+          Status
+          @if (selectedStatuses().length > 0) { <span class="bg-primary-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedStatuses().length }}</span> }
+          <span class="material-symbols-rounded text-base">expand_more</span>
+        </button>
+        @if (openDropdown() === 'status') {
+          <div class="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[160px]"
+               (click)="$event.stopPropagation()">
+            @for (f of statusFilters; track f.key) {
+              <button (click)="toggleFilter('status', f.key)"
+                      class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                      [class.text-primary-600]="isSelected('status', f.key)"
+                      [class.text-slate-700]="!isSelected('status', f.key)">
+                <span class="material-symbols-rounded text-base">{{ isSelected('status', f.key) ? 'check_box' : 'check_box_outline_blank' }}</span>
+                {{ f.label }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Priority filter -->
+      <div class="relative">
+        <button (click)="toggleDropdown('priority')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors"
+                [class.bg-primary-50]="selectedPriorities().length > 0"
+                [class.text-primary-700]="selectedPriorities().length > 0"
+                [class.border-primary-200]="selectedPriorities().length > 0"
+                [class.bg-white]="selectedPriorities().length === 0"
+                [class.text-slate-500]="selectedPriorities().length === 0"
+                [class.border-slate-200]="selectedPriorities().length === 0">
+          <span class="material-symbols-rounded text-base">flag</span>
+          Prioridade
+          @if (selectedPriorities().length > 0) { <span class="bg-primary-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedPriorities().length }}</span> }
+          <span class="material-symbols-rounded text-base">expand_more</span>
+        </button>
+        @if (openDropdown() === 'priority') {
+          <div class="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[160px]"
+               (click)="$event.stopPropagation()">
+            @for (f of priorityFilters; track f.key) {
+              <button (click)="toggleFilter('priority', f.key)"
+                      class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                      [class.text-primary-600]="isSelected('priority', f.key)"
+                      [class.text-slate-700]="!isSelected('priority', f.key)">
+                <span class="material-symbols-rounded text-base">{{ isSelected('priority', f.key) ? 'check_box' : 'check_box_outline_blank' }}</span>
+                {{ f.label }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Project filter -->
+      <div class="relative">
+        <button (click)="toggleDropdown('project')" class="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors"
+                [class.bg-primary-50]="selectedProject() !== null"
+                [class.text-primary-700]="selectedProject() !== null"
+                [class.border-primary-200]="selectedProject() !== null"
+                [class.bg-white]="selectedProject() === null"
+                [class.text-slate-500]="selectedProject() === null"
+                [class.border-slate-200]="selectedProject() === null">
+          <span class="material-symbols-rounded text-base">folder</span>
+          {{ selectedProject() ?? 'Projeto' }}
+          <span class="material-symbols-rounded text-base">expand_more</span>
+        </button>
+        @if (openDropdown() === 'project') {
+          <div class="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[180px]"
+               (click)="$event.stopPropagation()">
+            <button (click)="selectedProject.set(null); toggleDropdown('project')"
+                    class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 text-slate-500">
+              Todos
+            </button>
+            @for (p of projects(); track p.id) {
+              <button (click)="selectedProject.set(p.name); toggleDropdown('project')"
+                      class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                      [class.text-primary-600]="selectedProject() === p.name"
+                      [class.text-slate-700]="selectedProject() !== p.name">
+                <div class="w-2 h-2 rounded-full" [style.background]="p.color"></div>
+                {{ p.name }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      @if (hasActiveFilters()) {
+        <button (click)="clearFilters()" class="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors">
+          <span class="material-symbols-rounded text-sm">close</span>
+          Limpar
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Task Table -->
+  @if (loading()) {
+    <div class="space-y-2">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="ag-skeleton h-16 rounded-xl"></div>
+      }
+    </div>
+  } @else if (filteredTasks().length === 0) {
+    <div class="ag-empty">
+      <span class="material-symbols-rounded ag-empty__icon">task_alt</span>
+      <p class="ag-empty__title">{{ hasActiveFilters() ? 'Nenhuma tarefa encontrada' : 'Sem tarefas pendentes' }}</p>
+      <p class="ag-empty__desc">{{ hasActiveFilters() ? 'Tente ajustar os filtros' : 'Você está em dia com tudo.' }}</p>
+      @if (!hasActiveFilters()) {
+        <button (click)="showCreateModal.set(true)" class="ag-btn ag-btn--primary">
+          <span class="material-symbols-rounded">add</span> Criar Tarefa
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="flex flex-col gap-1.5">
+      <!-- Table header -->
+      <div class="hidden md:grid grid-cols-[32px_3fr_1.5fr_1fr_1.5fr_1fr_40px] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[--text-tertiary] border-b border-[rgba(0,0,0,0.07)]">
+        <div class="flex items-center justify-center">
+          <span class="material-symbols-rounded text-lg opacity-40">check_box_outline_blank</span>
+        </div>
+        <div>Nome da Tarefa</div>
+        <div>Status</div>
+        <div>Prioridade</div>
+        <div>Projeto</div>
+        <div>Entrega</div>
+        <div></div>
+      </div>
+
+      <!-- Rows -->
+      @for (task of filteredTasks(); track task.id) {
+        <div class="bg-white border border-[rgba(0,0,0,0.07)] rounded-xl hover:bg-slate-50 transition-colors group
+                    grid grid-cols-[32px_1fr] md:grid-cols-[32px_3fr_1.5fr_1fr_1.5fr_1fr_40px] gap-4 items-center px-4 py-3 min-h-[64px]"
+             [class.opacity-60]="task.status === 'DONE'">
+
+          <!-- Checkbox -->
+          <div class="flex items-center justify-center">
+            <input type="checkbox"
+                   [checked]="task.status === 'DONE'"
+                   (change)="toggleStatus(task)"
+                   class="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                   [disabled]="false" />
+          </div>
+
+          <!-- Title -->
+          <div class="text-sm font-semibold text-[--text-primary] truncate"
+               [class.line-through]="task.status === 'DONE'"
+               [class.text-slate-400]="task.status === 'DONE'">
+            {{ task.title }}
+          </div>
+
+          <!-- Status -->
+          <div class="hidden md:flex">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border"
+                  [style.background]="statusCfg(task.status).color + '18'"
+                  [style.color]="statusCfg(task.status).color"
+                  [style.border-color]="statusCfg(task.status).color + '40'">
+              @if (task.status === 'DONE') {
+                <span class="material-symbols-rounded text-sm">check</span>
+              } @else {
+                <span class="w-1.5 h-1.5 rounded-full" [style.background]="statusCfg(task.status).color"></span>
+              }
+              {{ statusCfg(task.status).label }}
+            </span>
+          </div>
+
+          <!-- Priority -->
+          <div class="hidden md:flex items-center gap-1.5 text-sm font-medium"
+               [style.color]="priorityCfg(task.priority).color">
+            <span class="material-symbols-rounded text-base">{{ priorityCfg(task.priority).icon }}</span>
+            {{ priorityCfg(task.priority).label }}
+          </div>
+
+          <!-- Project -->
+          <div class="hidden md:flex">
+            @if (task.project) {
+              <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-xs font-medium truncate max-w-[130px]">
+                <div class="w-1.5 h-1.5 rounded-full flex-shrink-0" [style.background]="task.project.color"></div>
+                {{ task.project.name }}
+              </span>
+            } @else {
+              <span class="text-xs text-slate-400">—</span>
+            }
+          </div>
+
+          <!-- Due date -->
+          <div class="hidden md:block text-sm"
+               [class.text-red-500]="task.dueDate && isOverdue(task.dueDate) && task.status !== 'DONE'"
+               [class.font-semibold]="task.dueDate && isOverdue(task.dueDate) && task.status !== 'DONE'"
+               [class.text-slate-400]="!task.dueDate || task.status === 'DONE' || !isOverdue(task.dueDate)">
+            @if (task.dueDate) {
+              {{ isDueToday(task.dueDate) ? 'Hoje' : formatDate(task.dueDate) }}
+            } @else {
+              <span class="text-slate-300">—</span>
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="relative flex items-center justify-center">
+            <button (click)="toggleMenu(task.id); $event.stopPropagation()"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-slate-600 hover:bg-slate-100 opacity-0 group-hover:opacity-100 transition-all">
+              <span class="material-symbols-rounded text-xl">more_vert</span>
+            </button>
+            @if (openMenuId() === task.id) {
+              <div class="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[150px]"
+                   (click)="$event.stopPropagation()">
+                <button (click)="toggleStatus(task); toggleMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700">
+                  <span class="material-symbols-rounded text-base">{{ task.status === 'DONE' ? 'restart_alt' : 'check_circle' }}</span>
+                  {{ task.status === 'DONE' ? 'Reabrir' : 'Concluir' }}
+                </button>
+                @if (task.project) {
+                  <a [routerLink]="['/projects', task.project.id, 'kanban']"
+                     (click)="toggleMenu(null)"
+                     class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700">
+                    <span class="material-symbols-rounded text-base">open_in_new</span>
+                    Ver no Kanban
+                  </a>
+                }
+                <div class="border-t border-slate-100 my-1"></div>
+                <button (click)="deleteTask(task); toggleMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 text-red-500">
+                  <span class="material-symbols-rounded text-base">delete</span>
+                  Excluir
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Create Modal -->
+@if (showCreateModal()) {
+  <div (click)="showCreateModal.set(false)"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+    <div (click)="$event.stopPropagation()"
+         class="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(0,0,0,0.07)]">
+        <h2 class="text-lg font-bold text-[--text-primary]">Nova Tarefa</h2>
+        <button (click)="showCreateModal.set(false)" class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form [formGroup]="createForm" (ngSubmit)="createTask()" class="p-6 space-y-4">
+        <div>
+          <label class="ag-label ag-label--required">Título</label>
+          <input type="text" formControlName="title" placeholder="Descreva a tarefa" class="ag-input" autofocus>
+          @if (createForm.get('title')?.invalid && createForm.get('title')?.touched) {
+            <p class="text-xs text-red-500 mt-1">Título é obrigatório</p>
+          }
+        </div>
+        <div>
+          <label class="ag-label">Projeto</label>
+          <select formControlName="projectId" class="ag-input">
+            <option value="">Selecione um projeto</option>
+            @for (p of projects(); track p.id) {
+              <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="ag-label">Prioridade</label>
+            <select formControlName="priority" class="ag-input">
+              @for (p of priorityOptions; track p.key) {
+                <option [value]="p.key">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="ag-label">Vencimento</label>
+            <input type="date" formControlName="dueDate" class="ag-input">
+          </div>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="showCreateModal.set(false)" class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
+          <button type="submit" [disabled]="creating() || createForm.get('projectId')?.invalid"
+                  class="flex-1 ag-btn ag-btn--primary justify-center">
+            @if (creating()) {
+              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+            }
+            Criar Tarefa
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
