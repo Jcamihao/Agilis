@@ -1,50 +1,47 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import {
-  CreateTaskPayload,
-  Task,
-  TaskStatus,
-  UpdateTaskPayload,
-  UpdateTaskStatusPayload,
-} from '../models/task.model';
+import { ApiService } from './api.service';
+import { Task, KanbanBoard } from '../models';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class TasksService {
-  private readonly http = inject(HttpClient);
+  private readonly api = inject(ApiService);
 
-  list(filters?: { status?: TaskStatus; assignedToId?: string; search?: string }): Observable<Task[]> {
-    let params = new HttpParams();
+  getKanban(projectId: string) { return this.api.get<KanbanBoard>(`/tasks/kanban/${projectId}`); }
+  getMyTasks(companyId?: string) { return this.api.get<Task[]>('/tasks/my-tasks', companyId ? { companyId } : {}); }
+  getOne(id: string) { return this.api.get<Task>(`/tasks/${id}`); }
 
-    if (filters?.status) {
-      params = params.set('status', filters.status);
-    }
+  create(data: Partial<Task>) { return this.api.post<Task>('/tasks', data); }
+  update(id: string, data: Partial<Task>) { return this.api.put<Task>(`/tasks/${id}`, data); }
 
-    if (filters?.assignedToId) {
-      params = params.set('assignedToId', filters.assignedToId);
-    }
-
-    if (filters?.search) {
-      params = params.set('search', filters.search);
-    }
-
-    return this.http.get<Task[]>(`${environment.apiUrl}/tasks`, {
-      params,
-    });
+  moveTask(id: string, status: string, position: number) {
+    return this.api.patch<Task>(`/tasks/${id}/move`, { status, position });
   }
 
-  create(payload: CreateTaskPayload): Observable<Task> {
-    return this.http.post<Task>(`${environment.apiUrl}/tasks`, payload);
+  delete(id: string) { return this.api.delete<Task>(`/tasks/${id}`); }
+
+  addParticipant(taskId: string, participantId: string) {
+    return this.api.post<Task>(`/tasks/${taskId}/participants/${participantId}`, {});
   }
 
-  update(taskId: string, payload: UpdateTaskPayload): Observable<Task> {
-    return this.http.patch<Task>(`${environment.apiUrl}/tasks/${taskId}`, payload);
+  removeParticipant(taskId: string, participantId: string) {
+    return this.api.delete<Task>(`/tasks/${taskId}/participants/${participantId}`);
   }
 
-  updateStatus(taskId: string, payload: UpdateTaskStatusPayload): Observable<Task> {
-    return this.http.patch<Task>(`${environment.apiUrl}/tasks/${taskId}/status`, payload);
+  // Subtasks
+  listSubtasks(taskId: string) { return this.api.get<Task[]>(`/tasks/${taskId}/subtasks`); }
+  createSubtask(taskId: string, data: { title: string; description?: string; priority?: string; assigneeId?: string }) {
+    return this.api.post<Task>(`/tasks/${taskId}/subtasks`, data);
+  }
+  deleteSubtask(parentId: string, subtaskId: string) {
+    return this.api.delete<void>(`/tasks/${parentId}/subtasks/${subtaskId}`);
+  }
+
+  // Dependencies
+  listDependencies(taskId: string) { return this.api.get<{ blockedBy: any[]; blocking: any[] }>(`/tasks/${taskId}/dependencies`); }
+  addDependency(taskId: string, dependsOnId: string, type = 'BLOCKS') {
+    return this.api.post<any>(`/tasks/${taskId}/dependencies`, { dependsOnId, type });
+  }
+  removeDependency(taskId: string, dependsOnId: string) {
+    return this.api.delete<void>(`/tasks/${taskId}/dependencies/${dependsOnId}`);
   }
 }

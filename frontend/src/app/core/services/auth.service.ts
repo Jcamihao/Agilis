@@ -1,126 +1,78 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, catchError, finalize, map, of, shareReplay, tap } from 'rxjs';
+import { tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginPayload, RegisterPayload } from '../models/auth.model';
-import { User } from '../models/user.model';
+import { User, AuthResponse, ApiResponse } from '../models';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly apiUrl = environment.apiUrl;
 
-  private readonly accessTokenSignal = signal<string | null>(null);
-  private readonly currentUserSignal = signal<User | null>(null);
-  private refreshSessionRequest: Observable<AuthResponse> | null = null;
+  private _user = signal<User | null>(null);
+  private _token = signal<string | null>(null);
 
-  readonly accessToken = computed(() => this.accessTokenSignal());
-  readonly currentUser = computed(() => this.currentUserSignal());
-  readonly isAuthenticated = computed(() => Boolean(this.accessTokenSignal()));
+  readonly user = this._user.asReadonly();
+  readonly token = this._token.asReadonly();
+  readonly isAuthenticated = computed(() => !!this._token());
+  readonly currentCompanyId = computed(() => this._user()?.companies?.[0]?.companyId);
 
-  login(payload: LoginPayload): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/login`, payload, {
-        withCredentials: true,
-      })
-      .pipe(tap((response) => this.persistSession(response)));
+  constructor() {
+    this.restoreSession();
   }
 
-  register(payload: RegisterPayload): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, payload, {
-        withCredentials: true,
-      })
-      .pipe(tap((response) => this.persistSession(response)));
-  }
-
-  refreshSession(): Observable<AuthResponse> {
-    if (!this.refreshSessionRequest) {
-      this.refreshSessionRequest = this.http
-        .post<AuthResponse>(
-          `${environment.apiUrl}/auth/refresh`,
-          {},
-          {
-            withCredentials: true,
-          },
-        )
-        .pipe(
-          tap((response) => this.persistSession(response)),
-          finalize(() => {
-            this.refreshSessionRequest = null;
-          }),
-          shareReplay({ bufferSize: 1, refCount: false }),
-        );
-    }
-
-    return this.refreshSessionRequest;
-  }
-
-  restoreSession(): Observable<boolean> {
-    if (this.isAuthenticated()) {
-      return of(true);
-    }
-
-    return this.refreshSession().pipe(
-      map(() => true),
-      catchError(() => {
-        this.clearSession();
-        return of(false);
+  login(email: string, password: string) {
+    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/auth/login`, { email, password }).pipe(
+      tap((res) => {
+        if (res.success) this.setSession(res.data);
       }),
     );
   }
 
-  me(): Observable<User> {
-    return this.http
-      .get<User>(`${environment.apiUrl}/auth/me`, {
-        withCredentials: true,
-      })
-      .pipe(tap((user) => this.setCurrentUser(user)));
+  register(data: {
+    name: string; email: string; password: string; companyName?: string;
+    phone?: string; cpfCnpj?: string; cep?: string; uf?: string;
+    address?: string; addressNumber?: string; addressComplement?: string;
+  }) {
+    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/auth/register`, data).pipe(
+      tap((res) => {
+        if (res.success) this.setSession(res.data);
+      }),
+    );
   }
 
-  applyCurrentUser(user: User): void {
-    this.setCurrentUser(user);
+  logout() {
+    localStorage.removeItem('agilis_token');
+    localStorage.removeItem('agilis_user');
+    this._token.set(null);
+    this._user.set(null);
+    this.router.navigate(['/auth/login']);
   }
 
-  logout(redirect = true): void {
-    const hadSession = Boolean(this.accessTokenSignal() || this.currentUserSignal());
-    this.clearSession();
-
-    if (hadSession) {
-      this.http
-        .post<void>(
-          `${environment.apiUrl}/auth/logout`,
-          {},
-          {
-            withCredentials: true,
-          },
-        )
-        .subscribe({
-          error: () => {
-            return;
-          },
-        });
-    }
-
-    if (redirect) {
-      void this.router.navigate(['/login']);
+  updateUser(user: Partial<User>) {
+    const current = this._user();
+    if (current) {
+      const updated = { ...current, ...user };
+      this._user.set(updated);
+      localStorage.setItem('agilis_user', JSON.stringify(updated));
     }
   }
 
-  private clearSession(): void {
-    this.accessTokenSignal.set(null);
-    this.currentUserSignal.set(null);
+  private setSession(data: AuthResponse) {
+    this._token.set(data.accessToken);
+    this._user.set(data.user);
+    localStorage.setItem('agilis_token', data.accessToken);
+    localStorage.setItem('agilis_user', JSON.stringify(data.user));
   }
 
-  private persistSession(response: AuthResponse): void {
-    this.accessTokenSignal.set(response.accessToken);
-    this.currentUserSignal.set(response.user);
-  }
-
-  private setCurrentUser(user: User): void {
-    this.currentUserSignal.set(user);
+  private restoreSession() {
+    const token = localStorage.getItem('agilis_token');
+    const user = localStorage.getItem('agilis_user');
+    if (token && user) {
+      this._token.set(token);
+      try { this._user.set(JSON.parse(user)); } catch {}
+    }
   }
 }
