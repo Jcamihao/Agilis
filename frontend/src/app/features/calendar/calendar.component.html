@@ -1,0 +1,315 @@
+<div class="flex flex-col" style="height: calc(100vh - 108px);">
+
+  <!-- Page Header -->
+  <div class="flex justify-between items-center mb-4 flex-shrink-0">
+    <div class="flex items-center gap-5">
+      <div>
+        <div class="ag-section-badge">
+          <span class="ag-section-num">7</span>
+          <span class="ag-section-label">Calendário</span>
+        </div>
+        <h1 class="ag-page-title">Calendário</h1>
+      </div>
+
+      <!-- View tabs -->
+      <div class="flex items-center rounded-xl p-1 gap-0.5"
+           style="background: #ffffff; border: 1px solid rgba(0,0,0,0.08);">
+        @for (v of views; track v.key) {
+          <button (click)="currentView.set(v.key); load()"
+                  class="px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all"
+                  [style.background]="currentView() === v.key ? '#4648d4' : 'transparent'"
+                  [style.color]="currentView() === v.key ? '#fff' : '#464554'">
+            {{ v.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex items-center gap-2">
+      <button (click)="navigate(-1)"
+              class="p-2 rounded-full transition-colors"
+              style="color: #767586;"
+              onmouseenter="this.style.background='#edeeef'"
+              onmouseleave="this.style.background='transparent'">
+        <span class="material-symbols-rounded text-xl">chevron_left</span>
+      </button>
+
+      <span class="text-[20px] font-semibold min-w-[160px] text-center"
+            style="color: #191c1d; letter-spacing: -0.01em;">
+        {{ headerLabel() }}
+      </span>
+
+      <button (click)="navigate(1)"
+              class="p-2 rounded-full transition-colors"
+              style="color: #767586;"
+              onmouseenter="this.style.background='#edeeef'"
+              onmouseleave="this.style.background='transparent'">
+        <span class="material-symbols-rounded text-xl">chevron_right</span>
+      </button>
+
+      <button (click)="goToToday()"
+              class="px-4 py-1.5 rounded-lg text-[13px] font-medium transition-colors ml-1"
+              style="border: 1px solid rgba(199,196,215,0.6); color: #464554; background: #fff;">
+        Hoje
+      </button>
+    </div>
+  </div>
+
+  <!-- Content: Calendar + Sidebar -->
+  <div class="flex flex-1 gap-6 overflow-hidden">
+
+    <!-- ── Calendar Area ───────────────────────────── -->
+    <div class="flex-1 rounded-xl overflow-hidden flex flex-col"
+         style="background: #fff; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+
+      @if (loading()) {
+        <div class="flex-1 ag-skeleton m-0 rounded-none"></div>
+      }
+
+      <!-- MONTH VIEW -->
+      @else if (currentView() === 'month') {
+        <div class="cal-grid flex-1">
+          @for (day of weekDays; track day) {
+            <div class="cal-header-cell">{{ day }}</div>
+          }
+          @for (cell of monthCells(); track cell.date.toISOString()) {
+            <div class="cal-cell"
+                 [class.cal-cell--outside]="!cell.isCurrentMonth"
+                 (click)="selectDay(cell.date)">
+              <span class="cal-date-num"
+                    [class.cal-date-num--today]="cell.isToday"
+                    [class.cal-date-num--outside]="!cell.isCurrentMonth">
+                {{ cell.date.getDate() }}
+              </span>
+              @for (task of cell.tasks.slice(0, 3); track task.id) {
+                <div class="cal-task"
+                     [style.background]="getTaskColor(task) + '18'"
+                     [style.border-left]="'3px solid ' + getTaskColor(task)"
+                     [title]="task.title">
+                  {{ task.title }}
+                </div>
+              }
+              @if (cell.tasks.length > 3) {
+                <div style="font-size:10px; color:#767586; padding: 1px 2px;">
+                  +{{ cell.tasks.length - 3 }} mais
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- WEEK VIEW -->
+      @else if (currentView() === 'week') {
+        <div class="flex flex-col flex-1 overflow-hidden">
+          <!-- Day headers -->
+          <div class="grid grid-cols-7"
+               style="border-bottom: 1px solid rgba(0,0,0,0.07);">
+            @for (day of weekCells(); track day.date.toISOString()) {
+              <div (click)="selectDay(day.date)"
+                   class="py-3 px-2 text-center cursor-pointer transition-colors border-r border-[rgba(0,0,0,0.07)] last:border-r-0"
+                   style="background: #f9fafb;">
+                <p class="text-[11px] font-bold uppercase tracking-wide" style="color: #767586;">
+                  {{ format(day.date, 'EEE', { locale: ptBR }) }}
+                </p>
+                <p class="text-[18px] font-semibold mt-0.5 w-8 h-8 mx-auto flex items-center justify-center rounded-full transition-colors"
+                   [style.background]="day.isToday ? '#4648d4' : 'transparent'"
+                   [style.color]="day.isToday ? '#fff' : '#191c1d'">
+                  {{ day.date.getDate() }}
+                </p>
+                @if (day.tasks.length > 0) {
+                  <div class="flex justify-center gap-0.5 mt-1">
+                    @for (t of day.tasks.slice(0,3); track t.id) {
+                      <div class="w-1.5 h-1.5 rounded-full" [style.background]="getTaskColor(t)"></div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          <!-- Task columns -->
+          <div class="flex-1 overflow-y-auto">
+            <div class="grid grid-cols-7 h-full divide-x divide-[rgba(0,0,0,0.07)]">
+              @for (day of weekCells(); track day.date.toISOString()) {
+                <div class="p-2 space-y-1.5">
+                  @for (task of day.tasks; track task.id) {
+                    <div class="cal-task"
+                         [style.background]="getTaskColor(task) + '15'"
+                         [style.border-left]="'3px solid ' + getTaskColor(task)"
+                         [title]="task.title">
+                      {{ task.title }}
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- DAY VIEW -->
+      @else if (currentView() === 'day') {
+        <div class="flex flex-col flex-1 overflow-hidden">
+          <div class="px-6 py-4 flex items-center justify-between flex-shrink-0"
+               style="border-bottom: 1px solid rgba(0,0,0,0.07);">
+            <div>
+              <p class="text-[18px] font-semibold" style="color:#191c1d; letter-spacing:-0.02em;">
+                {{ format(currentDate(), 'EEEE', { locale: ptBR }) }}
+              </p>
+              <p class="text-[13px] mt-0.5" style="color:#767586;">
+                {{ format(currentDate(), "d 'de' MMMM 'de' yyyy", { locale: ptBR }) }}
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="text-[32px] font-bold" style="color:#4648d4; letter-spacing:-0.04em;">
+                {{ dayTasks().length }}
+              </p>
+              <p class="text-[11px]" style="color:#767586;">
+                tarefa{{ dayTasks().length !== 1 ? 's' : '' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-4">
+            @if (dayTasks().length === 0) {
+              <div class="ag-empty py-16">
+                <span class="material-symbols-rounded ag-empty__icon">event_available</span>
+                <p class="ag-empty__title">Nenhuma tarefa para este dia</p>
+                <p class="ag-empty__desc">Aproveite o dia livre!</p>
+              </div>
+            } @else {
+              <div class="space-y-3">
+                @for (task of dayTasks(); track task.id) {
+                  <div class="ag-card p-4 flex items-start gap-3 cursor-pointer"
+                       style="border-left: 3px solid; border-left-color: var(--border);"
+                       [style.border-left-color]="getTaskColor(task)">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between gap-2">
+                        <p class="font-semibold text-[14px]" style="color:#191c1d;">{{ task.title }}</p>
+                        <span class="flex-shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                              [style.background]="getTaskColor(task) + '18'"
+                              [style.color]="getTaskColor(task)">
+                          {{ PRIORITY_CONFIG[task.priority].label }}
+                        </span>
+                      </div>
+                      @if (task.description) {
+                        <p class="text-[13px] mt-1 truncate" style="color:#767586;">{{ task.description }}</p>
+                      }
+                      @if (task.project) {
+                        <div class="flex items-center gap-1.5 mt-2">
+                          <span class="w-2 h-2 rounded-full" [style.background]="task.project.color"></span>
+                          <span class="text-[11px]" style="color:#767586;">{{ task.project.name }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- ── Right Sidebar ───────────────────────────── -->
+    <div class="w-80 flex flex-col gap-4 flex-shrink-0">
+
+      <!-- Filters -->
+      <div class="cal-glass rounded-xl p-4" style="box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <h3 class="flex items-center gap-2 font-semibold text-[15px] mb-4"
+            style="color:#191c1d; letter-spacing:-0.01em;">
+          <span class="material-symbols-rounded text-xl" style="color:#767586;">tune</span>
+          Filtros
+        </h3>
+        <div class="space-y-3">
+          <label class="flex items-center gap-2.5 text-[13px] cursor-pointer" style="color:#464554;">
+            <input type="checkbox" checked style="accent-color:#4648d4; width:14px; height:14px;">
+            Meus Projetos
+          </label>
+          <label class="flex items-center gap-2.5 text-[13px] cursor-pointer" style="color:#464554;">
+            <input type="checkbox" checked style="accent-color:#4648d4; width:14px; height:14px;">
+            Equipe Alpha
+          </label>
+          <label class="flex items-center gap-2.5 text-[13px] cursor-pointer" style="color:#464554;">
+            <input type="checkbox" style="accent-color:#4648d4; width:14px; height:14px;">
+            Concluídas
+          </label>
+        </div>
+        <div class="mt-4 pt-4" style="border-top: 1px solid rgba(199,196,215,0.3);">
+          <div class="text-[10px] font-bold uppercase tracking-[0.08em] mb-2" style="color:#767586;">
+            Etiquetas
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="tag-pill tag-pill--urgente">Urgente</span>
+            <span class="tag-pill tag-pill--design">Design</span>
+            <span class="tag-pill tag-pill--dev">Dev</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Backlog / Upcoming -->
+      <div class="cal-glass rounded-xl p-4 flex-1 flex flex-col overflow-hidden"
+           style="box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="flex items-center gap-2 font-semibold text-[15px]"
+              style="color:#191c1d; letter-spacing:-0.01em;">
+            <span class="material-symbols-rounded text-xl" style="color:#767586;">inbox</span>
+            Backlog
+          </h3>
+          @if (upcomingTasks().length > 0) {
+            <span class="backlog-count">{{ upcomingTasks().length }}</span>
+          }
+        </div>
+        <p class="text-[11px] mb-3" style="color:#767586;">Tarefas com prazo nos próximos 7 dias</p>
+
+        <div class="flex-1 overflow-y-auto space-y-2 pr-0.5">
+          @if (loading()) {
+            @for (i of [1,2,3]; track i) {
+              <div class="ag-skeleton h-16 rounded-xl"></div>
+            }
+          } @else if (upcomingTasks().length === 0) {
+            <div class="text-center py-8">
+              <span class="material-symbols-rounded text-[36px]" style="color:#c7c4d7;">event_available</span>
+              <p class="text-[12px] mt-2" style="color:#767586;">Nenhuma tarefa próxima</p>
+            </div>
+          } @else {
+            @for (task of upcomingTasks().slice(0, 8); track task.id) {
+              <div class="bg-white p-3 rounded-xl cursor-pointer group transition-shadow hover:shadow-md"
+                   style="border: 1px solid rgba(199,196,215,0.5); box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <div class="flex justify-between items-start">
+                  <span class="text-[12px] font-semibold truncate" style="color:#191c1d;">
+                    {{ task.title }}
+                  </span>
+                  <span class="material-symbols-rounded text-[13px] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-1"
+                        style="color:#767586;">drag_indicator</span>
+                </div>
+                @if (task.project) {
+                  <div class="flex items-center gap-1.5 mt-1.5">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0" [style.background]="task.project.color"></span>
+                    <span class="text-[10px]" style="color:#767586;">{{ task.project.name }}</span>
+                  </div>
+                }
+                @if (task.dueDate) {
+                  <p class="text-[10px] mt-1" style="color:#767586;">
+                    {{ format(parseISO(task.dueDate), "d 'de' MMM", { locale: ptBR }) }}
+                  </p>
+                }
+              </div>
+            }
+          }
+        </div>
+
+        <button class="mt-3 w-full py-2 rounded-xl text-[12px] flex justify-center items-center gap-1 transition-colors"
+                style="border: 1px dashed rgba(199,196,215,0.6); color: #767586; background: transparent;">
+          <span class="material-symbols-rounded text-[16px]">add</span>
+          Adicionar Tarefa
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

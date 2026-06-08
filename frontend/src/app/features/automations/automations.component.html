@@ -1,0 +1,399 @@
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="ag-page-header">
+        <div>
+                <div class="ag-section-badge">
+        <span class="ag-section-num">8</span>
+        <span class="ag-section-label">Automações</span>
+      </div>
+<h1 class="ag-page-title">Automações</h1>
+          <p class="ag-page-subtitle">{{ rules().length }} regra{{ rules().length !== 1 ? 's' : '' }} configurada{{ rules().length !== 1 ? 's' : '' }}</p>
+        </div>
+        <button (click)="openCreate()" class="ag-btn ag-btn--primary">
+          <span class="material-symbols-rounded">add</span> Nova Regra
+        </button>
+      </div>
+
+      <!-- Empty state -->
+      @if (!loading() && rules().length === 0) {
+        <div class="ag-empty py-20">
+          <span class="material-symbols-rounded ag-empty__icon">auto_awesome</span>
+          <p class="ag-empty__title">Nenhuma automação criada</p>
+          <p class="ag-empty__desc">Automatize ações repetitivas com regras SE → ENTÃO</p>
+          <button (click)="openCreate()" class="ag-btn ag-btn--primary">
+            <span class="material-symbols-rounded">add</span> Criar primeira regra
+          </button>
+        </div>
+      }
+
+      <!-- Rules list -->
+      @if (loading()) {
+        <div class="space-y-3">
+          @for (i of [1,2,3]; track i) { <div class="ag-skeleton h-28 rounded-2xl"></div> }
+        </div>
+      } @else {
+        <div class="space-y-3">
+          @for (rule of rules(); track rule.id) {
+            <div class="ag-card p-5 animate-fade-in-up">
+              <div class="flex items-start gap-4">
+                <!-- Active toggle -->
+                <button (click)="toggleRule(rule)"
+                        class="mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-all duration-200 relative"
+                        [class.bg-primary-500]="rule.isActive"
+                        [class.bg-slate-200]="!rule.isActive">
+                  <div class="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-200"
+                       [class.left-5]="rule.isActive"
+                       [class.left-1]="!rule.isActive"></div>
+                </button>
+
+                <!-- Rule info -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="font-semibold text-[--text-primary]">{{ rule.name }}</h3>
+                        <span class="ag-badge" [class.ag-badge--success]="rule.isActive" [class.ag-badge--neutral]="!rule.isActive">
+                          {{ rule.isActive ? 'Ativa' : 'Inativa' }}
+                        </span>
+                      </div>
+                      @if (rule.description) {
+                        <p class="text-sm text-[--text-secondary] mt-0.5 truncate">{{ rule.description }}</p>
+                      }
+                    </div>
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                      <button (click)="viewExecutions(rule)"
+                              class="ag-btn ag-btn--ghost ag-btn--sm ag-btn--icon" title="Ver execuções">
+                        <span class="material-symbols-rounded text-base">history</span>
+                      </button>
+                      <button (click)="editRule(rule)"
+                              class="ag-btn ag-btn--ghost ag-btn--sm ag-btn--icon" title="Editar">
+                        <span class="material-symbols-rounded text-base">edit</span>
+                      </button>
+                      <button (click)="deleteRule(rule)"
+                              class="ag-btn ag-btn--ghost ag-btn--sm ag-btn--icon text-red-400 hover:text-red-600 hover:bg-red-50"
+                              title="Excluir">
+                        <span class="material-symbols-rounded text-base">delete</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Trigger → Action summary -->
+                  <div class="flex items-center gap-2 mt-3 flex-wrap">
+                    <div class="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-medium">
+                      <span class="material-symbols-rounded text-sm">bolt</span>
+                      SE: {{ TRIGGER_LABELS[rule.trigger] }}
+                    </div>
+                    <span class="material-symbols-rounded text-[--text-tertiary] text-base">arrow_forward</span>
+                    @for (action of rule.actions.slice(0,2); track $index) {
+                      <div class="flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-medium">
+                        <span class="material-symbols-rounded text-sm">play_arrow</span>
+                        {{ ACTION_LABELS[action.type] }}
+                      </div>
+                    }
+                    @if (rule.actions.length > 2) {
+                      <span class="text-xs text-[--text-tertiary]">+{{ rule.actions.length - 2 }} ações</span>
+                    }
+                  </div>
+
+                  <!-- Stats footer -->
+                  <div class="flex items-center gap-4 mt-3 text-xs text-[--text-tertiary]">
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-rounded text-xs">play_circle</span>
+                      {{ rule.runCount }} execuções
+                    </span>
+                    @if (rule.lastRunAt) {
+                      <span>Última: {{ timeAgo(rule.lastRunAt) }}</span>
+                    }
+                    @if (rule.project) {
+                      <span class="flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full" [style.background]="rule.project.color"></span>
+                        {{ rule.project.name }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ═══ Execution History Panel ═══ -->
+    @if (selectedRule() && showExecutions()) {
+      <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
+          <div class="flex items-center justify-between p-5 border-b border-b-[rgba(0,0,0,0.07)]">
+            <div>
+              <h2 class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">Histórico de Execuções</h2>
+              <p class="text-sm text-[--text-secondary]">{{ selectedRule()!.name }}</p>
+            </div>
+            <button (click)="showExecutions.set(false)" class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color: var(--text-tertiary);">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+          <div class="flex-1 overflow-y-auto p-5">
+            @if (executionsLoading()) {
+              <div class="space-y-2">
+                @for (i of [1,2,3]; track i) { <div class="ag-skeleton h-14 rounded-lg"></div> }
+              </div>
+            } @else if (executions().length === 0) {
+              <div class="text-center py-8 text-[--text-tertiary]">
+                <span class="material-symbols-rounded text-4xl text-slate-300">history</span>
+                <p class="mt-2">Nenhuma execução ainda</p>
+              </div>
+            } @else {
+              <div class="space-y-2">
+                @for (ex of executions(); track ex.id) {
+                  <div class="flex items-start gap-3 p-3 rounded-xl border border-[rgba(0,0,0,0.08)]">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                         [class.bg-emerald-50]="ex.status === 'SUCCESS'"
+                         [class.bg-red-50]="ex.status === 'FAILED'"
+                         [class.bg-slate-100]="ex.status === 'SKIPPED'"
+                         [class.bg-blue-50]="ex.status === 'RUNNING'">
+                      <span class="material-symbols-rounded text-base"
+                            [class.text-emerald-600]="ex.status === 'SUCCESS'"
+                            [class.text-red-500]="ex.status === 'FAILED'"
+                            [class.text-slate-400]="ex.status === 'SKIPPED'"
+                            [class.text-blue-500]="ex.status === 'RUNNING'">
+                        {{ ex.status === 'SUCCESS' ? 'check_circle' : ex.status === 'FAILED' ? 'error' : ex.status === 'SKIPPED' ? 'skip_next' : 'sync' }}
+                      </span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-sm font-medium" [class.text-emerald-700]="ex.status === 'SUCCESS'"
+                              [class.text-red-600]="ex.status === 'FAILED'" [class.text-slate-500]="ex.status === 'SKIPPED'">
+                          {{ ex.status }}
+                        </span>
+                        @if (ex.task) {
+                          <span class="text-xs text-[--text-tertiary] truncate">→ {{ ex.task.title }}</span>
+                        }
+                        @if (ex.durationMs) {
+                          <span class="text-xs text-[--text-tertiary] ml-auto">{{ ex.durationMs }}ms</span>
+                        }
+                      </div>
+                      @if (ex.error) {
+                        <p class="text-xs text-red-500 mt-1 font-mono">{{ ex.error }}</p>
+                      }
+                      <p class="text-xs text-[--text-tertiary] mt-0.5">{{ timeAgo(ex.createdAt) }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ═══ Create/Edit Rule Modal ═══ -->
+    @if (showRuleModal()) {
+      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto animate-fade-in">
+        <div class="min-h-screen flex items-start justify-center p-4 py-8">
+          <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in">
+            <div class="flex items-center justify-between p-6 border-b border-b-[rgba(0,0,0,0.07)]">
+              <h2 class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">
+                {{ editingRule() ? 'Editar Regra' : 'Nova Regra de Automação' }}
+              </h2>
+              <button (click)="closeModal()" class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color: var(--text-tertiary);">
+                <span class="material-symbols-rounded">close</span>
+              </button>
+            </div>
+
+            <form [formGroup]="ruleForm" (ngSubmit)="saveRule()" class="p-6 space-y-6">
+              <!-- Basic info -->
+              <div class="grid grid-cols-1 gap-4">
+                <div>
+                  <label class="ag-label ag-label--required">Nome da Regra</label>
+                  <input type="text" formControlName="name" placeholder="Ex: Notificar equipe ao concluir tarefa" class="ag-input">
+                </div>
+                <div>
+                  <label class="ag-label">Descrição</label>
+                  <input type="text" formControlName="description" placeholder="Descreva o objetivo desta automação" class="ag-input">
+                </div>
+              </div>
+
+              <!-- Trigger -->
+              <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="material-symbols-rounded text-blue-600 text-lg">bolt</span>
+                  <h3 class="font-semibold text-blue-800 text-sm uppercase tracking-wide">SE (Gatilho)</h3>
+                </div>
+                <select formControlName="trigger" class="ag-input">
+                  @for (t of triggerOptions; track t.value) {
+                    <option [value]="t.value">{{ t.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- Conditions -->
+              <div class="bg-slate-50 border border-[rgba(0,0,0,0.08)] rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-rounded text-[--text-secondary] text-lg">filter_alt</span>
+                    <h3 class="font-semibold text-[--text-primary] text-sm uppercase tracking-wide">Condições (opcional)</h3>
+                  </div>
+                  <button type="button" (click)="addCondition()" class="ag-btn ag-btn--ghost ag-btn--sm">
+                    <span class="material-symbols-rounded text-base">add</span> Condição
+                  </button>
+                </div>
+
+                <div formArrayName="conditions" class="space-y-2">
+                  @for (cond of conditionsArray.controls; track $index; let i = $index) {
+                    <div [formGroupName]="i" class="flex items-center gap-2">
+                      <select formControlName="field" class="ag-input flex-1 text-sm py-2">
+                        @for (f of conditionFields; track f.value) {
+                          <option [value]="f.value">{{ f.label }}</option>
+                        }
+                      </select>
+                      <select formControlName="operator" class="ag-input w-36 text-sm py-2">
+                        @for (op of operators; track op.value) {
+                          <option [value]="op.value">{{ op.label }}</option>
+                        }
+                      </select>
+                      <input type="text" formControlName="value" placeholder="valor" class="ag-input flex-1 text-sm py-2">
+                      <button type="button" (click)="removeCondition(i)"
+                              class="p-2 text-[--text-tertiary] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                        <span class="material-symbols-rounded text-base">close</span>
+                      </button>
+                    </div>
+                  }
+                  @if (conditionsArray.length === 0) {
+                    <p class="text-sm text-[--text-tertiary] text-center py-2">Sem condições — a regra executará para qualquer evento do gatilho</p>
+                  }
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-rounded text-purple-600 text-lg">play_arrow</span>
+                    <h3 class="font-semibold text-purple-800 text-sm uppercase tracking-wide">ENTÃO (Ações)</h3>
+                  </div>
+                  <button type="button" (click)="addAction()" class="ag-btn ag-btn--ghost ag-btn--sm">
+                    <span class="material-symbols-rounded text-base">add</span> Ação
+                  </button>
+                </div>
+
+                <div formArrayName="actions" class="space-y-3">
+                  @for (act of actionsArray.controls; track $index; let i = $index) {
+                    <div [formGroupName]="i" class="bg-white rounded-xl border border-purple-200 p-3 space-y-2">
+                      <div class="flex items-center gap-2">
+                        <select formControlName="type" class="ag-input flex-1 text-sm py-2"
+                                (change)="onActionTypeChange(i, $event)">
+                          @for (a of actionOptions; track a.value) {
+                            <option [value]="a.value">{{ a.label }}</option>
+                          }
+                        </select>
+                        <button type="button" (click)="removeAction(i)"
+                                class="p-2 text-[--text-tertiary] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                          <span class="material-symbols-rounded text-base">close</span>
+                        </button>
+                      </div>
+
+                      <!-- Dynamic params based on action type -->
+                      @if (getActionType(i) === 'CHANGE_STATUS') {
+                        <div formGroupName="params">
+                          <select formControlName="status" class="ag-input text-sm py-2 w-full">
+                            <option value="BACKLOG">Backlog</option>
+                            <option value="IN_PROGRESS">Em Andamento</option>
+                            <option value="IN_REVIEW">Em Revisão</option>
+                            <option value="DONE">Concluído</option>
+                          </select>
+                        </div>
+                      }
+                      @if (getActionType(i) === 'SEND_NOTIFICATION') {
+                        <div formGroupName="params" class="space-y-2">
+                          <input type="text" formControlName="title" placeholder="Título da notificação" class="ag-input text-sm py-2 w-full">
+                          <input type="text" formControlName="message" placeholder="Mensagem" class="ag-input text-sm py-2 w-full">
+                        </div>
+                      }
+                      @if (getActionType(i) === 'CREATE_TASK') {
+                        <div formGroupName="params" class="space-y-2">
+                          <input type="text" formControlName="title" placeholder="Título da nova tarefa" class="ag-input text-sm py-2 w-full">
+                        </div>
+                      }
+                      @if (getActionType(i) === 'SEND_EMAIL') {
+                        <div formGroupName="params" class="space-y-2">
+                          <input type="email" formControlName="to" placeholder="Para (e-mail)" class="ag-input text-sm py-2 w-full">
+                          <input type="text" formControlName="subject" placeholder="Assunto" class="ag-input text-sm py-2 w-full">
+                        </div>
+                      }
+                      @if (getActionType(i) === 'SEND_WHATSAPP') {
+                        <div formGroupName="params" class="space-y-2">
+                          <div class="flex flex-col gap-1">
+                            <label class="text-xs font-semibold text-[--text-secondary]">Enviar para</label>
+                            <select formControlName="target" class="ag-input text-sm py-2">
+                              <option value="assignee">Responsável da tarefa</option>
+                              <option value="creator">Criador da tarefa</option>
+                            </select>
+                          </div>
+                          <div class="flex flex-col gap-1">
+                            <label class="text-xs font-semibold text-[--text-secondary]">
+                              Mensagem <span class="font-normal text-[--text-tertiary]">(opcional — usa padrão se vazio)</span>
+                            </label>
+                            <textarea formControlName="message" rows="3"
+                                      placeholder="Use {taskTitle}, {priority}, {status} como variáveis"
+                                      class="ag-input text-sm py-2 w-full resize-none"></textarea>
+                          </div>
+                          <p class="text-[11px] text-[--text-tertiary] flex items-start gap-1">
+                            <span class="material-symbols-rounded text-sm shrink-0 mt-0.5">info</span>
+                            O usuário precisa ter o campo <strong>Telefone</strong> preenchido no perfil (com prefixo +55).
+                          </p>
+                        </div>
+                      }
+                      @if (getActionType(i) === 'SEND_TELEGRAM') {
+                        <div formGroupName="params" class="space-y-2">
+                          <!-- Destinatário -->
+                          <div class="flex flex-col gap-1">
+                            <label class="text-xs font-semibold text-[--text-secondary]">Enviar para</label>
+                            <select formControlName="target" class="ag-input text-sm py-2">
+                              <option value="creator">Criador da tarefa</option>
+                              <option value="assignee">Responsável da tarefa</option>
+                              <option value="both">Criador e Responsável</option>
+                              <option value="custom">Chat ID personalizado</option>
+                            </select>
+                          </div>
+                          <!-- Chat ID customizado -->
+                          @if (getTelegramTarget(i) === 'custom') {
+                            <input type="text" formControlName="chatId" placeholder="Chat ID (ex: 123456789)"
+                                   class="ag-input text-sm py-2 w-full font-mono">
+                          }
+                          <!-- Mensagem customizada -->
+                          <div class="flex flex-col gap-1">
+                            <label class="text-xs font-semibold text-[--text-secondary]">
+                              Mensagem <span class="font-normal text-[--text-tertiary]">(opcional — usa padrão se vazio)</span>
+                            </label>
+                            <textarea formControlName="message" rows="3"
+                                      placeholder="Use {taskTitle}, {priority}, {status} como variáveis"
+                                      class="ag-input text-sm py-2 w-full resize-none"></textarea>
+                          </div>
+                          <!-- Dica -->
+                          <p class="text-[11px] text-[--text-tertiary] flex items-start gap-1">
+                            <span class="material-symbols-rounded text-sm shrink-0 mt-0.5">info</span>
+                            O usuário precisa ter o Telegram Chat ID cadastrado no perfil para receber a mensagem.
+                          </p>
+                        </div>
+                      }
+                    </div>
+                  }
+                  @if (actionsArray.length === 0) {
+                    <p class="text-sm text-red-400 text-center py-2">Adicione ao menos uma ação</p>
+                  }
+                </div>
+              </div>
+
+              <div class="flex gap-3 pt-2">
+                <button type="button" (click)="closeModal()" class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
+                <button type="submit" [disabled]="saving() || ruleForm.invalid || actionsArray.length === 0"
+                        class="flex-1 ag-btn ag-btn--primary justify-center">
+                  @if (saving()) { <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div> }
+                  {{ editingRule() ? 'Salvar Alterações' : 'Criar Regra' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    }

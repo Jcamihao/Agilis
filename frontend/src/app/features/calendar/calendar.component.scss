@@ -1,0 +1,108 @@
+// ── Calendar grid ─────────────────────────────────────────
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: rgba(0, 0, 0, 0.07);
+  height: 100%;
+}
+
+.cal-header-cell {
+  background: #f9fafb;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #767586;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.cal-cell {
+  background: #ffffff;
+  min-height: 105px;
+  padding: 8px;
+  cursor: pointer;
+  transition: background 120ms;
+
+  &:hover { background: #f9fafb; }
+  &--outside { background: rgba(249, 250, 251, 0.65); }
+}
+
+.cal-date-num {
+  font-size: 13px;
+  font-weight: 500;
+  color: #191c1d;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: 5px;
+
+  &--today  { background: #4648d4; color: #ffffff; }
+  &--outside { color: #c7c4d7; }
+}
+
+.cal-task {
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: transform 100ms;
+  color: #191c1d;
+
+  &:hover { transform: scale(1.02); }
+}
+
+// ── Glass sidebar panels ──────────────────────────────────
+.cal-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+// ── Backlog count pill ────────────────────────────────────
+.backlog-count {
+  background: #edeeef;
+  color: #464554;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 9999px;
+}
+
+// ── Tag pills ─────────────────────────────────────────────
+.tag-pill {
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 120ms;
+
+  &:hover { opacity: 0.8; }
+
+  &--urgente {
+    background: rgba(70, 72, 212, 0.08);
+    color: #4648d4;
+    border: 1px solid rgba(70, 72, 212, 0.2);
+  }
+  &--design {
+    background: rgba(91, 94, 108, 0.1);
+    color: #464554;
+    border: 1px solid rgba(91, 94, 108, 0.2);
+  }
+  &--dev {
+    background: rgba(75, 65, 225, 0.08);
+    color: #4b41e1;
+    border: 1px solid rgba(75, 65, 225, 0.2);
+  }
+}
