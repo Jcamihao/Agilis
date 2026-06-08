@@ -1,0 +1,4 @@
+.nav-item:hover { background: rgba(255,255,255,0.06) !important; }
+    .nav-item--active:hover { background: rgba(99,102,241,0.2) !important; }
+    a[routerLink="/profile"]:hover { background: rgba(255,255,255,0.06) !important; }
+    button:hover { background: rgba(255,255,255,0.06) !important; }

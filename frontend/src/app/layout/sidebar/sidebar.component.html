@@ -1,0 +1,231 @@
+<aside
+  class="fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-smooth"
+  style="background: #0b0e1a; border-right: 1px solid rgba(255, 255, 255, 0.05)"
+  [style.width]="collapsed ? '68px' : '248px'"
+>
+  <!-- Logo -->
+  <div
+    class="flex items-center h-[60px] px-4 flex-shrink-0"
+    style="border-bottom: 1px solid rgba(255, 255, 255, 0.05)"
+  >
+    <div class="flex items-center gap-3 min-w-0 overflow-hidden">
+      <div
+        class="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center shadow-lg"
+        style="
+          background: linear-gradient(
+            135deg,
+            #6366f1 0%,
+            #4f46e5 60%,
+            #7c3aed 100%
+          );
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        "
+      >
+        <span class="text-white font-bold text-sm tracking-tight">A</span>
+      </div>
+      @if (!collapsed) {
+        <div class="animate-fade-in min-w-0 overflow-hidden">
+          <p
+            class="text-[15px] font-semibold text-white tracking-[-0.02em] leading-none"
+          >
+            Agilis
+          </p>
+          @if (companyName()) {
+            <p
+              class="text-[11px] text-[--text-secondary] truncate max-w-36 mt-0.5"
+            >
+              {{ companyName() }}
+            </p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+    @if (!collapsed) {
+      <p
+        class="px-3 py-1 mt-1 text-[10px] font-bold text-[--text-secondary] uppercase tracking-[0.1em]"
+        style="color: #94a3b8"
+      >
+        Principal
+      </p>
+    }
+
+    @for (item of mainNav; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive
+        #rlaMain="routerLinkActive"
+        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+        class="nav-item flex items-center gap-3 px-3 py-[9px] rounded-xl cursor-pointer group relative transition-all duration-150"
+        [style.background]="rlaMain.isActive ? 'rgba(99,102,241,0.15)' : ''"
+        [class.nav-item--active]="rlaMain.isActive"
+        [title]="collapsed ? item.label : ''"
+      >
+        <span
+          class="material-symbols-rounded text-[20px] flex-shrink-0 transition-colors"
+          [style.color]="rlaMain.isActive ? '#818cf8' : '#64748b'"
+        >
+          {{ item.icon }}
+        </span>
+        @if (!collapsed) {
+          <span
+            class="text-[13.5px] font-medium animate-fade-in truncate"
+            [style.color]="rlaMain.isActive ? '#f1f5f9' : '#94a3b8'"
+          >
+            {{ item.label }}
+          </span>
+          @if (item.badge) {
+            <span
+              class="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full"
+              style="background: rgba(99, 102, 241, 0.2); color: #818cf8"
+            >
+              {{ item.badge }}
+            </span>
+          }
+        }
+        @if (collapsed && item.badge) {
+          <span
+            class="absolute top-1 right-1 w-4 h-4 bg-primary-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center"
+          >
+            {{ item.badge }}
+          </span>
+        }
+      </a>
+    }
+
+    @if (!collapsed) {
+      <p
+        class="px-3 pt-5 pb-1 text-[10px] font-bold text-[--text-secondary] uppercase tracking-[0.1em]"
+        style="color: #94a3b8"
+      >
+        Organização
+      </p>
+    } @else {
+      <div
+        class="my-3 mx-2"
+        style="border-top: 1px solid rgba(255, 255, 255, 0.05)"
+      ></div>
+    }
+
+    @for (item of orgNav; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive
+        #rlaOrg="routerLinkActive"
+        class="nav-item flex items-center gap-3 px-3 py-[9px] rounded-xl cursor-pointer group relative transition-all duration-150"
+        [style.background]="rlaOrg.isActive ? 'rgba(99,102,241,0.15)' : ''"
+        [class.nav-item--active]="rlaOrg.isActive"
+        [title]="collapsed ? item.label : ''"
+      >
+        <span
+          class="material-symbols-rounded text-[20px] flex-shrink-0 transition-colors"
+          [style.color]="rlaOrg.isActive ? '#818cf8' : '#64748b'"
+        >
+          {{ item.icon }}
+        </span>
+        @if (!collapsed) {
+          <span
+            class="text-[13.5px] font-medium animate-fade-in truncate"
+            [style.color]="rlaOrg.isActive ? '#f1f5f9' : '#94a3b8'"
+          >
+            {{ item.label }}
+          </span>
+        }
+      </a>
+    }
+
+    @if (!collapsed) {
+      <p
+        class="px-3 pt-5 pb-1 text-[10px] font-bold text-[--text-secondary] uppercase tracking-[0.1em]"
+        style="color: #94a3b8"
+      >
+        Inteligência
+      </p>
+    } @else {
+      <div
+        class="my-3 mx-2"
+        style="border-top: 1px solid rgba(255, 255, 255, 0.05)"
+      ></div>
+    }
+
+    @for (item of v3Nav; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive
+        #rlaV3="routerLinkActive"
+        class="nav-item flex items-center gap-3 px-3 py-[9px] rounded-xl cursor-pointer group relative transition-all duration-150"
+        [style.background]="rlaV3.isActive ? 'rgba(99,102,241,0.15)' : ''"
+        [class.nav-item--active]="rlaV3.isActive"
+        [title]="collapsed ? item.label : ''"
+      >
+        <span
+          class="material-symbols-rounded text-[20px] flex-shrink-0 transition-colors"
+          [style.color]="rlaV3.isActive ? '#818cf8' : '#64748b'"
+        >
+          {{ item.icon }}
+        </span>
+        @if (!collapsed) {
+          <span
+            class="text-[13.5px] font-medium animate-fade-in truncate"
+            [style.color]="rlaV3.isActive ? '#f1f5f9' : '#94a3b8'"
+          >
+            {{ item.label }}
+          </span>
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- User Area -->
+  <div
+    class="p-3 flex-shrink-0"
+    style="border-top: 1px solid rgba(255, 255, 255, 0.05)"
+  >
+    <a
+      routerLink="/profile"
+      class="nav-item flex items-center gap-3 px-2.5 py-2.5 rounded-xl cursor-pointer transition-all duration-150 group"
+    >
+      <div
+        class="flex-shrink-0 w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-white text-[11px] font-bold"
+        style="background: linear-gradient(135deg, #818cf8, #6366f1, #4f46e5)"
+      >
+        @if (user()?.avatarUrl) {
+          <img
+            [src]="user()!.avatarUrl"
+            [alt]="user()!.name"
+            class="w-full h-full object-cover"
+          />
+        } @else {
+          {{ user()?.name?.charAt(0) | uppercase }}
+        }
+      </div>
+      @if (!collapsed) {
+        <div class="min-w-0 animate-fade-in flex-1">
+          <p class="text-[13px] font-medium truncate" style="color: #cbd5e1">
+            {{ user()?.name }}
+          </p>
+          <p class="text-[11px] truncate" style="color: #475569">
+            {{ user()?.email }}
+          </p>
+        </div>
+      }
+    </a>
+
+    <button
+      (click)="toggleCollapse.emit()"
+      class="w-full mt-1 flex items-center justify-center p-2 rounded-xl transition-colors"
+      style="color: #475569"
+      title="Recolher menu"
+    >
+      <span
+        class="material-symbols-rounded text-[18px] transition-transform duration-300"
+        [class.rotate-180]="collapsed"
+      >
+        keyboard_double_arrow_left
+      </span>
+    </button>
+  </div>
+</aside>
