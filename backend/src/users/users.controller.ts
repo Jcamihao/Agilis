@@ -1,52 +1,68 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UsersService, UpdateProfileDto, InviteMemberDto } from './users.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { RateLimit } from '../common/decorators/rate-limit.decorator';
-import { Roles } from '../common/decorators/roles.decorator';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RateLimitGuard } from '../common/guards/rate-limit.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { AuthenticatedUser } from '../common/interfaces/authenticated-user.interface';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserRoleDto } from './dto/update-user-role.dto';
-import { UserResponseDto } from './dto/user-response.dto';
-import { UsersService } from './users.service';
 
+@ApiTags('users')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN, Role.MANAGER)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
-  findAll(@CurrentUser() user: AuthenticatedUser): Promise<UserResponseDto[]> {
-    return this.usersService.findAllByOrganization(user.organizationId);
+  @Get('profile')
+  @ApiOperation({ summary: 'Meu perfil' })
+  getProfile(@CurrentUser('id') userId: string) {
+    return this.usersService.findOne(userId);
   }
 
-  @Post()
-  @RateLimit({ limit: 10, windowMs: 15 * 60 * 1000 })
-  @UseGuards(RateLimitGuard)
-  create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateUserDto,
-  ): Promise<UserResponseDto> {
-    return this.usersService.create(user.organizationId, user, dto);
+  @Put('profile')
+  @ApiOperation({ summary: 'Atualizar perfil' })
+  updateProfile(@CurrentUser('id') userId: string, @Body() dto: UpdateProfileDto) {
+    return this.usersService.updateProfile(userId, dto);
   }
 
-  @Patch(':id/role')
-  updateRole(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id') userId: string,
-    @Body() dto: UpdateUserRoleDto,
-  ): Promise<UserResponseDto> {
-    return this.usersService.updateRole(user.organizationId, user, userId, dto.role);
+  @Get('company-members')
+  @ApiOperation({ summary: 'Membros da empresa (simples)' })
+  getCompanyMembers(@Query('companyId') companyId: string) {
+    return this.usersService.findCompanyMembers(companyId);
+  }
+
+  @Get('company-members/detailed')
+  @ApiOperation({ summary: 'Membros da empresa com papéis e detalhes' })
+  getCompanyMembersDetailed(@Query('companyId') companyId: string) {
+    return this.usersService.findCompanyMembersWithRoles(companyId);
+  }
+
+  @Post('company-members/invite')
+  @ApiOperation({ summary: 'Convidar membro para a empresa' })
+  inviteMember(
+    @Query('companyId') companyId: string,
+    @Body() dto: InviteMemberDto,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.usersService.inviteMember(companyId, dto, userId);
+  }
+
+  @Patch('company-members/:targetUserId/role')
+  @ApiOperation({ summary: 'Alterar papel do membro' })
+  updateMemberRole(
+    @Query('companyId') companyId: string,
+    @Param('targetUserId') targetUserId: string,
+    @Body('role') role: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.usersService.updateMemberRole(companyId, targetUserId, role, userId);
+  }
+
+  @Delete('company-members/:targetUserId')
+  @ApiOperation({ summary: 'Remover membro da empresa' })
+  removeMember(
+    @Query('companyId') companyId: string,
+    @Param('targetUserId') targetUserId: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.usersService.removeMember(companyId, targetUserId, userId);
   }
 }
