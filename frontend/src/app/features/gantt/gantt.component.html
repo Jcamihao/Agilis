@@ -1,0 +1,275 @@
+<!-- ═══════ PAGE HEADER ═══════ -->
+<div class="flex flex-col" style="height: calc(100vh - 8rem)">
+  <div class="flex items-end justify-between mb-4 flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <a routerLink="/projects"
+        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white hover:text-[--text-secondary] transition-colors">
+        <span class="material-symbols-rounded text-xl">arrow_back</span>
+      </a>
+      <div>
+        <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight flex items-center gap-2">
+          <span class="material-symbols-rounded text-2xl text-primary-600">account_tree</span>
+          @if (project()) { {{ project()!.name }} } @else { Timeline }
+        </h2>
+        <p class="text-sm text-[--text-secondary] mt-0.5">{{ filteredTasks().length }} tarefa(s)</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- View toggle -->
+      <div class="flex items-center bg-white border border-[rgba(0,0,0,0.08)] rounded-xl overflow-hidden shadow-sm">
+        <a [routerLink]="['/projects', id, 'kanban']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">view_kanban</span>
+          Kanban
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'list']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">table_rows</span>
+          Lista
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <button class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold bg-primary-50 text-primary-600 cursor-default">
+          <span class="material-symbols-rounded text-base">account_tree</span>
+          Gantt
+        </button>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'time-report']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">schedule</span>
+          Tempo
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex items-center gap-3 mb-3 flex-shrink-0">
+    <!-- Search -->
+    <div class="relative w-56">
+      <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
+      <input type="text" placeholder="Filtrar tarefas..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        class="ag-input ag-input--sm pl-9 w-full" />
+    </div>
+
+    <!-- Zoom -->
+    <div class="flex items-center bg-white border border-[rgba(0,0,0,0.08)] rounded-lg overflow-hidden">
+      @for (z of ([['week','Semana'],['month','Mês'],['quarter','Trimestre']]); track z[0]) {
+        <button
+          (click)="setZoom($any(z[0]))"
+          class="px-3 py-1.5 text-xs font-semibold transition-colors"
+          [class.bg-primary-600]="zoom() === z[0]"
+          [class.text-white]="zoom() === z[0]"
+          [class.text-[--text-secondary]]="zoom() !== z[0]"
+          [class.hover:bg-slate-50]="zoom() !== z[0]">
+          {{ z[1] }}
+        </button>
+      }
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex items-center gap-1">
+      <button (click)="navigatePrev()"
+        class="p-1.5 rounded-lg text-[--text-secondary] hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-slate-200">
+        <span class="material-symbols-rounded text-base">chevron_left</span>
+      </button>
+      <button (click)="goToToday()"
+        class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-[--text-secondary] hover:border-primary-300 hover:text-primary-700 transition-all shadow-sm">
+        Hoje
+      </button>
+      <button (click)="navigateNext()"
+        class="p-1.5 rounded-lg text-[--text-secondary] hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-slate-200">
+        <span class="material-symbols-rounded text-base">chevron_right</span>
+      </button>
+    </div>
+
+    <!-- Period label -->
+    <span class="text-sm font-semibold text-[--text-secondary]">
+      {{ monthLabel(visibleDays()[0]) }}
+      @if (visibleDays()[0].getMonth() !== visibleDays()[visibleDays().length - 1].getMonth()) {
+        — {{ monthLabel(visibleDays()[visibleDays().length - 1]) }}
+      }
+    </span>
+  </div>
+
+  <!-- ═══════ GANTT ═══════ -->
+  @if (loading()) {
+    <div class="flex-1 bg-white rounded-xl border border-[rgba(0,0,0,0.07)] ag-skeleton"></div>
+  } @else if (filteredTasks().length === 0) {
+    <div class="flex-1 bg-white rounded-xl border border-[rgba(0,0,0,0.07)] flex flex-col items-center justify-center">
+      <span class="material-symbols-rounded text-4xl text-slate-200 mb-3">account_tree</span>
+      <p class="text-[--text-secondary] font-medium">Nenhuma tarefa encontrada</p>
+      <p class="text-sm text-[--text-tertiary] mt-1">Adicione datas às tarefas para vê-las no Gantt</p>
+    </div>
+  } @else {
+    <div class="gantt-wrapper flex-1 min-h-0">
+      <!-- ── Sidebar ── -->
+      <div class="gantt-sidebar">
+        <div class="gantt-sidebar-header">Tarefas</div>
+        <div class="gantt-sidebar-rows" #sidebarRows [style.overflow-y]="'hidden'">
+          @for (gt of ganttTasks(); track gt.task.id) {
+            <div class="gantt-sidebar-row" [class.done]="gt.task.status === 'DONE'">
+              <!-- Status dot -->
+              <div class="w-2 h-2 rounded-full flex-shrink-0"
+                [style.background]="STATUS_CONFIG[gt.task.status].color"></div>
+
+              <!-- Priority icon -->
+              <span class="material-symbols-rounded text-[13px] flex-shrink-0"
+                [style.color]="PRIORITY_CONFIG[gt.task.priority].color">
+                {{ PRIORITY_CONFIG[gt.task.priority].icon }}
+              </span>
+
+              <!-- Title -->
+              <span class="text-[13px] font-medium text-[--text-primary] truncate flex-1"
+                [class.line-through]="gt.task.status === 'DONE'"
+                [title]="gt.task.title">{{ gt.task.title }}</span>
+
+              <!-- Assignee avatar -->
+              @if (gt.task.assignee) {
+                <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 overflow-hidden">
+                  @if (gt.task.assignee.avatarUrl) {
+                    <img [src]="gt.task.assignee.avatarUrl" class="w-full h-full object-cover" />
+                  } @else {
+                    {{ initials(gt.task.assignee.name) }}
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ── Timeline ── -->
+      <div class="gantt-timeline" #timelineEl>
+        <!-- Column header -->
+        <div class="gantt-header" [style.min-width.px]="timelineW()">
+          <!-- Month row -->
+          <div class="gantt-month-row">
+            @for (d of visibleDays(); track $index) {
+              @if (isMonthStart(d) || $index === 0) {
+                <div class="flex items-center px-2"
+                  [style.min-width.px]="pxPerDay()"
+                  style="font-size:11px;font-weight:700;color:var(--text-secondary);">
+                  {{ monthLabel(d) }}
+                </div>
+              }
+            }
+          </div>
+          <!-- Day row -->
+          <div class="gantt-day-row">
+            @for (d of visibleDays(); track $index) {
+              <div class="gantt-day-cell"
+                [style.width.px]="pxPerDay()"
+                [style.min-width.px]="pxPerDay()"
+                [class.today]="isToday(d)"
+                [class.weekend]="isWeekend(d)"
+                [class.month-start]="isMonthStart(d) && $index > 0">
+                @if (showDayLabel(d, $index)) {
+                  {{ formatDayHeader(d) }}
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Scrollable body -->
+        <div class="gantt-rows" #rowsEl
+          [style.min-width.px]="timelineW()"
+          (scroll)="$event.stopPropagation()">
+          <div class="gantt-body" [style.min-width.px]="timelineW()" [style.height.px]="svgHeight()">
+
+            <!-- Stripe rows -->
+            @for (gt of ganttTasks(); track gt.task.id; let odd = $odd) {
+              <div class="gantt-row-stripe" [class.odd]="odd"
+                [style.top.px]="gt.rowIndex * ROW_H"></div>
+            }
+
+            <!-- Grid lines -->
+            @for (d of visibleDays(); track $index) {
+              @if (isToday(d)) {
+                <div class="gantt-grid-line today-line"
+                  [style.left.px]="$index * pxPerDay() + pxPerDay() / 2"></div>
+              } @else if (isMonthStart(d) && $index > 0) {
+                <div class="gantt-grid-line month-line"
+                  [style.left.px]="$index * pxPerDay()"></div>
+              } @else {
+                <div class="gantt-grid-line"
+                  [style.left.px]="$index * pxPerDay()"></div>
+              }
+              @if (isWeekend(d)) {
+                <div class="gantt-grid-line weekend-bg"
+                  [style.left.px]="$index * pxPerDay()"
+                  [style.width.px]="pxPerDay()"></div>
+              }
+            }
+
+            <!-- Dependency arrows SVG -->
+            @if (ganttDeps().length > 0) {
+              <svg class="gantt-deps-svg"
+                [style.width.px]="timelineW()"
+                [style.height.px]="svgHeight()">
+                <defs>
+                  <marker id="arrowhead" markerWidth="6" markerHeight="6"
+                    refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L6,3 z" class="dep-arrowhead" />
+                  </marker>
+                </defs>
+                @for (dep of ganttDeps(); track $index) {
+                  <path [attr.d]="arrowPath(dep)"
+                    class="dep-arrow"
+                    marker-end="url(#arrowhead)" />
+                }
+              </svg>
+            }
+
+            <!-- Task bars -->
+            @for (gt of ganttTasks(); track gt.task.id) {
+              @if (gt.hasStart) {
+                <!-- Bar -->
+                <div class="gantt-bar-wrap"
+                  [style.left.px]="gt.left"
+                  [style.width.px]="gt.width"
+                  [style.top.px]="gt.rowIndex * ROW_H + 8"
+                  [style.background]="barColor(gt.task)"
+                  [class.done]="gt.task.status === 'DONE'"
+                  [title]="gt.task.title + (gt.task.dueDate ? ' · ' + formatDate(gt.task.dueDate) : '')">
+                  @if (gt.width > 32) {
+                    <span class="gantt-bar-label">{{ gt.task.title }}</span>
+                  }
+                </div>
+              } @else {
+                <!-- Milestone dot -->
+                <div class="gantt-milestone"
+                  [style.left.px]="todayOffset()"
+                  [style.top.px]="gt.rowIndex * ROW_H + 17"
+                  [style.background]="barColor(gt.task)"
+                  [title]="gt.task.title + ' (sem datas)'"></div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- ═══════ LEGEND ═══════ -->
+<div class="flex items-center gap-5 mt-3 px-1 flex-shrink-0">
+  @for (entry of legendStatuses; track entry.key) {
+    <div class="flex items-center gap-1.5 text-xs text-[--text-secondary]">
+      <div class="w-3 h-3 rounded-sm" [style.background]="STATUS_CONFIG[entry.key].color"></div>
+      {{ entry.label }}
+    </div>
+  }
+  <div class="flex items-center gap-1.5 text-xs text-[--text-secondary]">
+    <div class="w-6 h-0 border-t-2 border-dashed border-slate-400 opacity-60"></div>
+    Dependência
+  </div>
+  <div class="flex items-center gap-1.5 text-xs text-[--text-secondary]">
+    <div class="w-0.5 h-4 bg-primary-600 opacity-60"></div>
+    Hoje
+  </div>
+</div>
