@@ -1,45 +1,68 @@
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import * as compression from 'compression';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
-function parseCorsOrigins(frontendUrl: string): string | string[] {
-  const origins = frontendUrl
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+  });
 
-  for (const origin of origins) {
-    new URL(origin);
-  }
-
-  return origins.length === 1 ? origins[0] : origins;
-}
-
-async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  const frontendUrl = configService.getOrThrow<string>('FRONTEND_URL');
-  const port = configService.get<number>('PORT') ?? 3000;
+  const port = configService.get<number>('PORT', 3000);
+  const prefix = configService.get<string>('API_PREFIX', 'api/v1');
+  const corsOrigin = configService.get<string>('CORS_ORIGIN', 'http://localhost:4200');
+
+  app.use(helmet());
+  app.use(compression());
 
   app.enableCors({
-    origin: parseCorsOrigins(frontendUrl),
+    origin: corsOrigin,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
+
+  app.setGlobalPrefix(prefix);
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
+      transformOptions: { enableImplicitConversion: true },
     }),
   );
-  app.setGlobalPrefix('api');
-  app.enableShutdownHooks();
+
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new TransformInterceptor());
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Agilis API')
+    .setDescription('Plataforma de Gestão Operacional - API Documentation')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addTag('auth', 'Autenticação')
+    .addTag('users', 'Usuários')
+    .addTag('companies', 'Empresas')
+    .addTag('teams', 'Equipes')
+    .addTag('projects', 'Projetos')
+    .addTag('tasks', 'Tarefas')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
 
   await app.listen(port);
+  console.log(`🚀 Agilis API rodando em: http://localhost:${port}/${prefix}`);
+  console.log(`📚 Documentação: http://localhost:${port}/docs`);
 }
 
 bootstrap();
