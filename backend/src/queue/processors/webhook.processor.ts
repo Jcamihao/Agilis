@@ -5,7 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import * as crypto from 'crypto';
 import * as https from 'https';
 import * as http from 'http';
-import { QUEUE_WEBHOOK } from '../queue.module';
+import { QUEUE_WEBHOOK } from '../queue.constants';
 
 export interface WebhookJobData {
   webhookId: string;

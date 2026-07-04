@@ -40,6 +40,18 @@
           <span class="material-symbols-rounded text-base">schedule</span>
           Tempo
         </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'wiki']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">menu_book</span>
+          Wiki
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'settings']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">settings</span>
+          Config.
+        </a>
       </div>
     </div>
   </div>

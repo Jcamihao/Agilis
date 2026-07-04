@@ -115,6 +115,7 @@ export interface Task {
   creator?: Pick<User, 'id' | 'name'>;
   sprint?: Pick<Sprint, 'id' | 'name' | 'status' | 'startDate' | 'endDate'>;
   _count?: { comments: number; subtasks?: number; timeEntries?: number };
+  customFields?: TaskCustomFieldEntry[];
 }
 
 export interface KanbanBoard {
@@ -430,4 +431,241 @@ export interface Process {
   updatedAt: string;
   steps?: ProcessStep[];
   _count?: { steps: number; instances: number };
+}
+
+// ── Custom Fields ─────────────────────────────────────────────────────────────
+
+export type CustomFieldType =
+  'TEXT' | 'NUMBER' | 'DATE' | 'SELECT' | 'MULTI_SELECT' | 'CHECKBOX' | 'URL' | 'EMAIL' | 'PHONE';
+
+export interface CustomField {
+  id: string;
+  projectId: string;
+  name: string;
+  type: CustomFieldType;
+  options: string[];
+  isRequired: boolean;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomFieldValue {
+  id: string;
+  customFieldId: string;
+  taskId: string;
+  value: string | null;
+  customField: CustomField;
+}
+
+export interface TaskCustomFieldEntry {
+  fieldId: string;
+  fieldName: string;
+  fieldType: CustomFieldType;
+  options: string[];
+  value: string | null;
+}
+
+// ── Wiki ──────────────────────────────────────────────────────────────────────
+
+export interface WikiPage {
+  id: string;
+  projectId: string;
+  parentId: string | null;
+  title: string;
+  content: string;
+  icon: string;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+  updatedBy?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+  children?: WikiPage[];
+  revisions?: WikiPageRevision[];
+  _count?: { children: number; revisions: number };
+}
+
+export interface WikiPageRevision {
+  id: string;
+  pageId: string;
+  content: string;
+  title: string;
+  authorId: string;
+  createdAt: string;
+  author?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+}
+
+// ── Intake Forms ──────────────────────────────────────────────────────────────
+
+export type IntakeFormStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED';
+export type IntakeSubmissionStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CONVERTED';
+export type IntakeFieldType = 'TEXT' | 'TEXTAREA' | 'EMAIL' | 'NUMBER' | 'DATE' | 'SELECT' | 'MULTI_SELECT' | 'CHECKBOX';
+
+export interface IntakeFieldDef {
+  id: string;
+  type: IntakeFieldType;
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[];
+  mapsTo?: 'title' | 'description' | 'priority' | 'dueDate' | 'assigneeId' | null;
+}
+
+export interface IntakeForm {
+  id: string;
+  projectId: string;
+  slug: string;
+  title: string;
+  description?: string;
+  status: IntakeFormStatus;
+  fields: IntakeFieldDef[];
+  submitLabel: string;
+  successMsg: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: Pick<User, 'id' | 'name'>;
+  submissions?: IntakeSubmission[];
+  _count?: { submissions: number };
+}
+
+export interface IntakeSubmission {
+  id: string;
+  formId: string;
+  data: Record<string, any>;
+  status: IntakeSubmissionStatus;
+  taskId?: string;
+  submitterEmail?: string;
+  submittedAt: string;
+  task?: Pick<Task, 'id' | 'title' | 'status'>;
+}
+
+// ── Client Portal ─────────────────────────────────────────────────────────────
+
+export interface ClientPortal {
+  id: string;
+  projectId: string;
+  token: string;
+  isEnabled: boolean;
+  title?: string;
+  logoUrl?: string;
+  accentColor: string;
+  showKanban: boolean;
+  showTimeline: boolean;
+  showHealth: boolean;
+  showTeam: boolean;
+  password?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PortalTask {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  dueDate?: string;
+  assignee?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+}
+
+export interface PortalKanbanColumn {
+  status: string;
+  tasks: PortalTask[];
+}
+
+export interface PublicPortalData {
+  portal: {
+    title: string;
+    accentColor: string;
+    logoUrl?: string;
+    showKanban: boolean;
+    showTimeline: boolean;
+    showTeam: boolean;
+  };
+  project: {
+    id: string;
+    name: string;
+    description?: string;
+    color: string;
+    icon: string;
+    createdAt: string;
+  };
+  stats: { total: number; done: number; inProgress: number; overdue: number; progress: number };
+  kanban: PortalKanbanColumn[];
+  timeline: PortalTask[];
+  team: Pick<User, 'id' | 'name' | 'avatarUrl'>[];
+}
+
+// ── Approvals ─────────────────────────────────────────────────────────────────
+
+export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
+
+export interface TaskApproval {
+  id: string;
+  taskId: string;
+  requestedById: string;
+  approverId?: string | null;
+  status: ApprovalStatus;
+  note?: string;
+  reviewNote?: string;
+  targetStatus?: string;
+  resolvedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  task?: {
+    id: string;
+    title: string;
+    status: string;
+    priority: string;
+    project: Pick<Project, 'id' | 'name' | 'color' | 'icon'>;
+  };
+  requestedBy?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+  approver?: Pick<User, 'id' | 'name' | 'avatarUrl'> | null;
+}
+
+// ── OKRs ─────────────────────────────────────────────────────────────────────
+
+export type ObjectiveStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+export type KeyResultType   = 'PERCENTAGE' | 'NUMBER' | 'CURRENCY' | 'BOOLEAN';
+
+export interface KeyResultTask {
+  id: string;
+  task: { id: string; title: string; status: string };
+}
+
+export interface KeyResult {
+  id: string;
+  objectiveId: string;
+  title: string;
+  type: KeyResultType;
+  startValue: number;
+  targetValue: number;
+  currentValue: number;
+  unit?: string;
+  tasks: KeyResultTask[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Objective {
+  id: string;
+  companyId: string;
+  ownerId: string;
+  title: string;
+  description?: string;
+  status: ObjectiveStatus;
+  startDate: string;
+  endDate: string;
+  progress: number;
+  owner: { id: string; name: string; avatarUrl?: string };
+  keyResults: KeyResult[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OkrSummary {
+  total: number;
+  active: number;
+  completed: number;
+  avgProgress: number;
+  objectives: Objective[];
 }

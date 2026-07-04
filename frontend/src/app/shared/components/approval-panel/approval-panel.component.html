@@ -1,0 +1,100 @@
+<div class="ap">
+  <!-- Header toggle -->
+  <button (click)="toggle()" class="ap__header">
+    <span class="material-symbols-rounded text-base text-[--text-tertiary]">approval</span>
+    <span class="text-sm font-bold text-[--text-primary]">Aprovações</span>
+    @if (currentPending()) {
+      <span class="ap__badge ap__badge--pending">Pendente</span>
+    } @else if (approvals().length) {
+      <span class="ap__badge">{{ approvals().length }}</span>
+    }
+    <span class="material-symbols-rounded text-base text-[--text-tertiary] ml-auto">
+      {{ expanded() ? 'expand_less' : 'expand_more' }}
+    </span>
+  </button>
+
+  @if (expanded()) {
+    <div class="ap__body">
+
+      <!-- Current pending banner -->
+      @if (currentPending()) {
+        <div class="ap__pending-banner">
+          <span class="material-symbols-rounded text-amber-500 text-base">hourglass_top</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-amber-800">Aprovação pendente</p>
+            @if (currentPending()!.note) {
+              <p class="text-xs text-amber-700 mt-0.5 truncate">"{{ currentPending()!.note }}"</p>
+            }
+          </div>
+        </div>
+      } @else {
+        <!-- Request form -->
+        <div class="ap__form">
+          <p class="text-xs font-semibold text-[--text-secondary] mb-2">Solicitar aprovação</p>
+
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-1">
+              <label class="ap__label">Ao aprovar, mover tarefa para</label>
+              <select [(ngModel)]="targetStatus" class="ag-input ag-input--xs">
+                @for (s of STATUS_OPTIONS; track s.value) {
+                  <option [value]="s.value">{{ s.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="ap__label">Aprovador <span class="text-[--text-tertiary]">(opcional)</span></label>
+              <select [(ngModel)]="approverId" class="ag-input ag-input--xs">
+                <option value="">Qualquer membro do projeto</option>
+                @for (m of members(); track m.id) {
+                  <option [value]="m.id">{{ m.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="ap__label">Nota <span class="text-[--text-tertiary]">(opcional)</span></label>
+              <textarea [(ngModel)]="note" rows="2" placeholder="Contexto para o aprovador…"
+                class="ag-input ag-input--xs resize-none"></textarea>
+            </div>
+
+            <button (click)="request()" [disabled]="saving()"
+              class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 transition-colors disabled:opacity-50">
+              <span class="material-symbols-rounded text-sm" [class.animate-spin]="saving()">
+                {{ saving() ? 'refresh' : 'send' }}
+              </span>
+              {{ saving() ? 'Enviando…' : 'Solicitar Aprovação' }}
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- History -->
+      @if (approvals().length) {
+        <div class="ap__history">
+          <p class="text-xs font-semibold text-[--text-secondary] mb-2">Histórico</p>
+          @for (a of approvals(); track a.id) {
+            <div class="ap__history-item">
+              <span class="material-symbols-rounded text-sm" [style.color]="statusConfig(a.status).color">
+                {{ statusConfig(a.status).icon }}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-[--text-primary]">
+                    {{ statusConfig(a.status).label }}
+                  </span>
+                  <span class="text-[10px] text-[--text-tertiary]">
+                    {{ a.createdAt | date:'dd/MM HH:mm' }}
+                  </span>
+                </div>
+                @if (a.reviewNote) {
+                  <p class="text-xs text-[--text-secondary] mt-0.5 truncate">"{{ a.reviewNote }}"</p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

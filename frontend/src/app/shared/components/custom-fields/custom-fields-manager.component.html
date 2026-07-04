@@ -1,0 +1,97 @@
+<div class="cf-manager">
+  <!-- Header -->
+  <div class="cf-manager__header">
+    <h4 class="cf-manager__title">
+      <span class="material-symbols-rounded">input</span>
+      Campos Personalizados
+    </h4>
+    <button (click)="openForm()" class="ag-btn ag-btn--primary ag-btn--sm">
+      <span class="material-symbols-rounded">add</span>
+      Novo Campo
+    </button>
+  </div>
+
+  <!-- Add form -->
+  @if (showForm()) {
+    <div class="cf-form">
+      <div class="cf-form__grid">
+        <div class="cf-form__field">
+          <label class="cf-label">Nome</label>
+          <input [(ngModel)]="newName" placeholder="Ex: Prioridade Interna"
+            class="ag-input ag-input--sm" />
+        </div>
+        <div class="cf-form__field">
+          <label class="cf-label">Tipo</label>
+          <select [(ngModel)]="newType" class="ag-input ag-input--sm">
+            @for (t of FIELD_TYPES; track t.type) {
+              <option [value]="t.type">{{ t.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (needsOptions(newType)) {
+        <div class="cf-form__field mt-2">
+          <label class="cf-label">Opções <span class="text-xs text-[--text-tertiary]">(separadas por vírgula)</span></label>
+          <input [(ngModel)]="newOptions" placeholder="Ex: Baixo, Médio, Alto"
+            class="ag-input ag-input--sm" />
+        </div>
+      }
+
+      <div class="flex items-center gap-3 mt-3">
+        <label class="flex items-center gap-1.5 text-sm text-[--text-secondary] cursor-pointer select-none">
+          <input type="checkbox" [(ngModel)]="newRequired" class="rounded" />
+          Obrigatório
+        </label>
+        <div class="ml-auto flex gap-2">
+          <button (click)="showForm.set(false)" class="ag-btn ag-btn--ghost ag-btn--sm">Cancelar</button>
+          <button (click)="save()" [disabled]="saving() || !newName.trim()"
+            class="ag-btn ag-btn--primary ag-btn--sm">
+            {{ saving() ? 'Salvando…' : 'Salvar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Field list -->
+  @if (loading()) {
+    <div class="flex flex-col gap-2 mt-2">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="h-10 rounded-lg ag-skeleton"></div>
+      }
+    </div>
+  } @else if (fields().length === 0) {
+    <div class="cf-empty">
+      <span class="material-symbols-rounded text-3xl text-slate-300">input</span>
+      <p class="text-sm text-[--text-tertiary]">Nenhum campo personalizado</p>
+    </div>
+  } @else {
+    <ul class="cf-list">
+      @for (field of fields(); track field.id) {
+        <li class="cf-item">
+          <span class="material-symbols-rounded text-base text-[--text-tertiary]">
+            {{ typeConfig(field.type).icon }}
+          </span>
+          <div class="flex-1 min-w-0">
+            <span class="text-sm font-medium text-[--text-primary]">{{ field.name }}</span>
+            <span class="cf-type-badge">{{ typeConfig(field.type).label }}</span>
+            @if (field.isRequired) {
+              <span class="cf-required-badge">Obrigatório</span>
+            }
+            @if (field.options.length) {
+              <span class="text-xs text-[--text-tertiary] ml-1">
+                {{ field.options.slice(0, 3).join(', ') }}{{ field.options.length > 3 ? '…' : '' }}
+              </span>
+            }
+          </div>
+          <button (click)="delete(field.id)"
+            class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-50 hover:text-red-500 transition-all text-[--text-tertiary]"
+            title="Remover campo">
+            <span class="material-symbols-rounded text-sm">delete</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

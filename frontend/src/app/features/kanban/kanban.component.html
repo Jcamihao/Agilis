@@ -63,6 +63,24 @@
           <span class="material-symbols-rounded text-base">schedule</span>
           Tempo
         </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'wiki']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">menu_book</span>
+          Wiki
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'intake-forms']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">dynamic_form</span>
+          Intake
+        </a>
+        <div class="w-px h-5 bg-slate-100"></div>
+        <a [routerLink]="['/projects', id, 'settings']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">settings</span>
+          Config.
+        </a>
       </div>
 
       <button (click)="openCreate()" class="ag-btn ag-btn--primary flex items-center gap-2">
@@ -486,7 +504,7 @@
                 Subtarefas
                 @if (subtasks().length > 0) {
                   <span class="ml-1.5 text-[--text-tertiary] normal-case font-normal">
-                    {{ subtasks().filter(s => s.status === 'DONE').length }}/{{ subtasks().length }}
+                    {{ subtaskDoneCount() }}/{{ subtasks().length }}
                   </span>
                 }
               </h3>
@@ -589,7 +607,7 @@
                       [class.text-orange-700]="dep.dependsOn.status !== 'DONE'"
                     >{{ dep.dependsOn.status === 'DONE' ? 'Concluída' : 'Pendente' }}</span>
                     <button
-                      (click)="tasksService.removeDependency(detailTask()!.id, dep.dependsOnId).subscribe({ next: () => loadDependencies(detailTask()!.id) })"
+                      (click)="removeDep(detailTask()!.id, dep.dependsOnId)"
                       class="text-red-300 hover:text-red-600 transition-colors"
                     >
                       <span class="material-symbols-rounded text-sm">close</span>
@@ -599,6 +617,19 @@
               </div>
             </div>
           }
+
+          <div class="border-t border-[rgba(0,0,0,0.08)]"></div>
+
+          <!-- Approvals -->
+          <ag-approval-panel [taskId]="detailTask()!.id" />
+
+          <div class="border-t border-[rgba(0,0,0,0.08)]"></div>
+
+          <!-- Custom Fields -->
+          <ag-custom-field-values
+            [taskId]="detailTask()!.id"
+            [projectId]="detailTask()!.projectId"
+            [initialValues]="detailTask()!.customFields" />
 
           <div class="border-t border-[rgba(0,0,0,0.08)]"></div>
 

@@ -219,6 +219,71 @@
     </div>
   </div>
 
+  <!-- ── Health Score + Insights ─────────────────────────── -->
+  @if (companyHealthScore() || topInsights().length) {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+      <!-- Health Score card -->
+      @if (companyHealthScore(); as hs) {
+        <a routerLink="/health-score" class="dash-card p-5 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer group">
+          <!-- Ring -->
+          <div class="relative flex-shrink-0 w-16 h-16">
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="26" fill="none" stroke="#f1f5f9" stroke-width="7"/>
+              <circle cx="32" cy="32" r="26" fill="none"
+                [attr.stroke]="scoreColor(hs.score)"
+                stroke-width="7" stroke-linecap="round"
+                stroke-dasharray="163.4"
+                [attr.stroke-dashoffset]="163.4 - (163.4 * hs.score / 100)"
+                style="transition: stroke-dashoffset .8s ease"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-base font-black" [style.color]="scoreColor(hs.score)">{{ hs.score }}</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-[--text-tertiary] uppercase tracking-wide mb-0.5">Health Score</p>
+            <p class="text-base font-bold" [style.color]="scoreColor(hs.score)">{{ scoreLabel(hs.score) }}</p>
+            <p class="text-xs text-[--text-tertiary] mt-0.5 group-hover:text-primary-600 transition-colors">Ver detalhes →</p>
+          </div>
+          <span class="material-symbols-rounded text-3xl font-black flex-shrink-0"
+            [style.color]="scoreColor(hs.score)">
+            monitor_heart
+          </span>
+        </a>
+      }
+
+      <!-- Top insights -->
+      @if (topInsights().length) {
+        <div class="lg:col-span-2 dash-card p-5 flex flex-col gap-3">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
+              <span class="material-symbols-rounded text-base text-amber-500">tips_and_updates</span>
+              Insights Prioritários
+            </h3>
+            <a routerLink="/insights" class="text-xs font-semibold text-primary-600 hover:text-primary-800 transition-colors">
+              Ver todos →
+            </a>
+          </div>
+          @for (ins of topInsights(); track ins.id) {
+            <div class="flex items-start gap-3 p-2.5 rounded-xl"
+              [style.background]="insightSeverityColor(ins.severity) + '10'">
+              <span class="material-symbols-rounded text-lg flex-shrink-0 mt-0.5"
+                [style.color]="insightSeverityColor(ins.severity)">
+                {{ insightIcon(ins.type) }}
+              </span>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-[--text-primary] leading-snug">{{ ins.title }}</p>
+                <p class="text-xs text-[--text-secondary] leading-snug mt-0.5 line-clamp-1">{{ ins.description }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+  }
+
   <!-- ── Row 3: Team Workload ───────────────────────────── -->
   <div class="dash-card p-6">
     <h3 class="text-[20px] font-semibold leading-[1.4] tracking-[-0.01em] mb-6"

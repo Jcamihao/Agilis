@@ -24,8 +24,14 @@ export class ProfileComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly notifService = inject(NotificationsService);
   private readonly fb = inject(FormBuilder);
-  private readonly toast   = inject(ToastService);
+  private readonly toastSvc = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
+
+  readonly toast = signal('');
+  private showToast(msg: string) {
+    this.toast.set(msg);
+    setTimeout(() => this.toast.set(''), 2500);
+  }
 
   // ── State ──────────────────────────────────────────────────────────────────
   saving = signal(false);
@@ -120,7 +126,7 @@ export class ProfileComponent implements OnInit {
         this.auth.updateUser(updated);
         this.profileForm.markAsPristine();
         this.saving.set(false);
-        this.toast.success('Perfil atualizado com sucesso!');
+        this.showToast('Perfil atualizado com sucesso!');
       },
       error: () => this.saving.set(false),
     });
@@ -144,7 +150,7 @@ export class ProfileComponent implements OnInit {
         this.auth.updateUser(updated);
         this.personalForm.markAsPristine();
         this.savingPersonal.set(false);
-        this.toast.success('Dados pessoais salvos!');
+        this.showToast('Dados pessoais salvos!');
       },
       error: () => this.savingPersonal.set(false),
     });
@@ -212,7 +218,7 @@ export class ProfileComponent implements OnInit {
           this.auth.updateUser(updated);
           this.profileForm.patchValue({ avatarUrl: base64 });
           this.uploadingAvatar.set(false);
-          this.toast.success('Foto atualizada!');
+          this.showToast('Foto atualizada!');
         },
         error: () => { this.avatarPreview.set(null); this.uploadingAvatar.set(false); },
       });
@@ -230,7 +236,7 @@ export class ProfileComponent implements OnInit {
       next: () => {
         this.passwordForm.reset();
         this.savingPassword.set(false);
-        this.toast.success('Senha alterada com sucesso!');
+        this.showToast('Senha alterada com sucesso!');
       },
       error: (err) => {
         this.passwordError.set(err?.error?.message || 'Erro ao alterar senha');
@@ -248,7 +254,7 @@ export class ProfileComponent implements OnInit {
         this.auth.updateUser(updated);
         this.savingTelegram.set(false);
         this.telegramForm.markAsPristine();
-        this.toast.success('Chat ID do Telegram salvo!');
+        this.showToast('Chat ID do Telegram salvo!');
       },
       error: () => this.savingTelegram.set(false),
     });
@@ -260,9 +266,9 @@ export class ProfileComponent implements OnInit {
       next: (updates) => {
         this.telegramUpdates.set(updates);
         this.detectingChatId.set(false);
-        if (updates.length === 0) this.toast.success('Nenhuma interação encontrada. Envie uma mensagem ao bot primeiro.');
+        if (updates.length === 0) this.showToast('Nenhuma interação encontrada. Envie uma mensagem ao bot primeiro.');
       },
-      error: () => { this.detectingChatId.set(false); this.toast.success('Erro ao buscar atualizações do Telegram.'); },
+      error: () => { this.detectingChatId.set(false); this.showToast('Erro ao buscar atualizações do Telegram.'); },
     });
   }
 

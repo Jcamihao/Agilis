@@ -1,0 +1,217 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight flex items-center gap-2">
+        <span class="material-symbols-rounded text-2xl text-primary-600">monitor_heart</span>
+        Health Score
+      </h2>
+      <p class="text-sm text-[--text-secondary] mt-0.5">Diagnóstico automático de saúde operacional</p>
+    </div>
+    <button (click)="recalculate()" [disabled]="recalculating() || loading()"
+      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-[--text-secondary] hover:border-primary-300 hover:text-primary-700 transition-all shadow-sm disabled:opacity-50">
+      <span class="material-symbols-rounded text-base" [class.animate-spin]="recalculating()">refresh</span>
+      {{ recalculating() ? 'Recalculando…' : 'Recalcular' }}
+    </button>
+  </div>
+
+  @if (loading()) {
+    <!-- Skeleton -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="ag-card ag-skeleton h-44"></div>
+      }
+    </div>
+  } @else if (companyScore()) {
+
+    <!-- ── Company Score Hero ── -->
+    <div class="ag-card p-6 flex items-center gap-8">
+      <!-- Gauge ring -->
+      <div class="relative flex-shrink-0 w-32 h-32">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#f1f5f9" stroke-width="12"/>
+          <circle cx="60" cy="60" r="52" fill="none"
+            [attr.stroke]="scoreColor(companyScore()!.score)"
+            stroke-width="12"
+            stroke-linecap="round"
+            [attr.stroke-dasharray]="'326.7'"
+            [attr.stroke-dashoffset]="326.7 - (326.7 * companyScore()!.score / 100)"
+            style="transition: stroke-dashoffset .8s ease"/>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span class="text-3xl font-black" [style.color]="scoreColor(companyScore()!.score)">
+            {{ companyScore()!.score }}
+          </span>
+          <span class="text-xs font-bold text-[--text-tertiary] uppercase tracking-wide">pts</span>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-2xl font-black tracking-tight" [style.color]="scoreColor(companyScore()!.score)">
+            {{ scoreGrade(companyScore()!.score) }}
+          </span>
+          <span class="px-3 py-1 rounded-full text-sm font-bold"
+            [style.background]="scoreColor(companyScore()!.score) + '18'"
+            [style.color]="scoreColor(companyScore()!.score)">
+            {{ scoreLabel(companyScore()!.score) }}
+          </span>
+        </div>
+        <p class="text-sm text-[--text-secondary] mb-4">Saúde geral da empresa</p>
+
+        <!-- Breakdown bars -->
+        <div class="flex flex-col gap-2">
+          @for (item of breakdownItems(companyScore()!.breakdown); track item.label) {
+            @if (item.value > 0) {
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-[--text-tertiary] w-40 truncate">{{ item.label }}</span>
+                <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all"
+                    [style.width.%]="Math.min(100, item.value * (item.positive ? 5 : 2.85))"
+                    [style.background]="item.positive ? '#10b981' : '#ef4444'"></div>
+                </div>
+                <span class="text-xs font-semibold w-8 text-right"
+                  [style.color]="item.positive ? '#10b981' : '#ef4444'">
+                  {{ item.positive ? '+' : '-' }}{{ item.value }}
+                </span>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Critical alerts summary -->
+      @if (criticalInsights().length) {
+        <div class="flex flex-col gap-2 border-l border-slate-100 pl-6 min-w-48">
+          <p class="text-xs font-bold text-[--text-tertiary] uppercase tracking-wide mb-1">Alertas Ativos</p>
+          @for (ins of criticalInsights().slice(0, 3); track ins.id) {
+            <div class="flex items-start gap-2 p-2 rounded-lg"
+              [style.background]="severityConfig(ins.severity).bg">
+              <span class="material-symbols-rounded text-sm flex-shrink-0 mt-0.5"
+                [style.color]="severityConfig(ins.severity).color">
+                {{ typeIcon(ins.type) }}
+              </span>
+              <p class="text-xs font-medium leading-snug" [style.color]="severityConfig(ins.severity).color">
+                {{ ins.title }}
+              </p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ── Projects Grid ── -->
+    @if (projects().length) {
+      <div>
+        <h3 class="text-base font-bold text-[--text-primary] mb-3 flex items-center gap-2">
+          <span class="material-symbols-rounded text-lg text-slate-400">folder_open</span>
+          Score por Projeto
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          @for (p of projects(); track p.project.id) {
+            <div class="ag-card p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                [style.background]="(p.project.color ?? '#6366f1') + '20'">
+                {{ p.project.icon ?? '📁' }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-[--text-primary] truncate">{{ p.project.name }}</p>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all"
+                      [style.width.%]="p.score"
+                      [style.background]="scoreColor(p.score)"></div>
+                  </div>
+                  <span class="text-xs font-bold flex-shrink-0"
+                    [style.color]="scoreColor(p.score)">{{ p.score }}</span>
+                </div>
+              </div>
+              <span class="text-lg font-black flex-shrink-0" [style.color]="scoreColor(p.score)">
+                {{ scoreGrade(p.score) }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── Teams Grid ── -->
+    @if (teams().length) {
+      <div>
+        <h3 class="text-base font-bold text-[--text-primary] mb-3 flex items-center gap-2">
+          <span class="material-symbols-rounded text-lg text-slate-400">groups</span>
+          Score por Equipe
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+          @for (t of teams(); track t.team.id) {
+            <div class="ag-card p-4 text-center">
+              <div class="w-3 h-3 rounded-full mx-auto mb-2"
+                [style.background]="t.team.color ?? '#6366f1'"></div>
+              <p class="text-sm font-semibold text-[--text-primary] truncate mb-2">{{ t.team.name }}</p>
+              <span class="text-2xl font-black" [style.color]="scoreColor(t.score)">
+                {{ scoreGrade(t.score) }}
+              </span>
+              <p class="text-xs font-medium mt-1" [style.color]="scoreColor(t.score)">
+                {{ t.score }} pts — {{ t.label }}
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── All Insights ── -->
+    <div>
+      <h3 class="text-base font-bold text-[--text-primary] mb-3 flex items-center gap-2">
+        <span class="material-symbols-rounded text-lg text-slate-400">tips_and_updates</span>
+        Insights e Recomendações
+      </h3>
+
+      @if (!insights().length) {
+        <div class="ag-card flex flex-col items-center justify-center py-10">
+          <span class="material-symbols-rounded text-4xl text-emerald-400 mb-3">emoji_events</span>
+          <p class="font-semibold text-[--text-secondary]">Nenhum insight crítico</p>
+          <p class="text-sm text-[--text-tertiary] mt-1">Operação saudável — continue monitorando</p>
+        </div>
+      } @else {
+        <div class="flex flex-col gap-3">
+          @for (ins of insights(); track ins.id) {
+            <div class="ag-card p-4 flex items-start gap-4"
+              [style.border-left]="'3px solid ' + severityConfig(ins.severity).color">
+              <!-- Icon -->
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                [style.background]="severityConfig(ins.severity).bg">
+                <span class="material-symbols-rounded text-lg"
+                  [style.color]="severityConfig(ins.severity).color">
+                  {{ typeIcon(ins.type) }}
+                </span>
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                  <p class="text-sm font-semibold text-[--text-primary]">{{ ins.title }}</p>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    [style.background]="severityConfig(ins.severity).bg"
+                    [style.color]="severityConfig(ins.severity).color">
+                    {{ severityConfig(ins.severity).label }}
+                  </span>
+                </div>
+                <p class="text-sm text-[--text-secondary] leading-relaxed">{{ ins.description }}</p>
+              </div>
+
+              <!-- Dismiss -->
+              <button (click)="dismissInsight(ins.id)"
+                class="p-1.5 rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-600 transition-colors flex-shrink-0"
+                title="Dispensar">
+                <span class="material-symbols-rounded text-base">close</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

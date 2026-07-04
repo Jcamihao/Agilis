@@ -1,0 +1,134 @@
+<!-- ═══════ CHAT FAB ═══════ -->
+<button class="chat-fab" (click)="chat.togglePanel()" [class.has-unread]="chat.totalUnread() > 0">
+  <span class="material-symbols-rounded">{{ chat.panelOpen() ? 'close' : 'chat' }}</span>
+  @if (chat.totalUnread() > 0 && !chat.panelOpen()) {
+    <span class="chat-badge">{{ chat.totalUnread() > 9 ? '9+' : chat.totalUnread() }}</span>
+  }
+</button>
+
+<!-- ═══════ PANEL ═══════ -->
+@if (chat.panelOpen()) {
+  <div class="chat-panel">
+    <!-- Header -->
+    <div class="chat-panel-header">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-rounded text-base text-primary-400">chat</span>
+        <span class="font-semibold text-white text-sm">
+          {{ chat.activeRoom()?.name ?? 'Chat' }}
+        </span>
+      </div>
+      <button (click)="chat.togglePanel()" class="text-slate-400 hover:text-white transition-colors">
+        <span class="material-symbols-rounded text-lg">close</span>
+      </button>
+    </div>
+
+    <div class="chat-panel-body">
+      <!-- ── Sidebar rooms ── -->
+      <div class="chat-rooms-list">
+        @for (room of chat.rooms(); track room.id) {
+          <button class="chat-room-item"
+            [class.active]="chat.activeRoomId() === room.id"
+            (click)="selectRoom(room.id)">
+            <span class="material-symbols-rounded text-sm">
+              {{ room.type === 'GENERAL' ? 'tag' : room.type === 'PROJECT' ? 'folder' : 'person' }}
+            </span>
+            <span class="truncate text-xs font-medium">{{ room.name }}</span>
+            @if ((chat.unreadCounts())[room.id] > 0) {
+              <span class="chat-unread-dot">{{ (chat.unreadCounts())[room.id] }}</span>
+            }
+          </button>
+        }
+        @if (!chat.rooms().length) {
+          <p class="text-[10px] text-slate-500 px-3 py-2">Nenhuma sala</p>
+        }
+      </div>
+
+      <!-- ── Message thread ── -->
+      <div class="chat-messages-col">
+        @if (!chat.activeRoomId()) {
+          <div class="flex-1 flex flex-col items-center justify-center gap-2 text-slate-500">
+            <span class="material-symbols-rounded text-3xl opacity-30">chat_bubble</span>
+            <p class="text-xs">Selecione uma sala</p>
+          </div>
+        } @else {
+          <!-- Messages -->
+          <div class="chat-messages-scroll">
+            @for (group of groupedMessages(); track group.date) {
+              <!-- Date separator -->
+              <div class="flex items-center gap-2 my-2 px-3">
+                <div class="flex-1 h-px bg-[rgba(255,255,255,0.08)]"></div>
+                <span class="text-[10px] text-slate-500 font-medium">{{ group.date }}</span>
+                <div class="flex-1 h-px bg-[rgba(255,255,255,0.08)]"></div>
+              </div>
+
+              @for (msg of group.messages; track msg.id) {
+                <div class="chat-message" [class.own]="isOwn(msg)">
+                  <!-- Avatar -->
+                  @if (!isOwn(msg)) {
+                    <div class="chat-avatar">
+                      @if (msg.user.avatarUrl) {
+                        <img [src]="msg.user.avatarUrl" class="w-full h-full object-cover rounded-full" />
+                      } @else {
+                        {{ chat.initials(msg.user.name) }}
+                      }
+                    </div>
+                  }
+
+                  <div class="chat-bubble-wrap" [class.own]="isOwn(msg)">
+                    @if (!isOwn(msg)) {
+                      <span class="chat-author">{{ msg.user.name }}</span>
+                    }
+                    <div class="chat-bubble" [class.own]="isOwn(msg)">
+                      <p class="text-[13px] leading-snug whitespace-pre-wrap">{{ msg.content }}</p>
+                      <span class="chat-time">
+                        {{ formatTime(msg.createdAt) }}
+                        @if (msg.editedAt) { · editado }
+                      </span>
+                    </div>
+                    @if (isOwn(msg)) {
+                      <button class="chat-delete-btn" (click)="delete(msg)" title="Apagar">
+                        <span class="material-symbols-rounded" style="font-size:12px">delete</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            }
+
+            @if (!chat.messages().length) {
+              <div class="flex flex-col items-center justify-center h-full gap-2 text-slate-600">
+                <span class="material-symbols-rounded text-3xl opacity-40">chat_bubble_outline</span>
+                <p class="text-xs">Nenhuma mensagem ainda</p>
+              </div>
+            }
+
+            <div #msgEnd></div>
+          </div>
+
+          <!-- Typing indicator -->
+          @if (typingLabel()) {
+            <div class="typing-indicator">
+              <span class="typing-dots"><i></i><i></i><i></i></span>
+              {{ typingLabel() }}
+            </div>
+          }
+
+          <!-- Input -->
+          <div class="chat-input-row">
+            <textarea
+              class="chat-input"
+              placeholder="Mensagem... (Enter para enviar)"
+              rows="1"
+              [value]="messageText()"
+              (input)="onInput($event)"
+              (keydown)="onKeydown($event)">
+            </textarea>
+            <button class="chat-send-btn" (click)="send()" [disabled]="!messageText().trim()">
+              <span class="material-symbols-rounded text-base">send</span>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

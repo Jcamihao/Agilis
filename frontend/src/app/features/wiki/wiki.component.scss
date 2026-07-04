@@ -1,0 +1,380 @@
+// ─── Layout ────────────────────────────────────────────────────────────────────
+.wiki-layout {
+  display: flex;
+  height: calc(100vh - 4rem);
+  overflow: hidden;
+  margin: -1.5rem;  // cancel main-layout padding
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+.wiki-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-color, rgba(0,0,0,0.07));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-surface, #fff);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.75rem 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.05));
+  }
+}
+
+.wiki-search {
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.05));
+
+  &__icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.375rem 0.5rem 0.375rem 1.875rem;
+    font-size: 0.8125rem;
+    border: 1px solid var(--border-color, rgba(0,0,0,0.1));
+    border-radius: 0.5rem;
+    background: var(--bg-secondary, #f8fafc);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s;
+
+    &:focus { border-color: #6366f1; }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    line-height: 1;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+}
+
+.wiki-search-results {
+  border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.05));
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.wiki-search-result {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.1s;
+
+  &:hover { background: var(--bg-hover, rgba(0,0,0,0.04)); }
+}
+
+.wiki-empty-tree {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.wiki-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.375rem 0;
+}
+
+.wiki-tree-item {
+  display: flex;
+  align-items: center;
+  position: relative;
+
+  &:hover .wiki-tree-add { opacity: 1; }
+}
+
+.wiki-tree-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.75rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  text-align: left;
+  border-radius: 0.375rem;
+  margin: 0 0.375rem;
+  transition: background 0.1s;
+  min-width: 0;
+
+  &:hover { background: var(--bg-hover, rgba(0,0,0,0.04)); }
+
+  &--active {
+    background: #ede9fe !important;
+    color: #6d28d9;
+    font-weight: 600;
+
+    .material-symbols-rounded { color: #7c3aed; }
+  }
+}
+
+.wiki-tree-add {
+  flex-shrink: 0;
+  padding: 0.125rem 0.375rem;
+  margin-right: 0.375rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  border-radius: 0.25rem;
+  transition: background 0.1s, opacity 0.15s;
+
+  &:hover { background: var(--bg-hover, rgba(0,0,0,0.06)); color: #6366f1; }
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+.wiki-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-surface, #fff);
+}
+
+.wiki-no-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.wiki-page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem 0.5rem;
+  border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.05));
+}
+
+.wiki-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  cursor: text;
+  line-height: 1.3;
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover { opacity: 0.8; }
+}
+
+.wiki-title-input {
+  flex: 1;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  border: none;
+  border-bottom: 2px solid #6366f1;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  min-width: 0;
+}
+
+.wiki-meta {
+  padding: 0.25rem 1.5rem 0;
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  display: flex;
+  gap: 1rem;
+}
+
+// ─── Toolbar ──────────────────────────────────────────────────────────────────
+.wiki-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1px;
+  padding: 0.375rem 1rem;
+  border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.07));
+  background: var(--bg-secondary, #fafafa);
+}
+
+.wiki-tb-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.1s, color 0.1s;
+  flex-shrink: 0;
+
+  .material-symbols-rounded { font-size: 1.125rem; }
+
+  &:hover { background: var(--bg-hover, rgba(0,0,0,0.06)); color: var(--text-primary); }
+  &.active { background: #ede9fe; color: #7c3aed; }
+}
+
+.wiki-tb-sep {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--border-color, rgba(0,0,0,0.1));
+  margin: 0 0.25rem;
+}
+
+// ─── Editor ───────────────────────────────────────────────────────────────────
+.wiki-editor {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 2rem 3rem;
+
+  &--history { max-height: 60%; }
+
+  // TipTap ProseMirror target
+  :global(.ProseMirror) {
+    min-height: 300px;
+    outline: none;
+
+    > * + * { margin-top: 0.75em; }
+
+    h1 { font-size: 2rem;   font-weight: 800; line-height: 1.2; color: var(--text-primary); }
+    h2 { font-size: 1.5rem; font-weight: 700; line-height: 1.3; color: var(--text-primary); }
+    h3 { font-size: 1.125rem; font-weight: 700; line-height: 1.4; color: var(--text-primary); }
+
+    p { line-height: 1.7; color: var(--text-primary); }
+
+    ul, ol { padding-left: 1.5rem; }
+    li { margin: 0.25em 0; }
+
+    ul[data-type='taskList'] {
+      list-style: none;
+      padding: 0;
+
+      li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+
+        > label { flex-shrink: 0; margin-top: 0.2em; cursor: pointer; }
+        > div { flex: 1; }
+      }
+    }
+
+    blockquote {
+      border-left: 3px solid #6366f1;
+      padding-left: 1rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin: 1rem 0;
+    }
+
+    code {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.25rem;
+      padding: 0.125rem 0.375rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.875em;
+      color: #7c3aed;
+    }
+
+    pre {
+      background: #1e1f2e;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+
+      code {
+        background: none;
+        border: none;
+        padding: 0;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+      }
+    }
+
+    hr {
+      border: none;
+      border-top: 2px solid var(--border-color, rgba(0,0,0,0.07));
+      margin: 1.5rem 0;
+    }
+
+    a { color: #6366f1; text-decoration: underline; cursor: pointer; }
+
+    mark { background: #fef08a; border-radius: 0.2em; padding: 0.05em 0.2em; }
+
+    p.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      color: var(--text-tertiary);
+      pointer-events: none;
+      float: left;
+      height: 0;
+    }
+  }
+}
+
+// ─── History ──────────────────────────────────────────────────────────────────
+.wiki-history {
+  border-top: 1px solid var(--border-color, rgba(0,0,0,0.07));
+  padding: 1rem 1.5rem;
+  overflow-y: auto;
+  max-height: 40%;
+  background: var(--bg-secondary, #fafafa);
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+  }
+
+  &__item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color, rgba(0,0,0,0.04));
+
+    &:last-child { border-bottom: none; }
+  }
+
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    margin-bottom: 0.125rem;
+  }
+}

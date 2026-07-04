@@ -32,6 +32,14 @@ import { RedisModule } from './redis/redis.module';
 import { QueueModule } from './queue/queue.module';
 import { MailModule } from './mail/mail.module';
 import { TimeTrackingModule } from './time-tracking/time-tracking.module';
+import { ChatModule } from './chat/chat.module';
+import { OkrsModule } from './okrs/okrs.module';
+import { WorkloadModule } from './workload/workload.module';
+import { CustomFieldsModule } from './custom-fields/custom-fields.module';
+import { WikiModule } from './wiki/wiki.module';
+import { IntakeModule } from './intake/intake.module';
+import { ClientPortalModule } from './client-portal/client-portal.module';
+import { ApprovalsModule } from './approvals/approvals.module';
 
 @Module({
   imports: [
@@ -67,6 +75,14 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
     QueueModule,
     MailModule,
     TimeTrackingModule,
+    ChatModule,
+    OkrsModule,
+    WorkloadModule,
+    CustomFieldsModule,
+    WikiModule,
+    IntakeModule,
+    ClientPortalModule,
+    ApprovalsModule,
   ],
 })
 export class AppModule {}

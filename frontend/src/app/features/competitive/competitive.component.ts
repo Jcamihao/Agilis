@@ -39,12 +39,16 @@ export class CompetitiveComponent implements OnInit, AfterViewChecked {
   private readonly processService = inject(ProcessCenterService);
   private readonly projectsService = inject(ProjectsService);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly toast   = inject(ToastService);
+  private readonly toastSvc = inject(ToastService);
+
+  readonly toast = signal<{msg: string; type: 'success' | 'error'} | null>(null);
+  private showToast(msg: string, type: 'success' | 'error' = 'error') {
+    this.toast.set({ msg, type });
+    setTimeout(() => this.toast.set(null), 3000);
+  }
 
   @ViewChild('chatEnd') chatEnd?: ElementRef<HTMLDivElement>;
   private shouldScrollChat = false;
-
-  // ── Toast ──────────────────────────────────────────────────────────────────
 
   // ── AI Chat ────────────────────────────────────────────────────────────────
   chatMessages = signal<ChatMessage[]>([]);
@@ -172,7 +176,7 @@ export class CompetitiveComponent implements OnInit, AfterViewChecked {
       },
       error: () => {
         this.insightLoading.set(null);
-        this.toast.error('Erro ao analisar gargalos.');
+        this.showToast('Erro ao analisar gargalos.', 'error');
       },
     });
   }
@@ -193,7 +197,7 @@ export class CompetitiveComponent implements OnInit, AfterViewChecked {
           this.insightLoading.set(null);
           this.insightModal.set({ title: `Plano de Ação — ${project.name}`, content: res.plan });
         },
-        error: () => { this.insightLoading.set(null); this.toast.error('Erro ao gerar plano.'); },
+        error: () => { this.insightLoading.set(null); this.showToast('Erro ao gerar plano.', 'error'); },
       });
     } else {
       this.insightLoading.set('summarize');
@@ -202,7 +206,7 @@ export class CompetitiveComponent implements OnInit, AfterViewChecked {
           this.insightLoading.set(null);
           this.insightModal.set({ title: `Resumo — ${project.name}`, content: res.summary });
         },
-        error: () => { this.insightLoading.set(null); this.toast.error('Erro ao resumir projeto.'); },
+        error: () => { this.insightLoading.set(null); this.showToast('Erro ao resumir projeto.', 'error'); },
       });
     }
   }
@@ -220,9 +224,9 @@ export class CompetitiveComponent implements OnInit, AfterViewChecked {
           this.processName = '';
           this.processDescription = '';
           this.showCreateProcess.set(false);
-          this.toast.success('Processo criado!');
+          this.showToast('Processo criado!', 'success');
         },
-        error: () => this.toast.error('Erro ao criar processo.'),
+        error: () => this.showToast('Erro ao criar processo.', 'error'),
       });
   }
 
@@ -231,9 +235,9 @@ export class CompetitiveComponent implements OnInit, AfterViewChecked {
     this.processService.update(process.id, { status: 'DRAFT' }).subscribe({
       next: (updated) => {
         this.processes.update((list) => list.map((p) => p.id === updated.id ? updated : p));
-        this.toast.success('Processo pausado.');
+        this.showToast('Processo pausado.', 'success');
       },
-      error: () => this.toast.error('Erro ao pausar processo.'),
+      error: () => this.showToast('Erro ao pausar processo.', 'error'),
     });
   }
 
@@ -242,9 +246,9 @@ export class CompetitiveComponent implements OnInit, AfterViewChecked {
     this.processService.update(process.id, { status: 'ACTIVE' }).subscribe({
       next: (updated) => {
         this.processes.update((list) => list.map((p) => p.id === updated.id ? updated : p));
-        this.toast.success('Processo reativado!');
+        this.showToast('Processo reativado!', 'success');
       },
-      error: () => this.toast.error('Erro ao ativar processo.'),
+      error: () => this.showToast('Erro ao ativar processo.', 'error'),
     });
   }
 
@@ -253,9 +257,9 @@ export class CompetitiveComponent implements OnInit, AfterViewChecked {
     this.processService.update(process.id, { status: 'ARCHIVED' }).subscribe({
       next: () => {
         this.processes.update((list) => list.filter((p) => p.id !== process.id));
-        this.toast.success('Processo arquivado.');
+        this.showToast('Processo arquivado.', 'success');
       },
-      error: () => this.toast.error('Erro ao arquivar.'),
+      error: () => this.showToast('Erro ao arquivar.', 'error'),
     });
   }
 

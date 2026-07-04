@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { MAIL_ADAPTER, MailAdapter, SendMailOptions } from './mail-adapter.interface';
-import { QUEUE_MAIL } from '../queue/queue.module';
+import { QUEUE_MAIL } from '../queue/queue.constants';
 
 @Injectable()
 export class MailService {

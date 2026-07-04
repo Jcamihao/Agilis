@@ -3,9 +3,10 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { MailProcessor } from './processors/mail.processor';
 import { WebhookProcessor } from './processors/webhook.processor';
+import { MailModule } from '../mail/mail.module';
+import { QUEUE_MAIL, QUEUE_WEBHOOK } from './queue.constants';
 
-export const QUEUE_MAIL    = 'mail';
-export const QUEUE_WEBHOOK = 'webhook';
+export { QUEUE_MAIL, QUEUE_WEBHOOK } from './queue.constants';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ export const QUEUE_WEBHOOK = 'webhook';
       { name: QUEUE_MAIL },
       { name: QUEUE_WEBHOOK },
     ),
+    MailModule,
   ],
   providers: [MailProcessor, WebhookProcessor],
   exports: [BullModule],

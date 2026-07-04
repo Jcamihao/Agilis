@@ -1,0 +1,360 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-[--text-primary] flex items-center gap-2">
+        <span class="material-symbols-rounded text-2xl text-primary-600">dynamic_form</span>
+        Formulários de Entrada
+      </h2>
+      <p class="text-sm text-[--text-secondary] mt-0.5">Receba solicitações externas como tarefas do projeto</p>
+    </div>
+    <button (click)="createForm()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm">
+      <span class="material-symbols-rounded text-base">add</span>
+      Novo Formulário
+    </button>
+  </div>
+
+  <!-- Tabs (when a form is open) -->
+  @if (activeForm()) {
+    <div class="flex items-center gap-1 border-b border-[rgba(0,0,0,0.07)]">
+      @for (t of [
+        { id: 'forms',       label: 'Todos',       icon: 'list' },
+        { id: 'builder',     label: 'Construtor',  icon: 'build' },
+        { id: 'submissions', label: 'Submissões',  icon: 'inbox' }
+      ]; track t.id) {
+        <button (click)="tab.set($any(t.id))"
+          class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
+          [class.border-primary-600]="tab() === t.id"
+          [class.text-primary-600]="tab() === t.id"
+          [class.border-transparent]="tab() !== t.id"
+          [class.text-slate-500]="tab() !== t.id">
+          <span class="material-symbols-rounded text-base">{{ t.icon }}</span>
+          {{ t.label }}
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ── Tab: Forms list ──────────────────────────────────────────────────── -->
+  @if (tab() === 'forms') {
+    @if (loading()) {
+      <div class="flex flex-col gap-3">
+        @for (_ of [1,2,3]; track $index) {
+          <div class="h-20 rounded-xl ag-skeleton"></div>
+        }
+      </div>
+    } @else if (!forms().length) {
+      <div class="flex flex-col items-center gap-4 py-16 text-center">
+        <span class="material-symbols-rounded text-5xl text-slate-200">dynamic_form</span>
+        <p class="text-[--text-tertiary]">Nenhum formulário criado ainda.</p>
+        <button (click)="createForm()" class="ag-btn ag-btn--primary">Criar primeiro formulário</button>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (form of forms(); track form.id) {
+          <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4 flex items-center gap-4">
+
+            <!-- Status indicator -->
+            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+              [class.bg-green-400]="form.status === 'PUBLISHED'"
+              [class.bg-amber-400]="form.status === 'DRAFT'"
+              [class.bg-slate-300]="form.status === 'CLOSED'">
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-[--text-primary] truncate">{{ form.title }}</p>
+              <div class="flex items-center gap-3 mt-0.5">
+                <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+                  [class.bg-green-100]="form.status === 'PUBLISHED'"
+                  [class.text-green-700]="form.status === 'PUBLISHED'"
+                  [class.bg-amber-100]="form.status === 'DRAFT'"
+                  [class.text-amber-700]="form.status === 'DRAFT'"
+                  [class.bg-slate-100]="form.status === 'CLOSED'"
+                  [class.text-slate-600]="form.status === 'CLOSED'">
+                  {{ form.status === 'PUBLISHED' ? 'Publicado' : form.status === 'DRAFT' ? 'Rascunho' : 'Fechado' }}
+                </span>
+                <span class="text-xs text-[--text-tertiary]">{{ form._count?.submissions ?? 0 }} submissões</span>
+                <span class="text-xs text-[--text-tertiary]">{{ form.fields.length }} campos</span>
+              </div>
+            </div>
+
+            <!-- Copy link (only if published) -->
+            @if (form.status === 'PUBLISHED') {
+              <button (click)="copyLink(form.slug)"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-primary-200 text-primary-600 hover:bg-primary-50 transition-colors">
+                <span class="material-symbols-rounded text-sm">{{ copied() ? 'check' : 'content_copy' }}</span>
+                {{ copied() ? 'Copiado!' : 'Copiar link' }}
+              </button>
+            }
+
+            <!-- Actions -->
+            <div class="flex items-center gap-1">
+              <button (click)="openSubmissions(form)" title="Submissões"
+                class="p-2 rounded-lg hover:bg-slate-100 text-[--text-tertiary] transition-colors">
+                <span class="material-symbols-rounded text-base">inbox</span>
+              </button>
+              <button (click)="openBuilder(form)" title="Editar"
+                class="p-2 rounded-lg hover:bg-slate-100 text-[--text-tertiary] transition-colors">
+                <span class="material-symbols-rounded text-base">edit</span>
+              </button>
+              <button (click)="deleteForm(form.id)" title="Excluir"
+                class="p-2 rounded-lg hover:bg-red-50 hover:text-red-500 text-[--text-tertiary] transition-colors">
+                <span class="material-symbols-rounded text-base">delete</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- ── Tab: Form Builder ────────────────────────────────────────────────── -->
+  @if (tab() === 'builder' && activeForm()) {
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
+
+      <!-- Left: form settings + field list -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Settings card -->
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-5">
+          <h3 class="text-sm font-bold text-[--text-primary] mb-4 flex items-center gap-2">
+            <span class="material-symbols-rounded text-base text-slate-400">tune</span>
+            Configurações do Formulário
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-[--text-secondary]">Título</label>
+              <input [(ngModel)]="editTitle" class="ag-input ag-input--sm" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-[--text-secondary]">Texto do botão de envio</label>
+              <input [(ngModel)]="editSubmitLabel" class="ag-input ag-input--sm" />
+            </div>
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="text-xs font-semibold text-[--text-secondary]">Descrição</label>
+              <textarea [(ngModel)]="editDescription" rows="2" class="ag-input ag-input--sm resize-none"></textarea>
+            </div>
+            <div class="flex flex-col gap-1 md:col-span-2">
+              <label class="text-xs font-semibold text-[--text-secondary]">Mensagem de sucesso</label>
+              <input [(ngModel)]="editSuccessMsg" class="ag-input ag-input--sm" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Fields -->
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
+              <span class="material-symbols-rounded text-base text-slate-400">view_list</span>
+              Campos ({{ editFields().length }})
+            </h3>
+          </div>
+
+          @if (!editFields().length) {
+            <div class="text-center py-8 text-[--text-tertiary] text-sm">
+              Adicione campos usando o painel à direita
+            </div>
+          }
+
+          <div class="flex flex-col gap-2">
+            @for (field of editFields(); track field.id) {
+              <div class="border border-[rgba(0,0,0,0.07)] rounded-xl overflow-hidden">
+
+                <!-- Field header -->
+                <div class="flex items-center gap-2 px-4 py-3 bg-slate-50 cursor-pointer"
+                  (click)="editingFieldId.set(editingFieldId() === field.id ? null : field.id)">
+                  <span class="material-symbols-rounded text-sm text-[--text-tertiary]">
+                    {{ fieldTypeConfig(field.type).icon }}
+                  </span>
+                  <span class="flex-1 text-sm font-medium text-[--text-primary]">{{ field.label }}</span>
+                  @if (field.required) {
+                    <span class="text-[10px] bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Obrigatório</span>
+                  }
+                  <span class="text-xs text-[--text-tertiary]">{{ fieldTypeConfig(field.type).label }}</span>
+                  <div class="flex items-center gap-0.5 ml-1">
+                    <button (click)="moveField(field.id, -1); $event.stopPropagation()" class="p-0.5 hover:text-primary-600 text-[--text-tertiary]">
+                      <span class="material-symbols-rounded text-sm">arrow_upward</span>
+                    </button>
+                    <button (click)="moveField(field.id, 1); $event.stopPropagation()" class="p-0.5 hover:text-primary-600 text-[--text-tertiary]">
+                      <span class="material-symbols-rounded text-sm">arrow_downward</span>
+                    </button>
+                    <button (click)="removeField(field.id); $event.stopPropagation()" class="p-0.5 hover:text-red-500 text-[--text-tertiary]">
+                      <span class="material-symbols-rounded text-sm">close</span>
+                    </button>
+                  </div>
+                  <span class="material-symbols-rounded text-base text-[--text-tertiary]">
+                    {{ editingFieldId() === field.id ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </div>
+
+                <!-- Field editor -->
+                @if (editingFieldId() === field.id) {
+                  <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1">
+                      <label class="text-xs font-semibold text-[--text-secondary]">Rótulo</label>
+                      <input [ngModel]="field.label" (ngModelChange)="patchField(field.id, {label: $event})" class="ag-input ag-input--sm" />
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <label class="text-xs font-semibold text-[--text-secondary]">Placeholder</label>
+                      <input [ngModel]="field.placeholder" (ngModelChange)="patchField(field.id, {placeholder: $event})" class="ag-input ag-input--sm" />
+                    </div>
+                    <div class="flex flex-col gap-1">
+                      <label class="text-xs font-semibold text-[--text-secondary]">Mapear para</label>
+                      <select [ngModel]="field.mapsTo" (ngModelChange)="patchField(field.id, {mapsTo: $event})" class="ag-input ag-input--sm">
+                        @for (m of MAPS_TO; track m.value) {
+                          <option [value]="m.value">{{ m.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="flex items-center gap-2 pt-4">
+                      <input type="checkbox" [ngModel]="field.required" (ngModelChange)="patchField(field.id, {required: $event})" id="req_{{field.id}}" />
+                      <label [for]="'req_' + field.id" class="text-sm text-[--text-secondary] cursor-pointer">Campo obrigatório</label>
+                    </div>
+
+                    @if (needsOptions(field.type)) {
+                      <div class="md:col-span-2 flex flex-col gap-2">
+                        <label class="text-xs font-semibold text-[--text-secondary]">Opções</label>
+                        @for (opt of field.options ?? []; track $index) {
+                          <div class="flex gap-2">
+                            <input [ngModel]="opt" (ngModelChange)="updateOption(field.id, $index, $event)" class="ag-input ag-input--xs flex-1" />
+                            <button (click)="removeOption(field.id, $index)" class="p-1 rounded hover:bg-red-50 hover:text-red-500 text-[--text-tertiary]">
+                              <span class="material-symbols-rounded text-sm">close</span>
+                            </button>
+                          </div>
+                        }
+                        <button (click)="addOption(field.id)" class="ag-btn ag-btn--ghost ag-btn--xs w-fit">
+                          <span class="material-symbols-rounded text-sm">add</span> Adicionar opção
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: add field types + actions -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Publish toggle -->
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-bold text-[--text-primary]">Status</span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+              [class.bg-green-100]="activeForm()!.status === 'PUBLISHED'"
+              [class.text-green-700]="activeForm()!.status === 'PUBLISHED'"
+              [class.bg-amber-100]="activeForm()!.status !== 'PUBLISHED'"
+              [class.text-amber-700]="activeForm()!.status !== 'PUBLISHED'">
+              {{ activeForm()!.status === 'PUBLISHED' ? 'Publicado' : 'Rascunho' }}
+            </span>
+          </div>
+
+          @if (activeForm()!.status === 'PUBLISHED') {
+            <div class="text-xs bg-slate-50 border border-slate-200 rounded-lg p-3 mb-3 break-all text-primary-600 font-mono">
+              {{ publicUrl(activeForm()!.slug) }}
+            </div>
+            <button (click)="copyLink(activeForm()!.slug)"
+              class="w-full ag-btn ag-btn--secondary ag-btn--sm flex items-center justify-center gap-1.5 mb-2">
+              <span class="material-symbols-rounded text-base">{{ copied() ? 'check' : 'content_copy' }}</span>
+              {{ copied() ? 'Copiado!' : 'Copiar link público' }}
+            </button>
+          }
+
+          <button (click)="toggleStatus()"
+            class="w-full ag-btn ag-btn--sm flex items-center justify-center gap-1.5"
+            [class.ag-btn--primary]="activeForm()!.status !== 'PUBLISHED'"
+            [class.ag-btn--ghost]="activeForm()!.status === 'PUBLISHED'">
+            <span class="material-symbols-rounded text-base">
+              {{ activeForm()!.status === 'PUBLISHED' ? 'visibility_off' : 'publish' }}
+            </span>
+            {{ activeForm()!.status === 'PUBLISHED' ? 'Despublicar' : 'Publicar formulário' }}
+          </button>
+        </div>
+
+        <!-- Add field types -->
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4">
+          <p class="text-xs font-bold text-[--text-secondary] mb-3 uppercase tracking-wide">Adicionar Campo</p>
+          <div class="grid grid-cols-2 gap-2">
+            @for (ft of FIELD_TYPES; track ft.type) {
+              <button (click)="addField(ft.type)"
+                class="flex flex-col items-center gap-1 p-3 rounded-xl border border-[rgba(0,0,0,0.06)] hover:border-primary-300 hover:bg-primary-50 transition-all text-center">
+                <span class="material-symbols-rounded text-xl text-[--text-tertiary]">{{ ft.icon }}</span>
+                <span class="text-[10px] font-semibold text-[--text-secondary] leading-tight">{{ ft.label }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Save button -->
+        <button (click)="saveBuilder()" [disabled]="saving()"
+          class="w-full ag-btn ag-btn--primary ag-btn--lg flex items-center justify-center gap-2">
+          <span class="material-symbols-rounded text-base" [class.animate-spin]="saving()">
+            {{ saving() ? 'refresh' : 'save' }}
+          </span>
+          {{ saving() ? 'Salvando…' : 'Salvar Formulário' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── Tab: Submissions ─────────────────────────────────────────────────── -->
+  @if (tab() === 'submissions' && activeForm()) {
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-[--text-primary]">
+          Submissões — {{ activeForm()!.title }}
+        </h3>
+        <span class="text-sm text-[--text-secondary]">{{ submissions().length }} registros</span>
+      </div>
+
+      @if (!submissions().length) {
+        <div class="flex flex-col items-center gap-3 py-12 text-center">
+          <span class="material-symbols-rounded text-4xl text-slate-200">inbox</span>
+          <p class="text-sm text-[--text-tertiary]">Nenhuma submissão recebida ainda</p>
+        </div>
+      } @else {
+        <div class="flex flex-col gap-3">
+          @for (sub of submissions(); track sub.id) {
+            <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <p class="text-xs text-[--text-tertiary]">{{ sub.submittedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+                  @if (sub.submitterEmail) {
+                    <p class="text-xs text-[--text-secondary] mt-0.5">{{ sub.submitterEmail }}</p>
+                  }
+                </div>
+                <span class="text-xs font-bold px-2 py-1 rounded-full"
+                  [style.background]="statusConfig(sub.status).bg"
+                  [style.color]="statusConfig(sub.status).color">
+                  {{ statusConfig(sub.status).label }}
+                </span>
+              </div>
+
+              <!-- Data -->
+              <div class="flex flex-col gap-1.5 text-sm">
+                @for (entry of (sub.data | keyvalue); track entry.key) {
+                  <div class="flex gap-2">
+                    <span class="text-[--text-tertiary] min-w-24 text-xs font-medium">{{ entry.key }}</span>
+                    <span class="text-[--text-primary] text-xs flex-1">{{ entry.value }}</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Linked task -->
+              @if (sub.task) {
+                <div class="mt-3 pt-3 border-t border-slate-50 flex items-center gap-2 text-xs text-[--text-secondary]">
+                  <span class="material-symbols-rounded text-sm text-primary-500">task_alt</span>
+                  Tarefa criada: <span class="font-semibold">{{ sub.task.title }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

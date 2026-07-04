@@ -5,8 +5,8 @@ import { MailService } from './mail.service';
 import { MAIL_ADAPTER } from './mail-adapter.interface';
 import { ResendAdapter } from './adapters/resend.adapter';
 import { SmtpAdapter } from './adapters/smtp.adapter';
-import { QUEUE_MAIL } from '../queue/queue.module';
-
+import { NoopMailAdapter } from './adapters/noop.adapter';
+import { QUEUE_MAIL } from '../queue/queue.constants';
 @Module({
   imports: [BullModule.registerQueue({ name: QUEUE_MAIL })],
   providers: [
@@ -28,7 +28,9 @@ import { QUEUE_MAIL } from '../queue/queue.module';
           });
         }
 
-        return new ResendAdapter(config.get<string>('RESEND_API_KEY', ''), defaultFrom);
+        const resendKey = config.get<string>('RESEND_API_KEY', '');
+        if (!resendKey) return new NoopMailAdapter();
+        return new ResendAdapter(resendKey, defaultFrom);
       },
     },
     MailService,

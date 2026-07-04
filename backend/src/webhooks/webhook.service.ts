@@ -12,7 +12,7 @@ import {
   CommentCreatedEvent,
 } from '../events/agilis-events';
 import * as crypto from 'crypto';
-import { QUEUE_WEBHOOK } from '../queue/queue.module';
+import { QUEUE_WEBHOOK } from '../queue/queue.constants';
 import { WebhookJobData } from '../queue/processors/webhook.processor';
 
 export interface ProcessCompletedEvent {
@@ -77,21 +77,6 @@ export class WebhookService {
   async regenerateSecret(id: string) {
     const secret = crypto.randomBytes(24).toString('hex');
     return this.prisma.webhook.update({ where: { id }, data: { secret } });
-  }
-
-  // ── Test ──────────────────────────────────────────────────────────────────
-
-  async test(id: string) {
-    const webhook = await this.prisma.webhook.findUnique({ where: { id } });
-    if (!webhook) return { success: false, error: 'Webhook não encontrado' };
-
-    const payload = {
-      event: 'webhook.test',
-      timestamp: new Date().toISOString(),
-      data: { message: 'Este é um evento de teste do Agilis.' },
-    };
-
-    return this.deliver(webhook.id, webhook.url, webhook.secret, 'webhook.test', payload);
   }
 
   // ── Event Listeners ───────────────────────────────────────────────────────

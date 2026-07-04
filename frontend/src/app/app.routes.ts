@@ -59,6 +59,26 @@ export const routes: Routes = [
         title: 'Gantt — Agilis',
       },
       {
+        path: 'projects/:id/wiki',
+        loadComponent: () => import('./features/wiki/wiki.component').then((m) => m.WikiComponent),
+        title: 'Wiki — Agilis',
+      },
+      {
+        path: 'approvals',
+        loadComponent: () => import('./features/approvals/approvals.component').then((m) => m.ApprovalsComponent),
+        title: 'Aprovações — Agilis',
+      },
+      {
+        path: 'projects/:id/intake-forms',
+        loadComponent: () => import('./features/intake-forms/intake-forms.component').then((m) => m.IntakeFormsComponent),
+        title: 'Formulários de Entrada — Agilis',
+      },
+      {
+        path: 'projects/:id/settings',
+        loadComponent: () => import('./features/project-settings/project-settings.component').then((m) => m.ProjectSettingsComponent),
+        title: 'Configurações do Projeto — Agilis',
+      },
+      {
         path: 'my-tasks',
         loadComponent: () => import('./features/my-tasks/my-tasks.component').then((m) => m.MyTasksComponent),
         title: 'Minhas Tarefas — Agilis',
@@ -99,6 +119,26 @@ export const routes: Routes = [
         title: 'Centro de Operações — Agilis',
       },
       {
+        path: 'workload',
+        loadComponent: () => import('./features/workload/workload.component').then((m) => m.WorkloadComponent),
+        title: 'Carga de Trabalho — Agilis',
+      },
+      {
+        path: 'okrs',
+        loadComponent: () => import('./features/okrs/okrs.component').then((m) => m.OkrsComponent),
+        title: 'OKRs e Metas — Agilis',
+      },
+      {
+        path: 'health-score',
+        loadComponent: () => import('./features/health-score/health-score.component').then((m) => m.HealthScoreComponent),
+        title: 'Health Score — Agilis',
+      },
+      {
+        path: 'insights',
+        loadComponent: () => import('./features/insights-page/insights-page.component').then((m) => m.InsightsPageComponent),
+        title: 'Insights — Agilis',
+      },
+      {
         path: 'reports',
         loadComponent: () => import('./features/metrics/metrics.component').then((m) => m.MetricsComponent),
         title: 'Relatórios — Agilis',
@@ -114,6 +154,18 @@ export const routes: Routes = [
         title: 'Webhooks — Agilis',
       },
     ],
+  },
+  // Public client portal — no auth required
+  {
+    path: 'portal/:token',
+    loadComponent: () => import('./features/client-portal/client-portal.component').then((m) => m.ClientPortalComponent),
+    title: 'Portal do Projeto — Agilis',
+  },
+  // Public intake form — no auth required
+  {
+    path: 'intake/:slug',
+    loadComponent: () => import('./features/intake-public/intake-public.component').then((m) => m.IntakePublicComponent),
+    title: 'Solicitação — Agilis',
   },
   { path: '**', redirectTo: '/dashboard' },
 ];

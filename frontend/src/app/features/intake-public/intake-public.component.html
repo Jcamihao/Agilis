@@ -1,0 +1,142 @@
+<div class="intake-bg">
+  <div class="intake-card">
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="intake-card__skeleton">
+        <div class="h-8 w-48 rounded ag-skeleton mb-2"></div>
+        <div class="h-4 w-64 rounded ag-skeleton mb-6"></div>
+        @for (_ of [1,2,3]; track $index) {
+          <div class="h-12 rounded-lg ag-skeleton mb-3"></div>
+        }
+      </div>
+    }
+
+    <!-- Error state -->
+    @if (!loading() && error() && !form()) {
+      <div class="intake-card__error">
+        <span class="material-symbols-rounded text-4xl text-red-300">error</span>
+        <p class="text-[--text-secondary]">{{ error() }}</p>
+      </div>
+    }
+
+    <!-- Success state -->
+    @if (submitted()) {
+      <div class="intake-card__success">
+        <div class="intake-success-icon">
+          <span class="material-symbols-rounded text-4xl text-green-500">check_circle</span>
+        </div>
+        <h2 class="text-xl font-bold text-[--text-primary] mb-2">Enviado com sucesso!</h2>
+        <p class="text-[--text-secondary] text-center leading-relaxed">{{ successMsg() }}</p>
+        <button (click)="reset()" class="mt-6 ag-btn ag-btn--secondary">
+          Enviar outra resposta
+        </button>
+      </div>
+    }
+
+    <!-- Form -->
+    @if (!loading() && !submitted() && form()) {
+      <!-- Logo/brand -->
+      <div class="intake-brand">
+        <span class="material-symbols-rounded text-2xl text-primary-600">dynamic_form</span>
+        <span class="text-sm font-bold text-primary-600">Agilis</span>
+      </div>
+
+      <h1 class="intake-title">{{ form()!.title }}</h1>
+      @if (form()!.description) {
+        <p class="intake-description">{{ form()!.description }}</p>
+      }
+
+      <form (ngSubmit)="submit()" class="intake-form">
+        @for (field of form()!.fields; track field.id) {
+          <div class="intake-field">
+            <label [for]="field.id" class="intake-label">
+              {{ field.label }}
+              @if (field.required) { <span class="text-red-500 ml-0.5">*</span> }
+            </label>
+
+            @if (field.type === 'TEXTAREA') {
+              <textarea
+                [id]="field.id"
+                [placeholder]="field.placeholder ?? ''"
+                [ngModel]="getValue(field.id)"
+                [name]="field.id"
+                (ngModelChange)="setValue(field.id, $event)"
+                rows="4"
+                class="intake-input">
+              </textarea>
+
+            } @else if (field.type === 'SELECT') {
+              <select
+                [id]="field.id"
+                [ngModel]="getValue(field.id)"
+                [name]="field.id"
+                (ngModelChange)="setValue(field.id, $event)"
+                class="intake-input">
+                <option value="">Selecione…</option>
+                @for (opt of field.options ?? []; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+
+            } @else if (field.type === 'MULTI_SELECT') {
+              <div class="flex flex-col gap-2">
+                @for (opt of field.options ?? []; track opt) {
+                  <label class="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox"
+                      [checked]="(getValue(field.id) ?? '').includes(opt)"
+                      (change)="toggleMultiSelect(field.id, opt)"
+                      class="rounded" />
+                    <span class="text-sm text-[--text-primary]">{{ opt }}</span>
+                  </label>
+                }
+              </div>
+
+            } @else if (field.type === 'CHECKBOX') {
+              <label class="flex items-center gap-2.5 cursor-pointer">
+                <input type="checkbox"
+                  [id]="field.id"
+                  [ngModel]="getValue(field.id)"
+                  [name]="field.id"
+                  (ngModelChange)="setValue(field.id, $event)"
+                  class="rounded w-4 h-4" />
+                <span class="text-sm text-[--text-secondary]">{{ field.placeholder ?? field.label }}</span>
+              </label>
+
+            } @else {
+              <input
+                [id]="field.id"
+                [type]="fieldType(field.type)"
+                [placeholder]="field.placeholder ?? ''"
+                [ngModel]="getValue(field.id)"
+                [name]="field.id"
+                (ngModelChange)="setValue(field.id, $event)"
+                class="intake-input" />
+            }
+          </div>
+        }
+
+        <!-- Error message -->
+        @if (error()) {
+          <div class="intake-error">
+            <span class="material-symbols-rounded text-base">error</span>
+            {{ error() }}
+          </div>
+        }
+
+        <button type="submit" [disabled]="submitting()" class="intake-submit">
+          @if (submitting()) {
+            <span class="material-symbols-rounded text-base animate-spin">refresh</span>
+            Enviando…
+          } @else {
+            {{ form()!.submitLabel }}
+          }
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-[--text-tertiary] mt-6">
+        Powered by <span class="font-semibold text-primary-600">Agilis</span>
+      </p>
+    }
+  </div>
+</div>

@@ -1,0 +1,190 @@
+<div class="flex flex-col gap-6 max-w-3xl">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <a [routerLink]="['/projects', projectId(), 'kanban']"
+      class="p-1.5 rounded-lg hover:bg-slate-100 text-[--text-tertiary] transition-colors">
+      <span class="material-symbols-rounded text-xl">arrow_back</span>
+    </a>
+    <div>
+      <h2 class="text-xl font-bold text-[--text-primary] flex items-center gap-2">
+        <span class="material-symbols-rounded text-xl text-primary-600">settings</span>
+        Configurações do Projeto
+      </h2>
+      @if (project()) {
+        <p class="text-sm text-[--text-secondary]">{{ project()!.name }}</p>
+      }
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="flex gap-1 border-b border-[rgba(0,0,0,0.07)]">
+    @for (t of [
+      { id: 'fields',  label: 'Campos Personalizados', icon: 'input' },
+      { id: 'portal',  label: 'Portal do Cliente',     icon: 'share' },
+      { id: 'general', label: 'Geral',                 icon: 'tune' }
+    ]; track t.id) {
+      <button
+        (click)="t.id === 'portal' ? openPortalTab() : tab.set($any(t.id))"
+        class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
+        [class.border-primary-600]="tab() === t.id"
+        [class.text-primary-600]="tab() === t.id"
+        [class.border-transparent]="tab() !== t.id"
+        [class.text-slate-500]="tab() !== t.id">
+        <span class="material-symbols-rounded text-base">{{ t.icon }}</span>
+        {{ t.label }}
+      </button>
+    }
+  </div>
+
+  <!-- ── Custom Fields ──────────────────────────────────────────────────────── -->
+  @if (tab() === 'fields' && projectId()) {
+    <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-6">
+      <p class="text-sm text-[--text-secondary] mb-5">
+        Campos personalizados aparecem em todas as tarefas deste projeto.
+      </p>
+      <ag-custom-fields-manager [projectId]="projectId()" />
+    </div>
+  }
+
+  <!-- ── Portal do Cliente ─────────────────────────────────────────────────── -->
+  @if (tab() === 'portal') {
+    @if (!portal()) {
+      <div class="flex justify-center py-12">
+        <div class="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-5">
+
+        <!-- Enable toggle card -->
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-[--text-primary]">Portal Público</p>
+              <p class="text-xs text-[--text-secondary] mt-0.5">
+                Compartilhe o progresso do projeto com clientes de forma segura e sem login
+              </p>
+            </div>
+            <!-- Toggle switch -->
+            <button (click)="togglePortalEnabled()"
+              class="relative w-11 h-6 rounded-full transition-colors"
+              [class.bg-primary-600]="portal()!.isEnabled"
+              [class.bg-slate-200]="!portal()!.isEnabled">
+              <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform"
+                [class.translate-x-5]="portal()!.isEnabled"
+                [class.translate-x-0]="!portal()!.isEnabled">
+              </span>
+            </button>
+          </div>
+
+          @if (portal()!.isEnabled) {
+            <!-- Public URL -->
+            <div class="mt-4 flex items-center gap-2">
+              <div class="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-primary-600 font-mono truncate">
+                {{ portalUrl() }}
+              </div>
+              <button (click)="copyPortalLink()"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-primary-200 text-primary-600 hover:bg-primary-50 transition-colors flex-shrink-0">
+                <span class="material-symbols-rounded text-sm">{{ portalCopied() ? 'check' : 'content_copy' }}</span>
+                {{ portalCopied() ? 'Copiado!' : 'Copiar link' }}
+              </button>
+              <button (click)="regenerateToken()"
+                class="p-2 rounded-lg hover:bg-red-50 text-[--text-tertiary] hover:text-red-500 transition-colors"
+                title="Gerar novo link">
+                <span class="material-symbols-rounded text-base">refresh</span>
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Appearance & sections -->
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-5">
+          <h3 class="text-sm font-bold text-[--text-primary] mb-4 flex items-center gap-2">
+            <span class="material-symbols-rounded text-base text-slate-400">palette</span>
+            Personalização
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-[--text-secondary]">Título personalizado</label>
+              <input [ngModel]="portalTitle()" (ngModelChange)="portalTitle.set($event)"
+                placeholder="Usa o nome do projeto se vazio"
+                class="ag-input ag-input--sm" />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-[--text-secondary]">Cor de destaque</label>
+              <div class="flex items-center gap-2">
+                <input type="color" [ngModel]="portalAccent()" (ngModelChange)="portalAccent.set($event)"
+                  class="w-10 h-9 cursor-pointer rounded border border-slate-200 p-0.5" />
+                <span class="text-sm font-mono text-[--text-secondary]">{{ portalAccent() }}</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-[--text-secondary]">
+                Senha de acesso
+                <span class="text-[--text-tertiary] font-normal">(opcional)</span>
+              </label>
+              <div class="relative">
+                <input [type]="showPassword() ? 'text' : 'password'"
+                  [ngModel]="portalPassword()" (ngModelChange)="portalPassword.set($event)"
+                  placeholder="Deixe vazio para acesso público"
+                  class="ag-input ag-input--sm pr-10" />
+                <button (click)="showPassword.set(!showPassword())"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-[--text-tertiary]">
+                  <span class="material-symbols-rounded text-sm">
+                    {{ showPassword() ? 'visibility_off' : 'visibility' }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sections visibility -->
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-5">
+          <h3 class="text-sm font-bold text-[--text-primary] mb-4 flex items-center gap-2">
+            <span class="material-symbols-rounded text-base text-slate-400">visibility</span>
+            Seções Visíveis
+          </h3>
+          <div class="flex flex-col gap-3">
+            @for (section of [
+              { label: 'Board Kanban',   icon: 'view_kanban',     signal: portalShowKanban },
+              { label: 'Cronograma',     icon: 'calendar_month',  signal: portalShowTimeline },
+              { label: 'Equipe',         icon: 'group',           signal: portalShowTeam }
+            ]; track section.label) {
+              <label class="flex items-center gap-3 cursor-pointer select-none">
+                <button (click)="section.signal.set(!section.signal())"
+                  class="relative w-9 h-5 rounded-full transition-colors flex-shrink-0"
+                  [class.bg-primary-600]="section.signal()"
+                  [class.bg-slate-200]="!section.signal()">
+                  <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"
+                    [class.translate-x-4]="section.signal()"
+                    [class.translate-x-0]="!section.signal()">
+                  </span>
+                </button>
+                <span class="material-symbols-rounded text-base text-[--text-tertiary]">{{ section.icon }}</span>
+                <span class="text-sm text-[--text-primary]">{{ section.label }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Save -->
+        <button (click)="savePortal()" [disabled]="portalSaving()"
+          class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
+          <span class="material-symbols-rounded text-base" [class.animate-spin]="portalSaving()">
+            {{ portalSaving() ? 'refresh' : 'save' }}
+          </span>
+          {{ portalSaving() ? 'Salvando…' : 'Salvar Configurações' }}
+        </button>
+      </div>
+    }
+  }
+
+  <!-- ── Geral ──────────────────────────────────────────────────────────────── -->
+  @if (tab() === 'general') {
+    <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-6">
+      <p class="text-sm text-[--text-secondary]">Configurações gerais em breve.</p>
+    </div>
+  }
+</div>

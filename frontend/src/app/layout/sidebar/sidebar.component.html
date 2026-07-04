@@ -214,6 +214,26 @@
       }
     </a>
 
+    <!-- Chat button -->
+    <button
+      (click)="openChat()"
+      class="w-full mt-1 flex items-center gap-3 px-2.5 py-2.5 rounded-xl cursor-pointer transition-all duration-150 nav-item relative"
+      [style.background]="chat.panelOpen() ? 'rgba(99,102,241,0.15)' : ''"
+      title="Chat da equipe"
+    >
+      <span class="material-symbols-rounded text-[20px] flex-shrink-0"
+        [style.color]="chat.panelOpen() ? '#818cf8' : '#64748b'">chat</span>
+      @if (!collapsed) {
+        <span class="text-[13.5px] font-medium animate-fade-in"
+          [style.color]="chat.panelOpen() ? '#f1f5f9' : '#94a3b8'">Chat</span>
+      }
+      @if (chat.totalUnread() > 0) {
+        <span class="absolute top-1 right-1 w-4 h-4 bg-primary-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+          {{ chat.totalUnread() > 9 ? '9+' : chat.totalUnread() }}
+        </span>
+      }
+    </button>
+
     <button
       (click)="toggleCollapse.emit()"
       class="w-full mt-1 flex items-center justify-center p-2 rounded-xl transition-colors"

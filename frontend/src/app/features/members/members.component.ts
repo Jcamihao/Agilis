@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { MembersService, OrgMember } from '../../core/services/members.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../core/services/confirm.service';
+import { ChatService } from '../../core/services/chat.service';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -29,6 +30,7 @@ export class MembersComponent implements OnInit {
   private readonly fb      = inject(FormBuilder);
   private readonly toast   = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
+  readonly chat = inject(ChatService);
 
   readonly currentUser = this.auth.user;
   readonly ROLE_CFG    = ROLE_CFG;

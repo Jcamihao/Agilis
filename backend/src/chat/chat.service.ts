@@ -2,9 +2,6 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 
-const ONLINE_TTL = 35; // seconds
-const ONLINE_KEY = (userId: string) => `chat:online:${userId}`;
-
 @Injectable()
 export class ChatService {
   constructor(
@@ -52,12 +49,11 @@ export class ChatService {
   // ── Messages ───────────────────────────────────────────────────────────────
 
   async getMessages(roomId: string, limit = 50, before?: string) {
-    const cursor = before ? { createdAt: new Date(before) } : undefined;
     const messages = await this.prisma.chatMessage.findMany({
       where: {
         roomId,
         deletedAt: null,
-        ...(cursor ? { createdAt: { lt: cursor.createdAt } } : {}),
+        ...(before ? { createdAt: { lt: new Date(before) } } : {}),
       },
       include: {
         user: { select: { id: true, name: true, avatarUrl: true } },
@@ -106,25 +102,17 @@ export class ChatService {
     });
   }
 
-  // ── Online presence ────────────────────────────────────────────────────────
+  // ── Presence (delegates to RedisService) ──────────────────────────────────
 
-  async setOnline(userId: string) {
-    await this.redis.client.set(ONLINE_KEY(userId), '1', 'EX', ONLINE_TTL);
+  setOnline(userId: string) {
+    return this.redis.setPresence(userId, 'ONLINE');
   }
 
-  async setOffline(userId: string) {
-    await this.redis.client.del(ONLINE_KEY(userId));
+  setOffline(userId: string) {
+    return this.redis.setPresence(userId, 'OFFLINE');
   }
 
-  async refreshOnline(userId: string) {
-    await this.redis.client.expire(ONLINE_KEY(userId), ONLINE_TTL);
-  }
-
-  async getOnlineUsers(userIds: string[]): Promise<string[]> {
-    if (!userIds.length) return [];
-    const pipeline = this.redis.client.pipeline();
-    for (const id of userIds) pipeline.exists(ONLINE_KEY(id));
-    const results = await pipeline.exec();
-    return userIds.filter((_, i) => results?.[i]?.[1] === 1);
+  getOnlineUsers(userIds: string[]) {
+    return this.redis.getManyPresence(userIds);
   }
 }

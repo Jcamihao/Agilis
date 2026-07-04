@@ -1,0 +1,239 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight flex items-center gap-2">
+        <span class="material-symbols-rounded text-2xl text-primary-600">heatmap</span>
+        Carga de Trabalho
+      </h2>
+      <p class="text-sm text-[--text-secondary] mt-0.5">Capacidade e distribuição de tarefas por membro</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Project filter -->
+      <select [(ngModel)]="filterProjectId" (ngModelChange)="load()"
+        class="ag-input ag-input--sm min-w-40">
+        <option value="">Todos os projetos</option>
+        @for (p of projects(); track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+        }
+      </select>
+
+      <!-- AI suggest -->
+      <button (click)="suggest()" [disabled]="suggesting() || loading()"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
+        <span class="material-symbols-rounded text-base" [class.animate-spin]="suggesting()">
+          {{ suggesting() ? 'refresh' : 'auto_awesome' }}
+        </span>
+        {{ suggesting() ? 'Analisando…' : 'Sugerir com IA' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- AI Suggestion panel -->
+  @if (showSuggestion() && suggestion()) {
+    <div class="bg-gradient-to-r from-primary-50 to-indigo-50 border border-primary-200 rounded-xl p-4 flex items-start gap-3">
+      <span class="material-symbols-rounded text-2xl text-primary-600 flex-shrink-0 mt-0.5">auto_awesome</span>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-primary-800 mb-1">Sugestão de Redistribuição (IA)</p>
+        <p class="text-sm text-primary-700 leading-relaxed whitespace-pre-wrap">{{ suggestion() }}</p>
+      </div>
+      <button (click)="showSuggestion.set(false)" class="text-primary-400 hover:text-primary-600 flex-shrink-0">
+        <span class="material-symbols-rounded text-lg">close</span>
+      </button>
+    </div>
+  }
+
+  @if (loading()) {
+    <!-- Skeleton -->
+    <div class="flex flex-col gap-4">
+      <!-- Summary skeletons -->
+      <div class="grid grid-cols-4 gap-4">
+        @for (_ of [1,2,3,4]; track $index) {
+          <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] h-20 ag-skeleton"></div>
+        }
+      </div>
+      <!-- Member skeletons -->
+      @for (_ of [1,2,3]; track $index) {
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] h-28 ag-skeleton"></div>
+      }
+    </div>
+  } @else if (overview()) {
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      @for (card of [
+        { label: 'Membros',         value: members().length,           icon: 'group',         color: '#6366f1' },
+        { label: 'Total de Tarefas',value: overview()!.totalTasks,     icon: 'task_alt',      color: '#3b82f6' },
+        { label: 'Sobrecarregados', value: overview()!.overloaded,     icon: 'warning',       color: '#ef4444' },
+        { label: 'Capacidade Média',value: overview()!.avgCapacity + '%', icon: 'speed',      color: '#f59e0b' }
+      ]; track card.label) {
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            [style.background]="card.color + '18'">
+            <span class="material-symbols-rounded text-xl" [style.color]="card.color">{{ card.icon }}</span>
+          </div>
+          <div>
+            <p class="text-xl font-black text-[--text-primary]">{{ card.value }}</p>
+            <p class="text-xs text-[--text-tertiary] font-medium">{{ card.label }}</p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- ── Heatmap grid ── -->
+    @if (members().length && dayHeaders().length) {
+      <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-50 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
+            <span class="material-symbols-rounded text-base text-slate-400">calendar_view_week</span>
+            Calendário de Vencimentos — próximos 14 dias
+          </h3>
+          <!-- Legend -->
+          <div class="flex items-center gap-3 text-xs text-[--text-tertiary]">
+            @for (item of [
+              { color: '#f8fafc', label: '0' },
+              { color: '#dbeafe', label: '1' },
+              { color: '#93c5fd', label: '2' },
+              { color: '#6366f1', label: '3-4' },
+              { color: '#dc2626', label: '5+' }
+            ]; track item.label) {
+              <div class="flex items-center gap-1">
+                <div class="w-3.5 h-3.5 rounded-sm border border-slate-200"
+                  [style.background]="item.color"></div>
+                <span>{{ item.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <!-- Day headers -->
+            <thead>
+              <tr>
+                <th class="sticky left-0 bg-white z-10 w-48 px-4 py-2 text-left text-[--text-tertiary] font-semibold border-b border-r border-slate-50">
+                  Membro
+                </th>
+                @for (day of dayHeaders(); track day.date) {
+                  <th class="px-1 py-2 text-center font-medium border-b border-slate-50 min-w-[52px]"
+                    [class.bg-primary-50]="day.isToday"
+                    [class.text-primary-600]="day.isToday"
+                    [class.text-slate-400]="!day.isToday"
+                    [class.opacity-50]="day.isWeekend && !day.isToday">
+                    {{ day.label }}
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (m of members(); track m.user.id) {
+                <tr class="hover:bg-slate-50/40 transition-colors">
+                  <!-- Member name -->
+                  <td class="sticky left-0 bg-white z-10 px-4 py-2.5 border-r border-slate-50">
+                    <div class="flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden"
+                        [style.background]="statusConfig(m.status).barColor">
+                        @if (m.user.avatarUrl) {
+                          <img [src]="m.user.avatarUrl" class="w-full h-full object-cover" />
+                        } @else {
+                          {{ initials(m.user.name) }}
+                        }
+                      </div>
+                      <span class="font-medium text-[--text-primary] truncate max-w-28">{{ m.user.name }}</span>
+                    </div>
+                  </td>
+                  <!-- Daily cells -->
+                  @for (day of m.dailyLoad; track day.date) {
+                    <td class="px-1 py-1 text-center">
+                      <div class="mx-auto w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold cursor-default transition-transform hover:scale-110"
+                        [style.background]="heatColor(day.count)"
+                        [class.text-white]="day.count >= 3"
+                        [class.text-slate-500]="day.count < 3"
+                        [title]="heatTitle(day.count, day.date)">
+                        {{ day.count || '' }}
+                      </div>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- ── Member capacity cards ── -->
+    <div>
+      <h3 class="text-sm font-bold text-[--text-primary] mb-3 flex items-center gap-2">
+        <span class="material-symbols-rounded text-base text-slate-400">speed</span>
+        Capacidade por Membro
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        @for (m of members(); track m.user.id) {
+          <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4"
+            [style.border-left]="'3px solid ' + statusConfig(m.status).barColor">
+
+            <!-- Top row -->
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 overflow-hidden"
+                  [style.background]="statusConfig(m.status).barColor">
+                  @if (m.user.avatarUrl) {
+                    <img [src]="m.user.avatarUrl" class="w-full h-full object-cover" />
+                  } @else {
+                    {{ initials(m.user.name) }}
+                  }
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-[--text-primary]">{{ m.user.name }}</p>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    [style.background]="statusConfig(m.status).bg"
+                    [style.color]="statusConfig(m.status).color">
+                    {{ statusConfig(m.status).label }}
+                  </span>
+                </div>
+              </div>
+              <span class="text-xl font-black" [style.color]="statusConfig(m.status).barColor">
+                {{ m.capacityScore }}%
+              </span>
+            </div>
+
+            <!-- Capacity bar -->
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden mb-3">
+              <div class="h-full rounded-full transition-all duration-700"
+                [style.width.%]="m.capacityScore"
+                [style.background]="statusConfig(m.status).barColor">
+              </div>
+            </div>
+
+            <!-- Stats grid -->
+            <div class="grid grid-cols-3 gap-2 text-center">
+              @for (stat of [
+                { label: 'Abertas',   value: m.total,      icon: 'assignment', color: '#6366f1' },
+                { label: 'Atrasadas', value: m.overdue,    icon: 'warning',    color: m.overdue > 0 ? '#ef4444' : '#94a3b8' },
+                { label: 'Vence em 7d', value: m.dueSoon,  icon: 'schedule',   color: m.dueSoon > 0 ? '#f59e0b' : '#94a3b8' }
+              ]; track stat.label) {
+                <div class="bg-slate-50 rounded-lg p-2">
+                  <span class="material-symbols-rounded text-sm block mb-0.5" [style.color]="stat.color">
+                    {{ stat.icon }}
+                  </span>
+                  <p class="text-base font-black text-[--text-primary]">{{ stat.value }}</p>
+                  <p class="text-[10px] text-[--text-tertiary]">{{ stat.label }}</p>
+                </div>
+              }
+            </div>
+
+            <!-- Time tracked -->
+            @if (m.trackedMinThisWeek > 0) {
+              <p class="text-xs text-[--text-tertiary] mt-2.5 flex items-center gap-1">
+                <span class="material-symbols-rounded text-sm">timer</span>
+                {{ formatMin(m.trackedMinThisWeek) }} registrados esta semana
+              </p>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

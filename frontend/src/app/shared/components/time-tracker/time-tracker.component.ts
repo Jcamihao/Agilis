@@ -55,7 +55,7 @@ import { ConfirmService } from '../../../core/services/confirm.service';
 
       <!-- Manual entry form toggle -->
       <div>
-        <button (click)="showManual.update(v => !v)"
+        <button (click)="showManual.set(!showManual())"
           class="flex items-center gap-1.5 text-xs text-[--text-tertiary] hover:text-[--text-secondary] transition-colors">
           <span class="material-symbols-rounded text-sm">{{ showManual() ? 'expand_less' : 'add' }}</span>
           Adicionar manualmente

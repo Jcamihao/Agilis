@@ -1,0 +1,95 @@
+@if (!loading() && states().length) {
+  <div class="cfv">
+    <h5 class="cfv__heading">
+      <span class="material-symbols-rounded">input</span>
+      Campos Personalizados
+    </h5>
+
+    <div class="cfv__grid">
+      @for (s of states(); track s.field.id) {
+        <div class="cfv__row">
+          <!-- Label -->
+          <div class="cfv__label">
+            <span class="material-symbols-rounded text-sm">{{ typeConfig(s.field.type).icon }}</span>
+            {{ s.field.name }}
+            @if (s.field.isRequired) { <span class="text-red-400 ml-0.5">*</span> }
+          </div>
+
+          <!-- Value / Editor -->
+          <div class="cfv__value">
+
+            @if (s.field.type === 'CHECKBOX') {
+              <button (click)="toggleCheckbox(s)" class="flex items-center gap-1.5 text-sm">
+                <span class="material-symbols-rounded text-base"
+                  [class.text-primary-600]="s.value === 'true'"
+                  [class.text-slate-300]="s.value !== 'true'">
+                  {{ s.value === 'true' ? 'check_box' : 'check_box_outline_blank' }}
+                </span>
+                {{ s.value === 'true' ? 'Sim' : 'Não' }}
+              </button>
+
+            } @else if (s.field.type === 'SELECT' || s.field.type === 'MULTI_SELECT') {
+              @if (s.editing) {
+                <select [(ngModel)]="s.draft" (change)="commit(s)"
+                  class="ag-input ag-input--xs w-full">
+                  <option value="">— selecionar —</option>
+                  @for (opt of s.field.options; track opt) {
+                    <option [value]="opt">{{ opt }}</option>
+                  }
+                </select>
+              } @else {
+                <span class="cfv__display" (click)="startEdit(s)">
+                  @if (s.value) {
+                    <span class="cfv__chip">{{ s.value }}</span>
+                  } @else {
+                    <span class="cfv__placeholder">Selecionar</span>
+                  }
+                </span>
+              }
+
+            } @else if (s.field.type === 'DATE') {
+              @if (s.editing) {
+                <input type="date" [(ngModel)]="s.draft"
+                  (blur)="commit(s)" (keydown.enter)="commit(s)"
+                  class="ag-input ag-input--xs" />
+              } @else {
+                <span class="cfv__display" (click)="startEdit(s)">
+                  {{ display(s) }}
+                </span>
+              }
+
+            } @else if (s.field.type === 'NUMBER') {
+              @if (s.editing) {
+                <input type="number" [(ngModel)]="s.draft"
+                  (blur)="commit(s)" (keydown.enter)="commit(s)"
+                  class="ag-input ag-input--xs w-28" />
+              } @else {
+                <span class="cfv__display" (click)="startEdit(s)">{{ display(s) }}</span>
+              }
+
+            } @else {
+              <!-- TEXT / URL / EMAIL / PHONE -->
+              @if (s.editing) {
+                <input [type]="s.field.type === 'URL' ? 'url' : s.field.type === 'EMAIL' ? 'email' : 'text'"
+                  [(ngModel)]="s.draft"
+                  (blur)="commit(s)" (keydown.enter)="commit(s)" (keydown.escape)="cancel(s)"
+                  class="ag-input ag-input--xs w-full" />
+              } @else {
+                <span class="cfv__display" (click)="startEdit(s)">
+                  @if (s.value && s.field.type === 'URL') {
+                    <a [href]="s.value" target="_blank" class="text-primary-600 underline truncate" (click)="$event.stopPropagation()">
+                      {{ s.value }}
+                    </a>
+                  } @else {
+                    {{ display(s) }}
+                  }
+                </span>
+              }
+            }
+
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

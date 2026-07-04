@@ -166,6 +166,7 @@ model Company {
   processes       Process[]
   webhooks        Webhook[]
   chatRooms       ChatRoom[]
+  objectives      Objective[]
 
   @@map("companies")
 }
@@ -205,6 +206,13 @@ model User {
   timeEntries          TimeEntry[]
   chatMessages         ChatMessage[]
   chatRoomMembers      ChatRoomMember[]
+  ownedObjectives      Objective[]      @relation("ownedObjectives")
+  wikiPagesCreated     WikiPage[]       @relation("wikiCreated")
+  wikiPagesUpdated     WikiPage[]       @relation("wikiUpdated")
+  wikiRevisions        WikiPageRevision[] @relation("wikiRevisions")
+  intakeForms          IntakeForm[]     @relation("intakeForms")
+  approvalRequests     TaskApproval[]   @relation("approvalRequests")
+  approvalReviews      TaskApproval[]   @relation("approvalReviews")
 
   @@map("users")
 }
@@ -235,7 +243,6 @@ model Team {
   members      TeamMember[]
   projects     Project[]
   projectLinks ProjectTeam[]
-  healthScores HealthScore[]
 
   @@map("teams")
 }
@@ -284,10 +291,13 @@ model Project {
   tasks        Task[]
   sprints      Sprint[]
   automations  AutomationRule[]
-  healthScores HealthScore[]
   members      ProjectMember[]
   teams        ProjectTeam[]
   chatRooms    ChatRoom[]
+  customFields CustomField[]
+  wikiPages    WikiPage[]
+  intakeForms  IntakeForm[]
+  clientPortal ClientPortal?
 
   @@map("projects")
 }
@@ -338,7 +348,11 @@ model Task {
   participants TaskParticipant[]
   blockedBy    TaskDependency[]      @relation("dependentTask")
   blocking     TaskDependency[]      @relation("dependsOnTask")
-  timeEntries  TimeEntry[]
+  timeEntries       TimeEntry[]
+  keyResultTasks    KeyResultTask[]
+  customFieldValues CustomFieldValue[]
+  intakeSubmissions IntakeSubmission[]
+  approvals         TaskApproval[]     @relation("taskApprovals")
 
   @@index([parentId])
   @@map("tasks")
@@ -620,9 +634,7 @@ model HealthScore {
   trend        Json?
   calculatedAt DateTime     @default(now())
 
-  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  team    Team?    @relation(fields: [entityId], references: [id], onDelete: Cascade, map: "hs_team_fk")
-  project Project? @relation(fields: [entityId], references: [id], onDelete: Cascade, map: "hs_project_fk")
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([entityType, entityId])
   @@index([companyId, calculatedAt(sort: Desc)])
@@ -937,4 +949,267 @@ model ChatMessage {
 
   @@index([roomId, createdAt(sort: Desc)])
   @@map("chat_messages")
+}
+
+// ─── OKRs ─────────────────────────────────────────────────────────────────────
+
+enum ObjectiveStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum KeyResultType {
+  PERCENTAGE
+  NUMBER
+  CURRENCY
+  BOOLEAN
+}
+
+model Objective {
+  id          String          @id @default(uuid())
+  companyId   String
+  ownerId     String
+  title       String
+  description String?
+  status      ObjectiveStatus @default(ACTIVE)
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  owner      User        @relation("ownedObjectives", fields: [ownerId], references: [id])
+  keyResults KeyResult[]
+
+  @@index([companyId, status])
+  @@map("objectives")
+}
+
+model KeyResult {
+  id            String        @id @default(uuid())
+  objectiveId   String
+  title         String
+  type          KeyResultType @default(PERCENTAGE)
+  startValue    Float         @default(0)
+  targetValue   Float
+  currentValue  Float         @default(0)
+  unit          String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  objective Objective       @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  tasks     KeyResultTask[]
+
+  @@index([objectiveId])
+  @@map("key_results")
+}
+
+model KeyResultTask {
+  id          String @id @default(uuid())
+  keyResultId String
+  taskId      String
+
+  keyResult KeyResult @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([keyResultId, taskId])
+  @@map("key_result_tasks")
+}
+
+// ─── Custom Fields ─────────────────────────────────────────────────────────────
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  DATE
+  SELECT
+  MULTI_SELECT
+  CHECKBOX
+  URL
+  EMAIL
+  PHONE
+}
+
+model CustomField {
+  id         String          @id @default(uuid())
+  projectId  String
+  name       String
+  type       CustomFieldType
+  options    String[]
+  isRequired Boolean         @default(false)
+  position   Int             @default(0)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  project Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  values  CustomFieldValue[]
+
+  @@index([projectId, position])
+  @@map("custom_fields")
+}
+
+model CustomFieldValue {
+  id            String   @id @default(uuid())
+  customFieldId String
+  taskId        String
+  value         String?
+  updatedAt     DateTime @updatedAt
+
+  customField CustomField @relation(fields: [customFieldId], references: [id], onDelete: Cascade)
+  task        Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([customFieldId, taskId])
+  @@index([taskId])
+  @@map("custom_field_values")
+}
+
+// ─── Wiki / Docs ───────────────────────────────────────────────────────────────
+
+model WikiPage {
+  id        String   @id @default(uuid())
+  projectId String
+  parentId  String?
+  title     String
+  content   String   @default("")
+  icon      String   @default("article")
+  position  Int      @default(0)
+  createdById String
+  updatedById String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent    WikiPage?        @relation("WikiTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  WikiPage[]       @relation("WikiTree")
+  createdBy User             @relation("wikiCreated", fields: [createdById], references: [id])
+  updatedBy User             @relation("wikiUpdated", fields: [updatedById], references: [id])
+  revisions WikiPageRevision[]
+
+  @@index([projectId, position])
+  @@map("wiki_pages")
+}
+
+model WikiPageRevision {
+  id         String   @id @default(uuid())
+  pageId     String
+  content    String
+  title      String
+  authorId   String
+  createdAt  DateTime @default(now())
+
+  page   WikiPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  author User     @relation("wikiRevisions", fields: [authorId], references: [id])
+
+  @@index([pageId])
+  @@map("wiki_page_revisions")
+}
+
+// ─── Intake Forms ─────────────────────────────────────────────────────────────
+
+enum IntakeFormStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+model IntakeForm {
+  id          String           @id @default(uuid())
+  projectId   String
+  slug        String           @unique
+  title       String
+  description String?
+  status      IntakeFormStatus @default(DRAFT)
+  fields      Json             @default("[]")
+  submitLabel String           @default("Enviar")
+  successMsg  String           @default("Sua solicitação foi recebida. Obrigado!")
+  createdById String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   User              @relation("intakeForms", fields: [createdById], references: [id])
+  submissions IntakeSubmission[]
+
+  @@index([projectId])
+  @@map("intake_forms")
+}
+
+enum IntakeSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CONVERTED
+}
+
+model IntakeSubmission {
+  id         String                 @id @default(uuid())
+  formId     String
+  data       Json
+  status     IntakeSubmissionStatus @default(PENDING)
+  taskId     String?
+  submitterEmail String?
+  submittedAt    DateTime           @default(now())
+
+  form IntakeForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  task Task?      @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([formId, status])
+  @@map("intake_submissions")
+}
+
+// ─── Client Portal ────────────────────────────────────────────────────────────
+
+model ClientPortal {
+  id          String   @id @default(uuid())
+  projectId   String   @unique
+  token       String   @unique
+  isEnabled   Boolean  @default(false)
+  title       String?
+  logoUrl     String?
+  accentColor String   @default("#6366f1")
+  showKanban  Boolean  @default(true)
+  showTimeline Boolean @default(true)
+  showHealth  Boolean  @default(false)
+  showTeam    Boolean  @default(true)
+  password    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("client_portals")
+}
+
+// ─── Task Approvals ───────────────────────────────────────────────────────────
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model TaskApproval {
+  id             String         @id @default(uuid())
+  taskId         String
+  requestedById  String
+  approverId     String?
+  status         ApprovalStatus @default(PENDING)
+  note           String?
+  reviewNote     String?
+  targetStatus   TaskStatus?
+  resolvedAt     DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  task        Task  @relation("taskApprovals", fields: [taskId], references: [id], onDelete: Cascade)
+  requestedBy User  @relation("approvalRequests", fields: [requestedById], references: [id])
+  approver    User? @relation("approvalReviews",  fields: [approverId],    references: [id])
+
+  @@index([taskId])
+  @@index([approverId, status])
+  @@index([requestedById])
+  @@map("task_approvals")
 }

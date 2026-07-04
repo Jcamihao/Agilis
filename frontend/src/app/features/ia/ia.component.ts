@@ -39,7 +39,13 @@ export class IaComponent implements OnInit, AfterViewChecked {
   private readonly ai = inject(AiService);
   private readonly projectsService = inject(ProjectsService);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly toast   = inject(ToastService);
+  private readonly toastSvc = inject(ToastService);
+
+  readonly toast = signal<{msg: string; type: 'success' | 'error'} | null>(null);
+  private showToast(msg: string, type: 'success' | 'error' = 'error') {
+    this.toast.set({ msg, type });
+    setTimeout(() => this.toast.set(null), 3000);
+  }
 
   @ViewChild('chatEnd') chatEnd?: ElementRef<HTMLDivElement>;
   private shouldScroll = false;
@@ -177,7 +183,7 @@ export class IaComponent implements OnInit, AfterViewChecked {
       },
       error: () => {
         this.messages.set([]);
-        this.toast.error('Erro ao carregar conversa.');
+        this.showToast('Erro ao carregar conversa.', 'error');
       },
     });
   }
@@ -188,7 +194,7 @@ export class IaComponent implements OnInit, AfterViewChecked {
     this.insightLoading.set('bottlenecks');
     this.ai.bottlenecks(this.companyId()!).subscribe({
       next: (res) => { this.insightLoading.set(null); this.insightModal.set({ title: 'Análise de Gargalos', content: res.analysis }); },
-      error: () => { this.insightLoading.set(null); this.toast.error('Erro ao analisar gargalos.'); },
+      error: () => { this.insightLoading.set(null); this.showToast('Erro ao analisar gargalos.', 'error'); },
     });
   }
 
@@ -205,13 +211,13 @@ export class IaComponent implements OnInit, AfterViewChecked {
       this.insightLoading.set('actionPlan');
       this.ai.actionPlan(project.id).subscribe({
         next: (res) => { this.insightLoading.set(null); this.insightModal.set({ title: `Plano de Ação — ${project.name}`, content: res.plan }); },
-        error: () => { this.insightLoading.set(null); this.toast.error('Erro ao gerar plano.'); },
+        error: () => { this.insightLoading.set(null); this.showToast('Erro ao gerar plano.', 'error'); },
       });
     } else {
       this.insightLoading.set('summarize');
       this.ai.summarizeProject(project.id).subscribe({
         next: (res) => { this.insightLoading.set(null); this.insightModal.set({ title: `Resumo — ${project.name}`, content: res.summary }); },
-        error: () => { this.insightLoading.set(null); this.toast.error('Erro ao resumir projeto.'); },
+        error: () => { this.insightLoading.set(null); this.showToast('Erro ao resumir projeto.', 'error'); },
       });
     }
   }

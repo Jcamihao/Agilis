@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { MAIL_ADAPTER, MailAdapter, SendMailOptions } from '../../mail/mail-adapter.interface';
-import { QUEUE_MAIL } from '../queue.module';
+import { QUEUE_MAIL } from '../queue.constants';
 
 @Processor(QUEUE_MAIL)
 export class MailProcessor extends WorkerHost {

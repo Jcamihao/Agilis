@@ -17,6 +17,8 @@ import { ConfirmService } from '../../core/services/confirm.service';
 import { Router } from '@angular/router';
 import { CommentSectionComponent } from '../../shared/components/comment-section/comment-section.component';
 import { TimeTrackerComponent } from '../../shared/components/time-tracker/time-tracker.component';
+import { CustomFieldValuesComponent } from '../../shared/components/custom-fields/custom-field-values.component';
+import { ApprovalPanelComponent } from '../../shared/components/approval-panel/approval-panel.component';
 import {
   Task, TaskStatus, KanbanBoard, TASK_STATUS_CONFIG, PRIORITY_CONFIG, Priority, Project, Sprint
 } from '../../core/models';
@@ -33,7 +35,7 @@ interface Column {
   selector: 'ag-kanban',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, DragDropModule, ReactiveFormsModule, CommentSectionComponent, TimeTrackerComponent],
+  imports: [CommonModule, RouterLink, DragDropModule, ReactiveFormsModule, CommentSectionComponent, TimeTrackerComponent, CustomFieldValuesComponent, ApprovalPanelComponent],
   templateUrl: './kanban.component.html',
   styleUrls: ['./kanban.component.scss'],
 })
@@ -783,10 +785,20 @@ export class KanbanComponent implements OnInit {
     });
   }
 
+  subtaskDoneCount(): number {
+    return this.subtasks().filter((s) => s.status === 'DONE').length;
+  }
+
   subtaskProgress(): number {
     const list = this.subtasks();
     if (!list.length) return 0;
-    return Math.round((list.filter((s) => s.status === 'DONE').length / list.length) * 100);
+    return Math.round((this.subtaskDoneCount() / list.length) * 100);
+  }
+
+  removeDep(taskId: string, depId: string) {
+    this.tasksService.removeDependency(taskId, depId).subscribe({
+      next: () => this.loadDependencies(taskId),
+    });
   }
 
   private updateSubtaskCountInBoard(taskId: string, count: number) {

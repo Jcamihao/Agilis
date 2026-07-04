@@ -17,7 +17,13 @@ import { ptBR } from 'date-fns/locale';
 export class WebhooksComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly service = inject(WebhookService);
-  private readonly toast   = inject(ToastService);
+  private readonly toastSvc = inject(ToastService);
+
+  readonly toast = signal<{msg: string; type: 'success' | 'error'} | null>(null);
+  private showToast(msg: string, type: 'success' | 'error' = 'success') {
+    this.toast.set({ msg, type });
+    setTimeout(() => this.toast.set(null), 3000);
+  }
 
   readonly EVENTS = WEBHOOK_EVENTS;
 
@@ -95,9 +101,9 @@ export class WebhooksComponent implements OnInit {
         }
         this.showModal.set(false);
         this.saving.set(false);
-        this.toast.success(this.editingId() ? 'Webhook atualizado!' : 'Webhook criado!');
+        this.showToast(this.editingId() ? 'Webhook atualizado!' : 'Webhook criado!', 'success');
       },
-      error: () => { this.saving.set(false); this.toast.error('Erro ao salvar webhook.'); },
+      error: () => { this.saving.set(false); this.showToast('Erro ao salvar webhook.', 'error'); },
     });
   }
 
@@ -105,15 +111,15 @@ export class WebhooksComponent implements OnInit {
   toggle(w: Webhook) {
     this.service.update(w.id, { isActive: !w.isActive }).subscribe({
       next: (updated) => this.webhooks.update((list) => list.map((x) => x.id === updated.id ? updated : x)),
-      error: () => this.toast.error('Erro ao alterar status.'),
+      error: () => this.showToast('Erro ao alterar status.', 'error'),
     });
   }
 
   // ── Delete ─────────────────────────────────────────────────────────────────
   delete(w: Webhook) {
     this.service.delete(w.id).subscribe({
-      next: () => { this.webhooks.update((list) => list.filter((x) => x.id !== w.id)); this.toast.success('Webhook removido.'); },
-      error: () => this.toast.error('Erro ao remover.'),
+      next: () => { this.webhooks.update((list) => list.filter((x) => x.id !== w.id)); this.showToast('Webhook removido.', 'success'); },
+      error: () => this.showToast('Erro ao remover.', 'error'),
     });
   }
 
@@ -123,10 +129,10 @@ export class WebhooksComponent implements OnInit {
     this.service.test(w.id).subscribe({
       next: (res) => {
         this.testingId.set(null);
-        if (res.success) this.toast.success(`Teste enviado! Status: ${res.statusCode}`);
-        else this.toast.error(`Falha no teste: ${res.error ?? 'erro desconhecido'}`);
+        if (res.success) this.showToast(`Teste enviado! Status: ${res.statusCode}`, 'success');
+        else this.showToast(`Falha no teste: ${res.error ?? 'erro desconhecido'}`, 'error');
       },
-      error: () => { this.testingId.set(null); this.toast.error('Erro ao testar webhook.'); },
+      error: () => { this.testingId.set(null); this.showToast('Erro ao testar webhook.', 'error'); },
     });
   }
 
@@ -168,14 +174,14 @@ export class WebhooksComponent implements OnInit {
         const map = new Map(this.webhookSecrets());
         map.set(updated.id, updated.secret);
         this.webhookSecrets.set(map);
-        this.toast.success('Secret regenerado! Atualize no N8N.');
+        this.showToast('Secret regenerado! Atualize no N8N.', 'success');
       },
-      error: () => this.toast.error('Erro ao regenerar secret.'),
+      error: () => this.showToast('Erro ao regenerar secret.', 'error'),
     });
   }
 
   copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text).then(() => this.toast.success('Copiado!'));
+    navigator.clipboard.writeText(text).then(() => this.showToast('Copiado!', 'success'));
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

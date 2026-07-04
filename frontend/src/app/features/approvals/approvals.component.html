@@ -1,0 +1,234 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-[--text-primary] flex items-center gap-2">
+        <span class="material-symbols-rounded text-2xl text-primary-600">approval</span>
+        Aprovações
+      </h2>
+      <p class="text-sm text-[--text-secondary] mt-0.5">Gerencie aprovações de tarefas do seu time</p>
+    </div>
+    @if (pendingCount() > 0) {
+      <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+        <span class="material-symbols-rounded text-amber-500 text-lg">notifications_active</span>
+        <span class="text-sm font-semibold text-amber-700">
+          {{ pendingCount() }} aguardando sua revisão
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-1 border-b border-[rgba(0,0,0,0.07)]">
+    @for (t of [
+      { id: 'pending',   label: 'Para Revisar',  icon: 'rate_review' },
+      { id: 'requested', label: 'Minhas Solicitações', icon: 'send' }
+    ]; track t.id) {
+      <button (click)="tab.set($any(t.id))"
+        class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
+        [class.border-primary-600]="tab() === t.id"
+        [class.text-primary-600]="tab() === t.id"
+        [class.border-transparent]="tab() !== t.id"
+        [class.text-slate-500]="tab() !== t.id">
+        <span class="material-symbols-rounded text-base">{{ t.icon }}</span>
+        {{ t.label }}
+        @if (t.id === 'pending' && pendingCount() > 0) {
+          <span class="bg-amber-400 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[1.1rem] text-center">
+            {{ pendingCount() }}
+          </span>
+        }
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="flex flex-col gap-3">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="h-24 rounded-xl ag-skeleton"></div>
+      }
+    </div>
+  }
+
+  <!-- ── Para Revisar ─────────────────────────────────────────────────────── -->
+  @if (!loading() && tab() === 'pending') {
+    @if (!pending().length) {
+      <div class="flex flex-col items-center gap-4 py-16 text-center">
+        <span class="material-symbols-rounded text-5xl text-slate-200">task_alt</span>
+        <p class="text-[--text-tertiary]">Nenhuma aprovação pendente. Tudo em dia!</p>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (a of pending(); track a.id) {
+          <div class="approval-card" [class.approval-card--resolved]="a.status !== 'PENDING'">
+
+            <!-- Task info -->
+            <div class="approval-card__body">
+              <div class="flex items-start gap-3">
+                <!-- Project color dot -->
+                <div class="w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0"
+                  [style.background]="a.task?.project?.color ?? '#6366f1'">
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-[--text-tertiary] mb-0.5">{{ a.task?.project?.name }}</p>
+                  <p class="text-sm font-bold text-[--text-primary] truncate">{{ a.task?.title }}</p>
+
+                  <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+                    <!-- Priority -->
+                    <span class="text-xs font-semibold" [style.color]="priorityConfig(a.task?.priority ?? 'MEDIUM').color">
+                      ● {{ priorityConfig(a.task?.priority ?? 'MEDIUM').label }}
+                    </span>
+
+                    <!-- Target status -->
+                    @if (a.targetStatus) {
+                      <span class="text-xs bg-primary-50 text-primary-600 font-semibold px-2 py-0.5 rounded-full">
+                        → {{ a.targetStatus }}
+                      </span>
+                    }
+
+                    <!-- Date -->
+                    <span class="text-xs text-[--text-tertiary]">
+                      {{ a.createdAt | date:'dd/MM HH:mm' }}
+                    </span>
+                  </div>
+
+                  <!-- Requester note -->
+                  @if (a.note) {
+                    <div class="mt-2 bg-slate-50 rounded-lg px-3 py-2 text-xs text-[--text-secondary] flex items-start gap-2">
+                      <div class="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-[9px] font-bold">
+                        {{ initials(a.requestedBy?.name ?? '?') }}
+                      </div>
+                      <span>{{ a.note }}</span>
+                    </div>
+                  }
+
+                  <!-- Review note (if resolved) -->
+                  @if (a.reviewNote) {
+                    <div class="mt-2 rounded-lg px-3 py-2 text-xs flex items-start gap-2"
+                      [class.bg-green-50]="a.status === 'APPROVED'"
+                      [class.text-green-700]="a.status === 'APPROVED'"
+                      [class.bg-red-50]="a.status === 'REJECTED'"
+                      [class.text-red-700]="a.status === 'REJECTED'">
+                      <span class="material-symbols-rounded text-sm">
+                        {{ a.status === 'APPROVED' ? 'check_circle' : 'cancel' }}
+                      </span>
+                      {{ a.reviewNote }}
+                    </div>
+                  }
+                </div>
+
+                <!-- Status badge -->
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0"
+                  [style.background]="statusConfig(a.status).bg"
+                  [style.color]="statusConfig(a.status).color">
+                  {{ statusConfig(a.status).label }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Action bar (only for pending) -->
+            @if (a.status === 'PENDING') {
+              @if (reviewing() === a.id) {
+                <div class="approval-card__review">
+                  <textarea [(ngModel)]="reviewNote" rows="2" placeholder="Comentário (obrigatório para rejeição)…"
+                    class="ag-input ag-input--sm resize-none w-full"></textarea>
+                  <div class="flex gap-2 mt-2 justify-end">
+                    <button (click)="closeReview()" class="ag-btn ag-btn--ghost ag-btn--sm">Cancelar</button>
+                    <button (click)="reject(a.id)" [disabled]="requesting()"
+                      class="ag-btn ag-btn--sm bg-red-500 text-white hover:bg-red-600 border-0">
+                      <span class="material-symbols-rounded text-sm">cancel</span>
+                      Rejeitar
+                    </button>
+                    <button (click)="approve(a.id)" [disabled]="requesting()"
+                      class="ag-btn ag-btn--sm bg-green-500 text-white hover:bg-green-600 border-0">
+                      <span class="material-symbols-rounded text-sm">check_circle</span>
+                      Aprovar
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <div class="approval-card__actions">
+                  <span class="text-xs text-[--text-tertiary]">
+                    Solicitado por <strong>{{ a.requestedBy?.name }}</strong>
+                  </span>
+                  <button (click)="openReview(a.id)"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 transition-colors">
+                    <span class="material-symbols-rounded text-sm">rate_review</span>
+                    Revisar
+                  </button>
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- ── Minhas Solicitações ──────────────────────────────────────────────── -->
+  @if (!loading() && tab() === 'requested') {
+    @if (!requested().length) {
+      <div class="flex flex-col items-center gap-4 py-16 text-center">
+        <span class="material-symbols-rounded text-5xl text-slate-200">send</span>
+        <p class="text-[--text-tertiary]">Você ainda não solicitou aprovações.</p>
+      </div>
+    } @else {
+      <div class="flex flex-col gap-3">
+        @for (a of requested(); track a.id) {
+          <div class="approval-card" [class.approval-card--resolved]="a.status !== 'PENDING'">
+            <div class="approval-card__body">
+              <div class="flex items-start gap-3">
+                <div class="w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0"
+                  [style.background]="a.task?.project?.color ?? '#6366f1'">
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-[--text-tertiary] mb-0.5">{{ a.task?.project?.name }}</p>
+                  <p class="text-sm font-bold text-[--text-primary] truncate">{{ a.task?.title }}</p>
+                  <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+                    <span class="text-xs text-[--text-tertiary]">{{ a.createdAt | date:'dd/MM HH:mm' }}</span>
+                    @if (a.approver) {
+                      <span class="text-xs text-[--text-secondary]">
+                        Aprovador: <strong>{{ a.approver.name }}</strong>
+                      </span>
+                    } @else {
+                      <span class="text-xs text-[--text-tertiary]">Qualquer membro do projeto</span>
+                    }
+                  </div>
+                  @if (a.note) {
+                    <p class="mt-1.5 text-xs text-[--text-secondary] italic">"{{ a.note }}"</p>
+                  }
+                  @if (a.reviewNote) {
+                    <div class="mt-2 rounded-lg px-3 py-2 text-xs flex items-start gap-2"
+                      [class.bg-green-50]="a.status === 'APPROVED'"
+                      [class.text-green-700]="a.status === 'APPROVED'"
+                      [class.bg-red-50]="a.status === 'REJECTED'"
+                      [class.text-red-700]="a.status === 'REJECTED'">
+                      <span class="material-symbols-rounded text-sm">
+                        {{ a.status === 'APPROVED' ? 'check_circle' : 'cancel' }}
+                      </span>
+                      {{ a.reviewNote }}
+                    </div>
+                  }
+                </div>
+                <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-full"
+                    [style.background]="statusConfig(a.status).bg"
+                    [style.color]="statusConfig(a.status).color">
+                    {{ statusConfig(a.status).label }}
+                  </span>
+                  @if (a.status === 'PENDING') {
+                    <button (click)="cancel(a.id)"
+                      class="text-xs text-[--text-tertiary] hover:text-red-500 transition-colors flex items-center gap-1">
+                      <span class="material-symbols-rounded text-sm">close</span>
+                      Cancelar
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

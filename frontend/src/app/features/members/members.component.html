@@ -139,8 +139,9 @@
               } @else {
                 {{ member.name.charAt(0).toUpperCase() }}
               }
-              @if (isMe(member)) {
-                <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white"></div>
+              @if (isMe(member) || chat.onlineUsers().has(member.id)) {
+                <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white"
+                  title="Online"></div>
               }
             </div>
 

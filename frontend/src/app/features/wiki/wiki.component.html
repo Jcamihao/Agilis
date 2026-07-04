@@ -1,0 +1,234 @@
+<div class="wiki-layout">
+
+  <!-- ── Sidebar ────────────────────────────────────────────────────────────── -->
+  <aside class="wiki-sidebar">
+
+    <!-- Header -->
+    <div class="wiki-sidebar__header">
+      <a [routerLink]="['/projects', projectId(), 'kanban']"
+        class="p-1 rounded hover:bg-slate-100 text-[--text-tertiary] transition-colors flex-shrink-0">
+        <span class="material-symbols-rounded text-lg">arrow_back</span>
+      </a>
+      <span class="text-sm font-bold text-[--text-primary] flex-1 truncate">Wiki do Projeto</span>
+      <button (click)="createPage()" title="Nova página raiz"
+        class="p-1 rounded hover:bg-slate-100 text-[--text-tertiary] transition-colors flex-shrink-0">
+        <span class="material-symbols-rounded text-lg">add</span>
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="wiki-search">
+      <span class="material-symbols-rounded wiki-search__icon">search</span>
+      <input [(ngModel)]="searchQ" (ngModelChange)="doSearch()"
+        placeholder="Buscar na wiki…" class="wiki-search__input" />
+      @if (searchQ()) {
+        <button (click)="clearSearch()" class="wiki-search__clear">
+          <span class="material-symbols-rounded text-sm">close</span>
+        </button>
+      }
+    </div>
+
+    <!-- Search results -->
+    @if (searchRes().length) {
+      <div class="wiki-search-results">
+        @for (p of searchRes(); track p.id) {
+          <button (click)="selectPage(p); clearSearch()" class="wiki-search-result">
+            <span class="material-symbols-rounded text-sm text-[--text-tertiary]">{{ p.icon }}</span>
+            <span class="truncate text-sm">{{ p.title }}</span>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Tree -->
+    @if (loading()) {
+      <div class="p-3 flex flex-col gap-2">
+        @for (_ of [1,2,3]; track $index) {
+          <div class="h-6 rounded ag-skeleton"></div>
+        }
+      </div>
+    } @else if (!tree().length && !searchQ()) {
+      <div class="wiki-empty-tree">
+        <span class="material-symbols-rounded text-2xl text-slate-300">article</span>
+        <p class="text-xs text-[--text-tertiary]">Nenhuma página ainda</p>
+        <button (click)="createPage()" class="ag-btn ag-btn--primary ag-btn--xs mt-1">
+          Criar primeira página
+        </button>
+      </div>
+    } @else if (!searchQ()) {
+      <nav class="wiki-tree">
+        <ng-container *ngTemplateOutlet="treeNode; context: { pages: tree(), depth: 0 }" />
+      </nav>
+    }
+  </aside>
+
+  <!-- ── Main editor area ─────────────────────────────────────────────────── -->
+  <main class="wiki-main">
+
+    @if (!activePage()) {
+      <!-- Empty state -->
+      <div class="wiki-no-page">
+        <span class="material-symbols-rounded text-5xl text-slate-200">menu_book</span>
+        <p class="text-lg font-semibold text-[--text-tertiary]">Selecione ou crie uma página</p>
+        <button (click)="createPage()" class="ag-btn ag-btn--primary flex items-center gap-2 mt-2">
+          <span class="material-symbols-rounded text-base">add</span>
+          Nova Página
+        </button>
+      </div>
+    } @else {
+
+      <!-- Page header -->
+      <div class="wiki-page-header">
+        <!-- Icon + Title -->
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <span class="material-symbols-rounded text-3xl text-primary-500">{{ activePage()!.icon }}</span>
+          @if (editTitle()) {
+            <input [(ngModel)]="draftTitle"
+              (keydown.enter)="saveTitle()" (keydown.escape)="editTitle.set(false)"
+              (blur)="saveTitle()"
+              class="wiki-title-input" />
+          } @else {
+            <h1 class="wiki-title" (dblclick)="editTitle.set(true); draftTitle.set(activePage()!.title)">
+              {{ activePage()!.title }}
+            </h1>
+          }
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-2">
+          @if (saving()) {
+            <span class="text-xs text-[--text-tertiary] flex items-center gap-1">
+              <span class="material-symbols-rounded text-sm animate-spin">refresh</span>
+              Salvando…
+            </span>
+          } @else {
+            <span class="text-xs text-[--text-tertiary]">Salvo</span>
+          }
+
+          <button (click)="showHistory.set(!showHistory())"
+            class="p-1.5 rounded-lg hover:bg-slate-100 text-[--text-tertiary] transition-colors"
+            [class.bg-primary-50]="showHistory()"
+            [class.text-primary-600]="showHistory()"
+            title="Histórico">
+            <span class="material-symbols-rounded text-base">history</span>
+          </button>
+
+          <button (click)="createPage(activePage()!.id)"
+            class="p-1.5 rounded-lg hover:bg-slate-100 text-[--text-tertiary] transition-colors"
+            title="Nova subpágina">
+            <span class="material-symbols-rounded text-base">add</span>
+          </button>
+
+          <button (click)="deletePage(activePage()!.id)"
+            class="p-1.5 rounded-lg hover:bg-red-50 text-[--text-tertiary] hover:text-red-500 transition-colors"
+            title="Excluir página">
+            <span class="material-symbols-rounded text-base">delete</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Meta -->
+      <div class="wiki-meta">
+        @if (activePage()!.updatedBy) {
+          <span class="flex items-center gap-1">
+            <span class="material-symbols-rounded text-xs">edit</span>
+            Editado por {{ activePage()!.updatedBy!.name }}
+            · {{ activePage()!.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        }
+      </div>
+
+      <!-- Toolbar -->
+      <div class="wiki-toolbar" (mousedown)="$event.preventDefault()">
+        <!-- History -->
+        <button (click)="cmd('undo')" title="Desfazer" class="wiki-tb-btn">
+          <span class="material-symbols-rounded">undo</span>
+        </button>
+        <button (click)="cmd('redo')" title="Refazer" class="wiki-tb-btn">
+          <span class="material-symbols-rounded">redo</span>
+        </button>
+        <div class="wiki-tb-sep"></div>
+
+        <!-- Headings -->
+        <button (click)="cmd('h1')" [class.active]="isActive('heading',{level:1})" class="wiki-tb-btn font-bold text-sm">H1</button>
+        <button (click)="cmd('h2')" [class.active]="isActive('heading',{level:2})" class="wiki-tb-btn font-bold text-sm">H2</button>
+        <button (click)="cmd('h3')" [class.active]="isActive('heading',{level:3})" class="wiki-tb-btn font-bold text-sm">H3</button>
+        <div class="wiki-tb-sep"></div>
+
+        <!-- Inline -->
+        <button (click)="cmd('bold')"      [class.active]="isActive('bold')"      class="wiki-tb-btn" title="Negrito"><span class="material-symbols-rounded">format_bold</span></button>
+        <button (click)="cmd('italic')"    [class.active]="isActive('italic')"    class="wiki-tb-btn" title="Itálico"><span class="material-symbols-rounded">format_italic</span></button>
+        <button (click)="cmd('underline')" [class.active]="isActive('underline')" class="wiki-tb-btn" title="Sublinhado"><span class="material-symbols-rounded">format_underlined</span></button>
+        <button (click)="cmd('strike')"    [class.active]="isActive('strike')"    class="wiki-tb-btn" title="Tachado"><span class="material-symbols-rounded">strikethrough_s</span></button>
+        <button (click)="cmd('highlight')" [class.active]="isActive('highlight')" class="wiki-tb-btn" title="Destaque"><span class="material-symbols-rounded">highlight</span></button>
+        <button (click)="cmd('code')"      [class.active]="isActive('code')"      class="wiki-tb-btn" title="Código"><span class="material-symbols-rounded">code</span></button>
+        <button (click)="cmd('link')"      [class.active]="isActive('link')"      class="wiki-tb-btn" title="Link"><span class="material-symbols-rounded">link</span></button>
+        <div class="wiki-tb-sep"></div>
+
+        <!-- Lists -->
+        <button (click)="cmd('bullet')"  [class.active]="isActive('bulletList')"  class="wiki-tb-btn" title="Lista com marcadores"><span class="material-symbols-rounded">format_list_bulleted</span></button>
+        <button (click)="cmd('ordered')" [class.active]="isActive('orderedList')" class="wiki-tb-btn" title="Lista numerada"><span class="material-symbols-rounded">format_list_numbered</span></button>
+        <button (click)="cmd('task')"    [class.active]="isActive('taskList')"    class="wiki-tb-btn" title="Lista de tarefas"><span class="material-symbols-rounded">checklist</span></button>
+        <div class="wiki-tb-sep"></div>
+
+        <!-- Blocks -->
+        <button (click)="cmd('blockquote')" [class.active]="isActive('blockquote')" class="wiki-tb-btn" title="Citação"><span class="material-symbols-rounded">format_quote</span></button>
+        <button (click)="cmd('codeBlock')"  [class.active]="isActive('codeBlock')"  class="wiki-tb-btn" title="Bloco de código"><span class="material-symbols-rounded">data_object</span></button>
+        <button (click)="cmd('hr')" class="wiki-tb-btn" title="Separador"><span class="material-symbols-rounded">horizontal_rule</span></button>
+        <div class="wiki-tb-sep"></div>
+
+        <!-- Align -->
+        <button (click)="cmd('alignLeft')"   [class.active]="isActive({textAlign:'left'})"   class="wiki-tb-btn" title="Alinhar à esquerda"><span class="material-symbols-rounded">format_align_left</span></button>
+        <button (click)="cmd('alignCenter')" [class.active]="isActive({textAlign:'center'})" class="wiki-tb-btn" title="Centralizar"><span class="material-symbols-rounded">format_align_center</span></button>
+        <button (click)="cmd('alignRight')"  [class.active]="isActive({textAlign:'right'})"  class="wiki-tb-btn" title="Alinhar à direita"><span class="material-symbols-rounded">format_align_right</span></button>
+      </div>
+
+      <!-- TipTap editor mount point -->
+      <div #editorEl class="wiki-editor" [class.wiki-editor--history]="showHistory()"></div>
+
+      <!-- Revision history panel -->
+      @if (showHistory() && activePage()!.revisions?.length) {
+        <div class="wiki-history">
+          <h4 class="wiki-history__title">
+            <span class="material-symbols-rounded text-base">history</span>
+            Histórico de Revisões
+          </h4>
+          @for (rev of activePage()!.revisions!; track rev.id) {
+            <div class="wiki-history__item">
+              <div class="wiki-history__meta">
+                <span class="font-medium text-[--text-primary]">{{ rev.author?.name ?? 'Desconhecido' }}</span>
+                <span class="text-[--text-tertiary]">{{ rev.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <p class="text-xs text-[--text-tertiary] truncate">{{ rev.title }}</p>
+            </div>
+          }
+        </div>
+      }
+    }
+  </main>
+</div>
+
+<!-- Tree node template -->
+<ng-template #treeNode let-pages="pages" let-depth="depth">
+  @for (page of pages; track page.id) {
+    <div class="wiki-tree-item" [style.padding-left.px]="depth * 12">
+      <button (click)="selectPage(page)"
+        class="wiki-tree-btn"
+        [class.wiki-tree-btn--active]="activePage()?.id === page.id">
+        <span class="material-symbols-rounded text-sm text-[--text-tertiary]">{{ page.icon }}</span>
+        <span class="flex-1 truncate text-sm">{{ page.title }}</span>
+        @if (page._count?.children) {
+          <span class="text-[10px] text-[--text-tertiary] tabular-nums">{{ page._count!.children }}</span>
+        }
+      </button>
+      <button (click)="createPage(page.id)"
+        class="wiki-tree-add opacity-0 group-hover:opacity-100"
+        title="Adicionar subpágina">
+        <span class="material-symbols-rounded text-xs">add</span>
+      </button>
+    </div>
+    @if (page.children?.length) {
+      <ng-container *ngTemplateOutlet="treeNode; context: { pages: page.children, depth: depth + 1 }" />
+    }
+  }
+</ng-template>

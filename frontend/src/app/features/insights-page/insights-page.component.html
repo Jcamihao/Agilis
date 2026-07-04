@@ -1,0 +1,105 @@
+<div class="flex flex-col gap-5">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight flex items-center gap-2">
+        <span class="material-symbols-rounded text-2xl text-primary-600">tips_and_updates</span>
+        Insights Inteligentes
+      </h2>
+      <p class="text-sm text-[--text-secondary] mt-0.5">Riscos, gargalos e recomendações gerados automaticamente</p>
+    </div>
+    <button (click)="generate()" [disabled]="generating() || loading()"
+      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
+      <span class="material-symbols-rounded text-base" [class.animate-spin]="generating()">
+        {{ generating() ? 'refresh' : 'auto_awesome' }}
+      </span>
+      {{ generating() ? 'Gerando…' : 'Gerar Insights' }}
+    </button>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="flex items-center gap-1 bg-white border border-[rgba(0,0,0,0.08)] rounded-xl p-1 shadow-sm w-fit">
+    @for (f of typeFilters; track f.key) {
+      <button (click)="filterType.set(f.key)"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+        [class.bg-primary-600]="filterType() === f.key"
+        [class.text-white]="filterType() === f.key"
+        [class.text-slate-500]="filterType() !== f.key"
+        [class.hover:bg-slate-50]="filterType() !== f.key">
+        <span class="material-symbols-rounded text-sm">{{ f.icon }}</span>
+        {{ f.label }}
+        @if (f.key !== 'ALL') {
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+            [class.bg-white/20]="filterType() === f.key"
+            [class.bg-slate-100]="filterType() !== f.key">
+            {{ countByType(f.key) }}
+          </span>
+        }
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="flex flex-col gap-3">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] h-20 ag-skeleton"></div>
+      }
+    </div>
+  } @else if (!filtered().length) {
+    <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] flex flex-col items-center justify-center py-16">
+      <span class="material-symbols-rounded text-4xl text-emerald-400 mb-3">emoji_events</span>
+      <p class="font-semibold text-[--text-secondary]">Nenhum insight nesta categoria</p>
+      <p class="text-sm text-[--text-tertiary] mt-1">Clique em "Gerar Insights" para atualizar a análise</p>
+    </div>
+  } @else {
+    <div class="flex flex-col gap-3">
+      @for (ins of filtered(); track ins.id) {
+        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4 flex items-start gap-4 transition-all"
+          [class.opacity-60]="ins.isRead"
+          [style.border-left]="'3px solid ' + severityConfig(ins.severity).color"
+          (click)="!ins.isRead && markRead(ins.id)">
+
+          <!-- Icon -->
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            [style.background]="severityConfig(ins.severity).bg">
+            <span class="material-symbols-rounded text-xl"
+              [style.color]="severityConfig(ins.severity).color">
+              {{ typeIcon(ins.type) }}
+            </span>
+          </div>
+
+          <!-- Body -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <p class="text-sm font-bold text-[--text-primary]">{{ ins.title }}</p>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                [style.background]="severityConfig(ins.severity).bg"
+                [style.color]="severityConfig(ins.severity).color">
+                {{ severityConfig(ins.severity).label }}
+              </span>
+              @if (!ins.isRead) {
+                <span class="w-2 h-2 rounded-full bg-primary-500 flex-shrink-0"></span>
+              }
+            </div>
+            <p class="text-sm text-[--text-secondary] leading-relaxed">{{ ins.description }}</p>
+            @if (ins.metadata && ins.metadata['count']) {
+              <p class="text-xs text-[--text-tertiary] mt-1">
+                {{ ins.metadata['count'] }} itens afetados
+              </p>
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-1 flex-shrink-0">
+            <button (click)="$event.stopPropagation(); dismiss(ins.id)"
+              class="p-1.5 rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+              title="Dispensar">
+              <span class="material-symbols-rounded text-base">close</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

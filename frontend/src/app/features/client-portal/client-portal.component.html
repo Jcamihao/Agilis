@@ -1,0 +1,211 @@
+<div class="portal-root" [ngStyle]="accentStyle()">
+
+  <!-- ── Loading ─────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="portal-loading">
+      <div class="portal-spinner"></div>
+      <p class="text-sm text-slate-400 mt-3">Carregando portal…</p>
+    </div>
+  }
+
+  <!-- ── Password gate ───────────────────────────────────────────────────── -->
+  @if (!loading() && needsPass()) {
+    <div class="portal-gate">
+      <div class="portal-gate__card">
+        <span class="material-symbols-rounded text-4xl text-slate-300 mb-3">lock</span>
+        <h2 class="text-lg font-bold text-slate-700 mb-1">Portal Protegido</h2>
+        <p class="text-sm text-slate-500 mb-5">Digite a senha para acessar este portal</p>
+        <input [(ngModel)]="password" type="password" placeholder="Senha"
+          (keydown.enter)="submitPassword()"
+          class="portal-gate__input" />
+        @if (error()) {
+          <p class="text-sm text-red-500 mt-2">{{ error() }}</p>
+        }
+        <button (click)="submitPassword()" class="portal-gate__btn">Acessar</button>
+      </div>
+    </div>
+  }
+
+  <!-- ── Error ───────────────────────────────────────────────────────────── -->
+  @if (!loading() && !needsPass() && error()) {
+    <div class="portal-loading">
+      <span class="material-symbols-rounded text-5xl text-slate-200">error</span>
+      <p class="text-[--text-tertiary] mt-2">{{ error() }}</p>
+    </div>
+  }
+
+  <!-- ── Portal content ─────────────────────────────────────────────────── -->
+  @if (!loading() && !needsPass() && data()) {
+    <div class="portal-content">
+
+      <!-- Header bar -->
+      <header class="portal-header" [style.border-bottom-color]="'var(--portal-accent)'">
+        <div class="portal-header__inner">
+          <div class="flex items-center gap-3">
+            @if (data()!.portal.logoUrl) {
+              <img [src]="data()!.portal.logoUrl" class="h-8 object-contain" />
+            } @else {
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                [style.background]="'var(--portal-accent)'">
+                <span class="material-symbols-rounded text-base text-white">{{ data()!.project.icon }}</span>
+              </div>
+            }
+            <div>
+              <h1 class="portal-title">{{ data()!.portal.title }}</h1>
+              @if (data()!.project.description) {
+                <p class="portal-subtitle">{{ data()!.project.description }}</p>
+              }
+            </div>
+          </div>
+          <span class="portal-badge">Portal do Cliente</span>
+        </div>
+      </header>
+
+      <div class="portal-body">
+
+        <!-- Stats row -->
+        <div class="portal-stats">
+          @for (s of [
+            { label: 'Total',          value: data()!.stats.total,      icon: 'task_alt',  color: 'var(--portal-accent)' },
+            { label: 'Concluídas',     value: data()!.stats.done,       icon: 'check_circle', color: '#22c55e' },
+            { label: 'Em andamento',   value: data()!.stats.inProgress, icon: 'hourglass_top', color: '#f59e0b' },
+            { label: 'Atrasadas',      value: data()!.stats.overdue,    icon: 'warning',   color: data()!.stats.overdue > 0 ? '#ef4444' : '#94a3b8' }
+          ]; track s.label) {
+            <div class="portal-stat-card">
+              <div class="portal-stat-card__icon" [style.background]="s.color + '18'">
+                <span class="material-symbols-rounded text-xl" [style.color]="s.color">{{ s.icon }}</span>
+              </div>
+              <div>
+                <p class="portal-stat-card__value">{{ s.value }}</p>
+                <p class="portal-stat-card__label">{{ s.label }}</p>
+              </div>
+            </div>
+          }
+
+          <!-- Progress bar card -->
+          <div class="portal-stat-card portal-stat-card--progress">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold text-slate-500">Progresso geral</span>
+              <span class="text-lg font-black" [style.color]="'var(--portal-accent)'">{{ data()!.stats.progress }}%</span>
+            </div>
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-700"
+                [style.width.%]="data()!.stats.progress"
+                [style.background]="'var(--portal-accent)'">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab nav -->
+        <div class="portal-tabs">
+          @if (data()!.portal.showKanban) {
+            <button (click)="activeTab.set('board')" class="portal-tab" [class.portal-tab--active]="activeTab() === 'board'">
+              <span class="material-symbols-rounded text-base">view_kanban</span> Board
+            </button>
+          }
+          @if (data()!.portal.showTimeline && data()!.timeline.length) {
+            <button (click)="activeTab.set('timeline')" class="portal-tab" [class.portal-tab--active]="activeTab() === 'timeline'">
+              <span class="material-symbols-rounded text-base">calendar_month</span> Cronograma
+            </button>
+          }
+          @if (data()!.portal.showTeam && data()!.team.length) {
+            <button (click)="activeTab.set('team')" class="portal-tab" [class.portal-tab--active]="activeTab() === 'team'">
+              <span class="material-symbols-rounded text-base">group</span> Equipe
+            </button>
+          }
+        </div>
+
+        <!-- ── Board ─────────────────────────────────────────────────────── -->
+        @if (activeTab() === 'board') {
+          <div class="portal-board">
+            @for (col of data()!.kanban; track col.status) {
+              <div class="portal-col">
+                <div class="portal-col__header">
+                  <span class="portal-col__dot"></span>
+                  <span class="portal-col__name">{{ statusLabel(col.status) }}</span>
+                  <span class="portal-col__count">{{ col.tasks.length }}</span>
+                </div>
+                <div class="portal-col__cards">
+                  @for (task of col.tasks; track task.id) {
+                    <div class="portal-card" [class.portal-card--overdue]="isOverdue(task)">
+                      <p class="portal-card__title">{{ task.title }}</p>
+                      <div class="portal-card__meta">
+                        @if (task.dueDate) {
+                          <span class="portal-card__date" [class.text-red-500]="isOverdue(task)">
+                            <span class="material-symbols-rounded text-xs">schedule</span>
+                            {{ formatDate(task.dueDate) }}
+                          </span>
+                        }
+                        @if (task.assignee) {
+                          <div class="portal-card__avatar" [title]="task.assignee.name">
+                            @if (task.assignee.avatarUrl) {
+                              <img [src]="task.assignee.avatarUrl" class="w-full h-full object-cover" />
+                            } @else {
+                              {{ initials(task.assignee.name) }}
+                            }
+                          </div>
+                        }
+                        <span class="portal-card__priority" [style.color]="priorityConfig(task.priority).color">
+                          ●
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ── Timeline ──────────────────────────────────────────────────── -->
+        @if (activeTab() === 'timeline') {
+          <div class="portal-timeline">
+            @for (task of data()!.timeline; track task.id) {
+              <div class="portal-tl-item" [class.portal-tl-item--done]="task.status === 'DONE'">
+                <div class="portal-tl-dot" [class.portal-tl-dot--done]="task.status === 'DONE'"></div>
+                <div class="portal-tl-content">
+                  <p class="portal-tl-title">{{ task.title }}</p>
+                  <div class="flex items-center gap-3 mt-1">
+                    <span class="text-xs font-medium text-slate-400">{{ formatDate(task.dueDate!) }}</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full font-semibold"
+                      [style.background]="'var(--portal-accent-light)'"
+                      [style.color]="'var(--portal-accent)'">
+                      {{ statusLabel(task.status) }}
+                    </span>
+                    @if (isOverdue(task)) {
+                      <span class="text-xs font-semibold text-red-500">Atrasado</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ── Team ──────────────────────────────────────────────────────── -->
+        @if (activeTab() === 'team') {
+          <div class="portal-team">
+            @for (member of data()!.team; track member.id) {
+              <div class="portal-member">
+                <div class="portal-member__avatar" [style.background]="'var(--portal-accent)'">
+                  @if (member.avatarUrl) {
+                    <img [src]="member.avatarUrl" class="w-full h-full object-cover rounded-full" />
+                  } @else {
+                    {{ initials(member.name) }}
+                  }
+                </div>
+                <p class="portal-member__name">{{ member.name }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Footer -->
+      <footer class="portal-footer">
+        <p>Powered by <span class="font-semibold" [style.color]="'var(--portal-accent)'">Agilis</span></p>
+      </footer>
+    </div>
+  }
+</div>
