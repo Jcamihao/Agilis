@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, IsDateString, IsNumber, Allow } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, IsDateString, IsNumber, Allow, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { DependencyType, Priority, TaskStatus } from '@prisma/client';
 
@@ -12,6 +12,7 @@ export class UpdateTaskDto {
   @IsUUID() @IsOptional() assigneeId?: string | null;
   @IsUUID() @IsOptional() sprintId?: string;
   @Allow() @IsOptional() position?: number;
+  @IsString() @IsOptional() recurrence?: string;
 }
 
 export class CreateTaskDto {
@@ -59,6 +60,11 @@ export class CreateTaskDto {
   @IsUUID()
   @IsOptional()
   sprintId?: string;
+
+  @ApiProperty({ required: false, default: 'NONE' })
+  @IsString()
+  @IsOptional()
+  recurrence?: string;
 }
 
 export class UpdateTaskStatusDto {
@@ -102,6 +108,33 @@ export class CreateSubtaskDto {
   @IsUUID()
   @IsOptional()
   assigneeId?: string;
+}
+
+export class BulkUpdateTasksDto {
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  ids: string[];
+
+  @ApiProperty({ enum: TaskStatus, required: false })
+  @IsEnum(TaskStatus)
+  @IsOptional()
+  status?: TaskStatus;
+
+  @ApiProperty({ enum: Priority, required: false })
+  @IsEnum(Priority)
+  @IsOptional()
+  priority?: Priority;
+
+  @ApiProperty({ required: false })
+  @IsUUID()
+  @IsOptional()
+  assigneeId?: string | null;
+
+  @ApiProperty({ required: false })
+  @IsUUID()
+  @IsOptional()
+  sprintId?: string | null;
 }
 
 export class AddDependencyDto {

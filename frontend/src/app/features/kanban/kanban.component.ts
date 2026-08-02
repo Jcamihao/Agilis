@@ -14,13 +14,15 @@ import { SprintsService } from '../../core/services/sprints.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UsersService, CompanyMember } from '../../core/services/users.service';
 import { ConfirmService } from '../../core/services/confirm.service';
+import { ClientPortalService } from '../../core/services/client-portal.service';
+import { TaskTemplatesService, TaskTemplate } from '../../core/services/task-templates.service';
 import { Router } from '@angular/router';
 import { CommentSectionComponent } from '../../shared/components/comment-section/comment-section.component';
 import { TimeTrackerComponent } from '../../shared/components/time-tracker/time-tracker.component';
 import { CustomFieldValuesComponent } from '../../shared/components/custom-fields/custom-field-values.component';
 import { ApprovalPanelComponent } from '../../shared/components/approval-panel/approval-panel.component';
 import {
-  Task, TaskStatus, KanbanBoard, TASK_STATUS_CONFIG, PRIORITY_CONFIG, Priority, Project, Sprint
+  Task, TaskStatus, KanbanBoard, TASK_STATUS_CONFIG, PRIORITY_CONFIG, Priority, Project, Sprint, ClientPortal,
 } from '../../core/models';
 
 interface Column {
@@ -43,14 +45,16 @@ export class KanbanComponent implements OnInit {
   @Input() id!: string;
 
   readonly tasksService    = inject(TasksService);
-  private readonly projectsService = inject(ProjectsService);
-  private readonly sprintsService  = inject(SprintsService);
-  private readonly usersService    = inject(UsersService);
-  private readonly auth            = inject(AuthService);
-  private readonly router          = inject(Router);
-  private readonly fb              = inject(FormBuilder);
-  private readonly cdr             = inject(ChangeDetectorRef);
-  private readonly confirm         = inject(ConfirmService);
+  private readonly projectsService   = inject(ProjectsService);
+  private readonly sprintsService    = inject(SprintsService);
+  private readonly usersService      = inject(UsersService);
+  private readonly auth              = inject(AuthService);
+  private readonly router            = inject(Router);
+  private readonly fb                = inject(FormBuilder);
+  private readonly cdr               = inject(ChangeDetectorRef);
+  private readonly confirm           = inject(ConfirmService);
+  private readonly portalSvc         = inject(ClientPortalService);
+  private readonly templatesSvc      = inject(TaskTemplatesService);
 
   readonly PRIORITY_CONFIG = PRIORITY_CONFIG;
   readonly STATUS_CONFIG = TASK_STATUS_CONFIG;
@@ -60,6 +64,24 @@ export class KanbanComponent implements OnInit {
   loading = signal(true);
   creating = signal(false);
   showCreateModal = signal(false);
+
+  // ── Portal quick-access ──────────────────────────────────────────────────
+  showPortalPanel = signal(false);
+  portal          = signal<ClientPortal | null>(null);
+  portalCopied    = signal(false);
+  showMoreViews   = signal(false);
+  showActionsMenu = signal(false);
+
+  // ── Bulk actions ───────────────────────────────────────────────────────────
+  bulkMode        = signal(false);
+  selectedTaskIds = signal<Set<string>>(new Set());
+  bulkApplying    = signal(false);
+
+  // ── Templates ─────────────────────────────────────────────────────────────
+  showTemplatePanel  = signal(false);
+  templates          = signal<TaskTemplate[]>([]);
+  templatesLoaded    = signal(false);
+  applyingTemplate   = signal(false);
   quickCreateStatus = signal<TaskStatus>('BACKLOG');
   project = signal<Project | null>(null);
   detailTask = signal<Task | null>(null);
@@ -168,6 +190,7 @@ export class KanbanComponent implements OnInit {
     priority:    ['MEDIUM'],
     dueDate:     [''],
     sprintId:    [''],
+    recurrence:  ['NONE'],
   });
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -249,6 +272,39 @@ export class KanbanComponent implements OnInit {
   closeConfig() {
     this.showConfig.set(false);
     this.openMenuMemberId.set(null);
+  }
+
+  // ── Portal quick-access ──────────────────────────────────────────────────
+  togglePortalPanel() {
+    this.showPortalPanel.update(v => !v);
+    if (this.showPortalPanel() && !this.portal()) {
+      this.portalSvc.getOrCreate(this.id).subscribe({
+        next: (p) => { this.portal.set(p); this.cdr.markForCheck(); },
+      });
+    }
+  }
+
+  copyPortalLink() {
+    const p = this.portal();
+    if (!p) return;
+    navigator.clipboard.writeText(this.portalSvc.portalUrl(p.token)).then(() => {
+      this.portalCopied.set(true);
+      this.cdr.markForCheck();
+      setTimeout(() => { this.portalCopied.set(false); this.cdr.markForCheck(); }, 2000);
+    });
+  }
+
+  togglePortalEnabled() {
+    const p = this.portal();
+    if (!p) return;
+    this.portalSvc.update(this.id, { isEnabled: !p.isEnabled }).subscribe({
+      next: (updated) => { this.portal.set(updated); this.cdr.markForCheck(); },
+    });
+  }
+
+  portalUrl(): string {
+    const p = this.portal();
+    return p ? this.portalSvc.portalUrl(p.token) : '';
   }
 
   // ── General settings ──────────────────────────────────────────────────────
@@ -830,6 +886,100 @@ export class KanbanComponent implements OnInit {
         );
         this.cdr.markForCheck();
       },
+    });
+  }
+
+  // ── Bulk actions ──────────────────────────────────────────────────────────
+  toggleBulkMode() {
+    this.bulkMode.update((v) => !v);
+    if (!this.bulkMode()) this.selectedTaskIds.set(new Set());
+  }
+
+  toggleTaskSelect(taskId: string, event: Event) {
+    event.stopPropagation();
+    this.selectedTaskIds.update((set) => {
+      const next = new Set(set);
+      next.has(taskId) ? next.delete(taskId) : next.add(taskId);
+      return next;
+    });
+  }
+
+  isSelected(taskId: string): boolean {
+    return this.selectedTaskIds().has(taskId);
+  }
+
+  applyBulkStatus(status: TaskStatus) {
+    const ids = [...this.selectedTaskIds()];
+    if (!ids.length) return;
+    this.bulkApplying.set(true);
+    this.tasksService.bulkUpdate(ids, { status }).subscribe({
+      next: () => {
+        this.columns.update((cols) =>
+          cols.map((col) => {
+            const moved = col.tasks.filter((t) => ids.includes(t.id));
+            const remaining = col.tasks.filter((t) => !ids.includes(t.id));
+            if (col.key === status) return { ...col, tasks: [...moved.map((t) => ({ ...t, status })), ...remaining] };
+            return { ...col, tasks: remaining };
+          })
+        );
+        this.selectedTaskIds.set(new Set());
+        this.bulkMode.set(false);
+        this.bulkApplying.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => this.bulkApplying.set(false),
+    });
+  }
+
+  applyBulkDelete() {
+    const ids = [...this.selectedTaskIds()];
+    if (!ids.length) return;
+    this.confirm.open({ message: `Excluir ${ids.length} tarefa(s) selecionada(s)?` }).then((ok: boolean) => {
+      if (!ok) return;
+      this.bulkApplying.set(true);
+      Promise.all(ids.map((id) => this.tasksService.delete(id).toPromise())).then(() => {
+        this.columns.update((cols) =>
+          cols.map((col) => ({ ...col, tasks: col.tasks.filter((t) => !ids.includes(t.id)) }))
+        );
+        this.selectedTaskIds.set(new Set());
+        this.bulkMode.set(false);
+        this.bulkApplying.set(false);
+        this.cdr.markForCheck();
+      }).catch(() => this.bulkApplying.set(false));
+    });
+  }
+
+  // ── Templates ─────────────────────────────────────────────────────────────
+  openTemplatePanel() {
+    this.showTemplatePanel.set(true);
+    if (!this.templatesLoaded()) this.loadTemplates();
+  }
+
+  loadTemplates() {
+    const p = this.project();
+    if (!p) return;
+    this.templatesSvc.list(p.companyId).subscribe({
+      next: (list: any) => {
+        this.templates.set(list?.data ?? list ?? []);
+        this.templatesLoaded.set(true);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  applyTemplate(templateId: string) {
+    this.applyingTemplate.set(true);
+    this.templatesSvc.use(templateId, this.id).subscribe({
+      next: (task: any) => {
+        const t = task?.data ?? task;
+        this.columns.update((cols) =>
+          cols.map((col) => col.key === 'BACKLOG' ? { ...col, tasks: [t, ...col.tasks] } : col)
+        );
+        this.showTemplatePanel.set(false);
+        this.applyingTemplate.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => this.applyingTemplate.set(false),
     });
   }
 

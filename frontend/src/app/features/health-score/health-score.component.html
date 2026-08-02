@@ -113,8 +113,8 @@
           @for (p of projects(); track p.project.id) {
             <div class="ag-card p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
               <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                [style.background]="(p.project.color ?? '#6366f1') + '20'">
-                {{ p.project.icon ?? '📁' }}
+                [style.background]="p.project.color + '20'">
+                {{ p.project.icon }}
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-[--text-primary] truncate">{{ p.project.name }}</p>
@@ -148,7 +148,7 @@
           @for (t of teams(); track t.team.id) {
             <div class="ag-card p-4 text-center">
               <div class="w-3 h-3 rounded-full mx-auto mb-2"
-                [style.background]="t.team.color ?? '#6366f1'"></div>
+                [style.background]="t.team.color"></div>
               <p class="text-sm font-semibold text-[--text-primary] truncate mb-2">{{ t.team.name }}</p>
               <span class="text-2xl font-black" [style.color]="scoreColor(t.score)">
                 {{ scoreGrade(t.score) }}

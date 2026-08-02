@@ -36,6 +36,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) throw new UnauthorizedException('Token inválido');
-    return user;
+    const companyId = user.companies[0]?.companyId;
+    if (!companyId) throw new UnauthorizedException('Usuário sem empresa vinculada');
+
+    return {
+      ...user,
+      userId: user.id,
+      companyId,
+    };
   }
 }

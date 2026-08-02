@@ -361,6 +361,95 @@ Sugira 1-2 pessoas com justificativa.`,
     }
   }
 
+  async generateStrategicBrief(companyId: string): Promise<{
+    generatedAt: string;
+    summary: string;
+    risks: string;
+    opportunities: string;
+    teamHealth: string;
+    recommendations: string;
+    metrics: Record<string, any>;
+  }> {
+    const since30 = new Date(Date.now() - 30 * 86_400_000);
+
+    const [
+      totalTasks, doneTasks, overdueTasks, backlogTasks,
+      activeProjects, members, recentInsights, overdueByUser,
+    ] = await Promise.all([
+      this.prisma.task.count({ where: { project: { companyId } } }),
+      this.prisma.task.count({ where: { project: { companyId }, status: 'DONE' } }),
+      this.prisma.task.count({ where: { project: { companyId }, dueDate: { lt: new Date() }, status: { not: 'DONE' } } }),
+      this.prisma.task.count({ where: { project: { companyId }, status: 'BACKLOG' } }),
+      this.prisma.project.count({ where: { companyId, isArchived: false } }),
+      this.prisma.userCompany.count({ where: { companyId } }),
+      this.prisma.insight.findMany({
+        where: { companyId, isDismissed: false },
+        orderBy: [{ severity: 'desc' }, { createdAt: 'desc' }],
+        take: 5,
+        select: { type: true, severity: true, title: true, description: true },
+      }).catch(() => []),
+      this.prisma.task.groupBy({
+        by: ['assigneeId'],
+        where: { project: { companyId }, dueDate: { lt: new Date() }, status: { not: 'DONE' }, assigneeId: { not: null } },
+        _count: { assigneeId: true },
+        orderBy: { _count: { assigneeId: 'desc' } },
+        take: 3,
+      }).catch(() => []),
+    ]);
+
+    const completionRate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+    const recentDone     = await this.prisma.task.count({ where: { project: { companyId }, status: 'DONE', updatedAt: { gte: since30 } } });
+    const weeklyVelocity = Math.round((recentDone / 30) * 7);
+
+    const insightsSummary = recentInsights.length > 0
+      ? recentInsights.map((i) => `[${i.severity}] ${i.title}: ${i.description}`).join('\n')
+      : 'Nenhum insight crítico no momento.';
+
+    const prompt = `Você é um consultor estratégico sênior. Analise os dados abaixo e gere um brief estratégico executivo em português:
+
+MÉTRICAS:
+- Total de tarefas: ${totalTasks} | Concluídas: ${doneTasks} (${completionRate}%)
+- Tarefas atrasadas: ${overdueTasks} | Em backlog: ${backlogTasks}
+- Projetos ativos: ${activeProjects} | Membros: ${members}
+- Velocidade semanal: ${weeklyVelocity} tarefas/semana (últimos 30 dias)
+
+INSIGHTS AUTOMÁTICOS:
+${insightsSummary}
+
+Gere uma análise estratégica com 4 seções claramente separadas por "###":
+### RESUMO EXECUTIVO
+(2-3 frases sobre o estado geral da operação)
+
+### PRINCIPAIS RISCOS
+(3 riscos concretos baseados nos dados)
+
+### OPORTUNIDADES
+(2-3 oportunidades de melhoria identificadas)
+
+### RECOMENDAÇÕES
+(3-4 ações prioritárias com impacto esperado)`;
+
+    const raw = await this.simpleCompletion(prompt, 1200);
+
+    const section = (name: string) => {
+      const re = new RegExp(`###\\s*${name}\\s*([\\s\\S]*?)(?=###|$)`, 'i');
+      return raw.match(re)?.[1]?.trim() ?? '';
+    };
+
+    return {
+      generatedAt: new Date().toISOString(),
+      summary: section('RESUMO EXECUTIVO'),
+      risks: section('PRINCIPAIS RISCOS'),
+      opportunities: section('OPORTUNIDADES'),
+      recommendations: section('RECOMENDAÇÕES'),
+      teamHealth: `${members} membros | Velocidade: ${weeklyVelocity} tarefas/semana | Taxa de conclusão: ${completionRate}%`,
+      metrics: {
+        totalTasks, doneTasks, overdueTasks, backlogTasks,
+        activeProjects, members, completionRate, weeklyVelocity,
+      },
+    };
+  }
+
   private async simpleCompletion(prompt: string, maxTokens = 600): Promise<string> {
     try {
       return await this.ollamaChat(

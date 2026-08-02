@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { RedisService } from '../redis/redis.service';
 import { OkrsService } from '../okrs/okrs.service';
-import { CreateTaskDto, UpdateTaskDto, UpdateTaskStatusDto, MoveTaskDto, CreateSubtaskDto, AddDependencyDto } from './dto/create-task.dto';
+import { CreateTaskDto, UpdateTaskDto, UpdateTaskStatusDto, MoveTaskDto, CreateSubtaskDto, AddDependencyDto, BulkUpdateTasksDto } from './dto/create-task.dto';
 import { DependencyType, TaskStatus } from '@prisma/client';
 import { EVENTS } from '../events/agilis-events';
 
@@ -32,11 +33,12 @@ export class TasksService {
     const tasks = await this.prisma.task.findMany({
       where: { projectId },
       include: {
-        assignee: { select: { id: true, name: true, avatarUrl: true } },
-        creator: { select: { id: true, name: true } },
-        sprint: { select: { id: true, name: true, status: true, startDate: true, endDate: true } },
-        labels: { include: { label: true } },
-        _count: { select: { comments: true, subtasks: true, timeEntries: true } },
+        assignee:  { select: { id: true, name: true, avatarUrl: true } },
+        creator:   { select: { id: true, name: true } },
+        sprint:    { select: { id: true, name: true, status: true, startDate: true, endDate: true } },
+        labels:    { include: { label: true } },
+        blockedBy: { select: { dependsOnId: true, type: true } },
+        _count:    { select: { comments: true, subtasks: true, timeEntries: true } },
       },
       orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
     });
@@ -164,6 +166,9 @@ export class TasksService {
 
     const actor = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true } });
     this.events.emit(EVENTS.TASK_CREATED, { task, actor, companyId: project.companyId });
+    if (dto.assigneeId && dto.assigneeId !== userId) {
+      this.events.emit(EVENTS.TASK_ASSIGNED, { task, assigneeId: dto.assigneeId, actor, companyId: project.companyId });
+    }
 
     this.audit.log({ userId, companyId: project.companyId, action: 'CREATE', entityType: 'task', entityId: task.id, newValues: { title: task.title, status: task.status, priority: task.priority } });
     this.invalidateProjectCache(dto.projectId);
@@ -192,6 +197,10 @@ export class TasksService {
     });
 
     await this.createActivity(id, userId, 'task_updated', 'task');
+    if ((dto as any).assigneeId && (dto as any).assigneeId !== task.assigneeId && (dto as any).assigneeId !== userId) {
+      const actor = await this.prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true } });
+      this.events.emit(EVENTS.TASK_ASSIGNED, { task: updated, assigneeId: (dto as any).assigneeId, actor, companyId: task.project.companyId });
+    }
     this.invalidateProjectCache(task.project.id);
     return updated;
   }
@@ -235,6 +244,36 @@ export class TasksService {
 
     this.invalidateProjectCache(task.project.id);
     return this.prisma.task.delete({ where: { id } });
+  }
+
+  // ── Bulk update ──────────────────────────────────────────────────────────
+
+  async bulkUpdate(dto: BulkUpdateTasksDto, userId: string) {
+    const { ids, ...updates } = dto;
+    if (ids.length === 0) return { count: 0 };
+
+    const data: Record<string, unknown> = {};
+    if (updates.status    !== undefined) data['status']     = updates.status;
+    if (updates.priority  !== undefined) data['priority']   = updates.priority;
+    if ('assigneeId' in updates)         data['assigneeId'] = updates.assigneeId ?? null;
+    if ('sprintId'   in updates)         data['sprintId']   = updates.sprintId   ?? null;
+
+    const tasks = await this.prisma.task.findMany({
+      where: { id: { in: ids } },
+      include: { project: true },
+    });
+
+    const companyIds = [...new Set(tasks.map((t) => t.project.companyId))];
+    for (const cid of companyIds) {
+      await this.checkCompanyAccess(cid, userId);
+    }
+
+    const result = await this.prisma.task.updateMany({ where: { id: { in: ids } }, data });
+
+    const projectIds = [...new Set(tasks.map((t) => t.project.id))];
+    projectIds.forEach((pid) => this.invalidateProjectCache(pid));
+
+    return { count: result.count };
   }
 
   // ── Subtasks ──────────────────────────────────────────────────────────────
@@ -328,6 +367,55 @@ export class TasksService {
     await this.checkCompanyAccess(task.project.companyId, userId);
 
     await this.prisma.taskDependency.deleteMany({ where: { taskId, dependsOnId } });
+  }
+
+  // ── Recurrence cron ──────────────────────────────────────────────────────
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleRecurrence() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const recurring = await this.prisma.task.findMany({
+      where: { recurrence: { not: 'NONE' }, status: 'DONE' },
+    });
+
+    for (const task of recurring) {
+      if (!task.dueDate) continue;
+
+      const nextDue = new Date(task.dueDate);
+      switch (task.recurrence) {
+        case 'DAILY':     nextDue.setDate(nextDue.getDate() + 1);  break;
+        case 'WEEKLY':    nextDue.setDate(nextDue.getDate() + 7);  break;
+        case 'BIWEEKLY':  nextDue.setDate(nextDue.getDate() + 14); break;
+        case 'MONTHLY':   nextDue.setMonth(nextDue.getMonth() + 1); break;
+        default: continue;
+      }
+
+      if (nextDue <= today) continue;
+
+      const alreadyExists = await this.prisma.task.findFirst({
+        where: { recurrenceParentId: task.id, dueDate: nextDue },
+      });
+      if (alreadyExists) continue;
+
+      await this.prisma.task.create({
+        data: {
+          title:             task.title,
+          description:       task.description,
+          priority:          task.priority,
+          status:            'BACKLOG',
+          position:          0,
+          projectId:         task.projectId,
+          assigneeId:        task.assigneeId,
+          sprintId:          task.sprintId,
+          dueDate:           nextDue,
+          recurrence:        task.recurrence,
+          recurrenceParentId: task.id,
+          creatorId:         task.creatorId,
+        },
+      });
+    }
   }
 
   private async checkCompanyAccess(companyId: string, userId: string) {

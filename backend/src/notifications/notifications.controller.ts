@@ -1,25 +1,27 @@
 import {
-  Controller, Get, Patch, Delete, Param, Query, UseGuards, ParseIntPipe, DefaultValuePipe, Sse
+  Controller, Get, Patch, Delete, Param, Query, UseGuards, ParseIntPipe, DefaultValuePipe, Sse, Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SseAuthGuard } from './sse-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('notifications')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 @Controller('notifications')
 export class NotificationsController {
   constructor(private readonly service: NotificationsService) {}
 
   @Sse('stream')
-  @ApiOperation({ summary: 'SSE stream de notificações em tempo real' })
-  stream(@CurrentUser('id') userId: string): Observable<MessageEvent> {
-    return this.service.getStream(userId);
+  @UseGuards(SseAuthGuard)
+  @ApiOperation({ summary: 'SSE stream — autenticação via ?token= (EventSource limitation)' })
+  stream(@Req() req: any): Observable<MessageEvent> {
+    return this.service.getStream(req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get()
   @ApiOperation({ summary: 'Listar notificações com paginação' })
   findAll(
@@ -30,26 +32,30 @@ export class NotificationsController {
     return this.service.findAll(userId, page, limit);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get('unread-count')
-  @ApiOperation({ summary: 'Contagem de notificações não lidas' })
   unreadCount(@CurrentUser('id') userId: string) {
     return this.service.getUnreadCount(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Patch(':id/read')
-  @ApiOperation({ summary: 'Marcar notificação como lida' })
   markAsRead(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.service.markAsRead(id, userId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Patch('read-all')
-  @ApiOperation({ summary: 'Marcar todas como lidas' })
   markAllAsRead(@CurrentUser('id') userId: string) {
     return this.service.markAllAsRead(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Delete('old')
-  @ApiOperation({ summary: 'Remover notificações lidas com mais de 30 dias' })
   deleteOld(@CurrentUser('id') userId: string) {
     return this.service.deleteOld(userId);
   }

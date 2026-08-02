@@ -1,0 +1,244 @@
+<div class="risks-page">
+
+  <!-- Header -->
+  <div class="risks-header">
+    <div class="risks-title-row">
+      <span class="material-symbols-rounded risks-icon">warning_amber</span>
+      <h1 class="risks-title">Gestão de Riscos</h1>
+    </div>
+
+    <div class="risks-actions">
+      <div class="view-toggle">
+        <button class="view-btn" [class.active]="view() === 'matrix'" (click)="view.set('matrix')">
+          <span class="material-symbols-rounded">grid_on</span> Matriz
+        </button>
+        <button class="view-btn" [class.active]="view() === 'list'" (click)="view.set('list')">
+          <span class="material-symbols-rounded">list</span> Lista
+        </button>
+      </div>
+      <button class="btn-primary" (click)="openCreate()">
+        <span class="material-symbols-rounded">add</span> Novo Risco
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  @if (!loading()) {
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <span class="kpi-value">{{ risks().length }}</span>
+        <span class="kpi-label">Total</span>
+      </div>
+      <div class="kpi-card kpi-open">
+        <span class="kpi-value">{{ openCount() }}</span>
+        <span class="kpi-label">Abertos</span>
+      </div>
+      <div class="kpi-card kpi-critical">
+        <span class="kpi-value">{{ criticalCount() }}</span>
+        <span class="kpi-label">Críticos</span>
+      </div>
+      <div class="kpi-card kpi-high">
+        <span class="kpi-value">{{ highCount() }}</span>
+        <span class="kpi-label">Alta Prioridade</span>
+      </div>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-state">
+      <span class="material-symbols-rounded spin">autorenew</span>
+      <p>Carregando riscos…</p>
+    </div>
+  }
+
+  <!-- MATRIX VIEW -->
+  @if (!loading() && view() === 'matrix') {
+    <div class="matrix-container">
+      <div class="matrix-y-label">← Impacto</div>
+      <div class="matrix-grid-wrap">
+        <div class="matrix-grid">
+
+          <!-- Column headers (Probabilidade) -->
+          <div class="matrix-corner"></div>
+          @for (prob of PROBS; track prob) {
+            <div class="matrix-col-header">{{ probLabel(prob) }}</div>
+          }
+
+          <!-- Rows (Impacto — CRITICAL on top) -->
+          @for (impact of IMPACTS_MATRIX; track impact) {
+            <div class="matrix-row-header">{{ impactLabel(impact) }}</div>
+            @for (prob of PROBS; track prob) {
+              <div
+                class="matrix-cell"
+                [style.background]="cellColor(impact, prob)"
+                [style.opacity]="cellOpacity(impact, prob)"
+                [title]="impactLabel(impact) + ' × ' + probLabel(prob)"
+              >
+                @if (cellRisks(impact, prob).length > 0) {
+                  <span class="cell-badge">{{ cellRisks(impact, prob).length }}</span>
+                  @for (r of cellRisks(impact, prob); track r.id) {
+                    <span class="cell-chip" (click)="openEdit(r)" [title]="r.title">{{ r.title }}</span>
+                  }
+                }
+              </div>
+            }
+          }
+
+        </div>
+        <div class="matrix-x-label">Probabilidade →</div>
+      </div>
+
+      <!-- Legend -->
+      <div class="matrix-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#22c55e"></span> Baixo (1–4)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#eab308"></span> Médio (5–8)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#f97316"></span> Alto (9–14)</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#dc2626"></span> Crítico (≥15)</div>
+      </div>
+    </div>
+  }
+
+  <!-- LIST VIEW -->
+  @if (!loading() && view() === 'list') {
+    @if (risks().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-rounded empty-icon">shield</span>
+        <p class="empty-title">Nenhum risco cadastrado</p>
+        <p class="empty-sub">Adicione riscos para monitorar e mitigar ameaças ao projeto.</p>
+        <button class="btn-primary" (click)="openCreate()">
+          <span class="material-symbols-rounded">add</span> Adicionar primeiro risco
+        </button>
+      </div>
+    } @else {
+      <div class="risks-list">
+        @for (r of risks(); track r.id; let i = $index) {
+          <div class="risk-card">
+            <div class="risk-score-bar" [style.background]="colorOf(r)"></div>
+            <div class="risk-body">
+              <div class="risk-top">
+                <span class="risk-score-badge" [style.background]="colorOf(r)">{{ scoreOf(r) }}</span>
+                <span class="risk-title">{{ r.title }}</span>
+                <span class="risk-category">{{ categoryLabel(r.category) }}</span>
+                <span class="risk-status" [attr.data-status]="r.status">{{ statusLabel(r.status) }}</span>
+              </div>
+              @if (r.description) {
+                <p class="risk-desc">{{ r.description }}</p>
+              }
+              <div class="risk-meta">
+                <span><strong>Impacto:</strong> {{ impactLabel(r.impact) }}</span>
+                <span><strong>Probabilidade:</strong> {{ probLabel(r.probability) }}</span>
+                @if (r.owner) {
+                  <span><strong>Responsável:</strong> {{ r.owner.name }}</span>
+                }
+                @if (r.dueDate) {
+                  <span><strong>Prazo:</strong> {{ r.dueDate | date:'dd/MM/yyyy' }}</span>
+                }
+              </div>
+              @if (r.mitigation) {
+                <p class="risk-mitigation"><span class="material-symbols-rounded">build</span> {{ r.mitigation }}</p>
+              }
+            </div>
+            <div class="risk-actions">
+              <button class="icon-btn" (click)="openEdit(r)" title="Editar">
+                <span class="material-symbols-rounded">edit</span>
+              </button>
+              <button class="icon-btn icon-btn-danger" (click)="remove(r)" title="Excluir">
+                <span class="material-symbols-rounded">delete</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- FORM MODAL -->
+  @if (showForm()) {
+    <div class="modal-backdrop" (click)="showForm.set(false)">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ editId() ? 'Editar Risco' : 'Novo Risco' }}</h2>
+          <button class="icon-btn" (click)="showForm.set(false)">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-field">
+            <label>Título *</label>
+            <input type="text" [(ngModel)]="form.title" placeholder="Descreva o risco brevemente" />
+          </div>
+
+          <div class="form-field">
+            <label>Descrição</label>
+            <textarea [(ngModel)]="form.description" rows="2" placeholder="Contexto adicional"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label>Categoria</label>
+              <select [(ngModel)]="form.category">
+                @for (c of CATEGORIES; track c) {
+                  <option [value]="c">{{ categoryLabel(c) }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Status</label>
+              <select [(ngModel)]="form.status">
+                @for (s of STATUSES; track s) {
+                  <option [value]="s">{{ statusLabel(s) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label>Impacto</label>
+              <select [(ngModel)]="form.impact">
+                @for (imp of IMPACTS; track imp) {
+                  <option [value]="imp">{{ impactLabel(imp) }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Probabilidade</label>
+              <select [(ngModel)]="form.probability">
+                @for (p of PROBS; track p) {
+                  <option [value]="p">{{ probLabel(p) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label>Prazo</label>
+              <input type="date" [(ngModel)]="form.dueDate" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>Plano de mitigação</label>
+            <textarea [(ngModel)]="form.mitigation" rows="2" placeholder="Descreva como mitigar ou responder a este risco"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-ghost" (click)="showForm.set(false)">Cancelar</button>
+          <button class="btn-primary" [disabled]="!form.title" (click)="save()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Toast -->
+  @if (toast()) {
+    <div class="toast" [class.toast-success]="toast()!.type === 'success'" [class.toast-error]="toast()!.type === 'error'">
+      {{ toast()!.msg }}
+    </div>
+  }
+
+</div>

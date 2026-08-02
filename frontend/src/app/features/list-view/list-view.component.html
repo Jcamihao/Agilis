@@ -53,6 +53,11 @@
           <span class="material-symbols-rounded text-base">dynamic_form</span>
           Intake
         </a>
+        <a [routerLink]="['/projects', id, 'risks']"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-rounded text-base">warning_amber</span>
+          Riscos
+        </a>
         <div class="w-px h-5 bg-slate-100"></div>
         <a [routerLink]="['/projects', id, 'settings']"
           class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
@@ -443,7 +448,7 @@
                 <div class="flex items-center gap-2 text-[11px] text-slate-400">
                   @if (task._count?.comments) {
                     <span class="flex items-center gap-0.5">
-                      <span class="material-symbols-rounded text-sm">chat_bubble_outline</span>
+                      <span class="material-symbols-rounded text-sm">chat_bubble</span>
                       {{ task._count!.comments }}
                     </span>
                   }

@@ -72,6 +72,8 @@ export class DashboardComponent implements OnInit {
   });
   readonly firstName = () => this.auth.user()?.name?.split(' ')[0] ?? '';
 
+  showOnboarding = signal(true);
+
   activeWidgets = computed(() =>
     this.widgets()
       .filter((w) => w.isActive || this.customizing())
@@ -79,6 +81,15 @@ export class DashboardComponent implements OnInit {
   );
 
   inactiveWidgets = computed(() => this.widgets().filter((w) => !w.isActive));
+
+  readonly isNewUser = computed(() => {
+    const s = this.stats();
+    if (!s) return false;
+    const total = (s as any).totalProjects ?? (s as any).activeProjects ?? 0;
+    return total === 0 && this.myTasks().length === 0 && this.showOnboarding();
+  });
+
+  dismissOnboarding() { this.showOnboarding.set(false); }
 
   totalProductivity = computed(() =>
     this.productivityData().reduce((sum, d) => sum + d.count, 0),

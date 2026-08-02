@@ -11,20 +11,22 @@
         <span class="material-symbols-rounded text-xl">menu</span>
       </button>
 
-      <!-- Search -->
+      <!-- Search trigger -->
       <div class="flex-1 max-w-sm">
-        <div class="relative">
-          <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-[--text-tertiary]"
-                style="font-size: 18px;">search</span>
-          <input type="text" placeholder="Buscar tarefas, projetos..."
-                 class="w-full pl-9 pr-4 py-2 text-[13px] rounded-xl outline-none transition-all duration-150"
-                 style="background: #f3f4f6;
-                        border: 1px solid transparent;
-                        color: #374151;"
-                 (focus)="onSearchFocus($event)"
-                 (blur)="onSearchBlur($event)">
-        </div>
+        <button (click)="showSearch.set(true)"
+                class="w-full flex items-center gap-2 pl-3 pr-3 py-2 text-[13px] rounded-xl transition-all duration-150 text-left"
+                style="background: #f3f4f6; border: 1px solid transparent; color: #94a3b8;"
+                onmouseover="this.style.borderColor='#a5b4fc';this.style.background='#fff'"
+                onmouseout="this.style.borderColor='transparent';this.style.background='#f3f4f6'">
+          <span class="material-symbols-rounded" style="font-size: 18px; color: #94a3b8;">search</span>
+          <span class="flex-1">Buscar tarefas, projetos…</span>
+          <kbd class="text-[11px] bg-white border border-slate-200 rounded px-1.5 py-0.5 text-slate-400 hidden sm:block" style="font-family:inherit">⌘K</kbd>
+        </button>
       </div>
+
+      @if (showSearch()) {
+        <ag-global-search (close)="showSearch.set(false)"></ag-global-search>
+      }
 
       <div class="flex items-center gap-1 ml-auto">
 

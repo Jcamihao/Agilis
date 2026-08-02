@@ -8,7 +8,6 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { TasksService } from '../../core/services/tasks.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { SprintsService } from '../../core/services/sprints.service';
-import { UsersService, CompanyMember } from '../../core/services/users.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import {
@@ -57,7 +56,6 @@ export class GanttComponent implements OnInit, AfterViewInit {
   private readonly tasksSvc    = inject(TasksService);
   private readonly projSvc     = inject(ProjectsService);
   private readonly sprintsSvc  = inject(SprintsService);
-  private readonly usersSvc    = inject(UsersService);
   private readonly auth        = inject(AuthService);
   private readonly toast       = inject(ToastService);
   private readonly cdr         = inject(ChangeDetectorRef);
@@ -78,14 +76,9 @@ export class GanttComponent implements OnInit, AfterViewInit {
   project         = signal<Project | null>(null);
   allTasks        = signal<Task[]>([]);
   sprints         = signal<Sprint[]>([]);
-  members         = signal<CompanyMember[]>([]);
-  membersLoaded   = signal(false);
-
   zoom            = signal<ZoomLevel>('month');
   viewStart       = signal<Date>(this.startOfWeek(new Date()));
   searchQuery     = signal('');
-  groupBySprint   = signal(false);
-  collapsedGroups = signal<Set<string>>(new Set());
 
   // ── Inline date edit ──────────────────────────────────────────────────────
   editingStartId  = signal<string | null>(null);
@@ -150,7 +143,6 @@ export class GanttComponent implements OnInit, AfterViewInit {
       next: (s) => { this.sprints.set(s); this.cdr.markForCheck(); },
     });
     this.loadBoard();
-    this.loadMembers();
   }
 
   ngAfterViewInit() {
@@ -168,15 +160,6 @@ export class GanttComponent implements OnInit, AfterViewInit {
         setTimeout(() => this.scrollToToday(), 50);
       },
       error: () => this.loading.set(false),
-    });
-  }
-
-  loadMembers() {
-    if (this.membersLoaded()) return;
-    const cid = this.auth.currentCompanyId();
-    if (!cid) return;
-    this.usersSvc.getCompanyMembers(cid).subscribe({
-      next: (m) => { this.members.set(m); this.membersLoaded.set(true); },
     });
   }
 

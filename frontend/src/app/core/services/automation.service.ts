@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
 
 export type AutomationTrigger = 'TASK_CREATED' | 'TASK_STATUS_CHANGED' | 'TASK_OVERDUE' | 'COMMENT_CREATED' | 'TASK_ASSIGNED';
-export type AutomationActionType = 'CHANGE_STATUS' | 'ASSIGN_USER' | 'SEND_NOTIFICATION' | 'CREATE_TASK' | 'SEND_EMAIL' | 'SEND_WHATSAPP' | 'SEND_TELEGRAM';
+export type AutomationActionType = 'CHANGE_STATUS' | 'ASSIGN_USER' | 'SEND_NOTIFICATION' | 'CREATE_TASK' | 'SEND_EMAIL' | 'SEND_TELEGRAM';
 
 export interface AutomationCondition { field: string; operator: string; value: any }
 export interface AutomationAction    { type: AutomationActionType; params: Record<string, any> }

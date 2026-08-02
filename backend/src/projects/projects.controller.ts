@@ -12,6 +12,12 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
+  @Get('portfolio')
+  @ApiOperation({ summary: 'Visão executiva de portfolio de projetos' })
+  portfolio(@Query('companyId') companyId: string, @CurrentUser('id') userId: string) {
+    return this.projectsService.getPortfolio(companyId, userId);
+  }
+
   @Get()
   @ApiOperation({ summary: 'Listar projetos (companyId opcional; archived=true para arquivados)' })
   findAll(
@@ -75,6 +81,12 @@ export class ProjectsController {
     @CurrentUser('id') userId: string,
   ) {
     return this.projectsService.removeMember(id, targetUserId, userId);
+  }
+
+  @Get(':id/forecast')
+  @ApiOperation({ summary: 'Previsão de entrega baseada em velocidade' })
+  forecast(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.projectsService.getForecast(id, userId);
   }
 
   @Patch(':id/columns')

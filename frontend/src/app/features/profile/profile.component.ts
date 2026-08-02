@@ -38,7 +38,14 @@ export class ProfileComponent implements OnInit {
   savingPersonal = signal(false);
   savingPassword = signal(false);
   savingTelegram = signal(false);
+  testingTelegram = signal(false);
+  telegramTestResult = signal<'ok' | 'fail' | null>(null);
   detectingChatId = signal(false);
+
+  // Telegram notification preferences
+  telegramPrefCreated  = signal(true);
+  telegramPrefAssigned = signal(true);
+  telegramPrefDueSoon  = signal(true);
   uploadingAvatar = signal(false);
   lookingUpCep = signal(false);
   cepError = signal('');
@@ -110,6 +117,12 @@ export class ProfileComponent implements OnInit {
         addressComplement:u.addressComplement ?? '',
       });
       this.telegramForm.patchValue({ telegramChatId: u.telegramChatId ?? '' });
+      const tPref = u.notifPreferences?.telegram;
+      if (tPref) {
+        this.telegramPrefCreated.set(tPref.taskCreated !== false);
+        this.telegramPrefAssigned.set(tPref.taskAssigned !== false);
+        this.telegramPrefDueSoon.set(tPref.taskDueSoon !== false);
+      }
     }
     this.loadNotifications();
   }
@@ -249,14 +262,36 @@ export class ProfileComponent implements OnInit {
   saveTelegram() {
     this.savingTelegram.set(true);
     const { telegramChatId } = this.telegramForm.value;
-    this.api.put<User>('/users/profile', { telegramChatId: telegramChatId ?? '' }).subscribe({
+    const notifPreferences = {
+      telegram: {
+        taskCreated:  this.telegramPrefCreated(),
+        taskAssigned: this.telegramPrefAssigned(),
+        taskDueSoon:  this.telegramPrefDueSoon(),
+      },
+    };
+    this.api.put<User>('/users/profile', { telegramChatId: telegramChatId ?? '', notifPreferences }).subscribe({
       next: (updated) => {
         this.auth.updateUser(updated);
         this.savingTelegram.set(false);
         this.telegramForm.markAsPristine();
-        this.showToast('Chat ID do Telegram salvo!');
+        this.showToast('Configurações do Telegram salvas!');
       },
       error: () => this.savingTelegram.set(false),
+    });
+  }
+
+  testTelegram() {
+    const chatId = this.telegramForm.value.telegramChatId?.trim();
+    if (!chatId) { this.showToast('Insira um Chat ID primeiro.'); return; }
+    this.testingTelegram.set(true);
+    this.telegramTestResult.set(null);
+    this.api.post<boolean>('/telegram/test', { chatId, message: 'Conexão com o Agilis funcionando! ✅' }).subscribe({
+      next: (ok) => {
+        this.telegramTestResult.set(ok ? 'ok' : 'fail');
+        this.testingTelegram.set(false);
+        this.showToast(ok ? 'Mensagem enviada com sucesso!' : 'Falha ao enviar — verifique o Chat ID.');
+      },
+      error: () => { this.telegramTestResult.set('fail'); this.testingTelegram.set(false); },
     });
   }
 

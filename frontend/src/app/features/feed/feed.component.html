@@ -1,0 +1,171 @@
+<div class="feed-layout">
+
+  <!-- Compose -->
+  <div class="compose-card">
+    <div class="compose-avatar">{{ initials(me()?.name ?? 'U') }}</div>
+    <div class="compose-body">
+      <textarea
+        class="compose-input"
+        rows="3"
+        [value]="postText()"
+        (input)="postText.set($any($event.target).value)"
+        placeholder="Compartilhe algo com a equipe…"
+      ></textarea>
+
+      <!-- Image preview -->
+      @if (imagePreview()) {
+        <div class="compose-image-preview">
+          <img [src]="imagePreview()" alt="Imagem selecionada" class="compose-preview-img" />
+          <button class="compose-remove-img" (click)="removeImage()" title="Remover imagem">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      }
+
+      <div class="compose-actions">
+        <!-- Image picker -->
+        <label class="compose-attach-btn" title="Adicionar imagem">
+          <input type="file" accept="image/*" class="hidden" (change)="onImageSelect($event)" />
+          <span class="material-symbols-rounded">image</span>
+        </label>
+
+        <button class="btn-post"
+                [disabled]="(!postText().trim() && !pendingImage()) || saving() || uploadingImage()"
+                (click)="createPost()">
+          @if (saving() || uploadingImage()) {
+            <span class="material-symbols-rounded spin">autorenew</span>
+            {{ uploadingImage() ? 'Enviando imagem…' : 'Publicando…' }}
+          } @else {
+            <span class="material-symbols-rounded">send</span>
+            Publicar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feed -->
+  @if (loading()) {
+    <div class="feed-loading">
+      <span class="material-symbols-rounded spin">autorenew</span> Carregando mural…
+    </div>
+  }
+
+  @for (post of posts(); track post.id) {
+    <div class="post-card" [class.pinned]="post.isPinned">
+
+      @if (post.isPinned) {
+        <div class="pin-bar"><span class="material-symbols-rounded">push_pin</span> Fixado</div>
+      }
+
+      <div class="post-header">
+        <div class="post-avatar">{{ initials(post.author.name) }}</div>
+        <div class="post-meta">
+          <span class="post-author">{{ post.author.name }}</span>
+          <span class="post-time">{{ post.createdAt | date:'dd/MM/yy HH:mm' }}</span>
+        </div>
+        @if (isOwn(post.author.id)) {
+          <button class="icon-btn" (click)="deletePost(post.id)" title="Excluir">
+            <span class="material-symbols-rounded">delete</span>
+          </button>
+        }
+      </div>
+
+      <p class="post-content">{{ post.content }}</p>
+
+      @if (post.imageUrl) {
+        <img [src]="post.imageUrl" class="post-image" alt="imagem do post"
+             (click)="$any($event.target).requestFullscreen?.()" style="cursor:pointer" />
+      }
+
+      <!-- Reactions summary -->
+      <div class="reactions-bar">
+        @for (r of reactionSummary(post); track r.emoji) {
+          <button class="reaction-chip" [class.mine]="r.mine" (click)="react(post, r.emoji)">
+            {{ r.emoji }} {{ r.count }}
+          </button>
+        }
+
+        <div class="reaction-picker-wrap">
+          <button class="add-reaction-btn" (click)="emojiPickerFor.set(emojiPickerFor() === post.id ? null : post.id)" title="Reagir">
+            <span class="material-symbols-rounded">add_reaction</span>
+          </button>
+          @if (emojiPickerFor() === post.id) {
+            <div class="emoji-picker">
+              @for (e of emojis; track e) {
+                <button class="emoji-opt" (click)="react(post, e)">{{ e }}</button>
+              }
+            </div>
+          }
+        </div>
+
+        <button class="comment-toggle" (click)="toggleComments(post.id)">
+          <span class="material-symbols-rounded">chat_bubble</span>
+          {{ post.comments.length }} comentário(s)
+        </button>
+      </div>
+
+      <!-- Comments -->
+      @if (expandedComments().has(post.id)) {
+        <div class="comments-section">
+          @for (c of post.comments; track c.id) {
+            <div class="comment">
+              <div class="comment-avatar">{{ initials(c.author.name) }}</div>
+              <div class="comment-body">
+                <span class="comment-author">{{ c.author.name }}</span>
+                <p class="comment-text">{{ c.content }}</p>
+              </div>
+              @if (isOwn(c.author.id)) {
+                <button class="icon-btn-sm" (click)="deleteComment(post, c)" title="Excluir">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+              }
+            </div>
+          }
+
+          <div class="comment-input-row">
+            <div class="comment-avatar-me">{{ initials(me()?.name ?? 'U') }}</div>
+            <input
+              class="comment-input"
+              type="text"
+              [value]="commentTexts()[post.id] ?? ''"
+              (input)="setCommentText(post.id, $any($event.target).value)"
+              (keydown.enter)="sendComment(post)"
+              placeholder="Comentar… (Enter para enviar)"
+            />
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading() && posts().length === 0) {
+    <div class="feed-empty">
+      <span class="material-symbols-rounded">dynamic_feed</span>
+      <p>Nenhuma publicação ainda. Seja o primeiro!</p>
+    </div>
+  }
+
+  <!-- Load more -->
+  @if (!loading() && hasMore()) {
+    <div class="feed-load-more">
+      <button class="btn-load-more" (click)="loadMore()" [disabled]="loadingMore()">
+        @if (loadingMore()) {
+          <span class="material-symbols-rounded spin">autorenew</span>
+          Carregando…
+        } @else {
+          <span class="material-symbols-rounded">expand_more</span>
+          Carregar mais ({{ total() - posts().length }} restante(s))
+        }
+      </button>
+    </div>
+  }
+
+  <!-- All loaded indicator -->
+  @if (!loading() && posts().length > 0 && !hasMore()) {
+    <p class="feed-end-label">· {{ total() }} publicação(ões) no total ·</p>
+  }
+
+</div>

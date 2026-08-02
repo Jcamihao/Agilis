@@ -1,0 +1,314 @@
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex items-start justify-between gap-4 flex-wrap">
+    <div>
+      <h1 class="ag-page-title">Portfolio Executivo</h1>
+      <p class="ag-page-subtitle">Visão consolidada de todos os projetos</p>
+    </div>
+    <div class="flex gap-2">
+      <button (click)="load()" class="ag-btn ag-btn--secondary ag-btn--sm">
+        <span class="material-symbols-rounded text-base">refresh</span>
+        Atualizar
+      </button>
+      <button (click)="generateBrief()" [disabled]="briefLoading()" class="ag-btn ag-btn--primary ag-btn--sm">
+        @if (briefLoading()) {
+          <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+        } @else {
+          <span class="material-symbols-rounded text-base">auto_awesome</span>
+        }
+        Brief Estratégico IA
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  @if (kpis(); as k) {
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+      <div class="ag-card p-4 text-center">
+        <p class="text-2xl font-bold text-[--text-primary]">{{ k.totalProjects }}</p>
+        <p class="text-xs text-[--text-secondary] mt-1">Projetos Ativos</p>
+      </div>
+      <div class="ag-card p-4 text-center">
+        <p class="text-2xl font-bold" style="color:#6366f1">{{ k.avgProgress }}%</p>
+        <p class="text-xs text-[--text-secondary] mt-1">Progresso Médio</p>
+      </div>
+      <div class="ag-card p-4 text-center">
+        <p class="text-2xl font-bold" [style.color]="k.totalOverdue > 0 ? '#ef4444' : '#10b981'">{{ k.totalOverdue }}</p>
+        <p class="text-xs text-[--text-secondary] mt-1">Total Atrasadas</p>
+      </div>
+      <div class="ag-card p-4 text-center">
+        <p class="text-2xl font-bold" style="color:#10b981">{{ k.onTrack }}</p>
+        <p class="text-xs text-[--text-secondary] mt-1">No Prazo</p>
+      </div>
+      <div class="ag-card p-4 text-center">
+        <p class="text-2xl font-bold" [style.color]="k.atRisk > 0 ? '#f59e0b' : '#10b981'">{{ k.atRisk }}</p>
+        <p class="text-xs text-[--text-secondary] mt-1">Em Risco</p>
+      </div>
+    </div>
+  }
+
+  <!-- Search + Table -->
+  <div class="ag-card overflow-hidden">
+    <div class="p-4 border-b border-[--border]">
+      <input [ngModel]="search()" (ngModelChange)="search.set($event)"
+             type="search" placeholder="Filtrar projetos…"
+             class="ag-input max-w-xs" />
+    </div>
+
+    @if (loading()) {
+      <div class="ag-skeleton h-64"></div>
+    } @else if (!sorted().length) {
+      <div class="flex flex-col items-center justify-center py-16 text-[--text-secondary]">
+        <span class="material-symbols-rounded text-5xl mb-3">folder_off</span>
+        <p>Nenhum projeto encontrado</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-[--border] bg-[--surface-hover]">
+              <th class="px-4 py-3 text-left cursor-pointer" (click)="sort('name')">
+                <span class="flex items-center gap-1 font-semibold text-[--text-secondary]">
+                  Projeto
+                  @if (sortKey() === 'name') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
+                </span>
+              </th>
+              <th class="px-4 py-3 text-center cursor-pointer" (click)="sort('progress')">
+                <span class="flex items-center justify-center gap-1 font-semibold text-[--text-secondary]">
+                  Progresso
+                  @if (sortKey() === 'progress') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
+                </span>
+              </th>
+              <th class="px-4 py-3 text-center cursor-pointer" (click)="sort('overdue')">
+                <span class="flex items-center justify-center gap-1 font-semibold text-[--text-secondary]">
+                  Atrasadas
+                  @if (sortKey() === 'overdue') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
+                </span>
+              </th>
+              <th class="px-4 py-3 text-center cursor-pointer" (click)="sort('health')">
+                <span class="flex items-center justify-center gap-1 font-semibold text-[--text-secondary]">
+                  Health
+                  @if (sortKey() === 'health') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
+                </span>
+              </th>
+              <th class="px-4 py-3 text-center">Velocidade</th>
+              <th class="px-4 py-3 text-center cursor-pointer" (click)="sort('forecast')">
+                <span class="flex items-center justify-center gap-1 font-semibold text-[--text-secondary]">
+                  Previsão
+                  @if (sortKey() === 'forecast') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
+                </span>
+              </th>
+              <th class="px-4 py-3 text-center">Riscos</th>
+              <th class="px-4 py-3 text-center">OKR</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of sorted(); track p.id) {
+              <tr class="border-b border-[--border] hover:bg-[--surface-hover] transition-colors">
+                <!-- Project Name -->
+                <td class="px-4 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                         [style.background]="p.color + '20'">
+                      <span class="material-symbols-rounded text-lg" [style.color]="p.color">{{ p.icon }}</span>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-[--text-primary]">{{ p.name }}</p>
+                      <p class="text-xs text-[--text-secondary]">{{ p.total }} tarefas · {{ p.memberCount }} membros</p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Progress bar -->
+                <td class="px-4 py-4">
+                  <div class="flex flex-col items-center gap-1 min-w-[80px]">
+                    <span class="text-sm font-bold" [style.color]="progressColor(p.progress)">{{ p.progress }}%</span>
+                    <div class="w-full h-2 bg-[--border] rounded-full overflow-hidden">
+                      <div class="h-full rounded-full transition-all"
+                           [style.width]="p.progress + '%'"
+                           [style.background]="progressColor(p.progress)"></div>
+                    </div>
+                    <span class="text-[10px] text-[--text-secondary]">{{ p.done }}/{{ p.total }}</span>
+                  </div>
+                </td>
+
+                <!-- Overdue -->
+                <td class="px-4 py-4 text-center">
+                  @if (p.overdue > 0) {
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold"
+                          style="background:#fee2e2; color:#b91c1c;">
+                      <span class="material-symbols-rounded" style="font-size:12px">schedule</span>
+                      {{ p.overdue }}
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold"
+                          style="background:#d1fae5; color:#065f46;">
+                      <span class="material-symbols-rounded" style="font-size:12px">check_circle</span>
+                      0
+                    </span>
+                  }
+                </td>
+
+                <!-- Health Score -->
+                <td class="px-4 py-4 text-center">
+                  @if (p.health) {
+                    <div class="flex flex-col items-center">
+                      <span class="text-lg font-bold" [style.color]="healthColor(p.health.score)">{{ p.health.score }}</span>
+                      <span class="text-[10px] font-semibold" [style.color]="healthColor(p.health.score)">{{ p.health.grade }}</span>
+                    </div>
+                  } @else {
+                    <span class="text-[--text-secondary] text-xs">—</span>
+                  }
+                </td>
+
+                <!-- Velocity -->
+                <td class="px-4 py-4 text-center">
+                  <span class="text-sm font-semibold text-[--text-primary]">{{ p.dailyVelocity }}/d</span>
+                </td>
+
+                <!-- Forecast -->
+                <td class="px-4 py-4 text-center">
+                  @if (p.forecastDate) {
+                    <div class="flex flex-col items-center">
+                      <span class="text-sm font-semibold text-[--text-primary]">{{ p.forecastDate }}</span>
+                      <span class="text-[10px] text-[--text-secondary]">{{ forecastLabel(p.forecastDays) }}</span>
+                    </div>
+                  } @else {
+                    <span class="text-[--text-secondary] text-xs">Sem dados</span>
+                  }
+                </td>
+
+                <!-- Risk count -->
+                <td class="px-4 py-4 text-center">
+                  @if (p.riskCount > 0) {
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold"
+                          style="background:#fff7ed; color:#c2410c;">
+                      <span class="material-symbols-rounded" style="font-size:11px">warning</span>
+                      {{ p.riskCount }}
+                    </span>
+                  } @else {
+                    <span class="text-[--text-secondary] text-xs">—</span>
+                  }
+                </td>
+
+                <!-- OKR progress -->
+                <td class="px-4 py-4 text-center">
+                  @if (p.okrProgress !== null) {
+                    <span class="text-sm font-semibold" style="color:#ec4899">{{ p.okrProgress }}%</span>
+                  } @else {
+                    <span class="text-[--text-secondary] text-xs">—</span>
+                  }
+                </td>
+
+                <!-- Actions -->
+                <td class="px-4 py-4 text-right">
+                  <a [routerLink]="['/projects', p.id, 'kanban']"
+                     class="ag-btn ag-btn--secondary ag-btn--xs">
+                    <span class="material-symbols-rounded text-sm">open_in_new</span>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- Strategic Brief Panel -->
+  @if (showBrief()) {
+    <div class="ag-card p-6 animate-fade-in-up">
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl flex items-center justify-center" style="background:#6366f115">
+            <span class="material-symbols-rounded" style="color:#6366f1">auto_awesome</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-[--text-primary]">Brief Estratégico IA</h3>
+            @if (brief()) {
+              <p class="text-xs text-[--text-secondary]">Gerado em {{ brief().generatedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+            }
+          </div>
+        </div>
+        <button (click)="showBrief.set(false)" class="text-[--text-secondary] hover:text-[--text-primary]">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      @if (briefLoading()) {
+        <div class="space-y-3">
+          <div class="ag-skeleton h-5 rounded w-3/4"></div>
+          <div class="ag-skeleton h-5 rounded w-full"></div>
+          <div class="ag-skeleton h-5 rounded w-2/3"></div>
+          <div class="ag-skeleton h-5 rounded w-4/5"></div>
+          <div class="ag-skeleton h-5 rounded w-1/2"></div>
+        </div>
+      } @else if (brief(); as b) {
+        <!-- Metrics bar -->
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6 p-4 rounded-xl" style="background:var(--surface-hover)">
+          <div class="text-center">
+            <p class="text-lg font-bold text-[--text-primary]">{{ b.metrics.totalTasks }}</p>
+            <p class="text-[10px] text-[--text-secondary]">Total tarefas</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-bold" style="color:#10b981">{{ b.metrics.completionRate }}%</p>
+            <p class="text-[10px] text-[--text-secondary]">Conclusão</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-bold" style="color:#ef4444">{{ b.metrics.overdueTasks }}</p>
+            <p class="text-[10px] text-[--text-secondary]">Atrasadas</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-bold" style="color:#6366f1">{{ b.metrics.weeklyVelocity }}</p>
+            <p class="text-[10px] text-[--text-secondary]">Vel/semana</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-bold text-[--text-primary]">{{ b.metrics.activeProjects }}</p>
+            <p class="text-[10px] text-[--text-secondary]">Projetos</p>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-bold text-[--text-primary]">{{ b.metrics.members }}</p>
+            <p class="text-[10px] text-[--text-secondary]">Membros</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Summary -->
+          <div class="brief-section">
+            <h4 class="brief-section-title">
+              <span class="material-symbols-rounded">summarize</span> Resumo Executivo
+            </h4>
+            <p class="text-sm text-[--text-primary] leading-relaxed whitespace-pre-wrap">{{ b.summary }}</p>
+          </div>
+
+          <!-- Risks -->
+          <div class="brief-section" style="--brief-accent: #ef4444">
+            <h4 class="brief-section-title">
+              <span class="material-symbols-rounded">warning</span> Principais Riscos
+            </h4>
+            <p class="text-sm text-[--text-primary] leading-relaxed whitespace-pre-wrap">{{ b.risks }}</p>
+          </div>
+
+          <!-- Opportunities -->
+          <div class="brief-section" style="--brief-accent: #10b981">
+            <h4 class="brief-section-title">
+              <span class="material-symbols-rounded">lightbulb</span> Oportunidades
+            </h4>
+            <p class="text-sm text-[--text-primary] leading-relaxed whitespace-pre-wrap">{{ b.opportunities }}</p>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="brief-section" style="--brief-accent: #6366f1">
+            <h4 class="brief-section-title">
+              <span class="material-symbols-rounded">checklist</span> Recomendações
+            </h4>
+            <p class="text-sm text-[--text-primary] leading-relaxed whitespace-pre-wrap">{{ b.recommendations }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

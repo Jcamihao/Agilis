@@ -17,7 +17,7 @@
         </div>
       } @else if (comments().length === 0) {
         <div class="text-center py-6">
-          <span class="material-symbols-rounded text-3xl text-slate-300">chat_bubble_outline</span>
+          <span class="material-symbols-rounded text-3xl text-slate-300">chat_bubble</span>
           <p class="text-sm text-[--text-tertiary] mt-1">Nenhum comentário ainda</p>
         </div>
       } @else {
@@ -96,21 +96,23 @@
           </p>
           <div class="flex flex-wrap gap-2">
             @for (att of attachments(); track att.id) {
-              <div class="group relative flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm hover:border-slate-300 transition-colors">
+              <div class="group relative flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm hover:border-slate-300 transition-colors cursor-pointer"
+                   (click)="openAttachment(att.fileUrl)">
                 @if (isImage(att.mimeType)) {
                   <img [src]="att.fileUrl" [alt]="att.fileName"
-                       class="w-8 h-8 rounded object-cover flex-shrink-0 cursor-pointer"
-                       (click)="openAttachment(att.fileUrl)" />
+                       class="w-10 h-10 rounded object-cover flex-shrink-0" />
                 } @else {
-                  <span class="material-symbols-rounded text-primary-500 text-lg">description</span>
+                  <span class="material-symbols-rounded text-primary-500 text-xl">
+                    {{ att.mimeType === 'application/pdf' ? 'picture_as_pdf' : 'description' }}
+                  </span>
                 }
                 <div class="min-w-0">
-                  <p class="text-xs font-medium text-[--text-primary] truncate max-w-32">{{ att.fileName }}</p>
-                  <p class="text-[10px] text-[--text-tertiary]">{{ formatFileSize(att.fileSize) }}</p>
+                  <p class="text-xs font-medium text-[--text-primary] truncate max-w-36">{{ att.fileName }}</p>
+                  <p class="text-[10px] text-[--text-tertiary]">{{ formatFileSize(att.fileSize) }} · {{ att.uploadedBy.name }}</p>
                 </div>
-                <button (click)="deleteAttachment(att.id)"
+                <button (click)="$event.stopPropagation(); deleteAttachment(att.id)"
                         class="opacity-0 group-hover:opacity-100 transition-opacity text-[--text-tertiary] hover:text-red-500 ml-1">
-                  <span class="material-symbols-rounded text-sm">close</span>
+                  <span class="material-symbols-rounded text-sm">delete</span>
                 </button>
               </div>
             }
@@ -126,12 +128,20 @@
         <div class="flex-1 relative">
           <!-- Pending files preview -->
           @if (pendingFiles().length > 0) {
-            <div class="flex flex-wrap gap-1.5 mb-2">
+            <div class="flex flex-wrap gap-2 mb-2">
               @for (file of pendingFiles(); track $index) {
-                <div class="flex items-center gap-1.5 bg-primary-50 border border-primary-200 rounded-lg px-2 py-1 text-xs">
-                  <span class="material-symbols-rounded text-primary-500 text-sm">attach_file</span>
-                  <span class="text-primary-700 font-medium max-w-24 truncate">{{ file.name }}</span>
-                  <button (click)="removePendingFile($index)" class="text-primary-400 hover:text-primary-700 ml-0.5">
+                <div class="group relative flex items-center gap-2 bg-primary-50 border border-primary-200 rounded-lg px-2 py-1.5 text-xs">
+                  @if (pendingPreview(file)) {
+                    <img [src]="pendingPreview(file)" [alt]="file.name"
+                         class="w-8 h-8 rounded object-cover flex-shrink-0" />
+                  } @else {
+                    <span class="material-symbols-rounded text-primary-500 text-base">description</span>
+                  }
+                  <div class="min-w-0">
+                    <span class="text-primary-700 font-medium max-w-24 truncate block">{{ file.name }}</span>
+                    <span class="text-primary-400 text-[10px]">{{ formatFileSize(file.size) }}</span>
+                  </div>
+                  <button (click)="removePendingFile($index)" class="text-primary-400 hover:text-red-500 transition-colors ml-0.5">
                     <span class="material-symbols-rounded text-xs">close</span>
                   </button>
                 </div>

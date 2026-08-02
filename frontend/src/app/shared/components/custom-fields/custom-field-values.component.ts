@@ -4,8 +4,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { CustomFieldsService } from '../../../core/services/custom-fields.service';
-import { CustomField, TaskCustomFieldEntry } from '../../../core/models';
+import { CustomField, CustomFieldValue, TaskCustomFieldEntry } from '../../../core/models';
 
 interface FieldState {
   field: CustomField;
@@ -38,13 +39,21 @@ export class CustomFieldValuesComponent implements OnChanges {
   }
 
   load() {
-    this.svc.list(this.projectId).subscribe({
-      next: (res: any) => {
-        const fields: CustomField[] = res?.data ?? res ?? [];
+    this.loading.set(true);
+    forkJoin([
+      this.svc.list(this.projectId),
+      this.svc.getTaskValues(this.taskId),
+    ]).subscribe({
+      next: ([fieldsRaw, valueObjs]: [any, any]) => {
+        const fields: CustomField[] = fieldsRaw?.data ?? fieldsRaw ?? [];
         const valMap = new Map<string, string | null>();
-        for (const v of this.initialValues ?? []) valMap.set(v.fieldId, v.value);
 
-        this.states.set(fields.map(f => ({
+        // seed from initialValues (may already be present on the task object)
+        for (const v of this.initialValues ?? []) valMap.set(v.fieldId, v.value);
+        // override with live API values
+        for (const v of (valueObjs as CustomFieldValue[])) valMap.set(v.customFieldId, v.value);
+
+        this.states.set(fields.map((f: CustomField) => ({
           field:   f,
           value:   valMap.get(f.id) ?? null,
           editing: false,
@@ -53,7 +62,7 @@ export class CustomFieldValuesComponent implements OnChanges {
         this.loading.set(false);
         this.cdr.markForCheck();
       },
-      error: () => { this.loading.set(false); },
+      error: () => { this.loading.set(false); this.cdr.markForCheck(); },
     });
   }
 

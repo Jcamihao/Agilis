@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
-import { CreateTaskDto, UpdateTaskDto, MoveTaskDto, CreateSubtaskDto, AddDependencyDto } from './dto/create-task.dto';
+import { CreateTaskDto, UpdateTaskDto, MoveTaskDto, CreateSubtaskDto, AddDependencyDto, BulkUpdateTasksDto } from './dto/create-task.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -49,6 +49,12 @@ export class TasksController {
   @ApiOperation({ summary: 'Mover tarefa no kanban' })
   moveTask(@Param('id') id: string, @Body() dto: MoveTaskDto, @CurrentUser('id') userId: string) {
     return this.tasksService.moveTask(id, dto, userId);
+  }
+
+  @Patch('bulk')
+  @ApiOperation({ summary: 'Atualizar múltiplas tarefas' })
+  bulkUpdate(@Body() dto: BulkUpdateTasksDto, @CurrentUser('id') userId: string) {
+    return this.tasksService.bulkUpdate(dto, userId);
   }
 
   @Delete(':id')

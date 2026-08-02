@@ -45,8 +45,8 @@ export class NotificationsService {
       const token = this.auth.token();
       if (!token) { observer.complete(); return; }
 
-      // EventSource não suporta headers — usamos ?token= como workaround
-      const url = `${environment.apiUrl}/notifications/stream`;
+      // EventSource não suporta Authorization header — token via query param
+      const url = `${environment.apiUrl}/notifications/stream?token=${encodeURIComponent(token)}`;
       this.eventSource = new EventSource(url);
 
       this.eventSource.onmessage = (event) => {

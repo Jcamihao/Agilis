@@ -14,6 +14,21 @@ export class ChatController {
     return this.chatService.listRooms(req.user.companyId);
   }
 
+  @Post('rooms/channel')
+  createChannel(@Req() req: any, @Body('name') name: string) {
+    return this.chatService.createChannel(req.user.companyId, name);
+  }
+
+  @Post('rooms/direct/:targetUserId')
+  getOrCreateDirect(@Req() req: any, @Param('targetUserId') targetUserId: string) {
+    return this.chatService.getOrCreateDirect(req.user.companyId, req.user.userId, targetUserId);
+  }
+
+  @Delete('rooms/:roomId')
+  deleteRoom(@Param('roomId') roomId: string) {
+    return this.chatService.deleteRoom(roomId);
+  }
+
   @Post('rooms/general')
   getOrCreateGeneral(@Req() req: any) {
     return this.chatService.getOrCreateGeneralRoom(req.user.companyId);

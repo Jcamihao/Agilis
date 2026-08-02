@@ -320,29 +320,6 @@
                           <input type="text" formControlName="subject" placeholder="Assunto" class="ag-input text-sm py-2 w-full">
                         </div>
                       }
-                      @if (getActionType(i) === 'SEND_WHATSAPP') {
-                        <div formGroupName="params" class="space-y-2">
-                          <div class="flex flex-col gap-1">
-                            <label class="text-xs font-semibold text-[--text-secondary]">Enviar para</label>
-                            <select formControlName="target" class="ag-input text-sm py-2">
-                              <option value="assignee">Responsável da tarefa</option>
-                              <option value="creator">Criador da tarefa</option>
-                            </select>
-                          </div>
-                          <div class="flex flex-col gap-1">
-                            <label class="text-xs font-semibold text-[--text-secondary]">
-                              Mensagem <span class="font-normal text-[--text-tertiary]">(opcional — usa padrão se vazio)</span>
-                            </label>
-                            <textarea formControlName="message" rows="3"
-                                      placeholder="Use {taskTitle}, {priority}, {status} como variáveis"
-                                      class="ag-input text-sm py-2 w-full resize-none"></textarea>
-                          </div>
-                          <p class="text-[11px] text-[--text-tertiary] flex items-start gap-1">
-                            <span class="material-symbols-rounded text-sm shrink-0 mt-0.5">info</span>
-                            O usuário precisa ter o campo <strong>Telefone</strong> preenchido no perfil (com prefixo +55).
-                          </p>
-                        </div>
-                      }
                       @if (getActionType(i) === 'SEND_TELEGRAM') {
                         <div formGroupName="params" class="space-y-2">
                           <!-- Destinatário -->

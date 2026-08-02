@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SprintsService } from './sprints.service';
 import { CreateSprintDto } from './dto/create-sprint.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -21,6 +21,12 @@ export class SprintsController {
   @Post()
   create(@Body() dto: CreateSprintDto, @CurrentUser('id') userId: string) {
     return this.sprintsService.create(dto, userId);
+  }
+
+  @Get(':id/burndown')
+  @ApiOperation({ summary: 'Dados de burndown (ideal vs actual) para SVG chart' })
+  burndown(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.sprintsService.getBurndown(id, userId);
   }
 
   @Patch(':id/status')

@@ -46,4 +46,16 @@ export class AiService {
   getConversation(id: string) {
     return this.api.get<AiConversationDetail>(`/ai/conversations/${id}`);
   }
+
+  strategicBrief(companyId: string) {
+    return this.api.post<{
+      generatedAt: string;
+      summary: string;
+      risks: string;
+      opportunities: string;
+      recommendations: string;
+      teamHealth: string;
+      metrics: Record<string, number>;
+    }>('/ai/strategic-brief', { companyId });
+  }
 }

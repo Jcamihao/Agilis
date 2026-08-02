@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { Process } from '../models';
+import { Process, ProcessInstanceStep } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class ProcessCenterService {
@@ -24,5 +24,9 @@ export class ProcessCenterService {
 
   start(id: string) {
     return this.api.post<any>(`/process-center/${id}/start`, {});
+  }
+
+  updateInstanceStep(instanceStepId: string, data: { status?: string; notes?: string; answers?: { itemId: string; isChecked: boolean }[] }) {
+    return this.api.patch<ProcessInstanceStep>(`/process-center/instances/${instanceStepId}/step`, data);
   }
 }

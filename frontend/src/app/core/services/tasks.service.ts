@@ -13,6 +13,10 @@ export class TasksService {
   create(data: Partial<Task>) { return this.api.post<Task>('/tasks', data); }
   update(id: string, data: Partial<Task>) { return this.api.put<Task>(`/tasks/${id}`, data); }
 
+  bulkUpdate(ids: string[], updates: { status?: string; priority?: string; assigneeId?: string | null; sprintId?: string | null }) {
+    return this.api.patch<{ count: number }>('/tasks/bulk', { ids, ...updates });
+  }
+
   moveTask(id: string, status: string, position: number) {
     return this.api.patch<Task>(`/tasks/${id}/move`, { status, position });
   }

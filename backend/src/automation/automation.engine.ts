@@ -262,8 +262,6 @@ export class AutomationEngine {
       case AutomationActionType.SEND_EMAIL:
         return this.actionSendEmail(task, action.params, event?.actor);
 
-      case AutomationActionType.SEND_WHATSAPP:
-        return { skipped: true, reason: 'WhatsApp integration removed' };
 
       case AutomationActionType.SEND_TELEGRAM:
         return this.actionSendTelegram(task, action.params, event);

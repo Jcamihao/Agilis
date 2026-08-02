@@ -68,3 +68,67 @@
     transition: width 500ms ease;
   }
 }
+
+// ── Onboarding Banner ─────────────────────────────────────
+.onboarding-banner {
+  position: relative;
+  background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 100%);
+  border: 1px solid rgba(70,72,212,.18);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+}
+.onboarding-dismiss {
+  position: absolute; top: .75rem; right: .75rem;
+  background: transparent; border: none; cursor: pointer;
+  color: #94a3b8; border-radius: 6px; padding: .15rem;
+  display: flex; align-items: center;
+  &:hover { background: rgba(0,0,0,.06); }
+}
+.onboarding-top {
+  display: flex; align-items: flex-start; gap: .875rem; margin-bottom: 1rem;
+}
+.onboarding-wave { font-size: 1.75rem; color: #4648d4; flex-shrink: 0; }
+.onboarding-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin: 0 0 .2rem; }
+.onboarding-sub   { font-size: .825rem; color: #475569; margin: 0; }
+.onboarding-steps {
+  display: flex; gap: .75rem; flex-wrap: wrap;
+}
+.onboarding-step {
+  display: flex; align-items: center; gap: .5rem;
+  background: #fff; border: 1px solid rgba(70,72,212,.2);
+  border-radius: 10px; padding: .6rem 1rem;
+  text-decoration: none; color: #1e293b; flex: 1; min-width: 160px;
+  font-size: .875rem; font-weight: 500;
+  transition: box-shadow .15s, transform .15s;
+  &:hover { box-shadow: 0 4px 12px rgba(70,72,212,.12); transform: translateY(-1px); }
+}
+.step-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #4648d4; color: #fff; font-size: .7rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.step-icon  { font-size: 1rem; color: #4648d4; }
+.step-label { flex: 1; }
+.step-arrow { font-size: 1rem; color: #94a3b8; }
+
+// ── Quick Actions ─────────────────────────────────────────
+.quick-actions-bar {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.qa-label {
+  font-size: .75rem; font-weight: 600; color: #94a3b8;
+  text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
+}
+.qa-chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .35rem .875rem; border-radius: 999px;
+  border: 1px solid #e2e8f0; background: #fff;
+  font-size: .8rem; font-weight: 500; color: #475569;
+  text-decoration: none; transition: all .15s;
+  .material-symbols-rounded { font-size: .95rem; color: #94a3b8; }
+  &:hover {
+    border-color: rgba(70,72,212,.3); background: rgba(70,72,212,.04);
+    color: #4648d4;
+    .material-symbols-rounded { color: #4648d4; }
+  }
+}

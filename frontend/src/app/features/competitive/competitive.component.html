@@ -13,7 +13,7 @@
   </div>
 
   <!-- ═══ Toast ═══ -->
-  @if (toast()!.msg) {
+  @if (toast()) {
     <div class="fixed top-4 right-4 z-[999] px-4 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2 animate-fade-in-up"
          [class.bg-emerald-600]="toast()!.type === 'success'"
          [class.bg-red-600]="toast()!.type === 'error'"

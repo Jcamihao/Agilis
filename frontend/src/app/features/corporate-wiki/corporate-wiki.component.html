@@ -1,0 +1,158 @@
+<div class="cwiki-layout">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+  <aside class="cwiki-sidebar">
+    <div class="sidebar-header">
+      <span class="material-symbols-rounded sidebar-icon">menu_book</span>
+      <span class="sidebar-title">Wiki Corporativa</span>
+    </div>
+
+    <div class="new-page-wrap">
+      @if (!showNew()) {
+        <button class="new-page-btn" (click)="showNew.set(true)">
+          <span class="material-symbols-rounded">add</span> Nova página
+        </button>
+      } @else {
+        <div class="new-page-form">
+          <input
+            class="new-page-input"
+            type="text"
+            [value]="newTitle()"
+            (input)="newTitle.set($any($event.target).value)"
+            (keydown.enter)="createPage()"
+            placeholder="Título da página…"
+            autofocus
+          />
+          <div class="new-page-btns">
+            <button class="btn-ok" [disabled]="!newTitle().trim() || saving()" (click)="createPage()">
+              <span class="material-symbols-rounded">check</span>
+            </button>
+            <button class="btn-cancel" (click)="showNew.set(false); newTitle.set('')">
+              <span class="material-symbols-rounded">close</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="sidebar-loading">
+        <span class="material-symbols-rounded spin">autorenew</span>
+      </div>
+    }
+
+    <nav class="page-tree">
+      @for (page of rootPages(); track page.id) {
+        <div class="tree-item-wrap">
+          <button
+            class="tree-item"
+            [class.active]="activePage()?.id === page.id"
+            (click)="openPage(page)"
+          >
+            <span class="page-icon material-icons">{{ page.icon }}</span>
+            <span class="page-title">{{ page.title }}</span>
+            <button class="del-page" (click)="$event.stopPropagation(); deletePage(page)" title="Excluir">
+              <span class="material-symbols-rounded">delete</span>
+            </button>
+          </button>
+
+          @for (child of childrenOf(page.id); track child.id) {
+            <button
+              class="tree-item child"
+              [class.active]="activePage()?.id === child.id"
+              (click)="openPage(child)"
+            >
+              <span class="page-icon material-icons">{{ child.icon }}</span>
+              <span class="page-title">{{ child.title }}</span>
+              <button class="del-page" (click)="$event.stopPropagation(); deletePage(child)" title="Excluir">
+                <span class="material-symbols-rounded">delete</span>
+              </button>
+            </button>
+          }
+        </div>
+      }
+
+      @if (!loading() && pages().length === 0) {
+        <p class="sidebar-empty">Nenhuma página ainda.</p>
+      }
+    </nav>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────────────────────────── -->
+  <main class="cwiki-main">
+
+    @if (activePage()) {
+      @if (!editing()) {
+        <!-- View mode -->
+        <div class="page-topbar">
+          <span class="topbar-icon material-icons">{{ activePage()!.icon }}</span>
+          <h1 class="page-heading">{{ activePage()!.title }}</h1>
+          <button class="btn-edit" (click)="startEdit()">
+            <span class="material-symbols-rounded">edit</span> Editar
+          </button>
+        </div>
+
+        <div class="page-meta">
+          Atualizado por <strong>{{ activePage()!.updatedBy.name }}</strong>
+          em {{ activePage()!.updatedAt | date:'dd/MM/yy HH:mm' }}
+        </div>
+
+        <div class="page-content">
+          @if (activePage()!.content) {
+            <pre class="content-pre">{{ activePage()!.content }}</pre>
+          } @else {
+            <p class="content-empty">Esta página está vazia. Clique em <strong>Editar</strong> para adicionar conteúdo.</p>
+          }
+        </div>
+
+        <!-- Revisions -->
+        @if (activePage()!.revisions && activePage()!.revisions!.length > 0) {
+          <div class="revisions-section">
+            <h3 class="revisions-title">
+              <span class="material-symbols-rounded">history</span> Histórico de versões
+            </h3>
+            @for (rev of activePage()!.revisions!; track rev.id) {
+              <div class="revision-row">
+                <span class="rev-author">{{ rev.author.name }}</span>
+                <span class="rev-time">{{ rev.createdAt | date:'dd/MM/yy HH:mm' }}</span>
+                <span class="rev-title">{{ rev.title }}</span>
+              </div>
+            }
+          </div>
+        }
+
+      } @else {
+        <!-- Edit mode -->
+        <div class="edit-topbar">
+          <input
+            class="edit-title-input"
+            type="text"
+            [value]="editTitle()"
+            (input)="editTitle.set($any($event.target).value)"
+            placeholder="Título da página"
+          />
+          <div class="edit-actions">
+            <button class="btn-cancel" (click)="cancelEdit()">Cancelar</button>
+            <button class="btn-save" [disabled]="saving()" (click)="saveEdit()">
+              {{ saving() ? 'Salvando…' : 'Salvar' }}
+            </button>
+          </div>
+        </div>
+
+        <textarea
+          class="edit-content"
+          [value]="editContent()"
+          (input)="editContent.set($any($event.target).value)"
+          placeholder="Escreva o conteúdo da página…"
+        ></textarea>
+      }
+
+    } @else {
+      <div class="empty-state">
+        <span class="material-symbols-rounded">menu_book</span>
+        <p>Selecione uma página ou crie uma nova</p>
+      </div>
+    }
+
+  </main>
+</div>

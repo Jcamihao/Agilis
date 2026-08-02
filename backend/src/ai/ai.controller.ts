@@ -88,4 +88,10 @@ export class AiController {
     return this.service.suggestAssignee(taskId).then((suggestion) => ({ suggestion }));
   }
 
+  @Post('strategic-brief')
+  @ApiOperation({ summary: 'Gerar brief estratégico executivo com IA' })
+  strategicBrief(@Body('companyId') companyId: string) {
+    return this.service.generateStrategicBrief(companyId);
+  }
+
 }

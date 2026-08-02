@@ -1,0 +1,130 @@
+<div class="ow-overlay">
+  <div class="ow-modal">
+
+    <!-- Progress -->
+    <div class="ow-progress">
+      @for (n of [1,2,3]; track n) {
+        <div class="ow-step" [class.ow-step--active]="step() === n" [class.ow-step--done]="step() > n">
+          @if (step() > n) {
+            <span class="material-symbols-rounded" style="font-size:14px;">check</span>
+          } @else {
+            {{ n }}
+          }
+        </div>
+        @if (n < 3) { <div class="ow-line" [class.ow-line--done]="step() > n"></div> }
+      }
+    </div>
+
+    <!-- Header -->
+    <div class="ow-header">
+      <span class="ow-badge">Passo {{ step() }} de 3</span>
+      <h2 class="ow-title">{{ stepLabel }}</h2>
+      <p class="ow-desc">{{ stepDesc }}</p>
+    </div>
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="ow-error">
+        <span class="material-symbols-rounded">error</span>
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Step 1: Company -->
+    @if (step() === 1) {
+      <form [formGroup]="companyForm" (ngSubmit)="createCompany()" class="ow-form">
+        <div class="ow-field">
+          <label class="ow-label">Nome da empresa</label>
+          <input formControlName="name" type="text" class="ow-input"
+                 placeholder="Ex: Acme Corp, Minha Startup…"
+                 autocomplete="off" autofocus />
+        </div>
+        <div class="ow-actions">
+          <button type="submit" class="ow-btn ow-btn--primary" [disabled]="companyForm.invalid || saving()">
+            @if (saving()) {
+              <div class="ow-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded">arrow_forward</span>
+            }
+            Continuar
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Step 2: Project -->
+    @if (step() === 2) {
+      <form [formGroup]="projectForm" (ngSubmit)="createProject()" class="ow-form">
+        <div class="ow-field">
+          <label class="ow-label">Nome do projeto</label>
+          <input formControlName="name" type="text" class="ow-input"
+                 placeholder="Ex: Site Institucional, App Mobile…"
+                 autocomplete="off" autofocus />
+        </div>
+
+        <div class="ow-field">
+          <label class="ow-label">Ícone</label>
+          <div class="ow-icon-grid">
+            @for (icon of ICONS; track icon) {
+              <button type="button" class="ow-icon-btn"
+                      [class.ow-icon-btn--selected]="selectedIcon() === icon"
+                      (click)="selectedIcon.set(icon)">
+                <span class="material-symbols-rounded">{{ icon }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="ow-field">
+          <label class="ow-label">Cor</label>
+          <div class="ow-color-row">
+            @for (color of COLORS; track color) {
+              <button type="button" class="ow-color-swatch"
+                      [class.ow-color-swatch--selected]="selectedColor() === color"
+                      [style.background]="color"
+                      (click)="selectedColor.set(color)">
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="ow-actions">
+          <button type="submit" class="ow-btn ow-btn--primary" [disabled]="projectForm.invalid || saving()">
+            @if (saving()) {
+              <div class="ow-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded">arrow_forward</span>
+            }
+            Continuar
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Step 3: Task -->
+    @if (step() === 3) {
+      <form [formGroup]="taskForm" (ngSubmit)="createTask()" class="ow-form">
+        <div class="ow-field">
+          <label class="ow-label">Título da primeira tarefa</label>
+          <input formControlName="title" type="text" class="ow-input"
+                 placeholder="Ex: Levantar requisitos, Criar wireframes…"
+                 autocomplete="off" autofocus />
+        </div>
+        <div class="ow-actions">
+          <button type="button" class="ow-btn ow-btn--ghost" (click)="skip()">
+            Pular
+          </button>
+          <button type="submit" class="ow-btn ow-btn--primary" [disabled]="taskForm.invalid || saving()">
+            @if (saving()) {
+              <div class="ow-spin"></div>
+            } @else {
+              <span class="material-symbols-rounded">check</span>
+            }
+            Concluir
+          </button>
+        </div>
+      </form>
+    }
+
+  </div>
+</div>

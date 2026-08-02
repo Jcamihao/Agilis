@@ -165,6 +165,11 @@ export class CalendarComponent implements OnInit {
     }
   }
 
+  downloadIcal() {
+    const companyId = this.auth.currentCompanyId();
+    if (companyId) this.calendarService.downloadIcal(companyId);
+  }
+
   private getTasksForDay(date: Date): Task[] {
     return this.allTasks().filter((t) => {
       if (!t.dueDate) return false;

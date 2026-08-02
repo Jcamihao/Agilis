@@ -38,6 +38,70 @@
     </div>
   }
 
+  <!-- ── Onboarding Banner (new users) ─────────────────── -->
+  @if (isNewUser()) {
+    <div class="onboarding-banner animate-fade-in">
+      <button class="onboarding-dismiss" (click)="dismissOnboarding()" title="Fechar">
+        <span class="material-symbols-rounded text-sm">close</span>
+      </button>
+      <div class="onboarding-top">
+        <span class="material-symbols-rounded onboarding-wave">waving_hand</span>
+        <div>
+          <h3 class="onboarding-title">Bem-vindo ao Agilis, {{ firstName() || 'usuário' }}!</h3>
+          <p class="onboarding-sub">Gerencie projetos, tarefas e equipes — tudo em um só lugar. Comece em 3 passos:</p>
+        </div>
+      </div>
+      <div class="onboarding-steps">
+        <a routerLink="/projects" class="onboarding-step">
+          <span class="step-num">1</span>
+          <span class="material-symbols-rounded step-icon">rocket_launch</span>
+          <span class="step-label">Crie um Projeto</span>
+          <span class="material-symbols-rounded step-arrow">chevron_right</span>
+        </a>
+        <a routerLink="/teams" class="onboarding-step">
+          <span class="step-num">2</span>
+          <span class="material-symbols-rounded step-icon">group_add</span>
+          <span class="step-label">Convide sua Equipe</span>
+          <span class="material-symbols-rounded step-arrow">chevron_right</span>
+        </a>
+        <a routerLink="/my-tasks" class="onboarding-step">
+          <span class="step-num">3</span>
+          <span class="material-symbols-rounded step-icon">task_alt</span>
+          <span class="step-label">Atribua Tarefas</span>
+          <span class="material-symbols-rounded step-arrow">chevron_right</span>
+        </a>
+      </div>
+    </div>
+  }
+
+  <!-- ── Quick Actions ─────────────────────────────────── -->
+  @if (!customizing()) {
+    <div class="quick-actions-bar">
+      <span class="qa-label">Acesso rápido</span>
+      <a routerLink="/projects" class="qa-chip">
+        <span class="material-symbols-rounded">rocket_launch</span> Projetos
+      </a>
+      <a routerLink="/my-tasks" class="qa-chip">
+        <span class="material-symbols-rounded">task_alt</span> Minhas Tarefas
+      </a>
+      <a routerLink="/teams" class="qa-chip">
+        <span class="material-symbols-rounded">group</span> Equipes
+      </a>
+      <a routerLink="/okrs" class="qa-chip">
+        <span class="material-symbols-rounded">flag</span> OKRs
+      </a>
+      <a routerLink="/approvals" class="qa-chip">
+        <span class="material-symbols-rounded">approval</span> Aprovações
+      </a>
+      <a routerLink="/insights" class="qa-chip">
+        <span class="material-symbols-rounded">lightbulb</span> Insights IA
+      </a>
+      <a routerLink="/sla" class="qa-chip">
+        <span class="material-symbols-rounded">timer</span> SLA
+      </a>
+    </div>
+  }
+
   <!-- ── Row 1: Stat Cards ──────────────────────────────── -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
 

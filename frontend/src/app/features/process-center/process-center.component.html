@@ -1,0 +1,329 @@
+<div class="pc-page" (click)="closeMenu()">
+
+  <!-- ═══ Header ═══ -->
+  <div class="pc-header">
+    <div class="pc-header__left">
+      <span class="material-symbols-rounded text-[28px]" style="color:#818cf8">account_tree</span>
+      <div>
+        <h1 class="pc-title">Centro de Processos</h1>
+        <p class="pc-subtitle">Modelos de fluxo de trabalho reutilizáveis</p>
+      </div>
+    </div>
+    <button class="ag-btn ag-btn--primary" (click)="showCreate.set(!showCreate()); $event.stopPropagation()">
+      <span class="material-symbols-rounded text-[18px]">add</span>
+      Novo processo
+    </button>
+  </div>
+
+  <!-- ═══ Create Form ═══ -->
+  @if (showCreate()) {
+    <div class="pc-create-card" (click)="$event.stopPropagation()">
+      <h3 class="text-sm font-semibold text-[--text-primary] mb-3">Novo processo</h3>
+      <div class="flex gap-3 flex-wrap">
+        <input [(ngModel)]="newName" placeholder="Nome do processo *" class="ag-input flex-1 min-w-[200px]" />
+        <input [(ngModel)]="newDesc" placeholder="Descrição (opcional)" class="ag-input flex-1 min-w-[200px]" />
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-[--text-secondary]">Cor</label>
+          <input type="color" [(ngModel)]="newColor" class="w-8 h-8 rounded cursor-pointer border-0" />
+        </div>
+      </div>
+      <div class="flex gap-2 mt-3 justify-end">
+        <button class="ag-btn ag-btn--ghost text-sm" (click)="showCreate.set(false)">Cancelar</button>
+        <button class="ag-btn ag-btn--primary text-sm" (click)="createProcess()" [disabled]="!newName.trim()">Criar processo</button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ Main Layout ═══ -->
+  <div class="pc-layout">
+
+    <!-- ── Left: Process List ── -->
+    <aside class="pc-list">
+      <p class="pc-section-label">Processos ({{ processes().length }})</p>
+
+      @if (loading()) {
+        <div class="pc-spinner-wrap">
+          <div class="ag-spinner"></div>
+        </div>
+      } @else if (processes().length === 0) {
+        <div class="pc-empty">
+          <span class="material-symbols-rounded text-[40px]" style="color:#334155">account_tree</span>
+          <p>Nenhum processo criado ainda</p>
+          <button class="ag-btn ag-btn--primary text-sm mt-2" (click)="showCreate.set(true)">Criar primeiro processo</button>
+        </div>
+      } @else {
+        @for (p of processes(); track p.id) {
+          <div
+            class="pc-list-item"
+            [class.pc-list-item--active]="selectedProcess()?.id === p.id"
+            (click)="selectProcess(p)"
+          >
+            <div class="pc-list-item__icon" [style.background]="(p.color || '#6366f1') + '22'">
+              <span class="material-symbols-rounded text-[18px]" [style.color]="p.color || '#6366f1'">
+                {{ p.icon || 'account_tree' }}
+              </span>
+            </div>
+            <div class="pc-list-item__body">
+              <p class="pc-list-item__name">{{ p.name }}</p>
+              <div class="pc-list-item__meta">
+                <span class="pc-badge" [style.color]="statusColor(p.status)" [style.background]="statusColor(p.status) + '18'">
+                  {{ statusLabel(p.status) }}
+                </span>
+                <span class="text-[11px] text-[--text-secondary]">{{ p._count?.steps ?? 0 }} etapas</span>
+                <span class="text-[11px] text-[--text-secondary]">{{ p._count?.instances ?? 0 }} execuções</span>
+              </div>
+            </div>
+            <div class="relative" (click)="$event.stopPropagation()">
+              <button class="pc-menu-btn" (click)="toggleMenu(p.id, $event)">
+                <span class="material-symbols-rounded text-[18px]">more_vert</span>
+              </button>
+              @if (openMenuId() === p.id) {
+                <div class="pc-dropdown">
+                  @if (p.status !== 'ACTIVE') {
+                    <button class="pc-dropdown__item" (click)="updateStatus(p, 'ACTIVE')">
+                      <span class="material-symbols-rounded text-[16px]">play_circle</span> Ativar
+                    </button>
+                  }
+                  @if (p.status === 'ACTIVE') {
+                    <button class="pc-dropdown__item" (click)="updateStatus(p, 'DRAFT')">
+                      <span class="material-symbols-rounded text-[16px]">pause_circle</span> Pausar
+                    </button>
+                  }
+                  @if (p.status !== 'ARCHIVED') {
+                    <button class="pc-dropdown__item pc-dropdown__item--danger" (click)="updateStatus(p, 'ARCHIVED')">
+                      <span class="material-symbols-rounded text-[16px]">archive</span> Arquivar
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    </aside>
+
+    <!-- ── Right: Detail / Instance ── -->
+    <main class="pc-detail">
+
+      @if (!selectedProcess() && !detailLoading()) {
+        <div class="pc-empty pc-empty--center">
+          <span class="material-symbols-rounded text-[56px]" style="color:#1e293b">account_tree</span>
+          <p class="text-base font-medium text-[--text-secondary] mt-3">Selecione um processo</p>
+          <p class="text-sm text-[--text-secondary] mt-1">Clique em um processo para ver detalhes e executar</p>
+        </div>
+      }
+
+      @if (detailLoading()) {
+        <div class="pc-spinner-wrap pc-spinner-wrap--center">
+          <div class="ag-spinner"></div>
+        </div>
+      }
+
+      @if (selectedProcess() && !detailLoading()) {
+
+        <!-- Running Instance View -->
+        @if (activeInstance()) {
+          <div class="pc-instance-view">
+            <div class="pc-instance-view__header">
+              <button class="ag-btn ag-btn--ghost text-sm" (click)="closeInstance()">
+                <span class="material-symbols-rounded text-[16px]">arrow_back</span>
+                Voltar
+              </button>
+              <div>
+                <h2 class="text-lg font-semibold text-[--text-primary]">{{ selectedProcess()!.name }}</h2>
+                <span class="pc-badge"
+                  [style.color]="activeInstance()!.status === 'COMPLETED' ? '#22c55e' : '#f59e0b'"
+                  [style.background]="(activeInstance()!.status === 'COMPLETED' ? '#22c55e' : '#f59e0b') + '18'">
+                  {{ instanceStatusLabel(activeInstance()!.status) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="pc-steps-list">
+              @for (instStep of activeInstance()!.steps; track instStep.id) {
+                <div class="pc-step-card" [class.pc-step-card--done]="instStep.status === 'DONE'" [class.pc-step-card--skip]="instStep.status === 'SKIPPED'">
+                  <div class="pc-step-card__left">
+                    <span class="material-symbols-rounded text-[22px]"
+                      [style.color]="stepStatusColor(instStep.status)">
+                      {{ stepStatusIcon(instStep.status) }}
+                    </span>
+                  </div>
+                  <div class="pc-step-card__body">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="material-symbols-rounded text-[15px]" style="color:#818cf8">
+                        {{ stepTypeIcon(instStep.step.type) }}
+                      </span>
+                      <span class="text-[11px] font-medium" style="color:#818cf8">{{ stepTypeLabel(instStep.step.type) }}</span>
+                      <span class="font-semibold text-sm text-[--text-primary]">{{ instStep.step.title }}</span>
+                    </div>
+                    @if (instStep.step.description) {
+                      <p class="text-xs text-[--text-secondary] mb-2">{{ instStep.step.description }}</p>
+                    }
+
+                    <!-- Checklist answers -->
+                    @if (instStep.step.type === 'CHECKLIST' && instStep.answers.length > 0) {
+                      <div class="space-y-1.5 mb-3">
+                        @for (answer of instStep.answers; track answer.itemId) {
+                          <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="checkbox"
+                              [checked]="answer.isChecked"
+                              [disabled]="instStep.status === 'DONE' || instStep.status === 'SKIPPED'"
+                              (change)="toggleAnswer(instStep, answer.itemId)"
+                              class="w-4 h-4 rounded accent-indigo-500" />
+                            <span class="text-sm" [class.line-through]="answer.isChecked"
+                              [style.color]="answer.isChecked ? '#64748b' : 'var(--text-primary)'">
+                              {{ checklistLabel(instStep, answer.itemId) }}
+                            </span>
+                          </label>
+                        }
+                      </div>
+                    }
+
+                    @if (instStep.status === 'PENDING' || instStep.status === 'IN_PROGRESS') {
+                      <div class="flex gap-2 mt-2">
+                        @if (instStep.step.type === 'CHECKLIST') {
+                          <button class="ag-btn ag-btn--primary text-xs"
+                            [disabled]="!allAnswersChecked(instStep)"
+                            (click)="completeStep(instStep)">
+                            <span class="material-symbols-rounded text-[14px]">check</span>
+                            Concluir etapa
+                          </button>
+                        } @else {
+                          <button class="ag-btn ag-btn--primary text-xs" (click)="completeStep(instStep)">
+                            <span class="material-symbols-rounded text-[14px]">check</span>
+                            Concluir
+                          </button>
+                        }
+                        <button class="ag-btn ag-btn--ghost text-xs" (click)="skipStep(instStep)">
+                          <span class="material-symbols-rounded text-[14px]">skip_next</span>
+                          Pular
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <!-- Process Detail View -->
+          <div class="pc-process-detail">
+            <div class="pc-process-detail__header">
+              <div class="pc-process-detail__icon" [style.background]="(selectedProcess()!.color || '#6366f1') + '22'">
+                <span class="material-symbols-rounded text-[24px]" [style.color]="selectedProcess()!.color || '#6366f1'">
+                  {{ selectedProcess()!.icon || 'account_tree' }}
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3 flex-wrap">
+                  <h2 class="text-xl font-semibold text-[--text-primary]">{{ selectedProcess()!.name }}</h2>
+                  <span class="pc-badge" [style.color]="statusColor(selectedProcess()!.status)"
+                    [style.background]="statusColor(selectedProcess()!.status) + '18'">
+                    {{ statusLabel(selectedProcess()!.status) }}
+                  </span>
+                  <span class="text-xs text-[--text-secondary]">v{{ selectedProcess()!.version }}</span>
+                </div>
+                @if (selectedProcess()!.description) {
+                  <p class="text-sm text-[--text-secondary] mt-1">{{ selectedProcess()!.description }}</p>
+                }
+              </div>
+              @if (selectedProcess()!.status === 'ACTIVE') {
+                <button class="ag-btn ag-btn--primary" (click)="startInstance(selectedProcess()!)" [disabled]="starting()">
+                  <span class="material-symbols-rounded text-[18px]">play_arrow</span>
+                  {{ starting() ? 'Iniciando…' : 'Iniciar' }}
+                </button>
+              }
+            </div>
+
+            <!-- Steps Template -->
+            @if ((selectedProcess()!.steps?.length ?? 0) > 0) {
+              <div class="mt-6">
+                <p class="pc-section-label mb-3">Etapas do processo ({{ selectedProcess()!.steps!.length }})</p>
+                <div class="space-y-2">
+                  @for (step of selectedProcess()!.steps!; track step.id) {
+                    <div class="pc-template-step">
+                      <div class="pc-template-step__num">{{ step.order + 1 }}</div>
+                      <div class="pc-template-step__icon">
+                        <span class="material-symbols-rounded text-[16px]" style="color:#818cf8">
+                          {{ stepTypeIcon(step.type) }}
+                        </span>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-[--text-primary]">{{ step.title }}</p>
+                        <div class="flex items-center gap-2 mt-0.5">
+                          <span class="text-[11px]" style="color:#818cf8">{{ stepTypeLabel(step.type) }}</span>
+                          @if (step.isRequired) {
+                            <span class="text-[11px] text-[--text-secondary]">· Obrigatório</span>
+                          }
+                          @if (step.estimatedMin) {
+                            <span class="text-[11px] text-[--text-secondary]">· ~{{ step.estimatedMin }}min</span>
+                          }
+                        </div>
+                        @if (step.checklistItems && step.checklistItems.length > 0) {
+                          <div class="mt-1.5 space-y-0.5">
+                            @for (item of step.checklistItems; track item.id) {
+                              <div class="flex items-center gap-1.5 text-xs text-[--text-secondary]">
+                                <span class="material-symbols-rounded text-[13px]">check_box_outline_blank</span>
+                                {{ item.label }}
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Recent Instances -->
+            @if ((selectedProcess()!.instances?.length ?? 0) > 0) {
+              <div class="mt-8">
+                <p class="pc-section-label mb-3">Execuções recentes</p>
+                <div class="space-y-2">
+                  @for (inst of selectedProcess()!.instances!; track inst.id) {
+                    <div class="pc-instance-row" (click)="openInstance(inst)">
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                          <span class="pc-badge text-[11px]"
+                            [style.color]="inst.status === 'COMPLETED' ? '#22c55e' : inst.status === 'CANCELLED' ? '#ef4444' : '#f59e0b'"
+                            [style.background]="(inst.status === 'COMPLETED' ? '#22c55e' : inst.status === 'CANCELLED' ? '#ef4444' : '#f59e0b') + '18'">
+                            {{ instanceStatusLabel(inst.status) }}
+                          </span>
+                          <span class="text-xs text-[--text-secondary]">{{ inst.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                        @if (inst.steps) {
+                          <div class="flex items-center gap-1 mt-1">
+                            @for (s of inst.steps; track s.id) {
+                              <span class="material-symbols-rounded text-[14px]"
+                                [style.color]="stepStatusColor(s.status)">
+                                {{ stepStatusIcon(s.status) }}
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                      <span class="material-symbols-rounded text-[18px] text-[--text-secondary]">chevron_right</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="mt-8 text-center py-6">
+                <p class="text-sm text-[--text-secondary]">Nenhuma execução ainda</p>
+                @if (selectedProcess()!.status === 'ACTIVE') {
+                  <button class="ag-btn ag-btn--primary text-sm mt-3" (click)="startInstance(selectedProcess()!)" [disabled]="starting()">
+                    <span class="material-symbols-rounded text-[16px]">play_arrow</span>
+                    Iniciar primeira execução
+                  </button>
+                } @else {
+                  <p class="text-xs text-[--text-secondary] mt-1">Ative o processo para iniciar execuções</p>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>

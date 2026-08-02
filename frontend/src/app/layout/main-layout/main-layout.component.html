@@ -20,3 +20,7 @@
 
     <!-- Chat floating panel (portal-style, outside layout flow) -->
     <ag-chat-panel />
+
+    @if (showOnboarding()) {
+      <ag-onboarding-wizard (done)="showOnboarding.set(false)" />
+    }

@@ -54,7 +54,25 @@ export class ReportsComponent {
       icon: 'policy',
       color: '#f59e0b',
     },
+    {
+      key: 'time-tracking',
+      title: 'Time Tracking',
+      description: 'Apontamentos de horas por tarefa e registros de ponto (entrada/saída) da equipe.',
+      icon: 'schedule',
+      color: '#06b6d4',
+    },
+    {
+      key: 'okrs',
+      title: 'OKRs e Key Results',
+      description: 'Objetivos estratégicos, key results e percentual de progresso por responsável.',
+      icon: 'flag',
+      color: '#ec4899',
+    },
   ];
+
+  printPdf() {
+    window.print();
+  }
 
   export(reportKey: string, format: 'csv' | 'excel') {
     const companyId = this.auth.currentCompanyId();
@@ -71,9 +89,11 @@ export class ReportsComponent {
     if (to)       filters['to']       = to;
 
     try {
-      if (reportKey === 'tasks')       this.reportsService.downloadTasks(companyId, format, filters);
+      if (reportKey === 'tasks')        this.reportsService.downloadTasks(companyId, format, filters);
       if (reportKey === 'productivity') this.reportsService.downloadProductivity(companyId, format);
-      if (reportKey === 'audit')       this.reportsService.downloadAudit(companyId, format, from || undefined, to || undefined);
+      if (reportKey === 'audit')        this.reportsService.downloadAudit(companyId, format, from || undefined, to || undefined);
+      if (reportKey === 'time-tracking') this.reportsService.downloadTimeTracking(companyId, format, from || undefined, to || undefined);
+      if (reportKey === 'okrs')         this.reportsService.downloadOkrs(companyId, format);
 
       setTimeout(() => {
         this.downloading.set(null);

@@ -57,6 +57,30 @@ export class ReportsController {
     return this.send(res!, result, format, 'audit');
   }
 
+  @Get('time-tracking')
+  @ApiOperation({ summary: 'Relatório de time tracking e registros de ponto' })
+  async timeTracking(
+    @Query('companyId') companyId: string,
+    @Query('format') format: Format = 'json',
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Res() res?: Response,
+  ) {
+    const result = await this.service.exportTimeTracking(companyId, format, from, to);
+    return this.send(res!, result, format, 'time-tracking');
+  }
+
+  @Get('okrs')
+  @ApiOperation({ summary: 'Relatório de OKRs e Key Results' })
+  async okrs(
+    @Query('companyId') companyId: string,
+    @Query('format') format: Format = 'json',
+    @Res() res?: Response,
+  ) {
+    const result = await this.service.exportOkrs(companyId, format);
+    return this.send(res!, result, format, 'okrs');
+  }
+
   private send(res: Response, result: any, format: Format, name: string) {
     if (format === 'csv') {
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');

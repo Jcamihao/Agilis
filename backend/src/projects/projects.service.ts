@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRole } from '@prisma/client';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { EVENTS } from '../events/agilis-events';
 
 const MEMBER_SELECT = {
   id: true,
@@ -14,7 +16,10 @@ const MEMBER_SELECT = {
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly events: EventEmitter2,
+  ) {}
 
   async findAll(companyId: string | undefined, userId: string, teamId?: string) {
     let companyIds: string[];
@@ -180,6 +185,10 @@ export class ProjectsService {
       create: { projectId, userId: targetUserId, role: role as any },
       update: { role: role as any },
     });
+
+    const actor = await this.prisma.user.findUnique({ where: { id: requesterId }, select: { id: true, name: true, email: true } });
+    this.events.emit(EVENTS.PROJECT_MEMBER_ADDED, { project, targetUserId, actor });
+
     return this.findOne(projectId, requesterId);
   }
 
@@ -207,6 +216,131 @@ export class ProjectsService {
     await this.checkCompanyAccess(project.companyId, userId);
 
     return this.prisma.project.update({ where: { id }, data: { isArchived: true } });
+  }
+
+  async getPortfolio(companyId: string, userId: string) {
+    await this.checkCompanyAccess(companyId, userId);
+
+    const projects = await this.prisma.project.findMany({
+      where: { companyId, isArchived: false },
+      include: {
+        tasks: { select: { id: true, status: true, dueDate: true, updatedAt: true } },
+        _count: { select: { members: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const [risksByProject, healthScores, objectives] = await Promise.all([
+      this.prisma.risk.groupBy({
+        by: ['projectId'],
+        where: { project: { companyId } },
+        _count: { id: true },
+      }).catch(() => []),
+      this.prisma.healthScore.findMany({
+        where: { companyId, entityType: 'PROJECT' },
+        orderBy: { calculatedAt: 'desc' },
+        select: { entityId: true, score: true },
+      }).catch(() => []),
+      this.prisma.objective.findMany({
+        where: { companyId },
+        include: { keyResults: { select: { startValue: true, currentValue: true, targetValue: true } } },
+      }).catch(() => []),
+    ]);
+
+    const riskMap = Object.fromEntries(risksByProject.map((r: any) => [r.projectId, r._count.id]));
+    // Keep only latest score per project
+    const seenHealth = new Set<string>();
+    const healthMap: Record<string, { score: number; grade: string }> = {};
+    for (const h of healthScores as any[]) {
+      if (!seenHealth.has(h.entityId)) {
+        seenHealth.add(h.entityId);
+        const grade = h.score >= 80 ? 'A' : h.score >= 60 ? 'B' : h.score >= 40 ? 'C' : 'D';
+        healthMap[h.entityId] = { score: h.score, grade };
+      }
+    }
+
+    return projects.map((p) => {
+      const total     = p.tasks.length;
+      const done      = p.tasks.filter((t) => t.status === 'DONE').length;
+      const overdue   = p.tasks.filter((t) => t.dueDate && t.dueDate < new Date() && t.status !== 'DONE').length;
+      const progress  = total > 0 ? Math.round((done / total) * 100) : 0;
+
+      // Velocity: tasks completed in last 14 days
+      const since14  = new Date(Date.now() - 14 * 86_400_000);
+      const recentDone = p.tasks.filter((t) => t.status === 'DONE' && t.updatedAt >= since14).length;
+      const dailyVelocity = recentDone / 14;
+
+      const remaining = total - done;
+      const forecastDays = dailyVelocity > 0 ? Math.ceil(remaining / dailyVelocity) : null;
+      const forecastDate = forecastDays != null ? new Date(Date.now() + forecastDays * 86_400_000).toISOString().slice(0, 10) : null;
+
+      // OKR: find objectives linked to this project (by naming convention / company scope)
+      const objProgress = objectives.length > 0 ? (() => {
+        let krDone = 0, krTotal = 0;
+        for (const obj of objectives) {
+          for (const kr of obj.keyResults) {
+            krTotal++;
+            const p = kr.targetValue > kr.startValue
+              ? (kr.currentValue - kr.startValue) / (kr.targetValue - kr.startValue)
+              : 0;
+            krDone += Math.max(0, Math.min(1, p));
+          }
+        }
+        return krTotal > 0 ? Math.round((krDone / krTotal) * 100) : 0;
+      })() : null;
+
+      return {
+        id: p.id, name: p.name, color: p.color, icon: p.icon,
+        total, done, overdue, progress,
+        memberCount: p._count.members,
+        riskCount:   riskMap[p.id] ?? 0,
+        health:      healthMap[p.id] ?? null,
+        forecastDate,
+        forecastDays,
+        dailyVelocity: Math.round(dailyVelocity * 10) / 10,
+        okrProgress: objProgress,
+      };
+    });
+  }
+
+  async getForecast(projectId: string, userId: string) {
+    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) throw new NotFoundException('Projeto não encontrado');
+    await this.checkCompanyAccess(project.companyId, userId);
+
+    const since30 = new Date(Date.now() - 30 * 86_400_000);
+
+    const [allTasks, recentDone] = await Promise.all([
+      this.prisma.task.count({ where: { projectId } }),
+      this.prisma.task.count({
+        where: { projectId, status: 'DONE', updatedAt: { gte: since30 } },
+      }),
+    ]);
+
+    const doneTasks = await this.prisma.task.count({ where: { projectId, status: 'DONE' } });
+    const remaining = allTasks - doneTasks;
+    const dailyVelocity = recentDone / 30;
+
+    const forecastDays = dailyVelocity > 0 ? Math.ceil(remaining / dailyVelocity) : null;
+    const forecastDate = forecastDays != null
+      ? new Date(Date.now() + forecastDays * 86_400_000).toISOString().slice(0, 10)
+      : null;
+
+    const progress = allTasks > 0 ? Math.round((doneTasks / allTasks) * 100) : 0;
+
+    return {
+      projectId,
+      projectName: project.name,
+      totalTasks: allTasks,
+      doneTasks,
+      remaining,
+      progress,
+      dailyVelocity: Math.round(dailyVelocity * 100) / 100,
+      weeklyVelocity: Math.round(dailyVelocity * 7 * 10) / 10,
+      forecastDays,
+      forecastDate,
+      confidence: dailyVelocity > 0 ? (recentDone >= 5 ? 'HIGH' : 'MEDIUM') : 'LOW',
+    };
   }
 
   private async checkCompanyAccess(companyId: string, userId: string) {

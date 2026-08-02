@@ -40,6 +40,16 @@ import { WikiModule } from './wiki/wiki.module';
 import { IntakeModule } from './intake/intake.module';
 import { ClientPortalModule } from './client-portal/client-portal.module';
 import { ApprovalsModule } from './approvals/approvals.module';
+import { RisksModule } from './risks/risks.module';
+import { LabelsModule } from './labels/labels.module';
+import { TaskStatusConfigModule } from './task-status-config/task-status-config.module';
+import { AnnouncementsModule } from './announcements/announcements.module';
+import { FeedModule } from './feed/feed.module';
+import { CorporateWikiModule } from './corporate-wiki/corporate-wiki.module';
+import { HrModule } from './hr/hr.module';
+import { UploadModule } from './upload/upload.module';
+import { SearchModule } from './search/search.module';
+import { TaskTemplatesModule } from './task-templates/task-templates.module';
 
 @Module({
   imports: [
@@ -83,6 +93,16 @@ import { ApprovalsModule } from './approvals/approvals.module';
     IntakeModule,
     ClientPortalModule,
     ApprovalsModule,
+    RisksModule,
+    LabelsModule,
+    TaskStatusConfigModule,
+    AnnouncementsModule,
+    FeedModule,
+    CorporateWikiModule,
+    HrModule,
+    UploadModule,
+    SearchModule,
+    TaskTemplatesModule,
   ],
 })
 export class AppModule {}

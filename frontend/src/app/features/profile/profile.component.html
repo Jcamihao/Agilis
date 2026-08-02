@@ -110,7 +110,7 @@
               <input type="text" formControlName="phone" (input)="onPhoneInput($event)"
                      class="ag-input pl-12" placeholder="(11) 99999-8888" />
             </div>
-            <p class="text-xs text-slate-400">Usado para notificações via WhatsApp.</p>
+            <p class="text-xs text-slate-400">Usado para notificações e contato.</p>
           </div>
         </div>
 
@@ -268,6 +268,7 @@
       </div>
 
       <form [formGroup]="telegramForm" (ngSubmit)="saveTelegram()" class="flex flex-col gap-4">
+        <!-- Chat ID row -->
         <div class="flex flex-col gap-1.5">
           <label class="ag-label">Chat ID do Telegram</label>
           <div class="flex gap-2">
@@ -283,7 +284,31 @@
               }
               Detectar meu Chat ID
             </button>
+            <button type="button" (click)="testTelegram()"
+                    class="ag-btn ag-btn--secondary flex items-center gap-1.5 whitespace-nowrap"
+                    [disabled]="testingTelegram() || !telegramForm.value.telegramChatId">
+              @if (testingTelegram()) {
+                <div class="w-4 h-4 border-2 border-slate-400/40 border-t-slate-600 rounded-full animate-spin"></div>
+              } @else {
+                <span class="material-symbols-rounded text-base">send</span>
+              }
+              Testar
+            </button>
           </div>
+
+          <!-- Test result badge -->
+          @if (telegramTestResult() === 'ok') {
+            <p class="text-xs text-emerald-600 flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-rounded text-sm">check_circle</span>
+              Mensagem enviada com sucesso!
+            </p>
+          }
+          @if (telegramTestResult() === 'fail') {
+            <p class="text-xs text-red-500 flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-rounded text-sm">error</span>
+              Falha ao enviar — verifique o Chat ID.
+            </p>
+          }
 
           <!-- Dropdown de usuários detectados -->
           @if (telegramUpdates().length > 0) {
@@ -304,15 +329,44 @@
           }
         </div>
 
+        <!-- Notification preferences -->
+        <div class="flex flex-col gap-2">
+          <p class="text-sm font-semibold text-[--text-primary]">Notificar quando:</p>
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" class="ag-checkbox"
+                   [checked]="telegramPrefCreated()"
+                   (change)="telegramPrefCreated.set($any($event.target).checked)" />
+            <span class="text-sm text-[--text-secondary] group-hover:text-[--text-primary] transition-colors">
+              Uma nova tarefa for criada em um projeto que participo
+            </span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" class="ag-checkbox"
+                   [checked]="telegramPrefAssigned()"
+                   (change)="telegramPrefAssigned.set($any($event.target).checked)" />
+            <span class="text-sm text-[--text-secondary] group-hover:text-[--text-primary] transition-colors">
+              Uma tarefa for atribuída a mim
+            </span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <input type="checkbox" class="ag-checkbox"
+                   [checked]="telegramPrefDueSoon()"
+                   (change)="telegramPrefDueSoon.set($any($event.target).checked)" />
+            <span class="text-sm text-[--text-secondary] group-hover:text-[--text-primary] transition-colors">
+              Uma tarefa minha estiver prestes a vencer
+            </span>
+          </label>
+        </div>
+
         <div class="flex justify-end">
-          <button type="submit" [disabled]="savingTelegram() || telegramForm.pristine"
+          <button type="submit" [disabled]="savingTelegram()"
                   class="ag-btn ag-btn--primary flex items-center gap-2">
             @if (savingTelegram()) {
               <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
             } @else {
               <span class="material-symbols-rounded text-lg">save</span>
             }
-            Salvar Chat ID
+            Salvar configurações
           </button>
         </div>
       </form>

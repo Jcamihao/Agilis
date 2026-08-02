@@ -1,0 +1,277 @@
+<div class="sp-page">
+
+  <!-- ═══ Header ═══ -->
+  <div class="sp-header">
+    <div class="flex items-center gap-3">
+      <a routerLink="/projects" class="sp-back-btn">
+        <span class="material-symbols-rounded text-xl">arrow_back</span>
+      </a>
+      <div>
+        <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight">Sprint Planning</h2>
+        <p class="text-sm text-[--text-secondary] mt-0.5">Organize tarefas em sprints e acompanhe o progresso</p>
+      </div>
+    </div>
+
+    <!-- View toggle + actions -->
+    <div class="flex items-center gap-3">
+      <div class="sp-view-toggle">
+        <a [routerLink]="['/projects', id, 'kanban']"
+          class="sp-view-btn">
+          <span class="material-symbols-rounded text-base">view_kanban</span>
+          Kanban
+        </a>
+        <div class="sp-view-sep"></div>
+        <a [routerLink]="['/projects', id, 'list']"
+          class="sp-view-btn">
+          <span class="material-symbols-rounded text-base">table_rows</span>
+          Lista
+        </a>
+        <div class="sp-view-sep"></div>
+        <a [routerLink]="['/projects', id, 'gantt']"
+          class="sp-view-btn">
+          <span class="material-symbols-rounded text-base">account_tree</span>
+          Gantt
+        </a>
+        <div class="sp-view-sep"></div>
+        <a [routerLink]="['/projects', id, 'sprint-planning']"
+          class="sp-view-btn sp-view-btn--active">
+          <span class="material-symbols-rounded text-base">sprint</span>
+          Sprints
+        </a>
+        <div class="sp-view-sep"></div>
+        <a [routerLink]="['/projects', id, 'wiki']"
+          class="sp-view-btn">
+          <span class="material-symbols-rounded text-base">menu_book</span>
+          Wiki
+        </a>
+        <div class="sp-view-sep"></div>
+        <a [routerLink]="['/projects', id, 'settings']"
+          class="sp-view-btn">
+          <span class="material-symbols-rounded text-base">settings</span>
+          Config.
+        </a>
+      </div>
+
+      <button class="ag-btn ag-btn--primary" (click)="showCreate.set(!showCreate())">
+        <span class="material-symbols-rounded text-base">add</span>
+        Nova Sprint
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ Create Sprint Form ═══ -->
+  @if (showCreate()) {
+    <div class="sp-create-card">
+      <h3 class="text-sm font-semibold text-[--text-primary] mb-3">Nova Sprint</h3>
+      <div class="flex gap-3 flex-wrap">
+        <input [(ngModel)]="newName" placeholder="Nome da sprint *" class="ag-input flex-1 min-w-[200px]" />
+        <input [(ngModel)]="newGoal" placeholder="Objetivo (opcional)" class="ag-input flex-1 min-w-[200px]" />
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-[--text-secondary] whitespace-nowrap">Início</label>
+          <input type="date" [(ngModel)]="newStartDate" class="ag-input text-sm" />
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-[--text-secondary] whitespace-nowrap">Fim</label>
+          <input type="date" [(ngModel)]="newEndDate" class="ag-input text-sm" />
+        </div>
+      </div>
+      <div class="flex gap-2 mt-3 justify-end">
+        <button class="ag-btn ag-btn--ghost text-sm" (click)="showCreate.set(false)">Cancelar</button>
+        <button class="ag-btn ag-btn--primary text-sm" (click)="createSprint()" [disabled]="!newName.trim()">Criar Sprint</button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ Loading ═══ -->
+  @if (loading()) {
+    <div class="flex items-center justify-center py-24">
+      <div class="ag-spinner"></div>
+    </div>
+  }
+
+  <!-- ═══ Lanes ═══ -->
+  @if (!loading()) {
+    <div class="sp-lanes" cdkDropListGroup>
+      @for (lane of lanes(); track (lane.sprint?.id ?? 'backlog')) {
+        <div class="sp-lane" [class.sp-lane--active]="lane.sprint?.status === 'ACTIVE'" [class.sp-lane--completed]="lane.sprint?.status === 'COMPLETED'">
+
+          <!-- Lane Header -->
+          <div class="sp-lane__header">
+            <div class="sp-lane__title-area">
+              @if (!lane.sprint) {
+                <span class="material-symbols-rounded text-[20px]" style="color:#64748b">inbox</span>
+                <h3 class="sp-lane__title">Backlog do Produto</h3>
+                <span class="sp-count">{{ lane.tasks.length }}</span>
+              } @else {
+                <span class="material-symbols-rounded text-[20px]"
+                  [style.color]="sprintStatusColor(lane.sprint.status)">sprint</span>
+                <h3 class="sp-lane__title">{{ lane.sprint.name }}</h3>
+                <span class="sp-status-badge"
+                  [style.color]="sprintStatusColor(lane.sprint.status)"
+                  [style.background]="sprintStatusColor(lane.sprint.status) + '18'">
+                  {{ sprintStatusLabel(lane.sprint.status) }}
+                </span>
+                <span class="sp-count">{{ lane.tasks.length }}</span>
+              }
+            </div>
+
+            @if (lane.sprint) {
+              <div class="sp-lane__meta">
+                @if (lane.sprint.startDate || lane.sprint.endDate) {
+                  <span class="sp-date">
+                    <span class="material-symbols-rounded text-[14px]">calendar_month</span>
+                    {{ formatDate(lane.sprint.startDate) }} – {{ formatDate(lane.sprint.endDate) }}
+                  </span>
+                }
+                @if (lane.tasks.length > 0) {
+                  <div class="sp-progress">
+                    <div class="sp-progress__bar">
+                      <div class="sp-progress__fill" [style.width.%]="progressPct(lane)"></div>
+                    </div>
+                    <span class="sp-progress__label">{{ doneTasks(lane) }}/{{ lane.tasks.length }}</span>
+                  </div>
+                }
+                @if (lane.sprint.status === 'PLANNED') {
+                  <button class="ag-btn ag-btn--secondary text-xs h-7 px-3"
+                    (click)="updateSprintStatus(lane.sprint, 'ACTIVE')">
+                    <span class="material-symbols-rounded text-[14px]">play_arrow</span>
+                    Iniciar
+                  </button>
+                }
+                @if (lane.sprint.status === 'ACTIVE') {
+                  <button class="ag-btn ag-btn--ghost text-xs h-7 px-3"
+                    (click)="updateSprintStatus(lane.sprint, 'COMPLETED')">
+                    <span class="material-symbols-rounded text-[14px]">check_circle</span>
+                    Completar
+                  </button>
+                }
+                <button class="ag-btn ag-btn--ghost text-xs h-7 px-3"
+                        (click)="loadBurndown(lane.sprint.id)"
+                        [title]="activeBurndownSprintId() === lane.sprint.id ? 'Fechar burndown' : 'Ver burndown'">
+                  <span class="material-symbols-rounded text-[14px]">trending_down</span>
+                  Burndown
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Burndown Chart -->
+          @if (lane.sprint && activeBurndownSprintId() === lane.sprint.id) {
+            <div class="sp-burndown">
+              @if (burndownLoading()) {
+                <div class="ag-skeleton h-48 rounded-xl"></div>
+              } @else if (burndownData(); as bd) {
+                <div class="sp-burndown__header">
+                  <span class="font-semibold text-[--text-primary] text-sm">Burndown — {{ bd.sprintName }}</span>
+                  <div class="flex items-center gap-4 text-xs text-[--text-secondary]">
+                    <span class="flex items-center gap-1.5">
+                      <span class="w-3 h-0.5 inline-block rounded" style="background:#6366f1"></span>Ideal
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                      <span class="w-3 h-0.5 inline-block rounded" style="background:#10b981"></span>Real
+                    </span>
+                  </div>
+                </div>
+                <svg viewBox="0 0 620 220" class="w-full" style="overflow:visible">
+                  <!-- Grid lines -->
+                  @for (i of [0,1,2,3,4]; track i) {
+                    <line [attr.x1]="10" [attr.x2]="610"
+                          [attr.y1]="10 + i * 40" [attr.y2]="10 + i * 40"
+                          stroke="var(--border)" stroke-width="0.5"/>
+                    <text [attr.x]="5" [attr.y]="14 + i * 40" font-size="9"
+                          fill="var(--text-secondary)" text-anchor="end">
+                      {{ bd.total - Math.round(i * bd.total / 4) }}
+                    </text>
+                  }
+                  <!-- Ideal line -->
+                  <path [attr.d]="burndownPath('ideal')"
+                        fill="none" stroke="#6366f1" stroke-width="1.5"
+                        stroke-dasharray="5 3" transform="translate(10,10)"/>
+                  <!-- Actual line -->
+                  <path [attr.d]="burndownPath('actual')"
+                        fill="none" stroke="#10b981" stroke-width="2"
+                        transform="translate(10,10)"/>
+                  <!-- X-axis labels -->
+                  @for (lbl of burndownXLabels(); track lbl.x) {
+                    <text [attr.x]="lbl.x + 10" y="218"
+                          font-size="9" fill="var(--text-secondary)" text-anchor="middle">
+                      {{ lbl.label }}
+                    </text>
+                  }
+                </svg>
+              }
+            </div>
+          }
+
+          @if (lane.sprint?.goal) {
+            <p class="sp-lane__goal">
+              <span class="material-symbols-rounded text-[14px]">flag</span>
+              {{ lane.sprint!.goal }}
+            </p>
+          }
+
+          <!-- Drop zone -->
+          <div class="sp-drop-zone"
+            cdkDropList
+            [id]="laneId(lane)"
+            [cdkDropListData]="lane.tasks"
+            [cdkDropListConnectedTo]="connectedLaneIds()"
+            (cdkDropListDropped)="onDrop($event, lane.sprint?.id ?? null)">
+
+            @if (lane.tasks.length === 0) {
+              <div class="sp-empty-lane">
+                <span class="material-symbols-rounded text-[28px]" style="color:#1e293b">drag_indicator</span>
+                <p>Arraste tarefas aqui</p>
+              </div>
+            }
+
+            @for (task of lane.tasks; track task.id) {
+              <div class="sp-task-card"
+                cdkDrag
+                [cdkDragData]="task"
+                [class.sp-task-card--dragging]="updating() === task.id">
+
+                <!-- Drag handle -->
+                <div cdkDragHandle class="sp-task-card__drag">
+                  <span class="material-symbols-rounded text-[16px]" style="color:#334155">drag_indicator</span>
+                </div>
+
+                <!-- Priority dot -->
+                <div class="sp-task-card__priority" [style.background]="priorityColor(task.priority)"></div>
+
+                <div class="sp-task-card__body">
+                  <p class="sp-task-card__title">{{ task.title }}</p>
+                  <div class="sp-task-card__meta">
+                    <span class="sp-task-status" [style.color]="statusColor(task.status)" [style.background]="statusColor(task.status) + '15'">
+                      {{ statusLabel(task.status) }}
+                    </span>
+                    @if (task.dueDate) {
+                      <span class="sp-task-date" [class.overdue]="isOverdue(task.dueDate!)">
+                        <span class="material-symbols-rounded text-[12px]">event</span>
+                        {{ task.dueDate | date:'dd/MM' }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                @if (task.assignee) {
+                  <div class="sp-task-card__avatar" [title]="task.assignee.name">
+                    @if (task.assignee.avatarUrl) {
+                      <img [src]="task.assignee.avatarUrl" [alt]="task.assignee.name" class="w-full h-full object-cover" />
+                    } @else {
+                      {{ task.assignee.name.charAt(0) }}
+                    }
+                  </div>
+                }
+
+                <!-- Drag preview -->
+                <div *cdkDragPlaceholder class="sp-drag-placeholder"></div>
+                <div *cdkDragPreview class="sp-drag-preview">{{ task.title }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

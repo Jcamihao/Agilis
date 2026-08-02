@@ -6,6 +6,9 @@ export interface User {
   bio?: string;
   phone?: string;
   telegramChatId?: string;
+  notifPreferences?: {
+    telegram?: { taskCreated?: boolean; taskAssigned?: boolean; taskDueSoon?: boolean };
+  };
   cpfCnpj?: string;
   cep?: string;
   uf?: string;
@@ -417,6 +420,34 @@ export interface ProcessStep {
   checklistItems?: Array<{ id: string; label: string; isRequired: boolean; order: number }>;
 }
 
+export interface ChecklistItemAnswer {
+  id: string;
+  instanceStepId: string;
+  itemId: string;
+  isChecked: boolean;
+}
+
+export interface ProcessInstanceStep {
+  id: string;
+  instanceId: string;
+  stepId: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'DONE' | 'SKIPPED';
+  notes?: string;
+  completedAt?: string;
+  completedBy?: string;
+  step: ProcessStep;
+  answers: ChecklistItemAnswer[];
+}
+
+export interface ProcessInstance {
+  id: string;
+  processId: string;
+  status: 'RUNNING' | 'COMPLETED' | 'CANCELLED';
+  createdAt: string;
+  completedAt?: string;
+  steps: ProcessInstanceStep[];
+}
+
 export interface Process {
   id: string;
   name: string;
@@ -430,6 +461,7 @@ export interface Process {
   createdAt: string;
   updatedAt: string;
   steps?: ProcessStep[];
+  instances?: ProcessInstance[];
   _count?: { steps: number; instances: number };
 }
 

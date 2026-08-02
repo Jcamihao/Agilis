@@ -23,7 +23,7 @@ export interface ChatMessage {
 export interface ChatRoom {
   id: string;
   name: string;
-  type: 'GENERAL' | 'PROJECT' | 'DIRECT';
+  type: 'GENERAL' | 'PROJECT' | 'DIRECT' | 'DEPARTMENT';
   projectId?: string;
   project?: { id: string; name: string };
   _count?: { messages: number };
@@ -127,6 +127,18 @@ export class ChatService {
     this.socket?.emit('room:join', { roomId }, (res: any) => {
       if (res?.data) this.messages.set(res.data);
     });
+  }
+
+  createChannel(name: string) {
+    return this.http.post<any>(`${this.apiUrl}/chat/rooms/channel`, { name });
+  }
+
+  openDirect(targetUserId: string) {
+    return this.http.post<any>(`${this.apiUrl}/chat/rooms/direct/${targetUserId}`, {});
+  }
+
+  deleteRoom(roomId: string) {
+    return this.http.delete<any>(`${this.apiUrl}/chat/rooms/${roomId}`);
   }
 
   openGeneralRoom(companyId: string) {

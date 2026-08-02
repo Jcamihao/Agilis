@@ -1,5 +1,5 @@
 import {
-  Component, Output, EventEmitter, inject, ChangeDetectionStrategy, OnInit, signal, ChangeDetectorRef
+  Component, Output, EventEmitter, inject, ChangeDetectionStrategy, OnInit, signal, ChangeDetectorRef, HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -9,12 +9,13 @@ import { NotificationsService } from '../../core/services/notifications.service'
 import { Notification, NOTIFICATION_CONFIG } from '../../core/models';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { GlobalSearchComponent } from '../../shared/components/global-search/global-search.component';
 
 @Component({
   selector: 'ag-topbar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, MatMenuModule],
+  imports: [CommonModule, RouterLink, MatMenuModule, GlobalSearchComponent],
   templateUrl: './topbar.component.html',
   styleUrls: ['./topbar.component.scss']
 })
@@ -27,11 +28,30 @@ export class TopbarComponent implements OnInit {
   readonly notifService    = inject(NotificationsService);
   readonly user            = this.auth.user;
 
+  showSearch        = signal(false);
   showNotifications = signal(false);
   notifications     = signal<Notification[]>([]);
   notifLoading      = signal(false);
 
-  ngOnInit() { this.notifService.loadUnreadCount(); }
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(e: KeyboardEvent) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      this.showSearch.update((v) => !v);
+    }
+  }
+
+  ngOnInit() {
+    this.notifService.loadUnreadCount();
+    this.notifService.connect().subscribe({
+      next: (n) => {
+        if (this.notifications().length > 0) {
+          this.notifications.update(list => [n, ...list]);
+        }
+        this.cdr.markForCheck();
+      },
+    });
+  }
 
   onSearchFocus(event: FocusEvent) {
     const el = event.target as HTMLInputElement;

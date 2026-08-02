@@ -1,0 +1,311 @@
+<div class="hr-page">
+
+  <!-- Header + Tabs -->
+  <div class="hr-header">
+    <div class="hr-title">
+      <span class="material-symbols-rounded title-icon">people</span>
+      <h1>RH</h1>
+    </div>
+    <nav class="hr-tabs">
+      <button class="hr-tab" [class.active]="tab() === 'directory'"   (click)="setTab('directory')">
+        <span class="material-symbols-rounded">badge</span> Diretório
+      </button>
+      <button class="hr-tab" [class.active]="tab() === 'orgchart'"    (click)="setTab('orgchart')">
+        <span class="material-symbols-rounded">account_tree</span> Organograma
+      </button>
+      <button class="hr-tab" [class.active]="tab() === 'leave'"       (click)="setTab('leave')">
+        <span class="material-symbols-rounded">event_busy</span> Férias & Ausências
+      </button>
+      <button class="hr-tab" [class.active]="tab() === 'timerecords'" (click)="setTab('timerecords')">
+        <span class="material-symbols-rounded">schedule</span> Ponto
+      </button>
+      <button class="hr-tab" [class.active]="tab() === 'birthdays'"   (click)="setTab('birthdays')">
+        <span class="material-symbols-rounded">cake</span> Aniversários
+      </button>
+    </nav>
+  </div>
+
+  @if (loading()) {
+    <div class="hr-loading"><span class="material-symbols-rounded spin">autorenew</span> Carregando…</div>
+  }
+
+  <!-- ── DIRETÓRIO ───────────────────────────────────────────────────────── -->
+  @if (tab() === 'directory' && !loading()) {
+    <div class="section-wrap">
+
+      <div class="toolbar">
+        <select class="dept-filter" [value]="deptFilter()" (change)="deptFilter.set($any($event.target).value)">
+          <option value="">Todos os departamentos</option>
+          @for (d of departments(); track d) {
+            <option [value]="d">{{ d }}</option>
+          }
+        </select>
+        <span class="member-count">{{ filteredProfiles().length }} colaborador(es)</span>
+      </div>
+
+      <div class="directory-grid">
+        @for (p of filteredProfiles(); track p.id) {
+          <div class="member-card">
+            <div class="member-avatar large">{{ initials(p.user.name) }}</div>
+            <div class="member-info">
+              <span class="member-name">{{ p.user.name }}</span>
+              <span class="member-job">{{ p.jobTitle || '—' }}</span>
+              <span class="member-dept" *ngIf="p.department">{{ p.department }}</span>
+              <span class="status-chip" [class]="'status-' + p.status.toLowerCase()">
+                {{ hrStatusLabels[p.status] }}
+              </span>
+            </div>
+            <button class="edit-profile-btn" (click)="openEdit(p)" title="Editar perfil">
+              <span class="material-symbols-rounded">edit</span>
+            </button>
+          </div>
+        }
+        @if (filteredProfiles().length === 0) {
+          <div class="empty-state col-span">
+            <span class="material-symbols-rounded">person_search</span>
+            <p>Nenhum colaborador encontrado.</p>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- ── ORGANOGRAMA ─────────────────────────────────────────────────────── -->
+  @if (tab() === 'orgchart' && !loading()) {
+    <div class="section-wrap">
+      @if (orgChart().length === 0) {
+        <div class="empty-state">
+          <span class="material-symbols-rounded">account_tree</span>
+          <p>Configure os gestores nos perfis para ver o organograma.</p>
+        </div>
+      } @else {
+        <div class="org-tree">
+          @for (root of orgChart(); track root.id) {
+            <ng-container *ngTemplateOutlet="orgNode; context: { $implicit: root, depth: 0 }"></ng-container>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── FÉRIAS / AUSÊNCIAS ─────────────────────────────────────────────── -->
+  @if (tab() === 'leave' && !loading()) {
+    <div class="section-wrap">
+
+      <div class="toolbar">
+        <button class="btn-primary" (click)="showLeaveForm.set(true)">
+          <span class="material-symbols-rounded">add</span> Solicitar ausência
+        </button>
+      </div>
+
+      @if (showLeaveForm()) {
+        <div class="leave-form">
+          <h3>Nova solicitação</h3>
+          <div class="form-row">
+            <label>Tipo
+              <select [value]="leaveType()" (change)="leaveType.set($any($event.target).value)" class="form-select">
+                @for (t of leaveTypes; track t) {
+                  <option [value]="t">{{ leaveTypeLabels[t] }}</option>
+                }
+              </select>
+            </label>
+            <label>Início
+              <input type="date" [value]="leaveStart()" (change)="leaveStart.set($any($event.target).value)" class="form-input" />
+            </label>
+            <label>Fim
+              <input type="date" [value]="leaveEnd()" (change)="leaveEnd.set($any($event.target).value)" class="form-input" />
+            </label>
+          </div>
+          <textarea [value]="leaveReason()" (input)="leaveReason.set($any($event.target).value)"
+                    placeholder="Motivo (opcional)" rows="2" class="form-textarea"></textarea>
+          <div class="form-btns">
+            <button class="btn-ghost" (click)="showLeaveForm.set(false)">Cancelar</button>
+            <button class="btn-primary" [disabled]="!leaveStart() || !leaveEnd()" (click)="submitLeave()">Enviar</button>
+          </div>
+        </div>
+      }
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Colaborador</th><th>Tipo</th><th>Início</th><th>Fim</th><th>Status</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of leaves(); track l.id) {
+            <tr>
+              <td>
+                <div class="cell-user">
+                  <div class="mini-avatar">{{ initials(l.user.name) }}</div>
+                  {{ l.user.name }}
+                </div>
+              </td>
+              <td>{{ leaveTypeLabels[l.type] }}</td>
+              <td>{{ l.startDate | date:'dd/MM/yy' }}</td>
+              <td>{{ l.endDate | date:'dd/MM/yy' }}</td>
+              <td>
+                <span class="status-chip" [class]="'status-' + l.status.toLowerCase()">
+                  {{ l.status === 'PENDING' ? 'Pendente' : l.status === 'APPROVED' ? 'Aprovado' : l.status === 'REJECTED' ? 'Recusado' : 'Cancelado' }}
+                </span>
+              </td>
+              <td>
+                <div class="row-actions">
+                  @if (l.status === 'PENDING') {
+                    <button class="icon-btn green" (click)="reviewLeave(l.id, true)" title="Aprovar">
+                      <span class="material-symbols-rounded">check_circle</span>
+                    </button>
+                    <button class="icon-btn red" (click)="reviewLeave(l.id, false)" title="Recusar">
+                      <span class="material-symbols-rounded">cancel</span>
+                    </button>
+                    @if (isMe(l.userId)) {
+                      <button class="icon-btn" (click)="cancelLeave(l.id)" title="Cancelar">
+                        <span class="material-symbols-rounded">close</span>
+                      </button>
+                    }
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+          @if (leaves().length === 0) {
+            <tr><td colspan="6" class="empty-row">Nenhuma solicitação registrada.</td></tr>
+          }
+        </tbody>
+      </table>
+
+    </div>
+  }
+
+  <!-- ── PONTO ELETRÔNICO ───────────────────────────────────────────────── -->
+  @if (tab() === 'timerecords' && !loading()) {
+    <div class="section-wrap">
+
+      <div class="clock-card">
+        <div class="clock-display">
+          <span class="material-symbols-rounded clock-icon">schedule</span>
+          <div class="clock-info">
+            <span class="clock-label">Próximo registro</span>
+            <span class="clock-action">{{ timeRecordLabels[nextClock()] }}</span>
+          </div>
+        </div>
+        <button class="btn-clock" (click)="clock(nextClock())">
+          <span class="material-symbols-rounded">fingerprint</span>
+          Registrar {{ timeRecordLabels[nextClock()] }}
+        </button>
+      </div>
+
+      <div class="timeline">
+        <h3 class="timeline-title">Registros de hoje</h3>
+        @for (r of todayRecords(); track r.id) {
+          <div class="timeline-row">
+            <span class="tl-dot" [class]="'dot-' + r.type.toLowerCase()"></span>
+            <span class="tl-type">{{ timeRecordLabels[r.type] }}</span>
+            <span class="tl-time">{{ r.timestamp | date:'HH:mm:ss' }}</span>
+          </div>
+        }
+        @if (todayRecords().length === 0) {
+          <p class="empty-small">Nenhum registro hoje ainda.</p>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- ── ANIVERSÁRIOS ───────────────────────────────────────────────────── -->
+  @if (tab() === 'birthdays' && !loading()) {
+    <div class="section-wrap">
+      <div class="birthday-grid">
+        @for (p of birthdays(); track p.id) {
+          <div class="birthday-card" [class.today]="p.daysUntil === 0" [class.soon]="p.daysUntil! <= 7 && p.daysUntil! > 0">
+            <div class="bday-avatar">{{ initials(p.user.name) }}</div>
+            <div class="bday-info">
+              <span class="bday-name">{{ p.user.name }}</span>
+              <span class="bday-job">{{ p.jobTitle || p.department || '' }}</span>
+              <span class="bday-date">{{ p.birthDate | date:'dd/MM' }}</span>
+            </div>
+            <div class="bday-badge">
+              @if (p.daysUntil === 0) {
+                <span class="badge-today">🎂 Hoje!</span>
+              } @else {
+                <span class="badge-days">{{ p.daysUntil }}d</span>
+              }
+            </div>
+          </div>
+        }
+        @if (birthdays().length === 0) {
+          <div class="empty-state">
+            <span class="material-symbols-rounded">cake</span>
+            <p>Nenhum aniversário cadastrado nos perfis.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- ── Templates ───────────────────────────────────────────────────────── -->
+<ng-template #orgNode let-node let-depth="depth">
+  <div class="org-node" [style.margin-left.rem]="depth * 2.5">
+    <div class="org-card">
+      <div class="org-avatar">{{ initials(node.user.name) }}</div>
+      <div class="org-info">
+        <span class="org-name">{{ node.user.name }}</span>
+        <span class="org-job">{{ node.jobTitle || '—' }}</span>
+        <span class="org-dept" *ngIf="node.department">{{ node.department }}</span>
+      </div>
+      @if (node._count?.reports > 0 || node.children?.length > 0) {
+        <span class="org-reports">{{ node.children?.length || node._count?.reports }} subordinado(s)</span>
+      }
+    </div>
+    @if (node.children?.length > 0) {
+      <div class="org-children">
+        @for (child of node.children; track child.id) {
+          <ng-container *ngTemplateOutlet="orgNode; context: { $implicit: child, depth: depth + 1 }"></ng-container>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
+
+<!-- Profile Edit Modal -->
+@if (editingProfile()) {
+  <div class="modal-overlay" (click)="editingProfile.set(null)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Editar Perfil — {{ editingProfile()!.user.name }}</h3>
+        <button class="modal-close" (click)="editingProfile.set(null)">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label>Cargo
+          <input type="text" [value]="editJobTitle()" (input)="editJobTitle.set($any($event.target).value)"
+                 class="form-input" placeholder="Ex: Desenvolvedor Senior" />
+        </label>
+        <label>Departamento
+          <input type="text" [value]="editDept()" (input)="editDept.set($any($event.target).value)"
+                 class="form-input" placeholder="Ex: Engenharia" />
+        </label>
+        <label>Admissão
+          <input type="date" [value]="editAdmission()" (change)="editAdmission.set($any($event.target).value)" class="form-input" />
+        </label>
+        <label>Data de nascimento
+          <input type="date" [value]="editBirth()" (change)="editBirth.set($any($event.target).value)" class="form-input" />
+        </label>
+        <label>Status
+          <select [value]="editStatus()" (change)="editStatus.set($any($event.target).value)" class="form-select">
+            <option value="ACTIVE">Ativo</option>
+            <option value="ON_LEAVE">Afastado</option>
+            <option value="TERMINATED">Desligado</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" (click)="editingProfile.set(null)">Cancelar</button>
+        <button class="btn-primary" (click)="saveProfile()">Salvar</button>
+      </div>
+    </div>
+  </div>
+}

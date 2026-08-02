@@ -1,0 +1,23 @@
+.brief-section {
+  --brief-accent: #6366f1;
+  background: var(--surface-hover, #f9fafb);
+  border-radius: 16px;
+  padding: 20px;
+  border-left: 3px solid var(--brief-accent);
+}
+
+.brief-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brief-accent);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  .material-symbols-rounded {
+    font-size: 16px;
+  }
+}

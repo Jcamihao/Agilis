@@ -7,7 +7,9 @@ export const EVENTS = {
   TASK_STATUS_CHANGED: 'task.status_changed',
   TASK_ASSIGNED:       'task.assigned',
   TASK_OVERDUE:        'task.overdue',
+  TASK_DUE_SOON:       'task.due_soon',
   COMMENT_CREATED:     'comment.created',
+  PROJECT_MEMBER_ADDED:'project.member_added',
 } as const;
 
 // ── Payloads ─────────────────────────────────────────────────────────────────

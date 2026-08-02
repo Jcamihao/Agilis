@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { startOfDay, endOfDay, eachDayOfInterval, format } from 'date-fns';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class CalendarService {
@@ -48,6 +49,56 @@ export class CalendarService {
       tasks,
       grouped,
     };
+  }
+
+  async exportIcal(companyId: string): Promise<string> {
+    const tasks = await this.prisma.task.findMany({
+      where: { project: { companyId }, dueDate: { not: null } },
+      include: {
+        project: { select: { name: true } },
+        assignee: { select: { name: true } },
+      },
+      orderBy: { dueDate: 'asc' },
+      take: 2000,
+    });
+
+    const stamp = format(new Date(), "yyyyMMdd'T'HHmmss'Z'");
+    const lines: string[] = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Agilis//Agilis Calendar//PT',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'X-WR-CALNAME:Agilis',
+      'X-WR-TIMEZONE:America/Sao_Paulo',
+    ];
+
+    for (const task of tasks) {
+      if (!task.dueDate) continue;
+      const uid = crypto.createHash('md5').update(task.id).digest('hex');
+      const due = format(new Date(task.dueDate), "yyyyMMdd");
+      const title = this.escapeIcal(task.title);
+      const desc  = this.escapeIcal(`[${task.project.name}] Prioridade: ${task.priority} | Status: ${task.status}`);
+      const assignee = task.assignee?.name ? `ORGANIZER;CN=${task.assignee.name}:MAILTO:noreply@agilis.app\r\n` : '';
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:${uid}@agilis`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${due}`,
+        `DTEND;VALUE=DATE:${due}`,
+        `SUMMARY:${title}`,
+        `DESCRIPTION:${desc}`,
+        ...(assignee ? [assignee.trimEnd()] : []),
+        'END:VEVENT',
+      );
+    }
+
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n');
+  }
+
+  private escapeIcal(v: string): string {
+    return v.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
   }
 
   async getUpcoming(userId: string, companyId: string, days = 7) {

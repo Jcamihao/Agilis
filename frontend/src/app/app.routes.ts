@@ -79,6 +79,11 @@ export const routes: Routes = [
         title: 'Configurações do Projeto — Agilis',
       },
       {
+        path: 'projects/:id/risks',
+        loadComponent: () => import('./features/risks/risks.component').then((m) => m.RisksComponent),
+        title: 'Riscos — Agilis',
+      },
+      {
         path: 'my-tasks',
         loadComponent: () => import('./features/my-tasks/my-tasks.component').then((m) => m.MyTasksComponent),
         title: 'Minhas Tarefas — Agilis',
@@ -102,6 +107,11 @@ export const routes: Routes = [
         path: 'automations',
         loadComponent: () => import('./features/automations/automations.component').then((m) => m.AutomationsComponent),
         title: 'Automações — Agilis',
+      },
+      {
+        path: 'portfolio',
+        loadComponent: () => import('./features/portfolio/portfolio.component').then((m) => m.PortfolioComponent),
+        title: 'Portfolio Executivo — Agilis',
       },
       {
         path: 'metrics',
@@ -140,18 +150,53 @@ export const routes: Routes = [
       },
       {
         path: 'reports',
-        loadComponent: () => import('./features/metrics/metrics.component').then((m) => m.MetricsComponent),
+        loadComponent: () => import('./features/reports/reports.component').then((m) => m.ReportsComponent),
         title: 'Relatórios — Agilis',
       },
       {
         path: 'audit',
-        loadComponent: () => import('./features/metrics/metrics.component').then((m) => m.MetricsComponent),
+        loadComponent: () => import('./features/audit/audit.component').then((m) => m.AuditComponent),
         title: 'Auditoria — Agilis',
+      },
+      {
+        path: 'sla',
+        loadComponent: () => import('./features/sla/sla.component').then((m) => m.SlaComponent),
+        title: 'SLA — Agilis',
+      },
+      {
+        path: 'chat',
+        loadComponent: () => import('./features/chat/chat-page.component').then((m) => m.ChatPageComponent),
+        title: 'Comunicação — Agilis',
       },
       {
         path: 'webhooks',
         loadComponent: () => import('./features/webhooks/webhooks.component').then((m) => m.WebhooksComponent),
         title: 'Webhooks — Agilis',
+      },
+      {
+        path: 'feed',
+        loadComponent: () => import('./features/feed/feed.component').then((m) => m.FeedComponent),
+        title: 'Mural — Agilis',
+      },
+      {
+        path: 'corporate-wiki',
+        loadComponent: () => import('./features/corporate-wiki/corporate-wiki.component').then((m) => m.CorporateWikiComponent),
+        title: 'Wiki Corporativa — Agilis',
+      },
+      {
+        path: 'hr',
+        loadComponent: () => import('./features/hr/hr.component').then((m) => m.HrComponent),
+        title: 'RH — Agilis',
+      },
+      {
+        path: 'process-center',
+        loadComponent: () => import('./features/process-center/process-center.component').then((m) => m.ProcessCenterComponent),
+        title: 'Centro de Processos — Agilis',
+      },
+      {
+        path: 'projects/:id/sprint-planning',
+        loadComponent: () => import('./features/sprint-planning/sprint-planning.component').then((m) => m.SprintPlanningComponent),
+        title: 'Sprint Planning — Agilis',
       },
     ],
   },

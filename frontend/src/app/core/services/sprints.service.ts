@@ -25,4 +25,13 @@ export class SprintsService {
   updateStatus(id: string, status: string) {
     return this.api.patch<Sprint>(`/sprints/${id}/status`, { status });
   }
+
+  getBurndown(sprintId: string) {
+    return this.api.get<{
+      sprintId: string;
+      sprintName: string;
+      total: number;
+      days: { date: string; ideal: number; actual: number }[];
+    }>(`/sprints/${sprintId}/burndown`);
+  }
 }

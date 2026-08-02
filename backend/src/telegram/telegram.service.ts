@@ -2,7 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
-import { EVENTS, TaskCreatedEvent } from '../events/agilis-events';
+import {
+  EVENTS,
+  TaskCreatedEvent,
+  TaskAssignedEvent,
+  TaskOverdueEvent,
+} from '../events/agilis-events';
+
+type TelegramPref = { taskCreated?: boolean; taskAssigned?: boolean; taskDueSoon?: boolean };
 
 @Injectable()
 export class TelegramService {
@@ -80,15 +87,15 @@ export class TelegramService {
     }
   }
 
-  // ── Event Listener ────────────────────────────────────────────────────────
+  // ── Event Listeners ───────────────────────────────────────────────────────
 
   @OnEvent(EVENTS.TASK_CREATED)
   async onTaskCreated(e: TaskCreatedEvent) {
     if (!this.token) return;
 
     try {
-      const recipients = await this.resolveRecipients(e);
-      if (recipients.length === 0) return;
+      const chatIds = await this.getChatIdsForUsers([e.actor.id], 'taskCreated');
+      if (!chatIds.length) return;
 
       const priority: Record<string, string> = {
         LOW: '🟢 Baixa', MEDIUM: '🟡 Média', HIGH: '🔴 Alta', CRITICAL: '🚨 Crítica',
@@ -105,40 +112,72 @@ export class TelegramService {
         `⚡ Prioridade: ${priority[e.task.priority] ?? e.task.priority}${due}`,
       ].join('\n');
 
-      await Promise.allSettled(recipients.map((chatId) => this.sendMessage(chatId, text)));
+      await Promise.allSettled(chatIds.map(id => this.sendMessage(id, text)));
     } catch (err: any) {
       this.logger.error(`onTaskCreated Telegram error: ${err.message}`);
     }
   }
 
+  @OnEvent(EVENTS.TASK_ASSIGNED)
+  async onTaskAssigned(e: TaskAssignedEvent) {
+    if (!this.token) return;
+
+    try {
+      const chatIds = await this.getChatIdsForUsers([e.assigneeId], 'taskAssigned');
+      if (!chatIds.length) return;
+
+      const text = [
+        `📋 <b>Tarefa atribuída a você no Agilis</b>`,
+        ``,
+        `📌 <b>${e.task.title}</b>`,
+        `👤 Atribuída por: ${e.actor.name}`,
+      ].join('\n');
+
+      await Promise.allSettled(chatIds.map(id => this.sendMessage(id, text)));
+    } catch (err: any) {
+      this.logger.error(`onTaskAssigned Telegram error: ${err.message}`);
+    }
+  }
+
+  @OnEvent(EVENTS.TASK_DUE_SOON)
+  async onTaskDueSoon(e: TaskOverdueEvent) {
+    if (!this.token) return;
+
+    try {
+      const assigneeId = (e.task as any).assigneeId as string | undefined;
+      if (!assigneeId) return;
+
+      const chatIds = await this.getChatIdsForUsers([assigneeId], 'taskDueSoon');
+      if (!chatIds.length) return;
+
+      const text = [
+        `⏰ <b>Tarefa vence em breve no Agilis</b>`,
+        ``,
+        `📌 <b>${e.task.title}</b>`,
+        `📅 Prazo: ${new Date((e.task as any).dueDate).toLocaleDateString('pt-BR')}`,
+      ].join('\n');
+
+      await Promise.allSettled(chatIds.map(id => this.sendMessage(id, text)));
+    } catch (err: any) {
+      this.logger.error(`onTaskDueSoon Telegram error: ${err.message}`);
+    }
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  private async resolveRecipients(e: TaskCreatedEvent): Promise<string[]> {
-    const chatIds = new Set<string>();
-
-    // Criador da tarefa
-    const actor = await this.prisma.user.findUnique({
-      where: { id: e.actor.id },
-      select: { telegramChatId: true },
-    });
-    if (actor?.telegramChatId) chatIds.add(actor.telegramChatId);
-
-    // Líder(es) da equipe do projeto
-    const project = await this.prisma.project.findUnique({
-      where: { id: e.task.projectId },
-      select: { teamId: true },
+  private async getChatIdsForUsers(userIds: string[], eventKey: keyof TelegramPref): Promise<string[]> {
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds }, telegramChatId: { not: null } },
+      select: { telegramChatId: true, notifPreferences: true },
     });
 
-    if (project?.teamId) {
-      const leaders = await this.prisma.teamMember.findMany({
-        where: { teamId: project.teamId, role: { in: ['OWNER', 'ADMIN'] } },
-        include: { user: { select: { telegramChatId: true } } },
-      });
-      for (const l of leaders) {
-        if (l.user.telegramChatId) chatIds.add(l.user.telegramChatId);
-      }
-    }
-
-    return Array.from(chatIds);
+    return users
+      .filter(u => {
+        const prefs = (u.notifPreferences as any)?.telegram as TelegramPref | undefined;
+        // default true if no preference saved
+        return prefs?.[eventKey] !== false;
+      })
+      .map(u => u.telegramChatId!)
+      .filter(Boolean);
   }
 }

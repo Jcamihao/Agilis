@@ -1,0 +1,186 @@
+<div class="sla-page">
+
+  <!-- Header -->
+  <div class="sla-header">
+    <div class="sla-title-row">
+      <span class="material-symbols-rounded sla-icon">timer</span>
+      <div>
+        <h1 class="sla-title">SLA — Acordos de Nível de Serviço</h1>
+        <p class="sla-sub">Monitoramento de tempo de resposta e resolução de tarefas.</p>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <span class="material-symbols-rounded spin">autorenew</span>
+      <p>Carregando dados de SLA…</p>
+    </div>
+  }
+
+  @if (!loading()) {
+
+    <!-- KPI Cards -->
+    @if (summary()) {
+      <div class="kpi-grid">
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap" style="background:#dbeafe">
+            <span class="material-symbols-rounded" style="color:#2563eb">assignment</span>
+          </div>
+          <div>
+            <p class="kpi-label">Total monitorado</p>
+            <p class="kpi-value">{{ summary()!.total }}</p>
+          </div>
+        </div>
+
+        <div class="kpi-card" [class.kpi-alert]="summary()!.breachRate > 20">
+          <div class="kpi-icon-wrap" style="background:#fee2e2">
+            <span class="material-symbols-rounded" style="color:#dc2626">warning</span>
+          </div>
+          <div>
+            <p class="kpi-label">Taxa de violação</p>
+            <p class="kpi-value">{{ summary()!.breachRate }}%</p>
+            <p class="kpi-detail">{{ summary()!.breached }} violados</p>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap" style="background:#d1fae5">
+            <span class="material-symbols-rounded" style="color:#059669">check_circle</span>
+          </div>
+          <div>
+            <p class="kpi-label">Resolvidos</p>
+            <p class="kpi-value">{{ summary()!.resolved }}</p>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap" style="background:#ede9fe">
+            <span class="material-symbols-rounded" style="color:#7c3aed">reply</span>
+          </div>
+          <div>
+            <p class="kpi-label">Tempo médio de resposta</p>
+            <p class="kpi-value">{{ fmt(summary()!.avgResponseMinutes) }}</p>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap" style="background:#fef3c7">
+            <span class="material-symbols-rounded" style="color:#d97706">hourglass_bottom</span>
+          </div>
+          <div>
+            <p class="kpi-label">Tempo médio de resolução</p>
+            <p class="kpi-value">{{ fmt(summary()!.avgResolutionMinutes) }}</p>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap" style="background:#fee2e2">
+            <span class="material-symbols-rounded" style="color:#dc2626">schedule</span>
+          </div>
+          <div>
+            <p class="kpi-label">Atraso médio</p>
+            <p class="kpi-value">{{ fmt(summary()!.avgDelayMinutes) }}</p>
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- Breach rate bar -->
+    @if (summary() && summary()!.total > 0) {
+      <div class="breach-bar-wrap">
+        <div class="breach-bar-header">
+          <span>Saúde do SLA</span>
+          <span [class.text-red]="summary()!.breachRate > 20">
+            {{ 100 - summary()!.breachRate }}% dentro do prazo
+          </span>
+        </div>
+        <div class="breach-bar-track">
+          <div class="breach-bar-ok"    [style.width.%]="100 - summary()!.breachRate"></div>
+          <div class="breach-bar-fail"  [style.width.%]="summary()!.breachRate"></div>
+        </div>
+        <div class="breach-bar-legend">
+          <span><span class="dot dot-ok"></span> Dentro do prazo</span>
+          <span><span class="dot dot-fail"></span> Violado</span>
+        </div>
+      </div>
+    }
+
+    <!-- Breached tasks table -->
+    <div class="section">
+      <h2 class="section-title">
+        <span class="material-symbols-rounded">report_problem</span>
+        Tarefas com SLA Violado
+        @if (breached().length > 0) {
+          <span class="badge-count">{{ breached().length }}</span>
+        }
+      </h2>
+
+      @if (breached().length === 0) {
+        <div class="empty-state">
+          <span class="material-symbols-rounded empty-icon">verified</span>
+          <p class="empty-title">Nenhuma violação de SLA</p>
+          <p class="empty-sub">Todas as tarefas abertas estão dentro do prazo.</p>
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table class="sla-table">
+            <thead>
+              <tr>
+                <th>Tarefa</th>
+                <th>Projeto</th>
+                <th>Prioridade</th>
+                <th>Responsável</th>
+                <th>Prazo</th>
+                <th>Atraso</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of breached(); track r.id) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/projects', r.task.project.id, 'kanban']" class="task-link">
+                      {{ r.task.title }}
+                    </a>
+                  </td>
+                  <td>
+                    <span class="project-dot" [style.background]="r.task.project.color || '#6366f1'"></span>
+                    {{ r.task.project.name }}
+                  </td>
+                  <td>
+                    <span class="priority-chip" [style.color]="PRIORITY_COLOR[r.task.priority]">
+                      {{ PRIORITY_LABEL[r.task.priority] || r.task.priority }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (r.task.assignee) {
+                      <span class="assignee">{{ r.task.assignee.name }}</span>
+                    } @else {
+                      <span class="no-assignee">—</span>
+                    }
+                  </td>
+                  <td>
+                    @if (r.task.dueDate) {
+                      <span class="due-date">{{ r.task.dueDate | date:'dd/MM/yy' }}</span>
+                    } @else {
+                      <span class="no-assignee">—</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="delay-badge" [ngClass]="delayClass(r.delayMinutes)">
+                      +{{ fmt(r.delayMinutes) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+  }
+
+</div>

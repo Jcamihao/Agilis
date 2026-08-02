@@ -1,0 +1,130 @@
+<div class="gs-overlay" (click)="close.emit()">
+  <div class="gs-modal" (click)="$event.stopPropagation()">
+
+    <!-- Search input -->
+    <div class="gs-input-wrap">
+      <span class="material-symbols-rounded gs-search-icon">search</span>
+      <input
+        #searchInput
+        [formControl]="queryControl"
+        type="text"
+        class="gs-input"
+        placeholder="Buscar tarefas, projetos, membros, wiki…"
+        autocomplete="off"
+      />
+      @if (loading()) {
+        <span class="material-symbols-rounded gs-spin">autorenew</span>
+      } @else {
+        <kbd class="gs-esc-key">Esc</kbd>
+      }
+    </div>
+
+    <!-- Results -->
+    <div class="gs-body">
+
+      @if (!queryControl.value || (queryControl.value.trim().length) < 2) {
+        <p class="gs-hint">Digite pelo menos 2 caracteres para buscar</p>
+      } @else if (isEmpty()) {
+        <div class="gs-empty">
+          <span class="material-symbols-rounded">search_off</span>
+          <p>Nenhum resultado para "<strong>{{ queryControl.value }}</strong>"</p>
+        </div>
+      }
+
+      @if (results(); as r) {
+
+        <!-- Tasks -->
+        @if (r.tasks.length > 0) {
+          <div class="gs-section">
+            <p class="gs-section-label">
+              <span class="material-symbols-rounded">task_alt</span> Tarefas
+            </p>
+            @for (task of r.tasks; track task.id) {
+              <button class="gs-item" (click)="goTask(task.project.id, task.id)">
+                <span class="gs-status-dot" [style.background]="STATUS_COLOR[task.status]"></span>
+                <span class="gs-item-title">{{ task.title }}</span>
+                <span class="gs-item-meta">{{ task.project.name }}</span>
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Projects -->
+        @if (r.projects.length > 0) {
+          <div class="gs-section">
+            <p class="gs-section-label">
+              <span class="material-symbols-rounded">folder</span> Projetos
+            </p>
+            @for (proj of r.projects; track proj.id) {
+              <button class="gs-item" (click)="goProject(proj.id)">
+                <span class="gs-proj-dot" [style.background]="proj.color">
+                  <span class="material-symbols-rounded">{{ proj.icon }}</span>
+                </span>
+                <span class="gs-item-title">{{ proj.name }}</span>
+                @if (proj.description) {
+                  <span class="gs-item-meta">{{ proj.description }}</span>
+                }
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Members -->
+        @if (r.members.length > 0) {
+          <div class="gs-section">
+            <p class="gs-section-label">
+              <span class="material-symbols-rounded">group</span> Pessoas
+            </p>
+            @for (m of r.members; track m.id) {
+              <div class="gs-item gs-item--no-hover">
+                <div class="gs-avatar">{{ m.name.charAt(0) }}</div>
+                <div class="gs-item-info">
+                  <span class="gs-item-title">{{ m.name }}</span>
+                  <span class="gs-item-meta">{{ m.email }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Wiki Pages -->
+        @if (r.wikiPages.length > 0) {
+          <div class="gs-section">
+            <p class="gs-section-label">
+              <span class="material-symbols-rounded">menu_book</span> Wiki de Projetos
+            </p>
+            @for (page of r.wikiPages; track page.id) {
+              <button class="gs-item" (click)="goWiki(page.project.id, page.id)">
+                <span class="material-symbols-rounded gs-wiki-icon">{{ page.icon }}</span>
+                <span class="gs-item-title">{{ page.title }}</span>
+                <span class="gs-item-meta">{{ page.project.name }}</span>
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Corporate Wiki -->
+        @if (r.corpWiki.length > 0) {
+          <div class="gs-section">
+            <p class="gs-section-label">
+              <span class="material-symbols-rounded">corporate_fare</span> Wiki Corporativa
+            </p>
+            @for (page of r.corpWiki; track page.id) {
+              <button class="gs-item" (click)="goCorpWiki(page.id)">
+                <span class="material-symbols-rounded gs-wiki-icon">{{ page.icon }}</span>
+                <span class="gs-item-title">{{ page.title }}</span>
+              </button>
+            }
+          </div>
+        }
+
+      }
+    </div>
+
+    <div class="gs-footer">
+      <span><kbd>↑↓</kbd> navegar</span>
+      <span><kbd>↵</kbd> selecionar</span>
+      <span><kbd>Esc</kbd> fechar</span>
+    </div>
+  </div>
+</div>

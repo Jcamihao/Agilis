@@ -1,8 +1,14 @@
     <div class="space-y-6">
       <!-- Header -->
-      <div>
-        <h1 class="ag-page-title">Relatórios</h1>
-        <p class="ag-page-subtitle">Exporte dados em CSV ou Excel</p>
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 class="ag-page-title">Relatórios</h1>
+          <p class="ag-page-subtitle">Exporte dados em CSV, Excel ou PDF</p>
+        </div>
+        <button (click)="printPdf()" class="ag-btn ag-btn--secondary ag-btn--sm no-print">
+          <span class="material-symbols-rounded text-base">print</span>
+          Exportar PDF
+        </button>
       </div>
 
       <!-- Date range filter -->

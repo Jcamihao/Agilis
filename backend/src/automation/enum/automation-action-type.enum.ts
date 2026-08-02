@@ -4,6 +4,5 @@ export enum AutomationActionType {
   SEND_NOTIFICATION = 'SEND_NOTIFICATION',
   CREATE_TASK       = 'CREATE_TASK',
   SEND_EMAIL        = 'SEND_EMAIL',
-  SEND_WHATSAPP     = 'SEND_WHATSAPP',
   SEND_TELEGRAM     = 'SEND_TELEGRAM',
 }

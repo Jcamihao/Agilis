@@ -53,15 +53,28 @@ export class CommentSectionComponent implements OnInit {
     });
   }
 
+  private previewUrls = new Map<File, string>();
+
   onFileSelect(event: Event) {
     const files = Array.from((event.target as HTMLInputElement).files ?? []);
     if (!files.length) return;
+    files.forEach((f) => {
+      if (f.type.startsWith('image/')) this.previewUrls.set(f, URL.createObjectURL(f));
+    });
     this.pendingFiles.update((prev) => [...prev, ...files]);
     (event.target as HTMLInputElement).value = '';
   }
 
   removePendingFile(index: number) {
+    const files = this.pendingFiles();
+    const removed = files[index];
+    const url = this.previewUrls.get(removed);
+    if (url) { URL.revokeObjectURL(url); this.previewUrls.delete(removed); }
     this.pendingFiles.update((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  pendingPreview(file: File): string | null {
+    return this.previewUrls.get(file) ?? null;
   }
 
   uploadAttachments(): Promise<void> {
@@ -70,25 +83,30 @@ export class CommentSectionComponent implements OnInit {
     this.uploadingFile.set(true);
     return new Promise((resolve) => {
       let remaining = files.length;
+      const finish = () => {
+        if (--remaining === 0) {
+          this.uploadingFile.set(false);
+          this.pendingFiles.set([]);
+          this.cdr.markForCheck();
+          resolve();
+        }
+      };
       files.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const fileUrl = reader.result as string;
-          this.attachmentsService.create({
-            taskId: this.taskId,
-            fileName: file.name,
-            fileUrl,
-            fileSize: file.size,
-            mimeType: file.type,
-          }).subscribe({
-            next: (att) => {
-              this.attachments.update((prev) => [att, ...prev]);
-              if (--remaining === 0) { this.uploadingFile.set(false); this.pendingFiles.set([]); this.cdr.markForCheck(); resolve(); }
-            },
-            error: () => { if (--remaining === 0) { this.uploadingFile.set(false); resolve(); } },
-          });
-        };
-        reader.readAsDataURL(file);
+        this.attachmentsService.uploadFile(file).subscribe({
+          next: (uploaded) => {
+            this.attachmentsService.create({
+              taskId: this.taskId,
+              fileName: uploaded.fileName,
+              fileUrl: uploaded.url,
+              fileSize: uploaded.fileSize,
+              mimeType: uploaded.mimeType,
+            }).subscribe({
+              next: (att) => { this.attachments.update((prev) => [att, ...prev]); finish(); },
+              error: () => finish(),
+            });
+          },
+          error: () => finish(),
+        });
       });
     });
   }

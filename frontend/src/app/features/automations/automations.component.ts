@@ -23,7 +23,6 @@ const ACTION_LABELS: Record<AutomationActionType, string> = {
   SEND_NOTIFICATION: 'Enviar notificação',
   CREATE_TASK:       'Criar tarefa',
   SEND_EMAIL:        'Enviar e-mail',
-  SEND_WHATSAPP:     'Enviar WhatsApp',
   SEND_TELEGRAM:     'Enviar Telegram',
 };
 
@@ -221,7 +220,6 @@ export class AutomationsComponent implements OnInit {
       CREATE_TASK:       { title: '' },
       SEND_EMAIL:        { to: '', subject: '' },
       ASSIGN_USER:       { userId: '' },
-      SEND_WHATSAPP:     { target: 'assignee', message: '' },
       SEND_TELEGRAM:     { target: 'creator', chatId: '', message: '' },
     };
     ctrl.setControl('params', this.fb.group(paramsMap[type] ?? {}));
@@ -232,9 +230,6 @@ export class AutomationsComponent implements OnInit {
     return this.actionsArray.at(i)?.get('params')?.get('target')?.value ?? 'creator';
   }
 
-  getWhatsAppTarget(i: number): string {
-    return this.actionsArray.at(i)?.get('params')?.get('target')?.value ?? 'assignee';
-  }
 
   private normalizeActionParams(type: AutomationActionType, params: Record<string, any>): Record<string, any> {
     const defaults: Record<AutomationActionType, Record<string, any>> = {
@@ -243,7 +238,6 @@ export class AutomationsComponent implements OnInit {
       SEND_NOTIFICATION: { title: '', message: '' },
       CREATE_TASK:       { title: '' },
       SEND_EMAIL:        { to: '', subject: '' },
-      SEND_WHATSAPP:     { target: 'assignee', message: '' },
       SEND_TELEGRAM:     { target: 'creator', chatId: '', message: '' },
     };
     return { ...defaults[type], ...params };

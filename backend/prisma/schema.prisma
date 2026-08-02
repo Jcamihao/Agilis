@@ -38,7 +38,7 @@ enum NotificationType {
   TASK_STATUS_CHANGED
   PROJECT_INVITE
   AUTOMATION_TRIGGERED
-  WHATSAPP_SENT
+
   INSIGHT_GENERATED
 }
 
@@ -66,7 +66,6 @@ enum AutomationActionType {
   SEND_NOTIFICATION
   CREATE_TASK
   SEND_EMAIL
-  SEND_WHATSAPP
   SEND_TELEGRAM
 }
 
@@ -113,12 +112,6 @@ enum InsightSeverity {
   CRITICAL
 }
 
-enum WhatsAppStatus {
-  PENDING
-  SENT
-  FAILED
-  READ
-}
 
 enum ProcessStepType {
   DOCUMENTATION
@@ -157,16 +150,24 @@ model Company {
   teams           Team[]
   projects        Project[]
   statuses        TaskStatusConfig[]
+  labels          Label[]
+  announcements   Announcement[]
   automations     AutomationRule[]
   auditLogs       AuditLog[]
   insights        Insight[]
   healthScores    HealthScore[]
-  whatsappConfig  WhatsAppConfig?
+
   aiConversations AiConversation[]
   processes       Process[]
   webhooks        Webhook[]
   chatRooms       ChatRoom[]
   objectives      Objective[]
+  feedPosts       FeedPost[]
+  corporateWiki   CorporateWikiPage[]
+  hrProfiles      HrProfile[]
+  leaveRequests   LeaveRequest[]
+  timeRecords     TimeRecord[]
+  taskTemplates   TaskTemplate[]
 
   @@map("companies")
 }
@@ -180,6 +181,7 @@ model User {
   bio                String?
   phone              String?
   telegramChatId     String?
+  notifPreferences   Json?
   cpfCnpj            String?
   cep                String?
   uf                 String?
@@ -213,6 +215,20 @@ model User {
   intakeForms          IntakeForm[]     @relation("intakeForms")
   approvalRequests     TaskApproval[]   @relation("approvalRequests")
   approvalReviews      TaskApproval[]   @relation("approvalReviews")
+  ownedRisks           Risk[]           @relation("riskOwner")
+  authoredAnnouncements Announcement[]  @relation("authoredAnnouncements")
+  announcementReads     AnnouncementRead[]
+  feedPosts             FeedPost[]         @relation("feedPostAuthor")
+  feedReactions         FeedReaction[]     @relation("feedReactions")
+  feedComments          FeedComment[]      @relation("feedComments")
+  corpWikiCreated       CorporateWikiPage[] @relation("corpWikiCreated")
+  corpWikiUpdated       CorporateWikiPage[] @relation("corpWikiUpdated")
+  corpWikiRevisions     CorporateWikiRevision[] @relation("corpWikiRevisions")
+  hrProfile             HrProfile?
+  leaveRequests         LeaveRequest[]     @relation("leaveRequests")
+  leaveApprovals        LeaveRequest[]     @relation("leaveApprovals")
+  timeRecords           TimeRecord[]       @relation("timeRecords")
+  taskTemplates         TaskTemplate[]     @relation("taskTemplateCreator")
 
   @@map("users")
 }
@@ -298,6 +314,7 @@ model Project {
   wikiPages    WikiPage[]
   intakeForms  IntakeForm[]
   clientPortal ClientPortal?
+  risks        Risk[]
 
   @@map("projects")
 }
@@ -317,21 +334,23 @@ model ProjectMember {
 }
 
 model Task {
-  id          String     @id @default(uuid())
-  title       String
-  description String?
-  status      TaskStatus @default(BACKLOG)
-  priority    Priority   @default(MEDIUM)
-  position    Float      @default(0)
-  startDate   DateTime?
-  dueDate     DateTime?
-  projectId   String
-  assigneeId  String?
-  creatorId   String
-  sprintId    String?
-  parentId    String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id                 String     @id @default(uuid())
+  title              String
+  description        String?
+  status             TaskStatus @default(BACKLOG)
+  priority           Priority   @default(MEDIUM)
+  position           Float      @default(0)
+  startDate          DateTime?
+  dueDate            DateTime?
+  projectId          String
+  assigneeId         String?
+  creatorId          String
+  sprintId           String?
+  parentId           String?
+  recurrence         String     @default("NONE")
+  recurrenceParentId String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 
   project      Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
   assignee     User?                 @relation("assignedTasks", fields: [assigneeId], references: [id], onDelete: SetNull)
@@ -641,43 +660,6 @@ model HealthScore {
   @@map("health_scores")
 }
 
-// ─── V4: WhatsApp ────────────────────────────────────────────────────────────
-
-model WhatsAppConfig {
-  id           String   @id @default(uuid())
-  companyId    String   @unique
-  instanceName String
-  apiUrl       String
-  apiKey       String
-  isActive     Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  company  Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  messages WhatsAppMessage[]
-
-  @@map("whatsapp_configs")
-}
-
-model WhatsAppMessage {
-  id           String         @id @default(uuid())
-  configId     String
-  phone        String
-  message      String
-  type         String // REMINDER | ALERT | CHARGE | OVERDUE
-  status       WhatsAppStatus @default(PENDING)
-  taskId       String?
-  scheduledAt  DateTime?
-  sentAt       DateTime?
-  errorMessage String?
-  createdAt    DateTime       @default(now())
-
-  config WhatsAppConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
-
-  @@index([configId, status])
-  @@index([scheduledAt])
-  @@map("whatsapp_messages")
-}
 
 // ─── V4: Process Center ──────────────────────────────────────────────────────
 
@@ -809,12 +791,15 @@ model Insight {
 
 model Label {
   id        String   @id @default(uuid())
+  companyId String
   name      String
   color     String   @default("#6366f1")
   createdAt DateTime @default(now())
 
-  tasks TaskLabel[]
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tasks   TaskLabel[]
 
+  @@index([companyId])
   @@map("labels")
 }
 
@@ -901,6 +886,7 @@ enum ChatRoomType {
   GENERAL
   PROJECT
   DIRECT
+  DEPARTMENT
 }
 
 model ChatRoom {
@@ -949,6 +935,36 @@ model ChatMessage {
 
   @@index([roomId, createdAt(sort: Desc)])
   @@map("chat_messages")
+}
+
+model Announcement {
+  id          String   @id @default(uuid())
+  companyId   String
+  authorId    String
+  title       String
+  content     String
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company   Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  author    User                 @relation("authoredAnnouncements", fields: [authorId], references: [id])
+  reads     AnnouncementRead[]
+
+  @@index([companyId, createdAt(sort: Desc)])
+  @@map("announcements")
+}
+
+model AnnouncementRead {
+  announcementId String
+  userId         String
+  readAt         DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, userId])
+  @@map("announcement_reads")
 }
 
 // ─── OKRs ─────────────────────────────────────────────────────────────────────
@@ -1212,4 +1228,265 @@ model TaskApproval {
   @@index([approverId, status])
   @@index([requestedById])
   @@map("task_approvals")
+}
+
+// ─── Sprint 14: Risk Management ──────────────────────────────────────────────
+
+enum RiskImpact {
+  VERY_LOW
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskProbability {
+  VERY_LOW
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum RiskStatus {
+  OPEN
+  MITIGATED
+  ACCEPTED
+  CLOSED
+}
+
+enum RiskCategory {
+  TECHNICAL
+  SCHEDULE
+  BUDGET
+  RESOURCE
+  EXTERNAL
+  QUALITY
+  OTHER
+}
+
+model Risk {
+  id          String          @id @default(uuid())
+  projectId   String
+  title       String
+  description String?
+  category    RiskCategory    @default(OTHER)
+  impact      RiskImpact      @default(MEDIUM)
+  probability RiskProbability @default(MEDIUM)
+  status      RiskStatus      @default(OPEN)
+  ownerId     String?
+  mitigation  String?
+  dueDate     DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  owner   User?   @relation("riskOwner", fields: [ownerId], references: [id])
+
+  @@index([projectId, status])
+  @@index([ownerId])
+  @@map("risks")
+}
+
+// ─── Intranet Social ──────────────────────────────────────────────────────────
+
+model FeedPost {
+  id        String   @id @default(uuid())
+  companyId String
+  authorId  String
+  content   String
+  imageUrl  String?
+  isPinned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  author    User          @relation("feedPostAuthor", fields: [authorId], references: [id])
+  reactions FeedReaction[]
+  comments  FeedComment[]
+
+  @@index([companyId])
+  @@map("feed_posts")
+}
+
+model FeedReaction {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  emoji     String   @default("👍")
+  createdAt DateTime @default(now())
+
+  post FeedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User     @relation("feedReactions", fields: [userId], references: [id])
+
+  @@unique([postId, userId, emoji])
+  @@map("feed_reactions")
+}
+
+model FeedComment {
+  id        String   @id @default(uuid())
+  postId    String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  post   FeedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User     @relation("feedComments", fields: [authorId], references: [id])
+
+  @@index([postId])
+  @@map("feed_comments")
+}
+
+// ─── Corporate Wiki ───────────────────────────────────────────────────────────
+
+model CorporateWikiPage {
+  id          String   @id @default(uuid())
+  companyId   String
+  parentId    String?
+  title       String
+  content     String   @default("")
+  icon        String   @default("article")
+  position    Int      @default(0)
+  createdById String
+  updatedById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company   Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  parent    CorporateWikiPage?   @relation("CorpWikiTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  CorporateWikiPage[]  @relation("CorpWikiTree")
+  createdBy User                 @relation("corpWikiCreated", fields: [createdById], references: [id])
+  updatedBy User                 @relation("corpWikiUpdated", fields: [updatedById], references: [id])
+  revisions CorporateWikiRevision[]
+
+  @@index([companyId, position])
+  @@map("corporate_wiki_pages")
+}
+
+model CorporateWikiRevision {
+  id        String   @id @default(uuid())
+  pageId    String
+  content   String
+  title     String
+  authorId  String
+  createdAt DateTime @default(now())
+
+  page   CorporateWikiPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  author User              @relation("corpWikiRevisions", fields: [authorId], references: [id])
+
+  @@index([pageId])
+  @@map("corporate_wiki_revisions")
+}
+
+// ─── RH Básico ────────────────────────────────────────────────────────────────
+
+enum HrStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+enum LeaveType {
+  VACATION
+  SICK
+  PERSONAL
+  MATERNITY
+  PATERNITY
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum TimeRecordType {
+  CLOCK_IN
+  BREAK_START
+  BREAK_END
+  CLOCK_OUT
+}
+
+model HrProfile {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  companyId     String
+  jobTitle      String?
+  department    String?
+  managerId     String?
+  admissionDate DateTime?
+  birthDate     DateTime?
+  status        HrStatus  @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  manager HrProfile? @relation("HrReports", fields: [managerId], references: [userId])
+  reports HrProfile[] @relation("HrReports")
+
+  @@index([companyId])
+  @@map("hr_profiles")
+}
+
+model LeaveRequest {
+  id           String      @id @default(uuid())
+  userId       String
+  companyId    String
+  type         LeaveType
+  startDate    DateTime
+  endDate      DateTime
+  reason       String?
+  status       LeaveStatus @default(PENDING)
+  approvedById String?
+  approvedAt   DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user       User    @relation("leaveRequests", fields: [userId], references: [id])
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  approvedBy User?   @relation("leaveApprovals", fields: [approvedById], references: [id])
+
+  @@index([companyId])
+  @@index([userId])
+  @@map("leave_requests")
+}
+
+model TimeRecord {
+  id        String         @id @default(uuid())
+  userId    String
+  companyId String
+  type      TimeRecordType
+  timestamp DateTime       @default(now())
+  note      String?
+  createdAt DateTime       @default(now())
+
+  user    User    @relation("timeRecords", fields: [userId], references: [id])
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, userId])
+  @@map("time_records")
+}
+
+// ─── Task Templates ───────────────────────────────────────────────────────────
+
+model TaskTemplate {
+  id             String   @id @default(uuid())
+  companyId      String
+  name           String
+  description    String?
+  priority       Priority @default(MEDIUM)
+  checklist      Json     @default("[]")
+  estimatedHours Int?
+  createdById    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy User    @relation("taskTemplateCreator", fields: [createdById], references: [id])
+
+  @@index([companyId])
+  @@map("task_templates")
 }

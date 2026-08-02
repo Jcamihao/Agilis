@@ -34,6 +34,33 @@ export class ChatService {
     return room;
   }
 
+  async createChannel(companyId: string, name: string) {
+    return this.prisma.chatRoom.create({
+      data: { companyId, name, type: 'DEPARTMENT' },
+    });
+  }
+
+  async getOrCreateDirect(companyId: string, userId1: string, userId2: string) {
+    const sorted = [userId1, userId2].sort();
+    const name = `dm:${sorted[0]}:${sorted[1]}`;
+    let room = await this.prisma.chatRoom.findFirst({
+      where: { companyId, type: 'DIRECT', name },
+    });
+    if (!room) {
+      room = await this.prisma.chatRoom.create({
+        data: { companyId, name, type: 'DIRECT' },
+      });
+      await this.prisma.chatRoomMember.createMany({
+        data: [{ roomId: room.id, userId: userId1 }, { roomId: room.id, userId: userId2 }],
+      });
+    }
+    return room;
+  }
+
+  async deleteRoom(id: string) {
+    return this.prisma.chatRoom.delete({ where: { id } });
+  }
+
   async getOrCreateProjectRoom(companyId: string, projectId: string, projectName: string) {
     let room = await this.prisma.chatRoom.findFirst({
       where: { companyId, projectId, type: 'PROJECT' },
