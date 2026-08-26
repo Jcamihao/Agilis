@@ -348,7 +348,7 @@ model Task {
   sprintId           String?
   parentId           String?
   recurrence         String     @default("NONE")
-  recurrenceParentId String?
+  recurrenceParentId String?  @map("recurrence_parent_id")
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
@@ -1474,15 +1474,15 @@ model TimeRecord {
 
 model TaskTemplate {
   id             String   @id @default(uuid())
-  companyId      String
+  companyId      String   @map("company_id")
   name           String
   description    String?
   priority       Priority @default(MEDIUM)
   checklist      Json     @default("[]")
-  estimatedHours Int?
-  createdById    String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  estimatedHours Int?     @map("estimated_hours")
+  createdById    String   @map("created_by_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt      @map("updated_at")
 
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdBy User    @relation("taskTemplateCreator", fields: [createdById], references: [id])
