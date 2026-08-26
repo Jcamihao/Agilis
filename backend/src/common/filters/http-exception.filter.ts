@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -18,7 +19,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Erro interno do servidor';
+    let message = 'Algo deu errado. Tente novamente.';
     let errors: any = null;
 
     if (exception instanceof HttpException) {
@@ -35,9 +36,33 @@ export class HttpExceptionFilter implements ExceptionFilter {
           message = 'Erro de validação';
         }
       }
+    } else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+      this.logger.error(`Prisma [${exception.code}]: ${exception.message}`);
+      switch (exception.code) {
+        case 'P2002':
+          status = HttpStatus.CONFLICT;
+          message = 'Registro duplicado.';
+          break;
+        case 'P2025':
+          status = HttpStatus.NOT_FOUND;
+          message = 'Registro não encontrado.';
+          break;
+        case 'P2003':
+          status = HttpStatus.BAD_REQUEST;
+          message = 'Referência inválida.';
+          break;
+        default:
+          status = HttpStatus.INTERNAL_SERVER_ERROR;
+          message = 'Erro de banco de dados.';
+      }
+    } else if (exception instanceof Prisma.PrismaClientValidationError) {
+      this.logger.error(`Prisma validation: ${(exception as Error).message}`);
+      status = HttpStatus.BAD_REQUEST;
+      message = 'Dados inválidos enviados à API.';
     } else if (exception instanceof Error) {
-      message = exception.message;
       this.logger.error(exception.stack);
+    } else {
+      this.logger.error(String(exception));
     }
 
     response.status(status).json({

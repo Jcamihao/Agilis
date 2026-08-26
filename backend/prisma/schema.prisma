@@ -181,7 +181,7 @@ model User {
   bio                String?
   phone              String?
   telegramChatId     String?
-  notifPreferences   Json?
+  notifPreferences   Json?   @map("notif_preferences")
   cpfCnpj            String?
   cep                String?
   uf                 String?
