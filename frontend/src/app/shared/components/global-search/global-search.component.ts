@@ -87,7 +87,7 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
   hasResults(): boolean {
     const r = this.results();
     if (!r) return false;
-    return r.tasks.length + r.projects.length + r.members.length + r.wikiPages.length + r.corpWiki.length > 0;
+    return r.tasks.length + r.projects.length + r.members.length + r.wikiPages.length > 0;
   }
 
   isEmpty(): boolean {
@@ -110,8 +110,4 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
     this.close.emit();
   }
 
-  goCorpWiki(id: string) {
-    this.router.navigate(['/corporate-wiki'], { queryParams: { page: id } });
-    this.close.emit();
-  }
 }

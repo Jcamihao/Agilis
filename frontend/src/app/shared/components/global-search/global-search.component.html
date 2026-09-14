@@ -103,21 +103,6 @@
           </div>
         }
 
-        <!-- Corporate Wiki -->
-        @if (r.corpWiki.length > 0) {
-          <div class="gs-section">
-            <p class="gs-section-label">
-              <span class="material-symbols-rounded">corporate_fare</span> Wiki Corporativa
-            </p>
-            @for (page of r.corpWiki; track page.id) {
-              <button class="gs-item" (click)="goCorpWiki(page.id)">
-                <span class="material-symbols-rounded gs-wiki-icon">{{ page.icon }}</span>
-                <span class="gs-item-title">{{ page.title }}</span>
-              </button>
-            }
-          </div>
-        }
-
       }
     </div>
 

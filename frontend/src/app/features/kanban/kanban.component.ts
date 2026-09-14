@@ -14,7 +14,6 @@ import { SprintsService } from '../../core/services/sprints.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UsersService, CompanyMember } from '../../core/services/users.service';
 import { ConfirmService } from '../../core/services/confirm.service';
-import { ClientPortalService } from '../../core/services/client-portal.service';
 import { TaskTemplatesService, TaskTemplate } from '../../core/services/task-templates.service';
 import { Router } from '@angular/router';
 import { CommentSectionComponent } from '../../shared/components/comment-section/comment-section.component';
@@ -22,7 +21,7 @@ import { TimeTrackerComponent } from '../../shared/components/time-tracker/time-
 import { CustomFieldValuesComponent } from '../../shared/components/custom-fields/custom-field-values.component';
 import { ApprovalPanelComponent } from '../../shared/components/approval-panel/approval-panel.component';
 import {
-  Task, TaskStatus, KanbanBoard, TASK_STATUS_CONFIG, PRIORITY_CONFIG, Priority, Project, Sprint, ClientPortal,
+  Task, TaskStatus, KanbanBoard, TASK_STATUS_CONFIG, PRIORITY_CONFIG, Priority, Project, Sprint,
 } from '../../core/models';
 
 interface Column {
@@ -53,7 +52,6 @@ export class KanbanComponent implements OnInit {
   private readonly fb                = inject(FormBuilder);
   private readonly cdr               = inject(ChangeDetectorRef);
   private readonly confirm           = inject(ConfirmService);
-  private readonly portalSvc         = inject(ClientPortalService);
   private readonly templatesSvc      = inject(TaskTemplatesService);
 
   readonly PRIORITY_CONFIG = PRIORITY_CONFIG;
@@ -65,10 +63,6 @@ export class KanbanComponent implements OnInit {
   creating = signal(false);
   showCreateModal = signal(false);
 
-  // ── Portal quick-access ──────────────────────────────────────────────────
-  showPortalPanel = signal(false);
-  portal          = signal<ClientPortal | null>(null);
-  portalCopied    = signal(false);
   showMoreViews   = signal(false);
   showActionsMenu = signal(false);
 
@@ -272,39 +266,6 @@ export class KanbanComponent implements OnInit {
   closeConfig() {
     this.showConfig.set(false);
     this.openMenuMemberId.set(null);
-  }
-
-  // ── Portal quick-access ──────────────────────────────────────────────────
-  togglePortalPanel() {
-    this.showPortalPanel.update(v => !v);
-    if (this.showPortalPanel() && !this.portal()) {
-      this.portalSvc.getOrCreate(this.id).subscribe({
-        next: (p) => { this.portal.set(p); this.cdr.markForCheck(); },
-      });
-    }
-  }
-
-  copyPortalLink() {
-    const p = this.portal();
-    if (!p) return;
-    navigator.clipboard.writeText(this.portalSvc.portalUrl(p.token)).then(() => {
-      this.portalCopied.set(true);
-      this.cdr.markForCheck();
-      setTimeout(() => { this.portalCopied.set(false); this.cdr.markForCheck(); }, 2000);
-    });
-  }
-
-  togglePortalEnabled() {
-    const p = this.portal();
-    if (!p) return;
-    this.portalSvc.update(this.id, { isEnabled: !p.isEnabled }).subscribe({
-      next: (updated) => { this.portal.set(updated); this.cdr.markForCheck(); },
-    });
-  }
-
-  portalUrl(): string {
-    const p = this.portal();
-    return p ? this.portalSvc.portalUrl(p.token) : '';
   }
 
   // ── General settings ──────────────────────────────────────────────────────

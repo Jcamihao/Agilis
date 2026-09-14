@@ -5,10 +5,7 @@ export interface User {
   avatarUrl?: string;
   bio?: string;
   phone?: string;
-  telegramChatId?: string;
-  notifPreferences?: {
-    telegram?: { taskCreated?: boolean; taskAssigned?: boolean; taskDueSoon?: boolean };
-  };
+  notifPreferences?: Record<string, any>;
   cpfCnpj?: string;
   cep?: string;
   uf?: string;
@@ -525,106 +522,6 @@ export interface WikiPageRevision {
   authorId: string;
   createdAt: string;
   author?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
-}
-
-// ── Intake Forms ──────────────────────────────────────────────────────────────
-
-export type IntakeFormStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED';
-export type IntakeSubmissionStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CONVERTED';
-export type IntakeFieldType = 'TEXT' | 'TEXTAREA' | 'EMAIL' | 'NUMBER' | 'DATE' | 'SELECT' | 'MULTI_SELECT' | 'CHECKBOX';
-
-export interface IntakeFieldDef {
-  id: string;
-  type: IntakeFieldType;
-  label: string;
-  placeholder?: string;
-  required: boolean;
-  options?: string[];
-  mapsTo?: 'title' | 'description' | 'priority' | 'dueDate' | 'assigneeId' | null;
-}
-
-export interface IntakeForm {
-  id: string;
-  projectId: string;
-  slug: string;
-  title: string;
-  description?: string;
-  status: IntakeFormStatus;
-  fields: IntakeFieldDef[];
-  submitLabel: string;
-  successMsg: string;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: Pick<User, 'id' | 'name'>;
-  submissions?: IntakeSubmission[];
-  _count?: { submissions: number };
-}
-
-export interface IntakeSubmission {
-  id: string;
-  formId: string;
-  data: Record<string, any>;
-  status: IntakeSubmissionStatus;
-  taskId?: string;
-  submitterEmail?: string;
-  submittedAt: string;
-  task?: Pick<Task, 'id' | 'title' | 'status'>;
-}
-
-// ── Client Portal ─────────────────────────────────────────────────────────────
-
-export interface ClientPortal {
-  id: string;
-  projectId: string;
-  token: string;
-  isEnabled: boolean;
-  title?: string;
-  logoUrl?: string;
-  accentColor: string;
-  showKanban: boolean;
-  showTimeline: boolean;
-  showHealth: boolean;
-  showTeam: boolean;
-  password?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface PortalTask {
-  id: string;
-  title: string;
-  status: string;
-  priority: string;
-  dueDate?: string;
-  assignee?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
-}
-
-export interface PortalKanbanColumn {
-  status: string;
-  tasks: PortalTask[];
-}
-
-export interface PublicPortalData {
-  portal: {
-    title: string;
-    accentColor: string;
-    logoUrl?: string;
-    showKanban: boolean;
-    showTimeline: boolean;
-    showTeam: boolean;
-  };
-  project: {
-    id: string;
-    name: string;
-    description?: string;
-    color: string;
-    icon: string;
-    createdAt: string;
-  };
-  stats: { total: number; done: number; inProgress: number; overdue: number; progress: number };
-  kanban: PortalKanbanColumn[];
-  timeline: PortalTask[];
-  team: Pick<User, 'id' | 'name' | 'avatarUrl'>[];
 }
 
 // ── Approvals ─────────────────────────────────────────────────────────────────

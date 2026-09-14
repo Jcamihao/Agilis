@@ -66,7 +66,6 @@ enum AutomationActionType {
   SEND_NOTIFICATION
   CREATE_TASK
   SEND_EMAIL
-  SEND_TELEGRAM
 }
 
 enum ExecutionStatus {
@@ -163,7 +162,6 @@ model Company {
   chatRooms       ChatRoom[]
   objectives      Objective[]
   feedPosts       FeedPost[]
-  corporateWiki   CorporateWikiPage[]
   hrProfiles      HrProfile[]
   leaveRequests   LeaveRequest[]
   timeRecords     TimeRecord[]
@@ -180,7 +178,6 @@ model User {
   avatarUrl          String?
   bio                String?
   phone              String?
-  telegramChatId     String?
   notifPreferences   Json?   @map("notif_preferences")
   cpfCnpj            String?
   cep                String?
@@ -212,7 +209,6 @@ model User {
   wikiPagesCreated     WikiPage[]       @relation("wikiCreated")
   wikiPagesUpdated     WikiPage[]       @relation("wikiUpdated")
   wikiRevisions        WikiPageRevision[] @relation("wikiRevisions")
-  intakeForms          IntakeForm[]     @relation("intakeForms")
   approvalRequests     TaskApproval[]   @relation("approvalRequests")
   approvalReviews      TaskApproval[]   @relation("approvalReviews")
   ownedRisks           Risk[]           @relation("riskOwner")
@@ -221,9 +217,6 @@ model User {
   feedPosts             FeedPost[]         @relation("feedPostAuthor")
   feedReactions         FeedReaction[]     @relation("feedReactions")
   feedComments          FeedComment[]      @relation("feedComments")
-  corpWikiCreated       CorporateWikiPage[] @relation("corpWikiCreated")
-  corpWikiUpdated       CorporateWikiPage[] @relation("corpWikiUpdated")
-  corpWikiRevisions     CorporateWikiRevision[] @relation("corpWikiRevisions")
   hrProfile             HrProfile?
   leaveRequests         LeaveRequest[]     @relation("leaveRequests")
   leaveApprovals        LeaveRequest[]     @relation("leaveApprovals")
@@ -312,8 +305,6 @@ model Project {
   chatRooms    ChatRoom[]
   customFields CustomField[]
   wikiPages    WikiPage[]
-  intakeForms  IntakeForm[]
-  clientPortal ClientPortal?
   risks        Risk[]
 
   @@map("projects")
@@ -370,7 +361,6 @@ model Task {
   timeEntries       TimeEntry[]
   keyResultTasks    KeyResultTask[]
   customFieldValues CustomFieldValue[]
-  intakeSubmissions IntakeSubmission[]
   approvals         TaskApproval[]     @relation("taskApprovals")
 
   @@index([parentId])
@@ -1122,82 +1112,6 @@ model WikiPageRevision {
   @@map("wiki_page_revisions")
 }
 
-// ─── Intake Forms ─────────────────────────────────────────────────────────────
-
-enum IntakeFormStatus {
-  DRAFT
-  PUBLISHED
-  CLOSED
-}
-
-model IntakeForm {
-  id          String           @id @default(uuid())
-  projectId   String
-  slug        String           @unique
-  title       String
-  description String?
-  status      IntakeFormStatus @default(DRAFT)
-  fields      Json             @default("[]")
-  submitLabel String           @default("Enviar")
-  successMsg  String           @default("Sua solicitação foi recebida. Obrigado!")
-  createdById String
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-
-  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdBy   User              @relation("intakeForms", fields: [createdById], references: [id])
-  submissions IntakeSubmission[]
-
-  @@index([projectId])
-  @@map("intake_forms")
-}
-
-enum IntakeSubmissionStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  CONVERTED
-}
-
-model IntakeSubmission {
-  id         String                 @id @default(uuid())
-  formId     String
-  data       Json
-  status     IntakeSubmissionStatus @default(PENDING)
-  taskId     String?
-  submitterEmail String?
-  submittedAt    DateTime           @default(now())
-
-  form IntakeForm @relation(fields: [formId], references: [id], onDelete: Cascade)
-  task Task?      @relation(fields: [taskId], references: [id], onDelete: SetNull)
-
-  @@index([formId, status])
-  @@map("intake_submissions")
-}
-
-// ─── Client Portal ────────────────────────────────────────────────────────────
-
-model ClientPortal {
-  id          String   @id @default(uuid())
-  projectId   String   @unique
-  token       String   @unique
-  isEnabled   Boolean  @default(false)
-  title       String?
-  logoUrl     String?
-  accentColor String   @default("#6366f1")
-  showKanban  Boolean  @default(true)
-  showTimeline Boolean @default(true)
-  showHealth  Boolean  @default(false)
-  showTeam    Boolean  @default(true)
-  password    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  @@map("client_portals")
-}
-
 // ─── Task Approvals ───────────────────────────────────────────────────────────
 
 enum ApprovalStatus {
@@ -1335,47 +1249,6 @@ model FeedComment {
 
   @@index([postId])
   @@map("feed_comments")
-}
-
-// ─── Corporate Wiki ───────────────────────────────────────────────────────────
-
-model CorporateWikiPage {
-  id          String   @id @default(uuid())
-  companyId   String
-  parentId    String?
-  title       String
-  content     String   @default("")
-  icon        String   @default("article")
-  position    Int      @default(0)
-  createdById String
-  updatedById String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  company   Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  parent    CorporateWikiPage?   @relation("CorpWikiTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children  CorporateWikiPage[]  @relation("CorpWikiTree")
-  createdBy User                 @relation("corpWikiCreated", fields: [createdById], references: [id])
-  updatedBy User                 @relation("corpWikiUpdated", fields: [updatedById], references: [id])
-  revisions CorporateWikiRevision[]
-
-  @@index([companyId, position])
-  @@map("corporate_wiki_pages")
-}
-
-model CorporateWikiRevision {
-  id        String   @id @default(uuid())
-  pageId    String
-  content   String
-  title     String
-  authorId  String
-  createdAt DateTime @default(now())
-
-  page   CorporateWikiPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  author User              @relation("corpWikiRevisions", fields: [authorId], references: [id])
-
-  @@index([pageId])
-  @@map("corporate_wiki_revisions")
 }
 
 // ─── RH Básico ────────────────────────────────────────────────────────────────

@@ -8,7 +8,6 @@ export class UpdateProfileDto {
   @IsOptional() @IsString() bio?: string;
   @IsOptional() @IsString() avatarUrl?: string;
   @IsOptional() @IsString() phone?: string;
-  @IsOptional() @IsString() telegramChatId?: string;
   @IsOptional() notifPreferences?: Record<string, any>;
   @IsOptional() @IsString() cpfCnpj?: string;
   @IsOptional() @IsString() cep?: string;
@@ -55,7 +54,6 @@ export class UsersService {
     if (dto.bio !== undefined) data.bio = dto.bio;
     if (dto.avatarUrl !== undefined) data.avatarUrl = dto.avatarUrl;
     if (dto.phone            !== undefined) data.phone             = dto.phone;
-    if (dto.telegramChatId    !== undefined) data.telegramChatId    = dto.telegramChatId;
     if (dto.notifPreferences  !== undefined) data.notifPreferences  = dto.notifPreferences;
     if (dto.cpfCnpj         !== undefined) data.cpfCnpj           = dto.cpfCnpj;
     if (dto.cep             !== undefined) data.cep               = dto.cep;
@@ -76,7 +74,7 @@ export class UsersService {
       data,
       select: {
         id: true, name: true, email: true, avatarUrl: true, bio: true,
-        phone: true, telegramChatId: true, notifPreferences: true,
+        phone: true, notifPreferences: true,
         cpfCnpj: true, cep: true, uf: true, address: true, addressNumber: true, addressComplement: true,
       },
     });

@@ -27,7 +27,6 @@ import { ProcessCenterModule } from './process-center/process-center.module';
 import { InsightsModule } from './insights/insights.module';
 import { SprintsModule } from './sprints/sprints.module';
 import { WebhookModule } from './webhooks/webhook.module';
-import { TelegramModule } from './telegram/telegram.module';
 import { RedisModule } from './redis/redis.module';
 import { QueueModule } from './queue/queue.module';
 import { MailModule } from './mail/mail.module';
@@ -37,15 +36,12 @@ import { OkrsModule } from './okrs/okrs.module';
 import { WorkloadModule } from './workload/workload.module';
 import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { WikiModule } from './wiki/wiki.module';
-import { IntakeModule } from './intake/intake.module';
-import { ClientPortalModule } from './client-portal/client-portal.module';
 import { ApprovalsModule } from './approvals/approvals.module';
 import { RisksModule } from './risks/risks.module';
 import { LabelsModule } from './labels/labels.module';
 import { TaskStatusConfigModule } from './task-status-config/task-status-config.module';
 import { AnnouncementsModule } from './announcements/announcements.module';
 import { FeedModule } from './feed/feed.module';
-import { CorporateWikiModule } from './corporate-wiki/corporate-wiki.module';
 import { HrModule } from './hr/hr.module';
 import { UploadModule } from './upload/upload.module';
 import { SearchModule } from './search/search.module';
@@ -80,7 +76,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     InsightsModule,
     SprintsModule,
     WebhookModule,
-    TelegramModule,
     RedisModule,
     QueueModule,
     MailModule,
@@ -90,15 +85,12 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     WorkloadModule,
     CustomFieldsModule,
     WikiModule,
-    IntakeModule,
-    ClientPortalModule,
     ApprovalsModule,
     RisksModule,
     LabelsModule,
     TaskStatusConfigModule,
     AnnouncementsModule,
     FeedModule,
-    CorporateWikiModule,
     HrModule,
     UploadModule,
     SearchModule,

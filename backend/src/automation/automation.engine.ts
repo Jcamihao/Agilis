@@ -12,7 +12,6 @@ import {
   TaskAssignedEvent,
 } from '../events/agilis-events';
 import { AutomationActionType } from './enum/automation-action-type.enum';
-import { TelegramService } from '../telegram/telegram.service';
 import { MailService } from '../mail/mail.service';
 
 interface Condition {
@@ -32,7 +31,6 @@ export class AutomationEngine {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
-    private readonly telegram: TelegramService,
     private readonly mail: MailService,
   ) {}
 
@@ -262,10 +260,6 @@ export class AutomationEngine {
       case AutomationActionType.SEND_EMAIL:
         return this.actionSendEmail(task, action.params, event?.actor);
 
-
-      case AutomationActionType.SEND_TELEGRAM:
-        return this.actionSendTelegram(task, action.params, event);
-
       default:
         return { skipped: true, reason: `Unknown action: ${action.type}` };
     }
@@ -351,59 +345,6 @@ export class AutomationEngine {
     });
 
     return { type: 'SEND_EMAIL', to };
-  }
-
-  private async actionSendTelegram(task: any, params: any, event: any) {
-    const target = params.target ?? 'creator';
-    const chatIds = new Set<string>();
-
-    if (target === 'creator' || target === 'both') {
-      const creatorId = task?.creatorId ?? event?.actor?.id;
-      if (creatorId) {
-        const u = await this.prisma.user.findUnique({ where: { id: creatorId }, select: { telegramChatId: true } });
-        if (u?.telegramChatId) chatIds.add(u.telegramChatId);
-      }
-    }
-
-    if (target === 'assignee' || target === 'both') {
-      if (task?.assigneeId) {
-        const u = await this.prisma.user.findUnique({ where: { id: task.assigneeId }, select: { telegramChatId: true } });
-        if (u?.telegramChatId) chatIds.add(u.telegramChatId);
-      }
-    }
-
-    if (target === 'custom' && params.chatId) {
-      chatIds.add(String(params.chatId));
-    }
-
-    if (chatIds.size === 0) {
-      return { skipped: true, reason: 'Nenhum Telegram Chat ID encontrado para os destinatários' };
-    }
-
-    const priority: Record<string, string> = {
-      LOW: '🟢 Baixa', MEDIUM: '🟡 Média', HIGH: '🔴 Alta', CRITICAL: '🚨 Crítica',
-    };
-
-    const text = params.message
-      ? params.message
-          .replace('{taskTitle}',  task?.title    ?? '')
-          .replace('{priority}',   task?.priority ?? '')
-          .replace('{status}',     task?.status   ?? '')
-      : [
-          `📌 <b>Agilis — Nova tarefa</b>`,
-          ``,
-          `<b>${task?.title ?? 'Sem título'}</b>`,
-          `⚡ Prioridade: ${priority[task?.priority] ?? task?.priority ?? '—'}`,
-          event?.actor?.name ? `👤 Criada por: ${event.actor.name}` : '',
-        ].filter(Boolean).join('\n');
-
-    let sent = 0;
-    for (const chatId of chatIds) {
-      const ok = await this.telegram.sendMessage(chatId, text);
-      if (ok) sent++;
-    }
-
-    return { type: 'SEND_TELEGRAM', sent, total: chatIds.size };
   }
 
 }

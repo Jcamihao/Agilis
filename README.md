@@ -56,9 +56,7 @@ npm run dev
 ### Comunicação & Conhecimento
 - **Chat em Tempo Real** — WebSocket, salas por projeto e gerais, histórico
 - **Wiki de Projetos** — editor rich text por projeto
-- **Wiki Corporativa** — base de conhecimento da empresa
 - **Mural (Feed)** — announcements e updates da empresa
-- **Portal do Cliente** — link público por projeto para clientes acompanharem progresso
 
 ### Inteligência & Analytics
 - **Assistente IA** — chat com Ollama (Mistral), contexto do workspace em tempo real, resumo de projetos/tarefas, plano de ação, gargalos, sugestão de responsável
@@ -74,10 +72,9 @@ npm run dev
 ### Automações & Integrações
 - **Motor de Automações** — regras "se evento X → ação Y" (CRUD completo + engine de execução)
   - Triggers: tarefa criada, status alterado, prazo vencido, comentário, atribuição
-  - Ações: mudar status, atribuir usuário, notificar, criar tarefa, e-mail, Telegram
+  - Ações: mudar status, atribuir usuário, notificar, criar tarefa, e-mail
 - **Webhooks** — HTTP callbacks para eventos do sistema
 - **N8N** — integração via webhook para automações externas
-- **Telegram** — notificações via bot
 
 ### Administração
 - **Relatórios** (CSV / Excel / PDF) — Tarefas, Produtividade, Auditoria, Time Tracking, OKRs
@@ -87,7 +84,6 @@ npm run dev
 - **Centro de Processos** — fluxos de processo com etapas e checklists
 - **Centro de Operações** — monitoramento e indicadores operacionais
 - **SLA** — configuração de SLAs com breach detection
-- **Intake Forms** — formulários públicos para solicitação de tarefas/projetos
 
 ### Onboarding
 - **Wizard de Primeiro Acesso** — 3 passos guiados: criar empresa → projeto → primeira tarefa
@@ -161,9 +157,12 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v2.3.0** — Ciclos imediato + médio + estratégico completos.
+**v2.4.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v2.4.0** — Remoção de Telegram, Portal do Cliente, Intake Forms e Wiki Corporativa (escopo focado em PM, sem intranet/RH/agência)
+- **v2.3.2** — Correção de mapeamento Prisma (`@map`) em colunas de migrations manuais
+- **v2.3.1** — Mensagens de erro genéricas na API, correção de mapeamento de `notifPreferences`
 - **v2.3.0** — Portfolio Executivo, Burndown Chart SVG, Delivery Forecast, Brief Estratégico IA
 - **v2.2.0** — Reports (Time Tracking + OKRs + PDF), iCal Export, Onboarding Wizard
 - **v2.1.0** — Busca Global (⌘K), Ações em Massa, Templates de Tarefa, Recorrência, Gantt Dependencies

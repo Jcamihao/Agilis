@@ -23,7 +23,6 @@ const ACTION_LABELS: Record<AutomationActionType, string> = {
   SEND_NOTIFICATION: 'Enviar notificação',
   CREATE_TASK:       'Criar tarefa',
   SEND_EMAIL:        'Enviar e-mail',
-  SEND_TELEGRAM:     'Enviar Telegram',
 };
 
 const CONDITION_FIELDS = [
@@ -199,8 +198,8 @@ export class AutomationsComponent implements OnInit {
 
   addAction() {
     this.actionsArray.push(this.fb.group({
-      type:   ['SEND_TELEGRAM'],
-      params: this.fb.group({ target: ['creator'], chatId: [''], message: [''] }),
+      type:   ['SEND_NOTIFICATION'],
+      params: this.fb.group({ title: [''], message: [''] }),
     }));
   }
 
@@ -220,16 +219,10 @@ export class AutomationsComponent implements OnInit {
       CREATE_TASK:       { title: '' },
       SEND_EMAIL:        { to: '', subject: '' },
       ASSIGN_USER:       { userId: '' },
-      SEND_TELEGRAM:     { target: 'creator', chatId: '', message: '' },
     };
     ctrl.setControl('params', this.fb.group(paramsMap[type] ?? {}));
     this.cdr.markForCheck();
   }
-
-  getTelegramTarget(i: number): string {
-    return this.actionsArray.at(i)?.get('params')?.get('target')?.value ?? 'creator';
-  }
-
 
   private normalizeActionParams(type: AutomationActionType, params: Record<string, any>): Record<string, any> {
     const defaults: Record<AutomationActionType, Record<string, any>> = {
@@ -238,7 +231,6 @@ export class AutomationsComponent implements OnInit {
       SEND_NOTIFICATION: { title: '', message: '' },
       CREATE_TASK:       { title: '' },
       SEND_EMAIL:        { to: '', subject: '' },
-      SEND_TELEGRAM:     { target: 'creator', chatId: '', message: '' },
     };
     return { ...defaults[type], ...params };
   }

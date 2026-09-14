@@ -83,10 +83,6 @@
                  class="flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
                 <span class="material-symbols-rounded text-base text-slate-400">menu_book</span> Wiki
               </a>
-              <a [routerLink]="['/projects', id, 'intake-forms']"
-                 class="flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                <span class="material-symbols-rounded text-base text-slate-400">dynamic_form</span> Intake
-              </a>
               <a [routerLink]="['/projects', id, 'risks']"
                  class="flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
                 <span class="material-symbols-rounded text-base text-slate-400">warning_amber</span> Riscos
@@ -117,11 +113,11 @@
         Nova Tarefa
       </button>
 
-      <!-- Overflow actions: Nova Sprint, Portal, Configurar -->
+      <!-- Overflow actions: Nova Sprint, Configurar -->
       <div class="relative">
         <button (click)="showActionsMenu.set(!showActionsMenu())"
                 class="ag-btn ag-btn--secondary flex items-center gap-1"
-                [class.ring-2]="showActionsMenu() || showPortalPanel()"
+                [class.ring-2]="showActionsMenu()"
                 style="--tw-ring-color: #818cf8">
           <span class="material-symbols-rounded text-base">more_horiz</span>
         </button>
@@ -137,10 +133,6 @@
                     class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors text-left">
               <span class="material-symbols-rounded text-base text-slate-400">content_copy</span> Templates de tarefa
             </button>
-            <button (click)="togglePortalPanel(); showActionsMenu.set(false)"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors text-left">
-              <span class="material-symbols-rounded text-base text-slate-400">share</span> Portal do Cliente
-            </button>
             <div class="border-t border-slate-100 mx-2"></div>
             <button (click)="openConfig(); showActionsMenu.set(false)"
                     class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors text-left">
@@ -148,75 +140,6 @@
             </button>
           </div>
         }
-
-        <!-- Portal quick-access panel (floats from this container) -->
-        <div class="relative">
-        <button style="display:none"></button>
-
-        @if (showPortalPanel()) {
-          <div class="absolute right-0 top-full mt-2 z-50 w-80 bg-white border border-slate-100 rounded-2xl shadow-2xl p-4"
-            (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between mb-3">
-              <p class="font-semibold text-sm text-slate-800">Portal do Cliente</p>
-              <button (click)="showPortalPanel.set(false)" class="text-slate-400 hover:text-slate-600">
-                <span class="material-symbols-rounded text-base">close</span>
-              </button>
-            </div>
-
-            @if (!portal()) {
-              <div class="flex items-center justify-center py-4">
-                <div class="ag-spinner"></div>
-              </div>
-            } @else {
-              <!-- Enable toggle -->
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <p class="text-sm font-medium text-slate-700">Portal público</p>
-                  <p class="text-xs text-slate-400">{{ portal()!.isEnabled ? 'Ativo — qualquer pessoa com o link pode acessar' : 'Desativado' }}</p>
-                </div>
-                <button (click)="togglePortalEnabled()"
-                  class="w-10 h-6 rounded-full relative transition-colors duration-200"
-                  [class.bg-indigo-600]="portal()!.isEnabled"
-                  [class.bg-slate-200]="!portal()!.isEnabled">
-                  <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
-                    [class.translate-x-4]="portal()!.isEnabled"
-                    [class.translate-x-0]="!portal()!.isEnabled"></span>
-                </button>
-              </div>
-
-              @if (portal()!.isEnabled) {
-                <!-- Portal URL -->
-                <div class="bg-slate-50 rounded-xl p-3 mb-3">
-                  <p class="text-[11px] text-slate-400 font-medium mb-1.5 uppercase tracking-wide">Link do portal</p>
-                  <p class="text-[12px] text-slate-600 font-mono truncate mb-2">{{ portalUrl() }}</p>
-                  <div class="flex gap-2">
-                    <button (click)="copyPortalLink()"
-                      class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                      [class.bg-green-100]="portalCopied()"
-                      [class.text-green-700]="portalCopied()"
-                      [class.bg-indigo-50]="!portalCopied()"
-                      [class.text-indigo-600]="!portalCopied()">
-                      <span class="material-symbols-rounded text-sm">{{ portalCopied() ? 'check' : 'content_copy' }}</span>
-                      {{ portalCopied() ? 'Copiado!' : 'Copiar link' }}
-                    </button>
-                    <a [href]="portalUrl()" target="_blank"
-                      class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">
-                      <span class="material-symbols-rounded text-sm">open_in_new</span>
-                      Abrir
-                    </a>
-                  </div>
-                </div>
-              }
-
-              <a [routerLink]="['/projects', id, 'settings']" (click)="showPortalPanel.set(false)"
-                class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors mt-1">
-                <span class="material-symbols-rounded text-sm">settings</span>
-                Configurações avançadas do portal
-              </a>
-            }
-          </div>
-        }
-        </div><!-- /portal inner -->
       </div><!-- /overflow actions -->
     </div>
   </div>

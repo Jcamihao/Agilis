@@ -2,7 +2,7 @@ import { UsersService } from './users.service';
 
 const BASE_PROFILE = {
   id: 'u1', name: 'Alice', email: 'alice@test.com',
-  avatarUrl: null, bio: null, phone: null, telegramChatId: null,
+  avatarUrl: null, bio: null, phone: null,
   notifPreferences: null, cpfCnpj: null, cep: null, uf: null,
   address: null, addressNumber: null, addressComplement: null,
 };
@@ -34,7 +34,7 @@ describe('UsersService', () => {
 
     it('persists notifPreferences as-is', async () => {
       const { service, prisma } = makeService();
-      const prefs = { telegram: { taskCreated: true, taskAssigned: false, taskDueSoon: true } };
+      const prefs = { email: { taskCreated: true, taskAssigned: false, taskDueSoon: true } };
 
       await service.updateProfile('u1', { notifPreferences: prefs });
 
@@ -50,16 +50,6 @@ describe('UsersService', () => {
 
       const callData = prisma.user.update.mock.calls[0][0].data;
       expect(callData).not.toHaveProperty('notifPreferences');
-    });
-
-    it('includes telegramChatId when provided', async () => {
-      const { service, prisma } = makeService();
-
-      await service.updateProfile('u1', { telegramChatId: '9876543210' });
-
-      expect(prisma.user.update).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.objectContaining({ telegramChatId: '9876543210' }) }),
-      );
     });
 
     it('throws when current password is wrong', async () => {

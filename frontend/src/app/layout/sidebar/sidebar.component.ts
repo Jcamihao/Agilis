@@ -65,7 +65,6 @@ export class SidebarComponent {
       label: 'Comunicação',
       items: [
         { label: 'Mural',            icon: 'dynamic_feed', route: '/feed' },
-        { label: 'Wiki Corporativa', icon: 'menu_book',    route: '/corporate-wiki' },
       ],
     },
     {

@@ -69,11 +69,6 @@ export const routes: Routes = [
         title: 'Aprovações — Agilis',
       },
       {
-        path: 'projects/:id/intake-forms',
-        loadComponent: () => import('./features/intake-forms/intake-forms.component').then((m) => m.IntakeFormsComponent),
-        title: 'Formulários de Entrada — Agilis',
-      },
-      {
         path: 'projects/:id/settings',
         loadComponent: () => import('./features/project-settings/project-settings.component').then((m) => m.ProjectSettingsComponent),
         title: 'Configurações do Projeto — Agilis',
@@ -179,11 +174,6 @@ export const routes: Routes = [
         title: 'Mural — Agilis',
       },
       {
-        path: 'corporate-wiki',
-        loadComponent: () => import('./features/corporate-wiki/corporate-wiki.component').then((m) => m.CorporateWikiComponent),
-        title: 'Wiki Corporativa — Agilis',
-      },
-      {
         path: 'hr',
         loadComponent: () => import('./features/hr/hr.component').then((m) => m.HrComponent),
         title: 'RH — Agilis',
@@ -199,18 +189,6 @@ export const routes: Routes = [
         title: 'Sprint Planning — Agilis',
       },
     ],
-  },
-  // Public client portal — no auth required
-  {
-    path: 'portal/:token',
-    loadComponent: () => import('./features/client-portal/client-portal.component').then((m) => m.ClientPortalComponent),
-    title: 'Portal do Projeto — Agilis',
-  },
-  // Public intake form — no auth required
-  {
-    path: 'intake/:slug',
-    loadComponent: () => import('./features/intake-public/intake-public.component').then((m) => m.IntakePublicComponent),
-    title: 'Solicitação — Agilis',
   },
   { path: '**', redirectTo: '/dashboard' },
 ];
