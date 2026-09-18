@@ -1,0 +1,54 @@
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.bg-video {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  object-position: 70% center;
+  pointer-events: none;
+}
+
+.blurred-intro {
+  filter: blur(4px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.hamburger-bar {
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+// Pill buttons — white fill by default, invert to solid text-color fill on
+// hover (matches the reference: light pill -> dark pill on hover).
+.landing-pill {
+  background: rgb(var(--c-canvas));
+  color: rgb(var(--c-text));
+  border: 1px solid rgb(var(--c-border) / 0.12);
+
+  &:hover {
+    background: rgb(var(--c-text));
+    color: rgb(var(--c-canvas));
+  }
+}
+
+// Outline pill — inverted from the start (text-colored border, transparent
+// fill), inverts to a solid fill on hover.
+.landing-pill--outline {
+  background: transparent;
+  color: rgb(var(--c-text));
+  border: 1px solid rgb(var(--c-border) / 0.4);
+
+  &:hover {
+    background: rgb(var(--c-text));
+    color: rgb(var(--c-canvas));
+  }
+}

@@ -1,0 +1,142 @@
+<div class="relative min-h-screen select-none md:select-auto" style="color: rgb(var(--c-text));">
+
+  <!-- Background Video: plays forward, then reverses back to the start
+       (boomerang loop) instead of hard-cutting — see setupBoomerangVideo(). -->
+  <video
+    #bgVideo
+    class="bg-video"
+    src="/vids/hero_vid.mp4"
+    autoplay
+    [muted]="true"
+    playsinline
+    preload="auto"
+  ></video>
+
+  <!-- Navigation Bar -->
+  <header class="fixed top-0 left-0 w-full z-10 px-5 sm:px-8 py-4 sm:py-5 flex justify-between items-center">
+    <!-- Logo -->
+    <a routerLink="/" class="flex items-center gap-3">
+      <span class="font-medium text-[21px] sm:text-[26px] tracking-tight" style="color: rgb(var(--c-text));">
+        Agilis
+      </span>
+      <span class="ag-glyph ag-glyph--spin text-[25px] sm:text-[30px] select-none tracking-[-0.02em] leading-none"
+            style="color: rgb(var(--c-text));">✳︎</span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <nav class="hidden md:flex items-center text-[18px] font-normal" style="color: rgb(var(--c-text));">
+      <a href="#produto" class="hover:opacity-60 transition-opacity">Produto</a><span class="mr-1">,</span>
+      <a href="#precos" class="hover:opacity-60 transition-opacity">Preços</a><span class="mr-1">,</span>
+      <a href="#sobre" class="hover:opacity-60 transition-opacity">Sobre</a><span class="mr-1">,</span>
+      <a href="#contato" class="hover:opacity-60 transition-opacity">Contato</a>
+    </nav>
+
+    <!-- Desktop CTA -->
+    <div class="hidden md:block">
+      <a routerLink="/auth/login" class="text-[18px] underline underline-offset-2 hover:opacity-60 transition-opacity"
+         style="color: rgb(var(--c-text));">
+        Entrar
+      </a>
+    </div>
+
+    <!-- Mobile Hamburger -->
+    <button
+      type="button"
+      (click)="toggleMenu()"
+      class="md:hidden flex flex-col justify-center items-center gap-[5px] w-8 h-8 focus:outline-none z-20 relative"
+      aria-label="Abrir menu de navegação"
+    >
+      <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
+            [style.transform]="menuOpen() ? 'translateY(7px) rotate(45deg)' : 'none'"></span>
+      <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
+            [style.opacity]="menuOpen() ? 0 : 1"></span>
+      <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
+            [style.transform]="menuOpen() ? 'translateY(-7px) rotate(-45deg)' : 'none'"></span>
+    </button>
+  </header>
+
+  <!-- Mobile Overlay -->
+  <div
+    class="fixed inset-0 backdrop-blur-sm z-[9] flex flex-col justify-center px-8 gap-8 transition-opacity duration-300 md:hidden"
+    style="background: rgb(var(--c-canvas) / 0.97);"
+    [class.opacity-100]="menuOpen()"
+    [class.opacity-0]="!menuOpen()"
+    [class.pointer-events-auto]="menuOpen()"
+    [class.pointer-events-none]="!menuOpen()"
+  >
+    <a href="#produto" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Produto</a>
+    <a href="#precos" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Preços</a>
+    <a href="#sobre" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Sobre</a>
+    <a href="#contato" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Contato</a>
+    <a routerLink="/auth/login" (click)="closeMenu()" class="text-[32px] font-medium underline underline-offset-4 hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Entrar</a>
+  </div>
+
+  <!-- Hero Section -->
+  <main class="relative z-[1] w-full h-screen flex flex-col justify-end pb-12 md:justify-center md:pb-0 px-5 sm:px-8 md:px-10 overflow-hidden">
+    <div class="max-w-xl relative z-10">
+
+      <!-- Blurred Intro Label -->
+      <div
+        class="blurred-intro mb-5 sm:mb-6 select-none font-normal"
+        style="font-size: clamp(18px, 4vw, 26px); line-height: 1.3; color: rgb(var(--c-text));"
+      >
+        Olá, essa é a Assistente Agilis IA,<br>
+        sua copiloto de produtividade e gestão.
+      </div>
+
+      <!-- Typewriter Text -->
+      <p
+        class="mb-5 sm:mb-6 font-normal"
+        style="font-size: clamp(18px, 4vw, 26px); line-height: 1.35; min-height: 54px; color: rgb(var(--c-text));"
+      ><span>{{ typedText() }}</span><span
+          class="inline-block w-[2px] h-[1.1em] align-middle ml-[2px]"
+          [class.animate-blink]="showCursor()"
+          [class.opacity-0]="!showCursor()"
+          style="background: rgb(var(--c-text));"></span></p>
+
+      <!-- Action Pills -->
+      <div
+        class="flex flex-wrap gap-y-1 transition-all duration-500 ease-out"
+        [class.opacity-0]="!pillsVisible()"
+        [class.translate-y-2]="!pillsVisible()"
+        [class.opacity-100]="pillsVisible()"
+        [class.translate-y-0]="pillsVisible()"
+      >
+        <a routerLink="/auth/register"
+           class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
+          Testar grátis
+        </a>
+        <a href="#produto"
+           class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
+          Ver funcionalidades
+        </a>
+        <a href="#contato"
+           class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
+          Falar com vendas
+        </a>
+        <a href="#sobre"
+           class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
+          Ver como funciona
+        </a>
+
+        <!-- Outline pill: copy email -->
+        <button
+          type="button"
+          (click)="copyEmail()"
+          class="landing-pill landing-pill--outline inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap gap-2 sm:gap-3 transition-colors duration-200 relative group"
+        >
+          <span>Fale conosco: <span class="underline underline-offset-1">{{ contactEmail }}</span></span>
+          <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="3.5" y="1" width="6.5" height="7.5" rx="1" />
+            <path d="M2 3.5H1.5C1.22386 3.5 1 3.72386 1 4V10C1 10.2761 1.22386 10.5 1.5 10.5H7.5C7.77614 10.5 8 10.2761 8 10V9.5" />
+          </svg>
+          <span class="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] px-2 py-0.5 rounded opacity-0 transition-opacity pointer-events-none"
+                style="background: rgb(var(--c-text)); color: rgb(var(--c-canvas));"
+                [class.opacity-100]="copied()">Copiado!</span>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+</div>

@@ -1,46 +1,32 @@
 <div class="flex flex-1 w-full h-screen" style="background: rgb(var(--c-canvas));">
 
-  <!-- Left Panel: Video hero + trust signals (lg+) -->
+  <!-- Left Panel: Editorial Branding (lg+) -->
   <div class="hidden lg:flex flex-col flex-1 relative overflow-hidden justify-between p-10"
        style="background: rgb(var(--c-canvas)); border-right: 1px solid rgb(var(--c-border) / 0.12);">
 
-    <!-- Background video (mouse/touch scrub) -->
-    <video
-      #heroVideo
-      class="absolute inset-0 w-full h-full object-cover"
-      style="object-position: 65% center;"
-      src="/vids/hero_vid.mp4"
-      muted
-      playsinline
-      preload="auto"
-    ></video>
-    <!-- Legibility scrim so text stays readable over any video frame -->
-    <div class="absolute inset-0"
-         style="background: linear-gradient(180deg, rgb(var(--c-canvas) / 0.1), rgb(var(--c-canvas) / 0.55) 65%, rgb(var(--c-canvas) / 0.8));"></div>
-
     <!-- Logo -->
     <div class="relative z-10 flex items-center gap-3">
-      <div class="w-9 h-9 flex items-center justify-center" style="border: 1px solid rgb(var(--c-border) / 0.25); background: rgb(var(--c-canvas) / 0.6); backdrop-filter: blur(8px);">
+      <div class="w-9 h-9 flex items-center justify-center" style="border: 1px solid rgb(var(--c-border) / 0.25);">
         <span class="material-symbols-rounded text-lg" style="color: rgb(var(--c-text));">space_dashboard</span>
       </div>
       <span class="font-medium text-xl tracking-[-0.02em]" style="color: rgb(var(--c-text));">
-        AGILIS <span class="ag-glyph ag-glyph--spin" style="color: rgb(var(--c-border) / 0.5);">✳︎</span>
+        AGILIS <span class="ag-glyph" style="color: rgb(var(--c-border) / 0.5);">✳︎</span>
       </span>
     </div>
 
-    <!-- Hero: typewriter greeting -->
+    <!-- Hero -->
     <div class="relative z-10 flex flex-col gap-6 max-w-lg mb-20">
-      <p class="text-[26px] font-medium leading-[1.3] tracking-[-0.02em] p-5"
-         style="color: rgb(var(--c-text)); background: rgb(var(--c-border) / 0.04); border: 1px solid rgb(var(--c-border) / 0.12); backdrop-filter: blur(12px); min-height: 128px;">
-        <span>{{ typedText() }}</span><span
-          class="inline-block w-[2px] h-[1em] align-middle ml-[2px]"
-          [class.animate-blink]="showCursor()"
-          [class.opacity-0]="!showCursor()"
-          style="background: rgb(var(--c-text));"></span>
+      <h1 class="text-[48px] font-medium leading-[1.1] tracking-[-0.04em]" style="color: rgb(var(--c-text));">
+        Gerenciamento Pro para
+        <span style="color: rgb(var(--c-500));">Equipes de Alta Performance</span>
+      </h1>
+      <p class="text-[16px] leading-[1.6]" style="color: rgb(var(--c-700));">
+        A plataforma B2B desenhada para desenvolvedores e gerentes que exigem precisão.
+        Reduza a carga cognitiva e alcance resultados excepcionais.
       </p>
 
       <!-- Stats -->
-      <div class="flex items-center gap-6 pt-4 border-t"
+      <div class="flex items-center gap-6 mt-2 pt-4 border-t"
            style="border-color: rgb(var(--c-border) / 0.12);">
         <div class="flex flex-col gap-1">
           <span class="text-[20px] font-medium leading-tight" style="color: rgb(var(--c-text));">SSL/TLS</span>

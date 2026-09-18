@@ -3,13 +3,13 @@ import { authGuard, publicGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
-    // Bare root has no page of its own — the video/typewriter hero now
-    // lives inside auth-layout's left panel, so '/' and '/auth/login' are
-    // effectively the same screen. An authenticated visitor bounces onward
-    // to /dashboard via publicGuard below.
+    // Public marketing page — matches only the bare root URL, so it never
+    // shadows '/dashboard', '/projects', etc. below. Not guarded: it's meant
+    // to be seen by logged-out visitors before they hit /auth/login.
     path: '',
     pathMatch: 'full',
-    redirectTo: 'auth/login',
+    loadComponent: () => import('./features/landing/landing.component').then((m) => m.LandingComponent),
+    title: 'Agilis — Gestão Operacional para Equipes',
   },
   {
     path: 'auth',
