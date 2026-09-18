@@ -50,12 +50,12 @@
       <!-- Summary skeletons -->
       <div class="grid grid-cols-4 gap-4">
         @for (_ of [1,2,3,4]; track $index) {
-          <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] h-20 ag-skeleton"></div>
+          <div class="bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.07)] h-20 ag-skeleton"></div>
         }
       </div>
       <!-- Member skeletons -->
       @for (_ of [1,2,3]; track $index) {
-        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] h-28 ag-skeleton"></div>
+        <div class="bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.07)] h-28 ag-skeleton"></div>
       }
     </div>
   } @else if (overview()) {
@@ -68,7 +68,7 @@
         { label: 'Sobrecarregados', value: overview()!.overloaded,     icon: 'warning',       color: '#ef4444' },
         { label: 'Capacidade Média',value: overview()!.avgCapacity + '%', icon: 'speed',      color: '#f59e0b' }
       ]; track card.label) {
-        <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4 flex items-center gap-3">
+        <div class="bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.07)] shadow-sm p-4 flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             [style.background]="card.color + '18'">
             <span class="material-symbols-rounded text-xl" [style.color]="card.color">{{ card.icon }}</span>
@@ -83,7 +83,7 @@
 
     <!-- ── Heatmap grid ── -->
     @if (members().length && dayHeaders().length) {
-      <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm overflow-hidden">
+      <div class="bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.07)] shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-50 flex items-center justify-between">
           <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
             <span class="material-symbols-rounded text-base text-slate-400">calendar_view_week</span>
@@ -112,7 +112,7 @@
             <!-- Day headers -->
             <thead>
               <tr>
-                <th class="sticky left-0 bg-white z-10 w-48 px-4 py-2 text-left text-[--text-tertiary] font-semibold border-b border-r border-slate-50">
+                <th class="sticky left-0 bg-[#0a0a0a] z-10 w-48 px-4 py-2 text-left text-[--text-tertiary] font-semibold border-b border-r border-slate-50">
                   Membro
                 </th>
                 @for (day of dayHeaders(); track day.date) {
@@ -130,7 +130,7 @@
               @for (m of members(); track m.user.id) {
                 <tr class="hover:bg-slate-50/40 transition-colors">
                   <!-- Member name -->
-                  <td class="sticky left-0 bg-white z-10 px-4 py-2.5 border-r border-slate-50">
+                  <td class="sticky left-0 bg-[#0a0a0a] z-10 px-4 py-2.5 border-r border-slate-50">
                     <div class="flex items-center gap-2">
                       <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden"
                         [style.background]="statusConfig(m.status).barColor">
@@ -171,7 +171,7 @@
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         @for (m of members(); track m.user.id) {
-          <div class="bg-white rounded-xl border border-[rgba(0,0,0,0.07)] shadow-sm p-4"
+          <div class="bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.07)] shadow-sm p-4"
             [style.border-left]="'3px solid ' + statusConfig(m.status).barColor">
 
             <!-- Top row -->

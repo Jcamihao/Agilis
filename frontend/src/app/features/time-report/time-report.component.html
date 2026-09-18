@@ -4,7 +4,7 @@
   <div class="flex items-start justify-between">
     <div class="flex items-center gap-3">
       <a [routerLink]="['/projects', projectId(), 'kanban']"
-        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white hover:text-[--text-secondary] transition-colors">
+        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white/5 hover:text-[--text-secondary] transition-colors">
         <span class="material-symbols-rounded text-xl">arrow_back</span>
       </a>
       <div>
@@ -98,7 +98,7 @@
         <button
           (click)="activeTab.set($any(tab.key))"
           class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-          [class.bg-white]="activeTab() === tab.key"
+          [class.bg-[#0a0a0a]]="activeTab() === tab.key"
           [class.text-primary-700]="activeTab() === tab.key"
           [class.shadow-sm]="activeTab() === tab.key"
           [class.text-[--text-secondary]]="activeTab() !== tab.key"

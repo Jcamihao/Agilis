@@ -41,7 +41,7 @@
                         class="mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-all duration-200 relative"
                         [class.bg-primary-500]="rule.isActive"
                         [class.bg-slate-200]="!rule.isActive">
-                  <div class="absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all duration-200"
+                  <div class="absolute top-1 w-4 h-4 bg-[#0a0a0a] rounded-full shadow-sm transition-all duration-200"
                        [class.left-5]="rule.isActive"
                        [class.left-1]="!rule.isActive"></div>
                 </button>
@@ -122,13 +122,13 @@
     <!-- ═══ Execution History Panel ═══ -->
     @if (selectedRule() && showExecutions()) {
       <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
-          <div class="flex items-center justify-between p-5 border-b border-b-[rgba(0,0,0,0.07)]">
+        <div class="bg-[#0a0a0a] rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
+          <div class="flex items-center justify-between p-5 border-b border-b-[rgba(255,255,255,0.07)]">
             <div>
               <h2 class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">Histórico de Execuções</h2>
               <p class="text-sm text-[--text-secondary]">{{ selectedRule()!.name }}</p>
             </div>
-            <button (click)="showExecutions.set(false)" class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color: var(--text-tertiary);">
+            <button (click)="showExecutions.set(false)" class="p-2 rounded-full hover:bg-white/5 transition-colors" style="color: var(--text-tertiary);">
               <span class="material-symbols-rounded">close</span>
             </button>
           </div>
@@ -145,7 +145,7 @@
             } @else {
               <div class="space-y-2">
                 @for (ex of executions(); track ex.id) {
-                  <div class="flex items-start gap-3 p-3 rounded-xl border border-[rgba(0,0,0,0.08)]">
+                  <div class="flex items-start gap-3 p-3 rounded-xl border border-[rgba(255,255,255,0.08)]">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                          [class.bg-emerald-50]="ex.status === 'SUCCESS'"
                          [class.bg-red-50]="ex.status === 'FAILED'"
@@ -190,12 +190,12 @@
     @if (showRuleModal()) {
       <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto animate-fade-in">
         <div class="min-h-screen flex items-start justify-center p-4 py-8">
-          <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in">
-            <div class="flex items-center justify-between p-6 border-b border-b-[rgba(0,0,0,0.07)]">
+          <div class="bg-[#0a0a0a] rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in">
+            <div class="flex items-center justify-between p-6 border-b border-b-[rgba(255,255,255,0.07)]">
               <h2 class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">
                 {{ editingRule() ? 'Editar Regra' : 'Nova Regra de Automação' }}
               </h2>
-              <button (click)="closeModal()" class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color: var(--text-tertiary);">
+              <button (click)="closeModal()" class="p-2 rounded-full hover:bg-white/5 transition-colors" style="color: var(--text-tertiary);">
                 <span class="material-symbols-rounded">close</span>
               </button>
             </div>
@@ -227,7 +227,7 @@
               </div>
 
               <!-- Conditions -->
-              <div class="bg-slate-50 border border-[rgba(0,0,0,0.08)] rounded-xl p-4">
+              <div class="bg-slate-50 border border-[rgba(255,255,255,0.08)] rounded-xl p-4">
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center gap-2">
                     <span class="material-symbols-rounded text-[--text-secondary] text-lg">filter_alt</span>
@@ -278,7 +278,7 @@
 
                 <div formArrayName="actions" class="space-y-3">
                   @for (act of actionsArray.controls; track $index; let i = $index) {
-                    <div [formGroupName]="i" class="bg-white rounded-xl border border-purple-200 p-3 space-y-2">
+                    <div [formGroupName]="i" class="bg-[#0a0a0a] rounded-xl border border-purple-200 p-3 space-y-2">
                       <div class="flex items-center gap-2">
                         <select formControlName="type" class="ag-input flex-1 text-sm py-2"
                                 (change)="onActionTypeChange(i, $event)">

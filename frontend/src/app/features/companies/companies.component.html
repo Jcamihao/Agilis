@@ -4,20 +4,17 @@
   <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
     <div>
       <h2 class="text-[32px] sm:text-[48px] font-bold leading-[1.1] tracking-[-0.04em]"
-          style="color: #191c1d;">Diretório Organizacional</h2>
-      <p class="text-[16px] leading-[1.6] mt-2 max-w-2xl" style="color: #464554;">
+          style="color: #ffffff;">Diretório Organizacional</h2>
+      <p class="text-[16px] leading-[1.6] mt-2 max-w-2xl" style="color: #8e9192;">
         Gerencie a estrutura de equipes internas e acompanhe as métricas de empresas clientes ativas na plataforma.
       </p>
     </div>
     <div class="flex gap-3 flex-shrink-0">
-      <button class="px-4 py-2 text-[12px] font-medium rounded-lg transition-colors"
-              style="background: #ffffff; border: 1px solid rgba(199,196,215,0.6); color: #4648d4;
-                     box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+      <button class="ag-btn ag-btn--secondary ag-btn--sm">
         Exportar Relatório
       </button>
       <button (click)="showModal.set(true)"
-              class="px-4 py-2 text-[12px] font-medium rounded-lg flex items-center gap-2 text-white"
-              style="background: #4648d4; box-shadow: 0 1px 3px rgba(70,72,212,0.35);">
+              class="ag-btn ag-btn--primary ag-btn--sm">
         <span class="material-symbols-rounded" style="font-size:18px;">add</span>
         Nova Empresa
       </button>
@@ -25,7 +22,7 @@
   </div>
 
   <!-- ── Tabs ─────────────────────────────────────────── -->
-  <div class="flex gap-6" style="border-bottom: 1px solid rgba(199,196,215,0.3);">
+  <div class="flex gap-6" style="border-bottom: 1px solid rgba(255,255,255,0.3);">
     <a routerLink="/teams" class="dir-tab">
       Equipes Internas
     </a>
@@ -48,45 +45,45 @@
         <div class="dir-card animate-fade-in-up">
           <!-- Color strip -->
           <div class="absolute top-0 left-0 right-0 h-1"
-               style="background: linear-gradient(90deg, #4648d4, #645efb);"></div>
+               style="background: #2a2a2a;"></div>
 
           <div class="p-6 flex flex-col flex-1">
             <!-- Icon + more -->
             <div class="flex justify-between items-start mb-4">
               <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold"
-                   style="background: linear-gradient(135deg, #4648d4, #645efb);">
+                   style="background: #2a2a2a;">
                 {{ company.name.charAt(0) }}
               </div>
               <button (click)="openEdit(company)"
                       class="p-1 rounded-lg transition-colors"
-                      style="color: #767586;">
+                      style="color: #737373;">
                 <span class="material-symbols-rounded" style="font-size:20px;">more_horiz</span>
               </button>
             </div>
 
             <!-- Name + slug -->
             <h3 class="text-[20px] font-semibold leading-[1.4] tracking-[-0.01em] mb-1"
-                style="color: #191c1d;">{{ company.name }}</h3>
-            <p class="text-[13px] mb-4" style="color: #767586;">{{ company.slug }}</p>
+                style="color: #ffffff;">{{ company.name }}</h3>
+            <p class="text-[13px] mb-4" style="color: #737373;">{{ company.slug }}</p>
 
             <!-- Stats -->
             <div class="grid grid-cols-3 gap-2 mb-4">
               @for (stat of getStats(company); track stat.label) {
-                <div class="text-center p-3 rounded-xl" style="background: #f9fafb;">
+                <div class="text-center p-3 rounded-xl" style="background: #131313;">
                   <p class="text-[18px] font-semibold leading-tight tracking-[-0.03em]"
-                     style="color: #191c1d;">{{ stat.value }}</p>
-                  <p class="text-[10px] mt-0.5" style="color: #767586;">{{ stat.label }}</p>
+                     style="color: #ffffff;">{{ stat.value }}</p>
+                  <p class="text-[10px] mt-0.5" style="color: #737373;">{{ stat.label }}</p>
                 </div>
               }
             </div>
 
             <!-- Footer -->
             <div class="flex items-center justify-between pt-4 mt-auto"
-                 style="border-top: 1px solid rgba(199,196,215,0.2);">
+                 style="border-top: 1px solid rgba(255,255,255,0.2);">
               <span class="ag-badge ag-badge--success">Ativa</span>
               <button (click)="openManage(company)"
                       class="text-[13px] font-semibold transition-colors"
-                      style="color: #4648d4;">
+                      style="color: #ffffff;">
                 Gerenciar
               </button>
             </div>
@@ -97,11 +94,11 @@
       <!-- Add new company card -->
       <div class="add-card" (click)="showModal.set(true)">
         <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-             style="background: rgba(199,196,215,0.3);">
-          <span class="material-symbols-rounded text-[24px]" style="color: #767586;">add_circle</span>
+             style="background: rgba(255,255,255,0.3);">
+          <span class="material-symbols-rounded text-[24px]" style="color: #737373;">add_circle</span>
         </div>
-        <h3 class="text-[16px] font-semibold mb-1" style="color: #191c1d;">Adicionar Empresa</h3>
-        <p class="text-[13px]" style="color: #767586;">Cadastre uma nova organização.</p>
+        <h3 class="text-[16px] font-semibold mb-1" style="color: #ffffff;">Adicionar Empresa</h3>
+        <p class="text-[13px]" style="color: #737373;">Cadastre uma nova organização.</p>
       </div>
 
     </div>
@@ -121,12 +118,12 @@
 <!-- ── Create Company Modal ───────────────────────────── -->
 @if (showModal()) {
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-    <div class="bg-white rounded-2xl w-full max-w-md animate-scale-in"
+    <div class="bg-[#0a0a0a] rounded-2xl w-full max-w-md animate-scale-in"
          style="box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(0,0,0,0.07)]">
-        <h2 class="text-[15px] font-semibold tracking-[-0.02em]" style="color:#191c1d;">Nova Empresa</h2>
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(255,255,255,0.07)]">
+        <h2 class="text-[15px] font-semibold tracking-[-0.02em]" style="color:#ffffff;">Nova Empresa</h2>
         <button (click)="showModal.set(false)"
-                class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color:#767586;">
+                class="p-2 rounded-full hover:bg-white/5 transition-colors" style="color:#737373;">
           <span class="material-symbols-rounded">close</span>
         </button>
       </div>
@@ -152,12 +149,12 @@
 <!-- ── Edit Company Modal ─────────────────────────────── -->
 @if (showEditModal()) {
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-    <div class="bg-white rounded-2xl w-full max-w-md animate-scale-in"
+    <div class="bg-[#0a0a0a] rounded-2xl w-full max-w-md animate-scale-in"
          style="box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(0,0,0,0.07)]">
-        <h2 class="text-[15px] font-semibold tracking-[-0.02em]" style="color:#191c1d;">Editar Empresa</h2>
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(255,255,255,0.07)]">
+        <h2 class="text-[15px] font-semibold tracking-[-0.02em]" style="color:#ffffff;">Editar Empresa</h2>
         <button (click)="showEditModal.set(false)"
-                class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color:#767586;">
+                class="p-2 rounded-full hover:bg-white/5 transition-colors" style="color:#737373;">
           <span class="material-symbols-rounded">close</span>
         </button>
       </div>
@@ -183,57 +180,57 @@
 <!-- ── Manage Company Modal ────────────────────────────── -->
 @if (showManageModal() && managingCompany()) {
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-    <div class="bg-white rounded-2xl w-full max-w-lg animate-scale-in"
+    <div class="bg-[#0a0a0a] rounded-2xl w-full max-w-lg animate-scale-in"
          style="box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(0,0,0,0.07)]">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(255,255,255,0.07)]">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold"
-               style="background: linear-gradient(135deg, #4648d4, #645efb);">
+               style="background: #2a2a2a;">
             {{ managingCompany()!.name.charAt(0) }}
           </div>
           <div>
-            <h2 class="text-[15px] font-semibold tracking-[-0.02em]" style="color:#191c1d;">
+            <h2 class="text-[15px] font-semibold tracking-[-0.02em]" style="color:#ffffff;">
               {{ managingCompany()!.name }}
             </h2>
-            <p class="text-[11px]" style="color:#767586;">{{ managingCompany()!.slug }}</p>
+            <p class="text-[11px]" style="color:#737373;">{{ managingCompany()!.slug }}</p>
           </div>
         </div>
         <button (click)="showManageModal.set(false)"
-                class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color:#767586;">
+                class="p-2 rounded-full hover:bg-white/5 transition-colors" style="color:#737373;">
           <span class="material-symbols-rounded">close</span>
         </button>
       </div>
       <div class="p-6 space-y-4">
         <div class="grid grid-cols-3 gap-3">
           @for (stat of getStats(managingCompany()!); track stat.label) {
-            <div class="text-center p-4 rounded-xl" style="background: #f9fafb;">
-              <p class="text-[22px] font-semibold tracking-[-0.03em]" style="color:#191c1d;">{{ stat.value }}</p>
-              <p class="text-[11px] mt-0.5" style="color:#767586;">{{ stat.label }}</p>
+            <div class="text-center p-4 rounded-xl" style="background: #131313;">
+              <p class="text-[22px] font-semibold tracking-[-0.03em]" style="color:#ffffff;">{{ stat.value }}</p>
+              <p class="text-[11px] mt-0.5" style="color:#737373;">{{ stat.label }}</p>
             </div>
           }
         </div>
         <div class="space-y-2 pt-2">
           <button (click)="navigateTo('teams')"
                   class="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left"
-                  onmouseenter="this.style.background='#f9fafb'"
+                  onmouseenter="this.style.background='#131313'"
                   onmouseleave="this.style.background='transparent'">
-            <span class="material-symbols-rounded" style="color:#4648d4;">groups</span>
+            <span class="material-symbols-rounded" style="color:#ffffff;">groups</span>
             <div>
-              <p class="text-[13px] font-semibold" style="color:#191c1d;">Equipes</p>
-              <p class="text-[11px]" style="color:#767586;">Gerenciar equipes desta empresa</p>
+              <p class="text-[13px] font-semibold" style="color:#ffffff;">Equipes</p>
+              <p class="text-[11px]" style="color:#737373;">Gerenciar equipes desta empresa</p>
             </div>
-            <span class="material-symbols-rounded ml-auto" style="color:#c7c4d7;">chevron_right</span>
+            <span class="material-symbols-rounded ml-auto" style="color:#5d5f5f;">chevron_right</span>
           </button>
           <button (click)="navigateTo('projects')"
                   class="w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left"
-                  onmouseenter="this.style.background='#f9fafb'"
+                  onmouseenter="this.style.background='#131313'"
                   onmouseleave="this.style.background='transparent'">
-            <span class="material-symbols-rounded" style="color:#4648d4;">folder</span>
+            <span class="material-symbols-rounded" style="color:#ffffff;">folder</span>
             <div>
-              <p class="text-[13px] font-semibold" style="color:#191c1d;">Projetos</p>
-              <p class="text-[11px]" style="color:#767586;">Ver todos os projetos</p>
+              <p class="text-[13px] font-semibold" style="color:#ffffff;">Projetos</p>
+              <p class="text-[11px]" style="color:#737373;">Ver todos os projetos</p>
             </div>
-            <span class="material-symbols-rounded ml-auto" style="color:#c7c4d7;">chevron_right</span>
+            <span class="material-symbols-rounded ml-auto" style="color:#5d5f5f;">chevron_right</span>
           </button>
         </div>
       </div>

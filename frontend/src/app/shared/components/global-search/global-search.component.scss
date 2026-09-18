@@ -12,7 +12,7 @@
 
 .gs-modal {
   width: 100%; max-width: 600px; margin: 0 16px;
-  background: #fff; border-radius: 16px;
+  background: #0a0a0a; border-radius: 16px;
   box-shadow: 0 24px 64px -12px rgba(0,0,0,0.22), 0 8px 24px -8px rgba(0,0,0,0.12);
   overflow: hidden;
   animation: gs-slide-in 0.15s ease;
@@ -24,11 +24,11 @@
   padding: 14px 16px;
   border-bottom: 1px solid #f1f5f9;
 }
-.gs-search-icon { font-size: 20px; color: #94a3b8; flex-shrink: 0; }
+.gs-search-icon { font-size: 20px; color: #5d5f5f; flex-shrink: 0; }
 .gs-input {
   flex: 1; border: none; outline: none; font-size: 15px;
-  color: #1e293b; background: transparent;
-  &::placeholder { color: #94a3b8; }
+  color: #ffffff; background: transparent;
+  &::placeholder { color: #5d5f5f; }
 }
 .gs-spin {
   font-size: 18px; color: #6366f1; flex-shrink: 0;
@@ -36,8 +36,8 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .gs-esc-key {
-  font-size: 11px; color: #94a3b8;
-  background: #f8fafc; border: 1px solid #e2e8f0;
+  font-size: 11px; color: #5d5f5f;
+  background: #0a0a0a; border: 1px solid rgba(255,255,255,0.12);
   border-radius: 4px; padding: 2px 6px; flex-shrink: 0; font-family: inherit;
 }
 
@@ -47,20 +47,20 @@
 }
 .gs-hint {
   padding: 24px 16px; text-align: center;
-  color: #94a3b8; font-size: 13px; margin: 0;
+  color: #5d5f5f; font-size: 13px; margin: 0;
 }
 .gs-empty {
-  padding: 32px 16px; text-align: center; color: #94a3b8;
+  padding: 32px 16px; text-align: center; color: #5d5f5f;
   .material-symbols-rounded { font-size: 32px; display: block; margin-bottom: 8px; }
   p { font-size: 13px; margin: 0; }
-  strong { color: #475569; }
+  strong { color: #737373; }
 }
 
 .gs-section { margin-bottom: 4px; }
 .gs-section-label {
   display: flex; align-items: center; gap: 6px;
   font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.04em; color: #94a3b8;
+  letter-spacing: 0.04em; color: #5d5f5f;
   padding: 8px 16px 4px; margin: 0;
   .material-symbols-rounded { font-size: 14px; }
 }
@@ -69,7 +69,7 @@
   width: 100%; padding: 8px 16px; border: none;
   background: transparent; cursor: pointer; text-align: left;
   transition: background 0.1s;
-  &:hover { background: #f8fafc; }
+  &:hover { background: #0a0a0a; }
   &.gs-item--no-hover { cursor: default; &:hover { background: transparent; } }
 }
 .gs-status-dot {
@@ -88,11 +88,11 @@
 }
 .gs-item-info { display: flex; flex-direction: column; min-width: 0; }
 .gs-item-title {
-  font-size: 13px; font-weight: 500; color: #1e293b;
+  font-size: 13px; font-weight: 500; color: #ffffff;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
 }
 .gs-item-meta {
-  font-size: 11px; color: #94a3b8;
+  font-size: 11px; color: #5d5f5f;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0;
   margin-left: auto; padding-left: 8px;
 }
@@ -101,11 +101,11 @@
 .gs-footer {
   display: flex; align-items: center; gap: 16px;
   padding: 10px 16px; border-top: 1px solid #f1f5f9;
-  background: #fafafa;
-  span { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+  background: #131313;
+  span { font-size: 11px; color: #5d5f5f; display: flex; align-items: center; gap: 4px; }
   kbd {
-    font-size: 10px; color: #64748b; background: #f1f5f9;
-    border: 1px solid #e2e8f0; border-radius: 4px;
+    font-size: 10px; color: #8e9192; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 4px;
     padding: 1px 5px; font-family: inherit;
   }
 }

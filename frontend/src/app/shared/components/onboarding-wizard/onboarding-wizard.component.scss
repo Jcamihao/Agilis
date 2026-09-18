@@ -28,7 +28,7 @@
 .ow-step {
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: #e5e7eb;
+  background: rgba(255,255,255,0.1);
   color: #9ca3af;
   font-size: 13px;
   font-weight: 700;
@@ -48,7 +48,7 @@
 }
 
 .ow-line {
-  flex: 1; height: 2px; background: #e5e7eb; margin: 0 4px; max-width: 80px;
+  flex: 1; height: 2px; background: rgba(255,255,255,0.1); margin: 0 4px; max-width: 80px;
   &--done { background: #10b981; }
 }
 
@@ -132,7 +132,7 @@
   width: 40px; height: 40px;
   border-radius: 10px;
   border: 1.5px solid #e5e7eb;
-  background: #f9fafb;
+  background: #131313;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: all 0.15s;
@@ -196,7 +196,7 @@
   &--ghost {
     background: transparent;
     color: #767586;
-    &:hover { background: #f3f4f6; }
+    &:hover { background: rgba(255,255,255,0.06); }
   }
 }
 

@@ -3,36 +3,36 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 1px;
-  background: rgba(0, 0, 0, 0.07);
+  background: rgba(255, 255, 255, 0.12);
   height: 100%;
 }
 
 .cal-header-cell {
-  background: #f9fafb;
+  background: #131313;
   padding: 10px 8px;
   text-align: center;
   font-size: 11px;
-  font-weight: 700;
-  color: #767586;
+  font-weight: 500;
+  color: #737373;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .cal-cell {
-  background: #ffffff;
+  background: #0a0a0a;
   min-height: 105px;
   padding: 8px;
   cursor: pointer;
   transition: background 120ms;
 
-  &:hover { background: #f9fafb; }
-  &--outside { background: rgba(249, 250, 251, 0.65); }
+  &:hover { background: rgba(255, 255, 255, 0.04); }
+  &--outside { background: #050505; }
 }
 
 .cal-date-num {
   font-size: 13px;
   font-weight: 500;
-  color: #191c1d;
+  color: #ffffff;
   width: 24px;
   height: 24px;
   display: inline-flex;
@@ -41,8 +41,8 @@
   border-radius: 50%;
   margin-bottom: 5px;
 
-  &--today  { background: #4648d4; color: #ffffff; }
-  &--outside { color: #c7c4d7; }
+  &--today  { background: #ffffff; color: #000000; }
+  &--outside { color: #444748; }
 }
 
 .cal-task {
@@ -56,25 +56,25 @@
   text-overflow: ellipsis;
   cursor: pointer;
   transition: transform 100ms;
-  color: #191c1d;
+  color: #ffffff;
 
   &:hover { transform: scale(1.02); }
 }
 
 // ── Glass sidebar panels ──────────────────────────────────
 .cal-glass {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(10, 10, 10, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 // ── Backlog count pill ────────────────────────────────────
 .backlog-count {
-  background: #edeeef;
-  color: #464554;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c4c7c8;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   padding: 1px 8px;
   border-radius: 9999px;
 }
@@ -91,18 +91,18 @@
   &:hover { opacity: 0.8; }
 
   &--urgente {
-    background: rgba(70, 72, 212, 0.08);
-    color: #4648d4;
-    border: 1px solid rgba(70, 72, 212, 0.2);
+    background: rgba(255, 180, 171, 0.1);
+    color: #ffb4ab;
+    border: 1px solid rgba(255, 180, 171, 0.25);
   }
   &--design {
-    background: rgba(91, 94, 108, 0.1);
-    color: #464554;
-    border: 1px solid rgba(91, 94, 108, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    color: #c4c7c8;
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
   &--dev {
-    background: rgba(75, 65, 225, 0.08);
-    color: #4b41e1;
-    border: 1px solid rgba(75, 65, 225, 0.2);
+    background: rgba(142, 195, 255, 0.08);
+    color: #8ec3ff;
+    border: 1px solid rgba(142, 195, 255, 0.2);
   }
 }

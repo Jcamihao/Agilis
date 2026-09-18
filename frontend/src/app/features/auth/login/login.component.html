@@ -2,39 +2,35 @@
 
   <!-- Title -->
   <div class="flex flex-col gap-2 text-center">
-    <h2 class="text-[32px] font-semibold leading-[1.2] tracking-[-0.02em]"
-        style="color: #191c1d;">Bem-vindo de volta</h2>
-    <p class="text-[14px] leading-[1.5]" style="color: #464554;">
+    <h2 class="text-[32px] font-medium leading-[1.2] tracking-[-0.02em] text-white">Bem-vindo de volta</h2>
+    <p class="text-[14px] leading-[1.5]" style="color: #737373;">
       Insira seus dados para acessar sua conta.
     </p>
   </div>
 
   <!-- Form Card -->
-  <div class="rounded-2xl p-6"
-       style="background: #ffffff;
-              border: 1px solid rgba(199,196,215,0.3);
-              box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+  <div class="p-6"
+       style="background: #0a0a0a;
+              border: 1px solid rgba(255,255,255,0.12);">
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
 
       <!-- Email -->
       <div class="flex flex-col gap-1">
-        <label class="text-[12px] font-medium tracking-[0.02em]"
-               style="color: #191c1d;" for="login-email">Email Corporativo</label>
+        <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50" for="login-email">Email Corporativo</label>
         <input id="login-email" type="email" formControlName="email"
                placeholder="voce@empresa.com"
                class="auth-input"
                [class.auth-input--error]="form.get('email')?.invalid && form.get('email')?.touched">
         @if (form.get('email')?.invalid && form.get('email')?.touched) {
-          <p class="text-[12px] mt-0.5" style="color: #ba1a1a;">Email inválido</p>
+          <p class="text-[12px] mt-0.5" style="color: #ffb4ab;">Email inválido</p>
         }
       </div>
 
       <!-- Password -->
       <div class="flex flex-col gap-1">
         <div class="flex justify-between items-center">
-          <label class="text-[12px] font-medium tracking-[0.02em]"
-                 style="color: #191c1d;" for="login-password">Senha</label>
-          <a href="#" class="text-[12px] font-medium" style="color: #4648d4;">
+          <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50" for="login-password">Senha</label>
+          <a href="#" class="text-[12px] font-medium text-white/70 hover:text-white">
             Esqueci minha senha
           </a>
         </div>
@@ -46,47 +42,45 @@
                  class="auth-input pr-10"
                  [class.auth-input--error]="form.get('password')?.invalid && form.get('password')?.touched">
           <button type="button" (click)="togglePassword()"
-                  class="absolute right-2.5 top-1/2 -translate-y-1/2"
-                  style="color: #767586;">
+                  class="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
             <span class="material-symbols-rounded" style="font-size: 18px;">
               {{ showPassword() ? 'visibility_off' : 'visibility' }}
             </span>
           </button>
         </div>
         @if (form.get('password')?.invalid && form.get('password')?.touched) {
-          <p class="text-[12px] mt-0.5" style="color: #ba1a1a;">Mínimo 6 caracteres</p>
+          <p class="text-[12px] mt-0.5" style="color: #ffb4ab;">Mínimo 6 caracteres</p>
         }
       </div>
 
       @if (error()) {
-        <div class="px-3 py-2.5 rounded-lg text-[13px]"
-             style="background: #ffdad6; color: #93000a;">{{ error() }}</div>
+        <div class="px-3 py-2.5 text-[13px] border"
+             style="background: rgba(255,180,171,0.08); color: #ffb4ab; border-color: rgba(255,180,171,0.3);">{{ error() }}</div>
       }
 
       <!-- Submit -->
       <button type="submit" [disabled]="loading()"
-              class="mt-1 w-full h-11 text-white text-[12px] font-medium rounded-lg transition-all
-                     flex items-center justify-center gap-2 disabled:opacity-70"
-              style="background: linear-gradient(135deg, #4648d4 0%, #645efb 100%);
-                     box-shadow: 0 1px 3px rgba(70,72,212,0.35);">
+              class="mt-1 w-full h-11 text-[13px] font-medium transition-all
+                     flex items-center justify-center gap-2 disabled:opacity-40"
+              style="background: #ffffff; color: #000000; border-radius: 9999px;">
         @if (loading()) {
-          <div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          <div class="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
         }
         Entrar
       </button>
 
       <!-- Divider -->
       <div class="flex items-center gap-3">
-        <div class="flex-1 h-px" style="background: rgba(199,196,215,0.35);"></div>
-        <span class="text-[12px] font-medium" style="color: #767586;">ou</span>
-        <div class="flex-1 h-px" style="background: rgba(199,196,215,0.35);"></div>
+        <div class="flex-1 h-px" style="background: rgba(255,255,255,0.12);"></div>
+        <span class="text-[12px] font-medium text-white/40">ou</span>
+        <div class="flex-1 h-px" style="background: rgba(255,255,255,0.12);"></div>
       </div>
 
       <!-- Google -->
       <button type="button"
-              class="w-full h-11 text-[12px] font-medium rounded-lg transition-all
-                     flex items-center justify-center gap-2 hover:opacity-90"
-              style="background: #ffffff; border: 1px solid rgba(199,196,215,0.5); color: #191c1d;">
+              class="w-full h-11 text-[13px] font-medium transition-all
+                     flex items-center justify-center gap-2 hover:bg-white/5"
+              style="background: transparent; border: 1px solid rgba(255,255,255,0.25); color: #ffffff; border-radius: 9999px;">
         <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -101,9 +95,9 @@
 
   <!-- Toggle to Register -->
   <div class="text-center">
-    <a routerLink="/auth/register" class="text-[12px] font-medium" style="color: #464554;">
+    <a routerLink="/auth/register" class="text-[12px] font-medium" style="color: #737373;">
       Não tem uma conta?
-      <span class="font-semibold" style="color: #4648d4;">Crie agora</span>
+      <span class="font-medium text-white">Crie agora</span>
     </a>
   </div>
 

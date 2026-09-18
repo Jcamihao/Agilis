@@ -3,7 +3,7 @@
   <div class="flex items-end justify-between mb-4 flex-shrink-0">
     <div class="flex items-center gap-3">
       <a routerLink="/projects"
-        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white hover:text-[--text-secondary] transition-colors">
+        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white/5 hover:text-[--text-secondary] transition-colors">
         <span class="material-symbols-rounded text-xl">arrow_back</span>
       </a>
       <div>
@@ -17,7 +17,7 @@
 
     <div class="flex items-center gap-3">
       <!-- View toggle -->
-      <div class="flex items-center bg-white border border-[rgba(0,0,0,0.08)] rounded-xl overflow-hidden shadow-sm">
+      <div class="flex items-center bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-xl overflow-hidden shadow-sm">
         <a [routerLink]="['/projects', id, 'kanban']"
           class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
           <span class="material-symbols-rounded text-base">view_kanban</span>
@@ -73,7 +73,7 @@
     </div>
 
     <!-- Zoom -->
-    <div class="flex items-center bg-white border border-[rgba(0,0,0,0.08)] rounded-lg overflow-hidden">
+    <div class="flex items-center bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-lg overflow-hidden">
       @for (z of ([['week','Semana'],['month','Mês'],['quarter','Trimestre']]); track z[0]) {
         <button
           (click)="setZoom($any(z[0]))"
@@ -90,15 +90,15 @@
     <!-- Navigation -->
     <div class="flex items-center gap-1">
       <button (click)="navigatePrev()"
-        class="p-1.5 rounded-lg text-[--text-secondary] hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-slate-200">
+        class="p-1.5 rounded-lg text-[--text-secondary] hover:bg-white/5 hover:shadow-sm transition-all border border-transparent hover:border-slate-200">
         <span class="material-symbols-rounded text-base">chevron_left</span>
       </button>
       <button (click)="goToToday()"
-        class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-200 text-[--text-secondary] hover:border-primary-300 hover:text-primary-700 transition-all shadow-sm">
+        class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#0a0a0a] border border-slate-200 text-[--text-secondary] hover:border-primary-300 hover:text-primary-700 transition-all shadow-sm">
         Hoje
       </button>
       <button (click)="navigateNext()"
-        class="p-1.5 rounded-lg text-[--text-secondary] hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-slate-200">
+        class="p-1.5 rounded-lg text-[--text-secondary] hover:bg-white/5 hover:shadow-sm transition-all border border-transparent hover:border-slate-200">
         <span class="material-symbols-rounded text-base">chevron_right</span>
       </button>
     </div>
@@ -114,9 +114,9 @@
 
   <!-- ═══════ GANTT ═══════ -->
   @if (loading()) {
-    <div class="flex-1 bg-white rounded-xl border border-[rgba(0,0,0,0.07)] ag-skeleton"></div>
+    <div class="flex-1 bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.07)] ag-skeleton"></div>
   } @else if (filteredTasks().length === 0) {
-    <div class="flex-1 bg-white rounded-xl border border-[rgba(0,0,0,0.07)] flex flex-col items-center justify-center">
+    <div class="flex-1 bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.07)] flex flex-col items-center justify-center">
       <span class="material-symbols-rounded text-4xl text-slate-200 mb-3">account_tree</span>
       <p class="text-[--text-secondary] font-medium">Nenhuma tarefa encontrada</p>
       <p class="text-sm text-[--text-tertiary] mt-1">Adicione datas às tarefas para vê-las no Gantt</p>
