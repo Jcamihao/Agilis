@@ -98,7 +98,7 @@
         <button
           (click)="activeTab.set($any(tab.key))"
           class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-          [class.bg-[#f5f4f0]]="activeTab() === tab.key"
+          [class.bg-[rgb(var(--c-surface))]]="activeTab() === tab.key"
           [class.text-primary-700]="activeTab() === tab.key"
           [class.shadow-sm]="activeTab() === tab.key"
           [class.text-[--text-secondary]]="activeTab() !== tab.key"

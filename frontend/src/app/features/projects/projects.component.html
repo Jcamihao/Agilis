@@ -12,7 +12,7 @@
       <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
         <button (click)="viewMode.set('grid')"
                 class="p-1.5 rounded transition-all flex items-center justify-center"
-                [class.bg-[#f5f4f0]]="viewMode() === 'grid'"
+                [class.bg-[rgb(var(--c-surface))]]="viewMode() === 'grid'"
                 [class.shadow-sm]="viewMode() === 'grid'"
                 [class.text-primary-600]="viewMode() === 'grid'"
                 [class.text-slate-400]="viewMode() !== 'grid'">
@@ -20,7 +20,7 @@
         </button>
         <button (click)="viewMode.set('list')"
                 class="p-1.5 rounded transition-all flex items-center justify-center"
-                [class.bg-[#f5f4f0]]="viewMode() === 'list'"
+                [class.bg-[rgb(var(--c-surface))]]="viewMode() === 'list'"
                 [class.shadow-sm]="viewMode() === 'list'"
                 [class.text-primary-600]="viewMode() === 'list'"
                 [class.text-slate-400]="viewMode() !== 'list'">
@@ -43,7 +43,7 @@
               [class.bg-slate-900]="companyFilter() === 'all'"
               [class.text-white]="companyFilter() === 'all'"
               [class.border-slate-900]="companyFilter() === 'all'"
-              [class.bg-[#f5f4f0]]="companyFilter() !== 'all'"
+              [class.bg-[rgb(var(--c-surface))]]="companyFilter() !== 'all'"
               [class.text-[--text-secondary]]="companyFilter() !== 'all'"
               [class.border-slate-200]="companyFilter() !== 'all'"
               [class.hover:border-slate-400]="companyFilter() !== 'all'">
@@ -56,7 +56,7 @@
                 [class.bg-indigo-600]="companyFilter() === uc.companyId"
                 [class.text-white]="companyFilter() === uc.companyId"
                 [class.border-indigo-600]="companyFilter() === uc.companyId"
-                [class.bg-[#f5f4f0]]="companyFilter() !== uc.companyId"
+                [class.bg-[rgb(var(--c-surface))]]="companyFilter() !== uc.companyId"
                 [class.text-[--text-secondary]]="companyFilter() !== uc.companyId"
                 [class.border-slate-200]="companyFilter() !== uc.companyId">
           <span class="material-symbols-rounded text-sm">corporate_fare</span>
@@ -93,7 +93,7 @@
     } @else {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @for (project of projects(); track project.id) {
-          <div class="bg-[#f5f4f0] rounded-2xl border border-slate-200/80 shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:shadow-[0px_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col group relative overflow-hidden">
+          <div class="bg-[rgb(var(--c-surface))] rounded-2xl border border-slate-200/80 shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:shadow-[0px_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col group relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1" [style.background]="project.color"></div>
 
             <div class="p-6 pt-7 flex flex-col flex-1">
@@ -338,7 +338,7 @@
         } @else {
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             @for (project of archivedProjects(); track project.id) {
-              <div class="bg-[#f5f4f0] rounded-xl border border-slate-200 p-4 flex items-start gap-3 opacity-75 hover:opacity-100 transition-opacity">
+              <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-slate-200 p-4 flex items-start gap-3 opacity-75 hover:opacity-100 transition-opacity">
                 <!-- Icon -->
                 <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
                      [style.background]="project.color + '18'">
@@ -376,7 +376,7 @@
 <!-- Settings Modal -->
 @if (showSettingsModal() && editingProject()) {
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-    <div class="bg-[#f5f4f0] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+    <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
       <div class="flex items-center justify-between p-6 border-b border-slate-100">
         <h2 class="text-lg font-bold text-[--text-primary]">Configurações do Projeto</h2>
         <button (click)="showSettingsModal.set(false)" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100">
@@ -423,7 +423,7 @@
 <!-- Create Modal -->
 @if (showCreateModal()) {
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-    <div class="bg-[#f5f4f0] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+    <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
       <div class="flex items-center justify-between p-6 border-b border-slate-100">
         <h2 class="text-lg font-bold text-[--text-primary]">Novo Projeto</h2>
         <button (click)="showCreateModal.set(false); selectedMemberIds.set([])"

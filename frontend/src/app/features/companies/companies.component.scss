@@ -1,7 +1,7 @@
 // Shared directory styles (same as teams)
 .dir-card {
-  background: #f5f4f0;
-  border: 1px solid rgba(35,34,32,0.12);
+  background: rgb(var(--c-surface));
+  border: 1px solid rgb(var(--c-border) / 0.12);
   border-radius: 0;
   overflow: hidden;
   display: flex;
@@ -11,14 +11,14 @@
   transition: border-color 200ms ease, background 200ms ease;
 
   &:hover {
-    border-color: rgba(35,34,32,0.3);
-    background: rgba(35,34,32,0.02);
+    border-color: rgb(var(--c-border) / 0.3);
+    background: rgb(var(--c-border) / 0.02);
   }
 }
 
 .add-card {
   background: transparent;
-  border: 1px dashed rgba(35,34,32,0.25);
+  border: 1px dashed rgb(var(--c-border) / 0.25);
   border-radius: 0;
   display: flex;
   flex-direction: column;
@@ -30,8 +30,8 @@
   transition: border-color 200ms, background 200ms;
 
   &:hover {
-    border-color: rgba(35,34,32,0.5);
-    background: rgba(35,34,32,0.03);
+    border-color: rgb(var(--c-border) / 0.5);
+    background: rgb(var(--c-border) / 0.03);
   }
 }
 
@@ -44,13 +44,13 @@
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color 150ms, border-color 150ms;
-  color: #737373;
+  color: rgb(var(--c-500));
   text-decoration: none;
 
   &--active {
-    color: #232220;
-    border-bottom-color: #232220;
+    color: rgb(var(--c-text));
+    border-bottom-color: rgb(var(--c-text));
   }
 
-  &:hover:not(.dir-tab--active) { color: #d4d4d4; }
+  &:hover:not(.dir-tab--active) { color: rgb(var(--c-700)); }
 }

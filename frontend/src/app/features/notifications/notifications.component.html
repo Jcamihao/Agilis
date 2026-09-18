@@ -28,7 +28,7 @@
                   class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   [class.bg-primary-600]="activeFilter() === f.key"
                   [class.text-white]="activeFilter() === f.key"
-                  [class.bg-[#f5f4f0]]="activeFilter() !== f.key"
+                  [class.bg-[rgb(var(--c-surface))]]="activeFilter() !== f.key"
                   [class.text-slate-600]="activeFilter() !== f.key"
                   [class.border]="activeFilter() !== f.key"
                   [class.border-slate-200]="activeFilter() !== f.key">

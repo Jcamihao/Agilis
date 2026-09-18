@@ -4,8 +4,8 @@
   <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
     <div>
       <h2 class="text-[32px] sm:text-[48px] font-medium leading-[1.1] tracking-[-0.04em]"
-          style="color: #232220;">Diretório Organizacional</h2>
-      <p class="text-[16px] leading-[1.6] mt-2 max-w-2xl" style="color: #8e9192;">
+          style="color: rgb(var(--c-text));">Diretório Organizacional</h2>
+      <p class="text-[16px] leading-[1.6] mt-2 max-w-2xl" style="color: rgb(var(--c-500));">
         Gerencie a estrutura de equipes internas e acompanhe as métricas de empresas clientes ativas na plataforma.
       </p>
     </div>
@@ -55,7 +55,7 @@
               </div>
               <button (click)="openManage(team)"
                       class="p-1 rounded-lg transition-colors"
-                      style="color: #737373;"
+                      style="color: rgb(var(--c-500));"
                       title="Gerenciar equipe">
                 <span class="material-symbols-rounded" style="font-size:20px;">more_horiz</span>
               </button>
@@ -63,9 +63,9 @@
 
             <!-- Name + description -->
             <h3 class="text-[20px] font-semibold leading-[1.4] tracking-[-0.01em] mb-1"
-                style="color: #232220;">{{ team.name }}</h3>
+                style="color: rgb(var(--c-text));">{{ team.name }}</h3>
             <p class="text-[13px] leading-[1.5] flex-1 mb-4"
-               style="color: #737373; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+               style="color: rgb(var(--c-500)); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
               {{ team._count?.members || team.members?.length || 0 }} membros
               @if (team._count?.projects) { · {{ team._count!.projects }} projetos }
             </p>
@@ -78,7 +78,7 @@
                 @if (team.members && team.members.length > 0) {
                   @for (member of team.members.slice(0, 3); track member.id) {
                     <div class="avatar-stacked"
-                         [style.background]="'#d9d6cf'"
+                         [style.background]="'rgb(var(--p-200))'"
                          [title]="member.user.name">
                       @if (member.user.avatarUrl) {
                         <img [src]="member.user.avatarUrl" [alt]="member.user.name">
@@ -93,13 +93,13 @@
                     </div>
                   }
                 } @else {
-                  <span class="text-[12px]" style="color: #737373;">Sem membros</span>
+                  <span class="text-[12px]" style="color: rgb(var(--c-500));">Sem membros</span>
                 }
               </div>
 
               <button (click)="openManage(team)"
                       class="text-[13px] font-semibold transition-colors"
-                      style="color: #232220;">
+                      style="color: rgb(var(--c-text));">
                 Gerenciar
               </button>
             </div>
@@ -111,10 +111,10 @@
       <div class="add-card" (click)="showModal.set(true)">
         <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3"
              style="background: rgba(35,34,32,0.3);">
-          <span class="material-symbols-rounded text-[24px]" style="color: #737373;">add_circle</span>
+          <span class="material-symbols-rounded text-[24px]" style="color: rgb(var(--c-500));">add_circle</span>
         </div>
-        <h3 class="text-[16px] font-semibold mb-1" style="color: #232220;">Criar Nova Equipe</h3>
-        <p class="text-[13px]" style="color: #737373;">Configure permissões e membros.</p>
+        <h3 class="text-[16px] font-semibold mb-1" style="color: rgb(var(--c-text));">Criar Nova Equipe</h3>
+        <p class="text-[13px]" style="color: rgb(var(--c-500));">Configure permissões e membros.</p>
       </div>
 
     </div>
@@ -136,7 +136,7 @@
   <div (click)="closeManage()"
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div (click)="$event.stopPropagation()"
-         class="bg-[#f5f4f0] rounded-2xl w-full max-w-2xl animate-scale-in flex flex-col overflow-hidden"
+         class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-2xl animate-scale-in flex flex-col overflow-hidden"
          style="box-shadow: 0 20px 40px rgba(0,0,0,0.15); max-height: 90vh;">
 
       <!-- Header -->
@@ -251,7 +251,7 @@
                        class="ag-input pl-9" />
               </div>
               @if (addMemberSearch()) {
-                <div class="bg-[#f5f4f0] rounded-xl border border-slate-200 shadow-lg overflow-hidden max-h-44 overflow-y-auto">
+                <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-slate-200 shadow-lg overflow-hidden max-h-44 overflow-y-auto">
                   @if (!availableToAdd().length) {
                     <p class="text-sm text-[--text-tertiary] text-center py-4">Nenhum membro disponível</p>
                   } @else {
@@ -390,7 +390,7 @@
   <div (click)="showModal.set(false); selectedCreateMembers.set([]); createMemberSearch.set('')"
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div (click)="$event.stopPropagation()"
-         class="bg-[#f5f4f0] rounded-2xl w-full max-w-lg animate-scale-in flex flex-col overflow-hidden"
+         class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-lg animate-scale-in flex flex-col overflow-hidden"
          style="box-shadow: 0 20px 40px rgba(0,0,0,0.15); max-height: 90vh;">
 
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
@@ -478,7 +478,7 @@
                     <!-- Role select -->
                     <select [value]="item.role"
                             (change)="setCreateRole(item.member.id, $any($event.target).value)"
-                            class="text-xs font-semibold border border-slate-200 rounded-lg px-2 py-1.5 bg-[#f5f4f0] text-[--text-secondary] outline-none focus:border-primary-400 cursor-pointer shrink-0">
+                            class="text-xs font-semibold border border-slate-200 rounded-lg px-2 py-1.5 bg-[rgb(var(--c-surface))] text-[--text-secondary] outline-none focus:border-primary-400 cursor-pointer shrink-0">
                       @for (r of roleOptions; track r.key) {
                         <option [value]="r.key">{{ r.label }}</option>
                       }

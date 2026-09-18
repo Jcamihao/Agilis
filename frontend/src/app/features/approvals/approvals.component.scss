@@ -1,5 +1,5 @@
 .approval-card {
-  background: #f5f4f0;
+  background: rgb(var(--c-surface));
   border-radius: 0.875rem;
   border: 1px solid rgba(0,0,0,0.07);
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
@@ -21,12 +21,12 @@
     justify-content: space-between;
     padding: 0.625rem 1.25rem;
     border-top: 1px solid rgba(0,0,0,0.05);
-    background: #ede9df;
+    background: rgb(var(--c-surface-2));
   }
 
   &__review {
     padding: 0.75rem 1.25rem;
     border-top: 1px solid rgba(0,0,0,0.05);
-    background: #ede9df;
+    background: rgb(var(--c-surface-2));
   }
 }

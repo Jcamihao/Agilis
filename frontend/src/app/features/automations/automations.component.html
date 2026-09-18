@@ -41,7 +41,7 @@
                         class="mt-0.5 flex-shrink-0 w-10 h-6 rounded-full transition-all duration-200 relative"
                         [class.bg-primary-500]="rule.isActive"
                         [class.bg-slate-200]="!rule.isActive">
-                  <div class="absolute top-1 w-4 h-4 bg-[#f5f4f0] rounded-full shadow-sm transition-all duration-200"
+                  <div class="absolute top-1 w-4 h-4 bg-[rgb(var(--c-surface))] rounded-full shadow-sm transition-all duration-200"
                        [class.left-5]="rule.isActive"
                        [class.left-1]="!rule.isActive"></div>
                 </button>
@@ -122,7 +122,7 @@
     <!-- ═══ Execution History Panel ═══ -->
     @if (selectedRule() && showExecutions()) {
       <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-        <div class="bg-[#f5f4f0] rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
+        <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
           <div class="flex items-center justify-between p-5 border-b border-b-[rgba(35,34,32,0.07)]">
             <div>
               <h2 class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">Histórico de Execuções</h2>
@@ -190,7 +190,7 @@
     @if (showRuleModal()) {
       <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto animate-fade-in">
         <div class="min-h-screen flex items-start justify-center p-4 py-8">
-          <div class="bg-[#f5f4f0] rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in">
+          <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in">
             <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
               <h2 class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">
                 {{ editingRule() ? 'Editar Regra' : 'Nova Regra de Automação' }}
@@ -278,7 +278,7 @@
 
                 <div formArrayName="actions" class="space-y-3">
                   @for (act of actionsArray.controls; track $index; let i = $index) {
-                    <div [formGroupName]="i" class="bg-[#f5f4f0] rounded-xl border border-purple-200 p-3 space-y-2">
+                    <div [formGroupName]="i" class="bg-[rgb(var(--c-surface))] rounded-xl border border-purple-200 p-3 space-y-2">
                       <div class="flex items-center gap-2">
                         <select formControlName="type" class="ag-input flex-1 text-sm py-2"
                                 (change)="onActionTypeChange(i, $event)">

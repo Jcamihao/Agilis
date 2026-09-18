@@ -161,7 +161,7 @@
 
           <!-- Mention dropdown -->
           @if (mentionSuggestions().length > 0) {
-            <div class="absolute bottom-full left-0 mb-1 w-56 bg-[#f5f4f0] rounded-xl shadow-lg border border-[rgba(35,34,32,0.08)] z-20 overflow-hidden animate-scale-in">
+            <div class="absolute bottom-full left-0 mb-1 w-56 bg-[rgb(var(--c-surface))] rounded-xl shadow-lg border border-[rgba(35,34,32,0.08)] z-20 overflow-hidden animate-scale-in">
               @for (user of mentionSuggestions(); track user.id) {
                 <button (click)="insertMention(user)"
                         class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#F5F5F5] text-left transition-colors">

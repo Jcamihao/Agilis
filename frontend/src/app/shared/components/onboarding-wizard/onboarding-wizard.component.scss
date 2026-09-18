@@ -28,7 +28,7 @@
 .ow-step {
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: rgba(35,34,32,0.1);
+  background: rgb(var(--c-border) / 0.1);
   color: #9ca3af;
   font-size: 13px;
   font-weight: 700;
@@ -48,7 +48,7 @@
 }
 
 .ow-line {
-  flex: 1; height: 2px; background: rgba(35,34,32,0.1); margin: 0 4px; max-width: 80px;
+  flex: 1; height: 2px; background: rgb(var(--c-border) / 0.1); margin: 0 4px; max-width: 80px;
   &--done { background: #10b981; }
 }
 
@@ -132,7 +132,7 @@
   width: 40px; height: 40px;
   border-radius: 10px;
   border: 1.5px solid #e5e7eb;
-  background: #ede9df;
+  background: rgb(var(--c-surface-2));
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: all 0.15s;
@@ -196,14 +196,14 @@
   &--ghost {
     background: transparent;
     color: #767586;
-    &:hover { background: rgba(35,34,32,0.06); }
+    &:hover { background: rgb(var(--c-border) / 0.06); }
   }
 }
 
 /* Spinner */
 .ow-spin {
   width: 16px; height: 16px;
-  border: 2.5px solid rgba(35,34,32,0.35);
+  border: 2.5px solid rgb(var(--c-border) / 0.35);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
