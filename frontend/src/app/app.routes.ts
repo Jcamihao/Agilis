@@ -3,6 +3,15 @@ import { authGuard, publicGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
+    // Public marketing page — matches only the bare root URL, so it never
+    // shadows '/dashboard', '/projects', etc. below. Not guarded: it's meant
+    // to be seen by logged-out visitors before they hit /auth/login.
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./features/landing/landing.component').then((m) => m.LandingComponent),
+    title: 'Agilis — Gestão Operacional para Equipes',
+  },
+  {
     path: 'auth',
     canActivate: [publicGuard],
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.authRoutes),
