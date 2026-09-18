@@ -150,7 +150,6 @@ model Company {
   projects        Project[]
   statuses        TaskStatusConfig[]
   labels          Label[]
-  announcements   Announcement[]
   automations     AutomationRule[]
   auditLogs       AuditLog[]
   insights        Insight[]
@@ -159,12 +158,7 @@ model Company {
   aiConversations AiConversation[]
   processes       Process[]
   webhooks        Webhook[]
-  chatRooms       ChatRoom[]
   objectives      Objective[]
-  feedPosts       FeedPost[]
-  hrProfiles      HrProfile[]
-  leaveRequests   LeaveRequest[]
-  timeRecords     TimeRecord[]
   taskTemplates   TaskTemplate[]
 
   @@map("companies")
@@ -203,8 +197,6 @@ model User {
   aiMessages           AiMessage[]
   taskParticipations   TaskParticipant[] @relation("taskParticipations")
   timeEntries          TimeEntry[]
-  chatMessages         ChatMessage[]
-  chatRoomMembers      ChatRoomMember[]
   ownedObjectives      Objective[]      @relation("ownedObjectives")
   wikiPagesCreated     WikiPage[]       @relation("wikiCreated")
   wikiPagesUpdated     WikiPage[]       @relation("wikiUpdated")
@@ -212,15 +204,6 @@ model User {
   approvalRequests     TaskApproval[]   @relation("approvalRequests")
   approvalReviews      TaskApproval[]   @relation("approvalReviews")
   ownedRisks           Risk[]           @relation("riskOwner")
-  authoredAnnouncements Announcement[]  @relation("authoredAnnouncements")
-  announcementReads     AnnouncementRead[]
-  feedPosts             FeedPost[]         @relation("feedPostAuthor")
-  feedReactions         FeedReaction[]     @relation("feedReactions")
-  feedComments          FeedComment[]      @relation("feedComments")
-  hrProfile             HrProfile?
-  leaveRequests         LeaveRequest[]     @relation("leaveRequests")
-  leaveApprovals        LeaveRequest[]     @relation("leaveApprovals")
-  timeRecords           TimeRecord[]       @relation("timeRecords")
   taskTemplates         TaskTemplate[]     @relation("taskTemplateCreator")
 
   @@map("users")
@@ -302,7 +285,6 @@ model Project {
   automations  AutomationRule[]
   members      ProjectMember[]
   teams        ProjectTeam[]
-  chatRooms    ChatRoom[]
   customFields CustomField[]
   wikiPages    WikiPage[]
   risks        Risk[]
@@ -870,93 +852,6 @@ model WebhookDelivery {
   @@map("webhook_deliveries")
 }
 
-// ─── Chat ─────────────────────────────────────────────────────────────────────
-
-enum ChatRoomType {
-  GENERAL
-  PROJECT
-  DIRECT
-  DEPARTMENT
-}
-
-model ChatRoom {
-  id        String       @id @default(uuid())
-  companyId String
-  projectId String?
-  name      String
-  type      ChatRoomType @default(GENERAL)
-  createdAt DateTime     @default(now())
-
-  company  Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  project  Project?         @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  members  ChatRoomMember[]
-  messages ChatMessage[]
-
-  @@index([companyId])
-  @@index([projectId])
-  @@map("chat_rooms")
-}
-
-model ChatRoomMember {
-  id         String   @id @default(uuid())
-  roomId     String
-  userId     String
-  joinedAt   DateTime @default(now())
-  lastReadAt DateTime @default(now())
-
-  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([roomId, userId])
-  @@map("chat_room_members")
-}
-
-model ChatMessage {
-  id        String   @id @default(uuid())
-  roomId    String
-  userId    String
-  content   String
-  editedAt  DateTime?
-  deletedAt DateTime?
-  createdAt DateTime @default(now())
-
-  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([roomId, createdAt(sort: Desc)])
-  @@map("chat_messages")
-}
-
-model Announcement {
-  id          String   @id @default(uuid())
-  companyId   String
-  authorId    String
-  title       String
-  content     String
-  isPinned    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  company   Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  author    User                 @relation("authoredAnnouncements", fields: [authorId], references: [id])
-  reads     AnnouncementRead[]
-
-  @@index([companyId, createdAt(sort: Desc)])
-  @@map("announcements")
-}
-
-model AnnouncementRead {
-  announcementId String
-  userId         String
-  readAt         DateTime @default(now())
-
-  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([announcementId, userId])
-  @@map("announcement_reads")
-}
-
 // ─── OKRs ─────────────────────────────────────────────────────────────────────
 
 enum ObjectiveStatus {
@@ -1200,147 +1095,6 @@ model Risk {
   @@index([projectId, status])
   @@index([ownerId])
   @@map("risks")
-}
-
-// ─── Intranet Social ──────────────────────────────────────────────────────────
-
-model FeedPost {
-  id        String   @id @default(uuid())
-  companyId String
-  authorId  String
-  content   String
-  imageUrl  String?
-  isPinned  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  company   Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  author    User          @relation("feedPostAuthor", fields: [authorId], references: [id])
-  reactions FeedReaction[]
-  comments  FeedComment[]
-
-  @@index([companyId])
-  @@map("feed_posts")
-}
-
-model FeedReaction {
-  id        String   @id @default(uuid())
-  postId    String
-  userId    String
-  emoji     String   @default("👍")
-  createdAt DateTime @default(now())
-
-  post FeedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user User     @relation("feedReactions", fields: [userId], references: [id])
-
-  @@unique([postId, userId, emoji])
-  @@map("feed_reactions")
-}
-
-model FeedComment {
-  id        String   @id @default(uuid())
-  postId    String
-  authorId  String
-  content   String
-  createdAt DateTime @default(now())
-
-  post   FeedPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author User     @relation("feedComments", fields: [authorId], references: [id])
-
-  @@index([postId])
-  @@map("feed_comments")
-}
-
-// ─── RH Básico ────────────────────────────────────────────────────────────────
-
-enum HrStatus {
-  ACTIVE
-  ON_LEAVE
-  TERMINATED
-}
-
-enum LeaveType {
-  VACATION
-  SICK
-  PERSONAL
-  MATERNITY
-  PATERNITY
-  OTHER
-}
-
-enum LeaveStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  CANCELLED
-}
-
-enum TimeRecordType {
-  CLOCK_IN
-  BREAK_START
-  BREAK_END
-  CLOCK_OUT
-}
-
-model HrProfile {
-  id            String    @id @default(uuid())
-  userId        String    @unique
-  companyId     String
-  jobTitle      String?
-  department    String?
-  managerId     String?
-  admissionDate DateTime?
-  birthDate     DateTime?
-  status        HrStatus  @default(ACTIVE)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  manager HrProfile? @relation("HrReports", fields: [managerId], references: [userId])
-  reports HrProfile[] @relation("HrReports")
-
-  @@index([companyId])
-  @@map("hr_profiles")
-}
-
-model LeaveRequest {
-  id           String      @id @default(uuid())
-  userId       String
-  companyId    String
-  type         LeaveType
-  startDate    DateTime
-  endDate      DateTime
-  reason       String?
-  status       LeaveStatus @default(PENDING)
-  approvedById String?
-  approvedAt   DateTime?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  user       User    @relation("leaveRequests", fields: [userId], references: [id])
-  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  approvedBy User?   @relation("leaveApprovals", fields: [approvedById], references: [id])
-
-  @@index([companyId])
-  @@index([userId])
-  @@map("leave_requests")
-}
-
-model TimeRecord {
-  id        String         @id @default(uuid())
-  userId    String
-  companyId String
-  type      TimeRecordType
-  timestamp DateTime       @default(now())
-  note      String?
-  createdAt DateTime       @default(now())
-
-  user    User    @relation("timeRecords", fields: [userId], references: [id])
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@index([companyId, userId])
-  @@map("time_records")
 }
 
 // ─── Task Templates ───────────────────────────────────────────────────────────

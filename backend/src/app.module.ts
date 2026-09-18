@@ -31,7 +31,6 @@ import { RedisModule } from './redis/redis.module';
 import { QueueModule } from './queue/queue.module';
 import { MailModule } from './mail/mail.module';
 import { TimeTrackingModule } from './time-tracking/time-tracking.module';
-import { ChatModule } from './chat/chat.module';
 import { OkrsModule } from './okrs/okrs.module';
 import { WorkloadModule } from './workload/workload.module';
 import { CustomFieldsModule } from './custom-fields/custom-fields.module';
@@ -40,9 +39,6 @@ import { ApprovalsModule } from './approvals/approvals.module';
 import { RisksModule } from './risks/risks.module';
 import { LabelsModule } from './labels/labels.module';
 import { TaskStatusConfigModule } from './task-status-config/task-status-config.module';
-import { AnnouncementsModule } from './announcements/announcements.module';
-import { FeedModule } from './feed/feed.module';
-import { HrModule } from './hr/hr.module';
 import { UploadModule } from './upload/upload.module';
 import { SearchModule } from './search/search.module';
 import { TaskTemplatesModule } from './task-templates/task-templates.module';
@@ -80,7 +76,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     QueueModule,
     MailModule,
     TimeTrackingModule,
-    ChatModule,
     OkrsModule,
     WorkloadModule,
     CustomFieldsModule,
@@ -89,9 +84,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     RisksModule,
     LabelsModule,
     TaskStatusConfigModule,
-    AnnouncementsModule,
-    FeedModule,
-    HrModule,
     UploadModule,
     SearchModule,
     TaskTemplatesModule,

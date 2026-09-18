@@ -54,9 +54,7 @@ npm run dev
 - **SLA** — configuração e monitoramento de SLAs por prioridade/projeto
 
 ### Comunicação & Conhecimento
-- **Chat em Tempo Real** — WebSocket, salas por projeto e gerais, histórico
 - **Wiki de Projetos** — editor rich text por projeto
-- **Mural (Feed)** — announcements e updates da empresa
 
 ### Inteligência & Analytics
 - **Assistente IA** — chat com Ollama (Mistral), contexto do workspace em tempo real, resumo de projetos/tarefas, plano de ação, gargalos, sugestão de responsável
@@ -80,7 +78,6 @@ npm run dev
 - **Relatórios** (CSV / Excel / PDF) — Tarefas, Produtividade, Auditoria, Time Tracking, OKRs
 - **Auditoria** — log completo de todas as ações (quem, o quê, quando)
 - **Log de Auditoria** — exportável em CSV/Excel
-- **HR** — gestão de colaboradores, cargos e departamentos
 - **Centro de Processos** — fluxos de processo com etapas e checklists
 - **Centro de Operações** — monitoramento e indicadores operacionais
 - **SLA** — configuração de SLAs com breach detection
@@ -100,7 +97,6 @@ Agilis/
 │   │   ├── auth/               # JWT + guards
 │   │   ├── automation/         # Motor de automações + cron
 │   │   ├── calendar/           # Calendário + exportação iCal
-│   │   ├── chat/               # WebSocket em tempo real
 │   │   ├── companies/          # Multi-tenant
 │   │   ├── dashboard-widgets/  # Widgets customizáveis
 │   │   ├── health-score/       # Score automático por projeto
@@ -125,7 +121,7 @@ Agilis/
 ├── frontend/                   # Angular 16
 │   └── src/app/
 │       ├── features/           # Páginas (kanban, gantt, dashboard, portfolio, …)
-│       ├── shared/components/  # GlobalSearch, OnboardingWizard, ChatPanel, …
+│       ├── shared/components/  # GlobalSearch, OnboardingWizard, …
 │       ├── core/
 │       │   ├── services/       # Services para todos os módulos
 │       │   ├── models/         # Interfaces TypeScript
@@ -157,9 +153,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v2.4.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
+**v2.5.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v2.5.0** — Remoção de Chat em tempo real, Mural/Announcements e HR (escopo focado em PM, sem intranet/RH)
 - **v2.4.0** — Remoção de Telegram, Portal do Cliente, Intake Forms e Wiki Corporativa (escopo focado em PM, sem intranet/RH/agência)
 - **v2.3.2** — Correção de mapeamento Prisma (`@map`) em colunas de migrations manuais
 - **v2.3.1** — Mensagens de erro genéricas na API, correção de mapeamento de `notifPreferences`

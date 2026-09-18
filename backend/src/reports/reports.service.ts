@@ -139,32 +139,17 @@ export class ReportsService {
   // ── Time Tracking Report ──────────────────────────────────────────────────
 
   async exportTimeTracking(companyId: string, format: ReportFormat, from?: string, to?: string) {
-    const where: any = { companyId };
-    if (from || to) {
-      where.timestamp = {};
-      if (from) where.timestamp.gte = new Date(from);
-      if (to)   where.timestamp.lte = new Date(to);
-    }
+    const entries = await this.prisma.timeEntry.findMany({
+      where: { task: { project: { companyId } }, ...(from || to ? { startedAt: { ...(from ? { gte: new Date(from) } : {}), ...(to ? { lte: new Date(to) } : {}) } } : {}) },
+      include: {
+        user: { select: { name: true, email: true } },
+        task: { select: { title: true, project: { select: { name: true } } } },
+      },
+      orderBy: { startedAt: 'desc' },
+      take: 5000,
+    });
 
-    const [entries, records] = await Promise.all([
-      this.prisma.timeEntry.findMany({
-        where: { task: { project: { companyId } }, ...(from || to ? { startedAt: { ...(from ? { gte: new Date(from) } : {}), ...(to ? { lte: new Date(to) } : {}) } } : {}) },
-        include: {
-          user: { select: { name: true, email: true } },
-          task: { select: { title: true, project: { select: { name: true } } } },
-        },
-        orderBy: { startedAt: 'desc' },
-        take: 5000,
-      }),
-      this.prisma.timeRecord.findMany({
-        where,
-        include: { user: { select: { name: true, email: true } } },
-        orderBy: { timestamp: 'desc' },
-        take: 5000,
-      }),
-    ]);
-
-    const timeEntryRows = entries.map((e) => ({
+    const rows = entries.map((e) => ({
       tipo:          'Apontamento de Tarefa',
       usuario:       e.user.name,
       email:         e.user.email,
@@ -175,20 +160,6 @@ export class ReportsService {
       duracaoMin:    e.durationMin ?? '',
       descricao:     e.description ?? '',
     }));
-
-    const clockRows = records.map((r) => ({
-      tipo:          r.type,
-      usuario:       r.user.name,
-      email:         r.user.email,
-      projeto:       '',
-      tarefa:        '',
-      inicio:        r.timestamp.toISOString(),
-      fim:           '',
-      duracaoMin:    '',
-      descricao:     r.note ?? '',
-    }));
-
-    const rows = [...timeEntryRows, ...clockRows].sort((a, b) => a.inicio.localeCompare(b.inicio));
 
     if (format === 'csv')   return this.toCsv(rows);
     if (format === 'excel') return this.toExcel(rows, 'Time Tracking');

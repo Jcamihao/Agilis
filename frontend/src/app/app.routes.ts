@@ -159,24 +159,9 @@ export const routes: Routes = [
         title: 'SLA — Agilis',
       },
       {
-        path: 'chat',
-        loadComponent: () => import('./features/chat/chat-page.component').then((m) => m.ChatPageComponent),
-        title: 'Comunicação — Agilis',
-      },
-      {
         path: 'webhooks',
         loadComponent: () => import('./features/webhooks/webhooks.component').then((m) => m.WebhooksComponent),
         title: 'Webhooks — Agilis',
-      },
-      {
-        path: 'feed',
-        loadComponent: () => import('./features/feed/feed.component').then((m) => m.FeedComponent),
-        title: 'Mural — Agilis',
-      },
-      {
-        path: 'hr',
-        loadComponent: () => import('./features/hr/hr.component').then((m) => m.HrComponent),
-        title: 'RH — Agilis',
       },
       {
         path: 'process-center',

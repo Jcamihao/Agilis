@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetection
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { ChatService } from '../../core/services/chat.service';
 
 interface NavItem {
   label: string;
@@ -30,15 +29,8 @@ export class SidebarComponent {
   @Output() toggleCollapse = new EventEmitter<void>();
 
   private readonly auth = inject(AuthService);
-  readonly chat = inject(ChatService);
   readonly user = this.auth.user;
   readonly companyName = () => this.user()?.companies?.[0]?.company?.name;
-
-  openChat() {
-    const cid = this.auth.currentCompanyId();
-    if (cid) this.chat.openGeneralRoom(cid);
-    else this.chat.togglePanel();
-  }
 
   // Seções sempre visíveis (sem colapso)
   mainNav: NavItem[] = [
@@ -61,17 +53,9 @@ export class SidebarComponent {
       ],
     },
     {
-      key: 'com',
-      label: 'Comunicação',
+      key: 'process',
+      label: 'Processos',
       items: [
-        { label: 'Mural',            icon: 'dynamic_feed', route: '/feed' },
-      ],
-    },
-    {
-      key: 'rh',
-      label: 'Pessoas',
-      items: [
-        { label: 'RH',                  icon: 'people',       route: '/hr' },
         { label: 'Centro de Processos', icon: 'account_tree', route: '/process-center' },
       ],
     },
