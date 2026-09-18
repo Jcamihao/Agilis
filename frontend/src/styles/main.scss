@@ -100,6 +100,14 @@ $agilis-theme: mat.m2-define-light-theme((
   --text-secondary: var(--color-text-secondary);
   --text-tertiary:  var(--color-text-tertiary);
 
+  // More legacy alias names found in older components (var(--x, #hexFallback)
+  // usages) — defining them here means the fallback never triggers, so these
+  // components pick up the active theme instead of being stuck on a fixed color.
+  --surface-secondary: var(--color-surface-2);
+  --surface-hover:      var(--color-surface-hover);
+  --bg-secondary:       var(--color-surface-2);
+  --border:             var(--color-border);
+
   --font-sans:   'Hanken Grotesk', system-ui, -apple-system, sans-serif;
   --font-mono:   'JetBrains Mono', 'Fira Code', monospace;
 

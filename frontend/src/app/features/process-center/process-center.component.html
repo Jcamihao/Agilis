@@ -107,7 +107,7 @@
 
       @if (!selectedProcess() && !detailLoading()) {
         <div class="pc-empty pc-empty--center">
-          <span class="material-symbols-rounded text-[56px]" style="color:#1e293b">account_tree</span>
+          <span class="material-symbols-rounded text-[56px]" style="color:rgb(var(--c-800))">account_tree</span>
           <p class="text-base font-medium text-[--text-secondary] mt-3">Selecione um processo</p>
           <p class="text-sm text-[--text-secondary] mt-1">Clique em um processo para ver detalhes e executar</p>
         </div>
@@ -171,7 +171,7 @@
                               (change)="toggleAnswer(instStep, answer.itemId)"
                               class="w-4 h-4 rounded accent-indigo-500" />
                             <span class="text-sm" [class.line-through]="answer.isChecked"
-                              [style.color]="answer.isChecked ? '#64748b' : 'var(--text-primary)'">
+                              [style.color]="answer.isChecked ? 'rgb(var(--c-600))' : 'var(--text-primary)'">
                               {{ checklistLabel(instStep, answer.itemId) }}
                             </span>
                           </label>

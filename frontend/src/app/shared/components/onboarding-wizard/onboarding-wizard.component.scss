@@ -69,14 +69,14 @@
 .ow-title {
   font-size: 26px;
   font-weight: 800;
-  color: var(--text-primary, #191c1d);
+  color: var(--text-primary, rgb(var(--c-text)));
   letter-spacing: -0.02em;
   margin: 0 0 6px;
 }
 
 .ow-desc {
   font-size: 14px;
-  color: var(--text-secondary, #767586);
+  color: var(--text-secondary, rgb(var(--c-500)));
   margin: 0 0 28px;
 }
 
@@ -101,7 +101,7 @@
 .ow-label {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #191c1d);
+  color: var(--text-primary, rgb(var(--c-text)));
 }
 
 .ow-input {
@@ -111,7 +111,7 @@
   border-radius: 12px;
   font-size: 15px;
   background: var(--surface-input, #f9fafb);
-  color: var(--text-primary, #191c1d);
+  color: var(--text-primary, rgb(var(--c-text)));
   outline: none;
   transition: border-color 0.15s;
 
@@ -136,7 +136,7 @@
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: all 0.15s;
-  color: #767586;
+  color: rgb(var(--c-500));
 
   &:hover { border-color: #6366f1; color: #6366f1; }
 
@@ -195,7 +195,7 @@
 
   &--ghost {
     background: transparent;
-    color: #767586;
+    color: rgb(var(--c-500));
     &:hover { background: rgb(var(--c-border) / 0.06); }
   }
 }

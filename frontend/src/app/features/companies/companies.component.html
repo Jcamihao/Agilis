@@ -22,7 +22,7 @@
   </div>
 
   <!-- ── Tabs ─────────────────────────────────────────── -->
-  <div class="flex gap-6" style="border-bottom: 1px solid rgba(35,34,32,0.3);">
+  <div class="flex gap-6" style="border-bottom: 1px solid rgb(var(--c-border) / 0.3);">
     <a routerLink="/teams" class="dir-tab">
       Equipes Internas
     </a>
@@ -79,7 +79,7 @@
 
             <!-- Footer -->
             <div class="flex items-center justify-between pt-4 mt-auto"
-                 style="border-top: 1px solid rgba(35,34,32,0.2);">
+                 style="border-top: 1px solid rgb(var(--c-border) / 0.2);">
               <span class="ag-badge ag-badge--success">Ativa</span>
               <button (click)="openManage(company)"
                       class="text-[13px] font-semibold transition-colors"
@@ -94,7 +94,7 @@
       <!-- Add new company card -->
       <div class="add-card" (click)="showModal.set(true)">
         <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-             style="background: rgba(35,34,32,0.3);">
+             style="background: rgb(var(--c-border) / 0.3);">
           <span class="material-symbols-rounded text-[24px]" style="color: rgb(var(--c-500));">add_circle</span>
         </div>
         <h3 class="text-[16px] font-semibold mb-1" style="color: rgb(var(--c-text));">Adicionar Empresa</h3>
@@ -120,7 +120,7 @@
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md animate-scale-in"
          style="box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgb(var(--c-border) / 0.07)]">
         <h2 class="text-[15px] font-semibold tracking-[-0.02em]" style="color: rgb(var(--c-text));">Nova Empresa</h2>
         <button (click)="showModal.set(false)"
                 class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color:rgb(var(--c-500));">
@@ -151,7 +151,7 @@
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md animate-scale-in"
          style="box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgb(var(--c-border) / 0.07)]">
         <h2 class="text-[15px] font-semibold tracking-[-0.02em]" style="color: rgb(var(--c-text));">Editar Empresa</h2>
         <button (click)="showEditModal.set(false)"
                 class="p-2 rounded-full hover:bg-black/5 transition-colors" style="color:rgb(var(--c-500));">
@@ -182,7 +182,7 @@
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-lg animate-scale-in"
          style="box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgb(var(--c-border) / 0.07)]">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold"
                style="background: rgb(var(--p-200));">

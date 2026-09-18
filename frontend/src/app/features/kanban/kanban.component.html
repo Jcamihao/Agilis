@@ -40,7 +40,7 @@
         </div>
       </div>
       <!-- View toggle -->
-      <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgba(35,34,32,0.08)] rounded-xl overflow-visible shadow-sm">
+      <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgb(var(--c-border) / 0.08)] rounded-xl overflow-visible shadow-sm">
         <button class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold bg-primary-50 text-primary-600 cursor-default rounded-l-xl">
           <span class="material-symbols-rounded text-base">view_kanban</span>
           Kanban
@@ -146,7 +146,7 @@
 
   <!-- Filter Bar -->
   <div
-    class="flex items-center gap-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.08)] p-2 mb-5 flex-shrink-0 shadow-sm"
+    class="flex items-center gap-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)] p-2 mb-5 flex-shrink-0 shadow-sm"
   >
     <div class="flex-1 relative">
       <span
@@ -270,7 +270,7 @@
                 (cdkDragStarted)="onDragStart()"
                 (cdkDragEnded)="onDragEnd()"
                 (click)="openDetailWithSubtasks(task)"
-                class="task-card bg-[rgb(var(--c-surface))] rounded-xl p-4 border border-[rgba(35,34,32,0.07)] cursor-pointer select-none transition-all duration-150 group relative"
+                class="task-card bg-[rgb(var(--c-surface))] rounded-xl p-4 border border-[rgb(var(--c-border) / 0.07)] cursor-pointer select-none transition-all duration-150 group relative"
                 [class.border-primary-200]="column.key === 'IN_PROGRESS'"
                 [class.opacity-80]="column.key === 'DONE'"
               >
@@ -448,7 +448,7 @@
     <div class="flex flex-col flex-1 bg-[rgb(var(--c-surface))] overflow-hidden rounded-l-2xl">
       <!-- Modal header -->
       <div
-        class="flex items-center justify-between px-6 py-4 border-b border-b-[rgba(35,34,32,0.07)] flex-shrink-0"
+        class="flex items-center justify-between px-6 py-4 border-b border-b-[rgb(var(--c-border) / 0.07)] flex-shrink-0"
       >
         <div
           class="flex items-center gap-2 text-sm text-[--text-tertiary] min-w-0"
@@ -471,7 +471,7 @@
         </div>
         <button
           (click)="closeDetail()"
-          class="p-2 rounded-lg text-[--text-tertiary] hover:bg-[#F5F5F5] hover:text-[--text-secondary] transition-colors"
+          class="p-2 rounded-lg text-[--text-tertiary] hover:bg-[rgb(var(--c-surface-2))] hover:text-[--text-secondary] transition-colors"
         >
           <span class="material-symbols-rounded text-lg">close</span>
         </button>
@@ -494,7 +494,7 @@
           } @else {
             <h2
               (click)="startEditTitle()"
-              class="text-xl font-bold text-slate-900 leading-snug cursor-text hover:bg-[#F5F5F5] rounded-lg px-2 py-1 -mx-2 transition-colors group"
+              class="text-xl font-bold text-slate-900 leading-snug cursor-text hover:bg-[rgb(var(--c-surface-2))] rounded-lg px-2 py-1 -mx-2 transition-colors group"
             >
               {{ detailTask()!.title }}
               <span
@@ -537,7 +537,7 @@
             } @else {
               <div
                 (click)="startEditDesc()"
-                class="min-h-[60px] px-3 py-2 rounded-lg text-sm text-[--text-secondary] leading-relaxed cursor-text hover:bg-[#F5F5F5] transition-colors group"
+                class="min-h-[60px] px-3 py-2 rounded-lg text-sm text-[--text-secondary] leading-relaxed cursor-text hover:bg-[rgb(var(--c-surface-2))] transition-colors group"
               >
                 @if (detailTask()!.description) {
                   <span class="whitespace-pre-wrap">{{
@@ -556,7 +556,7 @@
             }
           </div>
 
-          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
+          <div class="border-t border-[rgb(var(--c-border) / 0.08)]"></div>
 
           <!-- Subtasks -->
           <div>
@@ -679,12 +679,12 @@
             </div>
           }
 
-          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
+          <div class="border-t border-[rgb(var(--c-border) / 0.08)]"></div>
 
           <!-- Approvals -->
           <ag-approval-panel [taskId]="detailTask()!.id" />
 
-          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
+          <div class="border-t border-[rgb(var(--c-border) / 0.08)]"></div>
 
           <!-- Custom Fields -->
           <ag-custom-field-values
@@ -692,12 +692,12 @@
             [projectId]="detailTask()!.projectId"
             [initialValues]="detailTask()!.customFields" />
 
-          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
+          <div class="border-t border-[rgb(var(--c-border) / 0.08)]"></div>
 
           <!-- Time Tracker -->
           <ag-time-tracker [taskId]="detailTask()!.id" />
 
-          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
+          <div class="border-t border-[rgb(var(--c-border) / 0.08)]"></div>
 
           <!-- Comments -->
           <ag-comment-section [taskId]="detailTask()!.id" />
@@ -705,7 +705,7 @@
 
         <!-- RIGHT: sidebar -->
         <div
-          class="w-[296px] flex-shrink-0 border-l border-[rgba(35,34,32,0.08)] overflow-y-auto px-5 py-6 space-y-5 bg-[#fafafa]"
+          class="w-[296px] flex-shrink-0 border-l border-[rgb(var(--c-border) / 0.08)] overflow-y-auto px-5 py-6 space-y-5 bg-[#fafafa]"
         >
           <!-- Status -->
           <div>
@@ -766,7 +766,7 @@
             </p>
             <button
               (click)="toggleAssigneePicker()"
-              class="w-full flex items-center gap-2.5 p-2.5 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.08)] hover:border-primary-300 hover:bg-primary-50/30 transition-colors group text-left"
+              class="w-full flex items-center gap-2.5 p-2.5 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)] hover:border-primary-300 hover:bg-primary-50/30 transition-colors group text-left"
             >
               @if (detailTask()!.assignee) {
                 <div class="ag-avatar ag-avatar--md flex-shrink-0">
@@ -883,7 +883,7 @@
               <div class="flex flex-col gap-1.5 mb-2">
                 @for (p of participantsOf(); track p.id) {
                   <div
-                    class="flex items-center gap-2 p-2 bg-[rgb(var(--c-surface))] rounded-lg border border-[rgba(35,34,32,0.06)] group"
+                    class="flex items-center gap-2 p-2 bg-[rgb(var(--c-surface))] rounded-lg border border-[rgb(var(--c-border) / 0.06)] group"
                   >
                     <div class="ag-avatar ag-avatar--sm flex-shrink-0">
                       @if (p.user?.avatarUrl) {
@@ -914,7 +914,7 @@
 
             <button
               (click)="toggleParticipantPicker()"
-              class="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-[rgba(35,34,32,0.08)] text-[--text-tertiary] hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50/30 transition-colors text-sm"
+              class="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-[rgb(var(--c-border) / 0.08)] text-[--text-tertiary] hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50/30 transition-colors text-sm"
             >
               <span class="material-symbols-rounded text-base">group_add</span>
               Adicionar participante
@@ -984,7 +984,7 @@
               Data de Entrega
             </p>
             <div
-              class="p-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.08)]"
+              class="p-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)]"
               [class.border-red-200]="
                 detailTask()!.dueDate && isOverdue(detailTask()!.dueDate!)
               "
@@ -1078,7 +1078,7 @@
               Criado em
             </p>
             <div
-              class="flex items-center gap-2 p-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.08)]"
+              class="flex items-center gap-2 p-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)]"
             >
               <span
                 class="material-symbols-rounded text-base text-[--text-tertiary]"
@@ -1099,7 +1099,7 @@
                 Projeto
               </p>
               <div
-                class="flex items-center gap-2.5 p-2.5 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.08)]"
+                class="flex items-center gap-2.5 p-2.5 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)]"
               >
                 <div
                   class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -1120,7 +1120,7 @@
           }
 
           <!-- Delete -->
-          <div class="pt-2 border-t border-[rgba(35,34,32,0.08)]">
+          <div class="pt-2 border-t border-[rgb(var(--c-border) / 0.08)]">
             <button
               (click)="deleteDetailTask()"
               class="w-full ag-btn ag-btn--ghost ag-btn--sm justify-center text-red-500 hover:bg-red-50"
@@ -1146,7 +1146,7 @@
       class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in"
     >
       <div
-        class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]"
+        class="flex items-center justify-between p-6 border-b border-b-[rgb(var(--c-border) / 0.07)]"
       >
         <h2 class="text-[15px] font-semibold text-[--text-primary]">
           Nova Tarefa
@@ -1379,7 +1379,7 @@
     <div (click)="$event.stopPropagation()"
          class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
 
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgb(var(--c-border) / 0.07)]">
         <div class="flex items-center gap-2">
           <span class="material-symbols-rounded text-primary-600">sprint</span>
           <h2 class="text-[15px] font-semibold text-[--text-primary]">Nova Sprint</h2>

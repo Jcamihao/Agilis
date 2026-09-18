@@ -42,7 +42,7 @@
   margin-bottom: 5px;
 
   &--today  { background: rgb(var(--c-text)); color: rgb(var(--c-surface)); }
-  &--outside { color: #444748; }
+  &--outside { color: rgb(var(--c-500)); }
 }
 
 .cal-task {
@@ -91,9 +91,9 @@
   &:hover { opacity: 0.8; }
 
   &--urgente {
-    background: rgba(255, 180, 171, 0.1);
+    background: rgb(var(--f-danger) / 0.1);
     color: rgb(var(--f-danger));
-    border: 1px solid rgba(255, 180, 171, 0.25);
+    border: 1px solid rgb(var(--f-danger) / 0.25);
   }
   &--design {
     background: rgb(var(--c-border) / 0.06);
@@ -101,8 +101,8 @@
     border: 1px solid rgb(var(--c-border) / 0.15);
   }
   &--dev {
-    background: rgba(142, 195, 255, 0.08);
-    color: #8ec3ff;
-    border: 1px solid rgba(142, 195, 255, 0.2);
+    background: rgb(var(--f-info) / 0.08);
+    color: rgb(var(--f-info));
+    border: 1px solid rgb(var(--f-info) / 0.2);
   }
 }

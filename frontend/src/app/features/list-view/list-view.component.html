@@ -18,7 +18,7 @@
 
     <div class="flex items-center gap-3">
       <!-- View toggle -->
-      <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgba(35,34,32,0.08)] rounded-xl overflow-hidden shadow-sm">
+      <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgb(var(--c-border) / 0.08)] rounded-xl overflow-hidden shadow-sm">
         <a [routerLink]="['/projects', id, 'kanban']"
           class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
           <span class="material-symbols-rounded text-base">view_kanban</span>
@@ -68,7 +68,7 @@
   </div>
 
   <!-- ═══════ FILTER BAR ═══════ -->
-  <div class="flex items-center gap-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.08)] p-2 mb-4 flex-shrink-0 shadow-sm flex-wrap">
+  <div class="flex items-center gap-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)] p-2 mb-4 flex-shrink-0 shadow-sm flex-wrap">
     <!-- Search -->
     <div class="flex-1 min-w-[180px] relative">
       <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
@@ -162,12 +162,12 @@
   }
 
   <!-- ═══════ TABLE ═══════ -->
-  <div class="flex-1 min-h-0 overflow-auto bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.08)] shadow-sm">
+  <div class="flex-1 min-h-0 overflow-auto bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)] shadow-sm">
     @if (loading()) {
       <!-- Skeleton -->
       <table class="w-full border-collapse">
         <thead>
-          <tr class="border-b border-[rgba(35,34,32,0.07)] bg-slate-50">
+          <tr class="border-b border-[rgb(var(--c-border) / 0.07)] bg-slate-50">
             <th class="w-10 px-4 py-3"></th>
             @for (i of [1,2,3,4,5,6]; track i) {
               <th class="px-4 py-3">
@@ -178,7 +178,7 @@
         </thead>
         <tbody>
           @for (i of [1,2,3,4,5,6,7,8]; track i) {
-            <tr class="border-b border-[rgba(35,34,32,0.05)]">
+            <tr class="border-b border-[rgb(var(--c-border) / 0.05)]">
               <td class="px-4 py-3.5"><div class="h-4 w-4 bg-slate-100 rounded ag-skeleton"></div></td>
               <td class="px-4 py-3.5"><div class="h-4 bg-slate-100 rounded ag-skeleton" [style.width.px]="120 + i * 15"></div></td>
               <td class="px-4 py-3.5"><div class="h-5 w-24 bg-slate-100 rounded-full ag-skeleton"></div></td>
@@ -212,7 +212,7 @@
       <table class="w-full border-collapse text-sm">
         <!-- Sticky header -->
         <thead class="sticky top-0 z-10">
-          <tr class="bg-slate-50 border-b border-[rgba(35,34,32,0.07)]">
+          <tr class="bg-slate-50 border-b border-[rgb(var(--c-border) / 0.07)]">
             <!-- Select all -->
             <th class="w-10 px-4 py-3 text-left">
               <input type="checkbox"
@@ -286,7 +286,7 @@
         <tbody>
           @for (task of displayedTasks(); track task.id; let odd = $odd) {
             <tr
-              class="border-b border-[rgba(35,34,32,0.04)] transition-colors group"
+              class="border-b border-[rgb(var(--c-border) / 0.04)] transition-colors group"
               [class.bg-[rgb(var(--c-surface))]]="!odd"
               [class.bg-slate-50/60]="odd"
               [class.hover:bg-primary-50/40]="!selectedIds().has(task.id)"
@@ -487,7 +487,7 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
     <div (click)="$event.stopPropagation()"
       class="bg-[rgb(var(--c-surface))] rounded-2xl shadow-2xl w-full max-w-lg pointer-events-auto animate-scale-in">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-[rgba(35,34,32,0.07)]">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-[rgb(var(--c-border) / 0.07)]">
         <h3 class="text-base font-bold text-[--text-primary]">Nova Tarefa</h3>
         <button (click)="closeCreate()" class="p-1.5 rounded-lg text-[--text-tertiary] hover:bg-slate-100 transition-colors">
           <span class="material-symbols-rounded text-lg">close</span>

@@ -22,7 +22,7 @@
   </div>
 
   <!-- ── Tabs ─────────────────────────────────────────── -->
-  <div class="flex gap-6" style="border-bottom: 1px solid rgba(35,34,32,0.12);">
+  <div class="flex gap-6" style="border-bottom: 1px solid rgb(var(--c-border) / 0.12);">
     <span class="dir-tab dir-tab--active">
       Equipes Internas ({{ teams().length }})
     </span>
@@ -72,7 +72,7 @@
 
             <!-- Footer: avatars + action -->
             <div class="flex items-center justify-between pt-4"
-                 style="border-top: 1px solid rgba(35,34,32,0.2);">
+                 style="border-top: 1px solid rgb(var(--c-border) / 0.2);">
               <!-- Stacked avatars -->
               <div class="flex items-center">
                 @if (team.members && team.members.length > 0) {
@@ -110,7 +110,7 @@
       <!-- Add new team card -->
       <div class="add-card" (click)="showModal.set(true)">
         <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-             style="background: rgba(35,34,32,0.3);">
+             style="background: rgb(var(--c-border) / 0.3);">
           <span class="material-symbols-rounded text-[24px]" style="color: rgb(var(--c-500));">add_circle</span>
         </div>
         <h3 class="text-[16px] font-semibold mb-1" style="color: rgb(var(--c-text));">Criar Nova Equipe</h3>

@@ -35,7 +35,7 @@
 
               <!-- Content -->
               <div class="flex-1 min-w-0">
-                <div class="bg-[#F5F5F5] rounded-xl px-4 py-3">
+                <div class="bg-[rgb(var(--c-surface-2))] rounded-xl px-4 py-3">
                   <div class="flex items-center justify-between gap-2 mb-1.5">
                     <div class="flex items-center gap-2">
                       <span class="text-sm font-semibold text-[--text-primary]">{{ comment.author.name }}</span>
@@ -121,7 +121,7 @@
       }
 
       <!-- New Comment Input -->
-      <div class="flex gap-3 pt-2 border-t border-[rgba(35,34,32,0.08)]">
+      <div class="flex gap-3 pt-2 border-t border-[rgb(var(--c-border) / 0.08)]">
         <div class="ag-avatar ag-avatar--sm flex-shrink-0 mt-1">
           {{ currentUser()?.name?.charAt(0) }}
         </div>
@@ -161,10 +161,10 @@
 
           <!-- Mention dropdown -->
           @if (mentionSuggestions().length > 0) {
-            <div class="absolute bottom-full left-0 mb-1 w-56 bg-[rgb(var(--c-surface))] rounded-xl shadow-lg border border-[rgba(35,34,32,0.08)] z-20 overflow-hidden animate-scale-in">
+            <div class="absolute bottom-full left-0 mb-1 w-56 bg-[rgb(var(--c-surface))] rounded-xl shadow-lg border border-[rgb(var(--c-border) / 0.08)] z-20 overflow-hidden animate-scale-in">
               @for (user of mentionSuggestions(); track user.id) {
                 <button (click)="insertMention(user)"
-                        class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#F5F5F5] text-left transition-colors">
+                        class="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[rgb(var(--c-surface-2))] text-left transition-colors">
                   <div class="ag-avatar ag-avatar--sm">{{ user.name.charAt(0) }}</div>
                   <div class="min-w-0">
                     <p class="text-sm font-medium text-[--text-primary] truncate">{{ user.name }}</p>

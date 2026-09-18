@@ -12,8 +12,8 @@
     <div class="flex items-center gap-2">
       <button (click)="toggleCustomize()"
               class="ag-btn ag-btn--secondary ag-btn--sm"
-              [style.background]="customizing() ? 'rgba(35,34,32,0.06)' : ''"
-              [style.border-color]="customizing() ? 'rgba(35,34,32,0.3)' : ''"
+              [style.background]="customizing() ? 'rgb(var(--c-border) / 0.06)' : ''"
+              [style.border-color]="customizing() ? 'rgb(var(--c-border) / 0.3)' : ''"
               [style.color]="customizing() ? 'rgb(var(--c-text))' : ''">
         <span class="material-symbols-rounded text-base">
           {{ customizing() ? 'check' : 'dashboard_customize' }}
@@ -32,7 +32,7 @@
   <!-- Customize hint -->
   @if (customizing()) {
     <div class="p-3.5 rounded-2xl text-[13px] flex items-center gap-2 animate-fade-in"
-         style="background: rgba(35,34,32,0.06); border: 1px solid rgba(35,34,32,0.15); color: rgb(var(--c-text));">
+         style="background: rgb(var(--c-border) / 0.06); border: 1px solid rgb(var(--c-border) / 0.15); color: rgb(var(--c-text));">
       <span class="material-symbols-rounded text-base">info</span>
       Arraste para reorganizar. Clique no olho para mostrar/esconder. Clique em ✓ para salvar.
     </div>
@@ -109,7 +109,7 @@
     <div class="dash-card p-5 h-32 flex flex-col justify-between">
       <div class="flex justify-between items-start">
         <div>
-          <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: #9a978f;">
+          <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: rgb(var(--c-500));">
             Minhas Tarefas
           </p>
           @if (myTasksLoading()) {
@@ -119,7 +119,7 @@
                 style="color: rgb(var(--c-text));">{{ myTasks().length }}</h3>
           }
         </div>
-        <div class="stat-icon" style="background: rgba(35,34,32,0.1);">
+        <div class="stat-icon" style="background: rgb(var(--c-border) / 0.1);">
           <span class="material-symbols-rounded text-[20px]" style="color: rgb(var(--c-text));">task_alt</span>
         </div>
       </div>
@@ -129,7 +129,7 @@
     <div class="dash-card p-5 h-32 flex flex-col justify-between">
       <div class="flex justify-between items-start">
         <div>
-          <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: #9a978f;">
+          <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: rgb(var(--c-500));">
             Tarefas Atrasadas
           </p>
           @if (widgetData()['OVERDUE_TASKS'] !== undefined) {
@@ -139,7 +139,7 @@
             <div class="ag-skeleton h-9 w-10 mt-2 rounded-xl"></div>
           }
         </div>
-        <div class="stat-icon" style="background: rgba(255,180,171,0.1);">
+        <div class="stat-icon" style="background: rgb(var(--f-danger) / 0.1);">
           <span class="material-symbols-rounded text-[20px]" style="color: rgb(var(--f-danger));">warning</span>
         </div>
       </div>
@@ -149,7 +149,7 @@
     <div class="dash-card p-5 h-32 flex flex-col justify-between">
       <div class="flex justify-between items-start">
         <div>
-          <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: #9a978f;">
+          <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: rgb(var(--c-500));">
             Projetos Ativos
           </p>
           @if (widgetData()['ACTIVE_PROJECTS'] !== undefined) {
@@ -159,7 +159,7 @@
             <div class="ag-skeleton h-9 w-10 mt-2 rounded-xl"></div>
           }
         </div>
-        <div class="stat-icon" style="background: rgba(35,34,32,0.1);">
+        <div class="stat-icon" style="background: rgb(var(--c-border) / 0.1);">
           <span class="material-symbols-rounded text-[20px]" style="color: rgb(var(--c-text));">folder_open</span>
         </div>
       </div>
@@ -169,7 +169,7 @@
     <div class="dash-card p-5 h-32 flex flex-col justify-between">
       <div class="flex justify-between items-start">
         <div>
-          <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: #9a978f;">
+          <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: rgb(var(--c-500));">
             Produtividade
           </p>
           <div class="flex items-baseline gap-2 mt-1">
@@ -177,14 +177,14 @@
                 style="color: rgb(var(--c-text));">{{ widgetData()['COMPLETED_TASKS'] ?? '—' }}</h3>
             @if ((widgetData()['COMPLETED_TASKS'] ?? 0) > 0) {
               <span class="text-[11px] font-semibold flex items-center gap-0.5 px-2 py-0.5 rounded-full"
-                    style="background: rgba(124,217,146,0.1); color: rgb(var(--f-success));">
+                    style="background: rgb(var(--f-success) / 0.1); color: rgb(var(--f-success));">
                 <span class="material-symbols-rounded" style="font-size:13px;">trending_up</span>
                 concluídas
               </span>
             }
           </div>
         </div>
-        <div class="stat-icon" style="background: rgba(35,34,32,0.1);">
+        <div class="stat-icon" style="background: rgb(var(--c-border) / 0.1);">
           <span class="material-symbols-rounded text-[20px]" style="color: rgb(var(--c-text));">monitoring</span>
         </div>
       </div>
@@ -213,15 +213,15 @@
                      [style.height.%]="getBarHeight(item.count)"
                      [title]="item.count + ' tarefas'">
                 </div>
-                <span class="text-[10px] font-medium" style="color: #9a978f;">
+                <span class="text-[10px] font-medium" style="color: rgb(var(--c-500));">
                   {{ formatShortDate(item.date) }}
                 </span>
               </div>
             }
           </div>
           <!-- Axis line -->
-          <div class="h-px mt-1 mb-3" style="background: rgba(35,34,32,0.3);"></div>
-          <p class="text-[12px] text-center" style="color: #9a978f;">
+          <div class="h-px mt-1 mb-3" style="background: rgb(var(--c-border) / 0.3);"></div>
+          <p class="text-[12px] text-center" style="color: rgb(var(--c-500));">
             Total: <strong style="color: rgb(var(--c-text));">{{ totalProductivity() }}</strong> tarefas concluídas
           </p>
         </div>
@@ -229,9 +229,9 @@
         <div class="flex-1 ag-skeleton rounded-xl"></div>
       } @else {
         <div class="flex-1 rounded-xl flex flex-col items-center justify-center"
-             style="background: rgba(35,34,32,0.04); border: 1px dashed rgba(35,34,32,0.5);">
+             style="background: rgb(var(--c-border) / 0.04); border: 1px dashed rgb(var(--c-border) / 0.5);">
           <span class="material-symbols-rounded text-[32px]" style="color: rgb(var(--c-500)); opacity: 0.6;">show_chart</span>
-          <p class="text-[14px] mt-2" style="color: #9a978f;">Área do Gráfico de Linha</p>
+          <p class="text-[14px] mt-2" style="color: rgb(var(--c-500));">Área do Gráfico de Linha</p>
         </div>
       }
     </div>
@@ -249,18 +249,18 @@
         } @else if (!stats()?.recentActivities?.length) {
           <div class="text-center py-8">
             <span class="material-symbols-rounded text-[32px]" style="color: rgb(var(--c-500));">history</span>
-            <p class="text-[13px] mt-2" style="color: #9a978f;">Nenhuma atividade</p>
+            <p class="text-[13px] mt-2" style="color: rgb(var(--c-500));">Nenhuma atividade</p>
           </div>
         } @else {
           @for (activity of stats()?.recentActivities?.slice(0, 6); track activity.id; let last = $last) {
             <div class="flex gap-3 group relative">
               <!-- Timeline line -->
               @if (!last) {
-                <div class="absolute left-4 top-8 bottom-0 w-0.5" style="background: rgba(35,34,32,0.1);"></div>
+                <div class="absolute left-4 top-8 bottom-0 w-0.5" style="background: rgb(var(--c-border) / 0.1);"></div>
               }
               <!-- Icon -->
               <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10"
-                   style="background: rgba(35,34,32,0.1);">
+                   style="background: rgb(var(--c-border) / 0.1);">
                 <span class="material-symbols-rounded text-[15px]" style="color: rgb(var(--c-text));">
                   {{ activity.action === 'task_created' ? 'add_task' :
                      activity.action === 'status_changed' ? 'swap_horiz' :
@@ -272,7 +272,7 @@
                   <strong>{{ activity.user.name.split(' ')[0] }}</strong>
                   {{ getActivityLabel(activity.action) }}
                 </p>
-                <p class="text-[11px] mt-1" style="color: #9a978f;">
+                <p class="text-[11px] mt-1" style="color: rgb(var(--c-500));">
                   {{ timeAgo(activity.createdAt) }}
                 </p>
               </div>
@@ -360,7 +360,7 @@
         }
       </div>
     } @else if (teamWorkload().length === 0) {
-      <p class="text-[13px] text-center py-6" style="color: #9a978f;">
+      <p class="text-[13px] text-center py-6" style="color: rgb(var(--c-500));">
         Nenhum membro com tarefas atribuídas
       </p>
     } @else {
@@ -368,17 +368,17 @@
         @for (member of teamWorkload().slice(0, 6); track member.id) {
           <div class="flex items-center gap-4 p-4 rounded-2xl transition-colors"
                style="cursor: default;"
-               onmouseenter="this.style.background='rgba(35,34,32,0.04)'"
+               onmouseenter="this.style.background='rgb(var(--c-border) / 0.04)'"
                onmouseleave="this.style.background='transparent'">
             <!-- Avatar -->
             <div class="relative flex-shrink-0">
               @if (member.avatarUrl) {
                 <img [src]="member.avatarUrl" [alt]="member.name"
                      class="w-12 h-12 rounded-full object-cover"
-                     style="border: 1px solid rgba(35,34,32,0.3);">
+                     style="border: 1px solid rgb(var(--c-border) / 0.3);">
               } @else {
                 <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-[15px]"
-                     style="background: rgba(35,34,32,0.1); color: rgb(var(--c-text)); border: 1px solid rgba(35,34,32,0.3);">
+                     style="background: rgb(var(--c-border) / 0.1); color: rgb(var(--c-text)); border: 1px solid rgb(var(--c-border) / 0.3);">
                   {{ member.name.charAt(0) }}
                 </div>
               }
@@ -427,12 +427,12 @@
           <div cdkDrag [class]="getWidgetClass(widget)" class="cursor-grab">
             <div *cdkDragPlaceholder
                  class="rounded-2xl border-2 border-dashed h-24"
-                 style="border-color: rgba(35,34,32,0.2); background: rgba(35,34,32,0.03);"
+                 style="border-color: rgb(var(--c-border) / 0.2); background: rgb(var(--c-border) / 0.03);"
                  [class]="getWidgetClass(widget)"></div>
             <div class="dash-card p-4 flex items-center justify-between"
-                 style="ring: 2px solid rgba(35,34,32,0.2);">
+                 style="ring: 2px solid rgb(var(--c-border) / 0.2);">
               <div class="flex items-center gap-2">
-                <span class="material-symbols-rounded text-base" cdkDragHandle style="color: #9a978f;">
+                <span class="material-symbols-rounded text-base" cdkDragHandle style="color: rgb(var(--c-500));">
                   drag_indicator
                 </span>
                 <span class="text-[12px] font-semibold uppercase tracking-wide" style="color: rgb(var(--c-700));">
@@ -451,14 +451,14 @@
         @for (w of inactiveWidgets(); track w.widgetType) {
           <div class="col-span-1 rounded-2xl border-2 border-dashed p-4 flex flex-col items-center
                        justify-center gap-2 cursor-pointer transition-all group"
-               style="border-color: rgba(35,34,32,0.4);"
-               onmouseenter="this.style.borderColor='rgba(35,34,32,0.3)'"
-               onmouseleave="this.style.borderColor='rgba(35,34,32,0.4)'"
+               style="border-color: rgb(var(--c-border) / 0.4);"
+               onmouseenter="this.style.borderColor='rgb(var(--c-border) / 0.3)'"
+               onmouseleave="this.style.borderColor='rgb(var(--c-border) / 0.4)'"
                (click)="toggleWidgetActive(w)">
             <span class="material-symbols-rounded text-[28px]" style="color: rgb(var(--c-500));">
               {{ WIDGET_CONFIG[w.widgetType].icon }}
             </span>
-            <p class="text-[11px] font-medium" style="color: #9a978f;">
+            <p class="text-[11px] font-medium" style="color: rgb(var(--c-500));">
               + {{ WIDGET_CONFIG[w.widgetType].label }}
             </p>
           </div>

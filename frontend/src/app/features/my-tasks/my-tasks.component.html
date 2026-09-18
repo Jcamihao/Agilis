@@ -13,7 +13,7 @@
   </div>
 
   <!-- Filter Bar -->
-  <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.08)] shadow-sm p-2 flex flex-col sm:flex-row gap-3 items-center">
+  <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)] shadow-sm p-2 flex flex-col sm:flex-row gap-3 items-center">
     <div class="flex-1 w-full relative">
       <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
       <input type="text" placeholder="Filtrar tarefas por nome..."
@@ -147,7 +147,7 @@
   } @else {
     <div class="flex flex-col gap-1.5">
       <!-- Table header -->
-      <div class="hidden md:grid grid-cols-[32px_3fr_1.5fr_1fr_1.5fr_1fr_40px] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[--text-tertiary] border-b border-[rgba(35,34,32,0.07)]">
+      <div class="hidden md:grid grid-cols-[32px_3fr_1.5fr_1fr_1.5fr_1fr_40px] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[--text-tertiary] border-b border-[rgb(var(--c-border) / 0.07)]">
         <div class="flex items-center justify-center">
           <span class="material-symbols-rounded text-lg opacity-40">check_box_outline_blank</span>
         </div>
@@ -161,7 +161,7 @@
 
       <!-- Rows -->
       @for (task of filteredTasks(); track task.id) {
-        <div class="bg-[rgb(var(--c-surface))] border border-[rgba(35,34,32,0.07)] rounded-xl hover:bg-slate-50 transition-colors group
+        <div class="bg-[rgb(var(--c-surface))] border border-[rgb(var(--c-border) / 0.07)] rounded-xl hover:bg-slate-50 transition-colors group
                     grid grid-cols-[32px_1fr] md:grid-cols-[32px_3fr_1.5fr_1fr_1.5fr_1fr_40px] gap-4 items-center px-4 py-3 min-h-[64px]"
              [class.opacity-60]="task.status === 'DONE'">
 
@@ -268,7 +268,7 @@
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div (click)="$event.stopPropagation()"
          class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgb(var(--c-border) / 0.07)]">
         <h2 class="text-lg font-bold text-[--text-primary]">Nova Tarefa</h2>
         <button (click)="showCreateModal.set(false)" class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
           <span class="material-symbols-rounded">close</span>

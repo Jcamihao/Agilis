@@ -123,7 +123,7 @@
     @if (selectedRule() && showExecutions()) {
       <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
         <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl animate-scale-in">
-          <div class="flex items-center justify-between p-5 border-b border-b-[rgba(35,34,32,0.07)]">
+          <div class="flex items-center justify-between p-5 border-b border-b-[rgb(var(--c-border) / 0.07)]">
             <div>
               <h2 class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">Histórico de Execuções</h2>
               <p class="text-sm text-[--text-secondary]">{{ selectedRule()!.name }}</p>
@@ -145,7 +145,7 @@
             } @else {
               <div class="space-y-2">
                 @for (ex of executions(); track ex.id) {
-                  <div class="flex items-start gap-3 p-3 rounded-xl border border-[rgba(35,34,32,0.08)]">
+                  <div class="flex items-start gap-3 p-3 rounded-xl border border-[rgb(var(--c-border) / 0.08)]">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                          [class.bg-emerald-50]="ex.status === 'SUCCESS'"
                          [class.bg-red-50]="ex.status === 'FAILED'"
@@ -191,7 +191,7 @@
       <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 overflow-y-auto animate-fade-in">
         <div class="min-h-screen flex items-start justify-center p-4 py-8">
           <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in">
-            <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
+            <div class="flex items-center justify-between p-6 border-b border-b-[rgb(var(--c-border) / 0.07)]">
               <h2 class="text-[15px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em;">
                 {{ editingRule() ? 'Editar Regra' : 'Nova Regra de Automação' }}
               </h2>
@@ -227,7 +227,7 @@
               </div>
 
               <!-- Conditions -->
-              <div class="bg-slate-50 border border-[rgba(35,34,32,0.08)] rounded-xl p-4">
+              <div class="bg-slate-50 border border-[rgb(var(--c-border) / 0.08)] rounded-xl p-4">
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center gap-2">
                     <span class="material-symbols-rounded text-[--text-secondary] text-lg">filter_alt</span>

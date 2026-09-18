@@ -82,7 +82,7 @@
 }
 .gs-avatar {
   width: 28px; height: 28px; border-radius: 50%;
-  background: #4648d4; color: #fff;
+  background: rgb(var(--p-200)); color: rgb(var(--c-text));
   font-size: 12px; font-weight: 700;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }

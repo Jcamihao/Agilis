@@ -99,7 +99,7 @@
           <div class="sp-lane__header">
             <div class="sp-lane__title-area">
               @if (!lane.sprint) {
-                <span class="material-symbols-rounded text-[20px]" style="color:#64748b">inbox</span>
+                <span class="material-symbols-rounded text-[20px]" style="color:rgb(var(--c-600))">inbox</span>
                 <h3 class="sp-lane__title">Backlog do Produto</h3>
                 <span class="sp-count">{{ lane.tasks.length }}</span>
               } @else {
@@ -220,7 +220,7 @@
 
             @if (lane.tasks.length === 0) {
               <div class="sp-empty-lane">
-                <span class="material-symbols-rounded text-[28px]" style="color:#1e293b">drag_indicator</span>
+                <span class="material-symbols-rounded text-[28px]" style="color:rgb(var(--c-800))">drag_indicator</span>
                 <p>Arraste tarefas aqui</p>
               </div>
             }

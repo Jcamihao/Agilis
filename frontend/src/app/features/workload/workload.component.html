@@ -50,12 +50,12 @@
       <!-- Summary skeletons -->
       <div class="grid grid-cols-4 gap-4">
         @for (_ of [1,2,3,4]; track $index) {
-          <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.07)] h-20 ag-skeleton"></div>
+          <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.07)] h-20 ag-skeleton"></div>
         }
       </div>
       <!-- Member skeletons -->
       @for (_ of [1,2,3]; track $index) {
-        <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.07)] h-28 ag-skeleton"></div>
+        <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.07)] h-28 ag-skeleton"></div>
       }
     </div>
   } @else if (overview()) {
@@ -68,7 +68,7 @@
         { label: 'Sobrecarregados', value: overview()!.overloaded,     icon: 'warning',       color: '#ef4444' },
         { label: 'Capacidade Média',value: overview()!.avgCapacity + '%', icon: 'speed',      color: '#f59e0b' }
       ]; track card.label) {
-        <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.07)] shadow-sm p-4 flex items-center gap-3">
+        <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.07)] shadow-sm p-4 flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             [style.background]="card.color + '18'">
             <span class="material-symbols-rounded text-xl" [style.color]="card.color">{{ card.icon }}</span>
@@ -83,7 +83,7 @@
 
     <!-- ── Heatmap grid ── -->
     @if (members().length && dayHeaders().length) {
-      <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.07)] shadow-sm overflow-hidden">
+      <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.07)] shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-50 flex items-center justify-between">
           <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
             <span class="material-symbols-rounded text-base text-slate-400">calendar_view_week</span>
@@ -171,7 +171,7 @@
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         @for (m of members(); track m.user.id) {
-          <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.07)] shadow-sm p-4"
+          <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.07)] shadow-sm p-4"
             [style.border-left]="'3px solid ' + statusConfig(m.status).barColor">
 
             <!-- Top row -->
@@ -211,8 +211,8 @@
             <div class="grid grid-cols-3 gap-2 text-center">
               @for (stat of [
                 { label: 'Abertas',   value: m.total,      icon: 'assignment', color: '#6366f1' },
-                { label: 'Atrasadas', value: m.overdue,    icon: 'warning',    color: m.overdue > 0 ? '#ef4444' : '#94a3b8' },
-                { label: 'Vence em 7d', value: m.dueSoon,  icon: 'schedule',   color: m.dueSoon > 0 ? '#f59e0b' : '#94a3b8' }
+                { label: 'Atrasadas', value: m.overdue,    icon: 'warning',    color: m.overdue > 0 ? '#ef4444' : 'rgb(var(--c-500))' },
+                { label: 'Vence em 7d', value: m.dueSoon,  icon: 'schedule',   color: m.dueSoon > 0 ? '#f59e0b' : 'rgb(var(--c-500))' }
               ]; track stat.label) {
                 <div class="bg-slate-50 rounded-lg p-2">
                   <span class="material-symbols-rounded text-sm block mb-0.5" [style.color]="stat.color">

@@ -144,12 +144,12 @@
   right: 0;
   top: calc(100% + 4px);
   z-index: 50;
-  background: #1e2436;
+  background: rgb(var(--c-surface-2));
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 4px;
   min-width: 160px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 24px rgb(var(--c-950) / 0.15);
 
   &__item {
     display: flex;

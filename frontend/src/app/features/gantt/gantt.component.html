@@ -17,7 +17,7 @@
 
     <div class="flex items-center gap-3">
       <!-- View toggle -->
-      <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgba(35,34,32,0.08)] rounded-xl overflow-hidden shadow-sm">
+      <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgb(var(--c-border) / 0.08)] rounded-xl overflow-hidden shadow-sm">
         <a [routerLink]="['/projects', id, 'kanban']"
           class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
           <span class="material-symbols-rounded text-base">view_kanban</span>
@@ -73,7 +73,7 @@
     </div>
 
     <!-- Zoom -->
-    <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgba(35,34,32,0.08)] rounded-lg overflow-hidden">
+    <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgb(var(--c-border) / 0.08)] rounded-lg overflow-hidden">
       @for (z of ([['week','Semana'],['month','Mês'],['quarter','Trimestre']]); track z[0]) {
         <button
           (click)="setZoom($any(z[0]))"
@@ -114,9 +114,9 @@
 
   <!-- ═══════ GANTT ═══════ -->
   @if (loading()) {
-    <div class="flex-1 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.07)] ag-skeleton"></div>
+    <div class="flex-1 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.07)] ag-skeleton"></div>
   } @else if (filteredTasks().length === 0) {
-    <div class="flex-1 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgba(35,34,32,0.07)] flex flex-col items-center justify-center">
+    <div class="flex-1 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.07)] flex flex-col items-center justify-center">
       <span class="material-symbols-rounded text-4xl text-slate-200 mb-3">account_tree</span>
       <p class="text-[--text-secondary] font-medium">Nenhuma tarefa encontrada</p>
       <p class="text-sm text-[--text-tertiary] mt-1">Adicione datas às tarefas para vê-las no Gantt</p>
