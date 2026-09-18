@@ -10,7 +10,7 @@
       <p class="text-sm text-[--text-secondary] mt-0.5">Riscos, gargalos e recomendações gerados automaticamente</p>
     </div>
     <button (click)="generate()" [disabled]="generating() || loading()"
-      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
+      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-black text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
       <span class="material-symbols-rounded text-base" [class.animate-spin]="generating()">
         {{ generating() ? 'refresh' : 'auto_awesome' }}
       </span>
@@ -24,14 +24,14 @@
       <button (click)="filterType.set(f.key)"
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
         [class.bg-primary-600]="filterType() === f.key"
-        [class.text-white]="filterType() === f.key"
+        [class.text-black]="filterType() === f.key"
         [class.text-slate-500]="filterType() !== f.key"
         [class.hover:bg-slate-50]="filterType() !== f.key">
         <span class="material-symbols-rounded text-sm">{{ f.icon }}</span>
         {{ f.label }}
         @if (f.key !== 'ALL') {
           <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-            [class.bg-white/20]="filterType() === f.key"
+            [class.bg-black/10]="filterType() === f.key"
             [class.bg-slate-100]="filterType() !== f.key">
             {{ countByType(f.key) }}
           </span>

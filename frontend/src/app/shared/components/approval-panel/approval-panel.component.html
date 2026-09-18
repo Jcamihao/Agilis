@@ -59,7 +59,7 @@
             </div>
 
             <button (click)="request()" [disabled]="saving()"
-              class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-bold hover:bg-primary-700 transition-colors disabled:opacity-50">
+              class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-600 text-black text-xs font-bold hover:bg-primary-700 transition-colors disabled:opacity-50">
               <span class="material-symbols-rounded text-sm" [class.animate-spin]="saving()">
                 {{ saving() ? 'refresh' : 'send' }}
               </span>

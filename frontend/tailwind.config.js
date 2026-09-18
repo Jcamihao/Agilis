@@ -1,3 +1,29 @@
+const defaultColors = require('tailwindcss/colors');
+
+// Reverses a Tailwind hue's shade axis (50<->950, 100<->900, …, 500 fixed).
+// Light-mode usage in this codebase is: bg-{hue}-50/100 for a pale badge
+// background, text-{hue}-600/700 for readable saturated text, border-{hue}-200
+// for a subtle divider. Reversing the axis makes bg-{hue}-50 resolve to the
+// hue's near-black 950 tone (a dark tinted chip) and text-{hue}-600 resolve to
+// the hue's light 400 tone (bright enough to read on black) — same shade
+// tokens, correct dark-mode roles, zero per-file template changes needed.
+const SHADE_PAIRS = [[50, 950], [100, 900], [200, 800], [300, 700], [400, 600], [500, 500]];
+function invertHue(name) {
+  const scale = defaultColors[name];
+  if (!scale) return undefined;
+  const out = {};
+  for (const [a, b] of SHADE_PAIRS) {
+    out[a] = scale[b];
+    out[b] = scale[a];
+  }
+  return out;
+}
+const invertedHues = Object.fromEntries(
+  ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky',
+   'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
+    .map((name) => [name, invertHue(name)]),
+);
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{html,ts,scss}'],
@@ -5,6 +31,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        ...invertedHues,
         // ── Swiss Vanguard Studio — monochrome system ──────────────────────
         // `slate` / `gray` are remapped project-wide so that raw Tailwind
         // utility classes (text-slate-600, bg-gray-50, …) already used across

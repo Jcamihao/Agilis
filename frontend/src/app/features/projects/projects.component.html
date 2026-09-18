@@ -41,7 +41,7 @@
       <button (click)="setCompanyFilter('all')"
               class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
               [class.bg-slate-900]="companyFilter() === 'all'"
-              [class.text-white]="companyFilter() === 'all'"
+              [class.text-black]="companyFilter() === 'all'"
               [class.border-slate-900]="companyFilter() === 'all'"
               [class.bg-[#0a0a0a]]="companyFilter() !== 'all'"
               [class.text-[--text-secondary]]="companyFilter() !== 'all'"

@@ -10,7 +10,7 @@
       <p class="text-sm text-[--text-secondary] mt-0.5">Objetivos e resultados-chave da empresa</p>
     </div>
     <button (click)="openCreateObjective()"
-      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm">
+      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-black text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm">
       <span class="material-symbols-rounded text-base">add</span>
       Novo Objetivo
     </button>
@@ -50,7 +50,7 @@
       <p class="font-semibold text-[--text-secondary]">Nenhum objetivo cadastrado</p>
       <p class="text-sm text-[--text-tertiary] mt-1 mb-4">Defina metas estratégicas para a sua empresa</p>
       <button (click)="openCreateObjective()"
-        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors">
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-black text-sm font-semibold hover:bg-primary-700 transition-colors">
         <span class="material-symbols-rounded text-base">add</span> Criar Objetivo
       </button>
     </div>
@@ -103,7 +103,7 @@
             </div>
 
             <!-- Owner avatar -->
-            <div class="w-7 h-7 rounded-full bg-primary-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden"
+            <div class="w-7 h-7 rounded-full bg-primary-600 flex items-center justify-center text-black text-[10px] font-bold flex-shrink-0 overflow-hidden"
               [title]="obj.owner.name">
               @if (obj.owner.avatarUrl) {
                 <img [src]="obj.owner.avatarUrl" class="w-full h-full object-cover" />
@@ -236,7 +236,7 @@
             Cancelar
           </button>
           <button type="submit" [disabled]="objForm.invalid || saving()"
-            class="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50">
+            class="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-black text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50">
             {{ saving() ? 'Salvando…' : 'Criar Objetivo' }}
           </button>
         </div>
@@ -282,7 +282,7 @@
             Cancelar
           </button>
           <button type="submit" [disabled]="krForm.invalid || saving()"
-            class="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50">
+            class="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-black text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50">
             {{ saving() ? 'Salvando…' : 'Criar KR' }}
           </button>
         </div>
@@ -307,7 +307,7 @@
             Cancelar
           </button>
           <button type="submit" [disabled]="krUpdateForm.invalid || saving()"
-            class="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50">
+            class="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-black text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50">
             {{ saving() ? 'Salvando…' : 'Salvar' }}
           </button>
         </div>
