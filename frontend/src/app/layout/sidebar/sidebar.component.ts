@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, inject, signal, ChangeDetection
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 interface NavItem {
   label: string;
@@ -29,6 +30,7 @@ export class SidebarComponent {
   @Output() toggleCollapse = new EventEmitter<void>();
 
   private readonly auth = inject(AuthService);
+  readonly themeSvc = inject(ThemeService);
   readonly user = this.auth.user;
   readonly companyName = () => this.user()?.companies?.[0]?.company?.name;
 

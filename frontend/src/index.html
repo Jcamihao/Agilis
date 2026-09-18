@@ -6,7 +6,7 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Agilis - Plataforma moderna de gestão operacional para equipes">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#e8e6e1">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,10 +15,13 @@
   <style>
     * { -webkit-font-smoothing: antialiased; }
     :root { font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; }
-    html, body { background: #000000; }
+    /* Pre-hydration canvas colors — kept in sync with the --c-canvas token in
+       main.scss for both themes, so there's no flash before Angular boots. */
+    html, body { background: #e8e6e1; }
+    html[data-theme="dark"], html[data-theme="dark"] body { background: #000000; }
   </style>
 </head>
-<body class="bg-black">
+<body>
   <ag-root></ag-root>
 </body>
 </html>

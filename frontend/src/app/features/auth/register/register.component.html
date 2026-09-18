@@ -4,16 +4,16 @@
   <div class="flex flex-col gap-2 text-center">
     @switch (currentStep()) {
       @case (1) {
-        <h2 class="text-[32px] font-medium leading-[1.2] tracking-[-0.02em] text-white">Criar nova conta</h2>
-        <p class="text-[14px] leading-[1.5]" style="color:#737373;">Junte-se ao Agilis e eleve a gestão da sua equipe.</p>
+        <h2 class="text-[32px] font-medium leading-[1.2] tracking-[-0.02em]" style="color: rgb(var(--c-text));">Criar nova conta</h2>
+        <p class="text-[14px] leading-[1.5]" style="color: rgb(var(--c-500));">Junte-se ao Agilis e eleve a gestão da sua equipe.</p>
       }
       @case (2) {
-        <h2 class="text-[32px] font-medium leading-[1.2] tracking-[-0.02em] text-white">Seus dados</h2>
-        <p class="text-[14px] leading-[1.5]" style="color:#737373;">Preencha suas informações de contato e endereço.</p>
+        <h2 class="text-[32px] font-medium leading-[1.2] tracking-[-0.02em]" style="color: rgb(var(--c-text));">Seus dados</h2>
+        <p class="text-[14px] leading-[1.5]" style="color: rgb(var(--c-500));">Preencha suas informações de contato e endereço.</p>
       }
       @case (3) {
-        <h2 class="text-[32px] font-medium leading-[1.2] tracking-[-0.02em] text-white">Quase lá!</h2>
-        <p class="text-[14px] leading-[1.5]" style="color:#737373;">Informe o nome da sua empresa para finalizar.</p>
+        <h2 class="text-[32px] font-medium leading-[1.2] tracking-[-0.02em]" style="color: rgb(var(--c-text));">Quase lá!</h2>
+        <p class="text-[14px] leading-[1.5]" style="color: rgb(var(--c-500));">Informe o nome da sua empresa para finalizar.</p>
       }
     }
   </div>
@@ -23,9 +23,9 @@
     @for (step of [1,2,3]; track step; let last = $last) {
       <div class="flex items-center gap-1.5">
         <div class="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-medium transition-all border"
-             [style.background]="currentStep() >= step ? '#ffffff' : 'transparent'"
-             [style.border-color]="currentStep() >= step ? '#ffffff' : 'rgba(255,255,255,0.25)'"
-             [style.color]="currentStep() >= step ? '#000000' : '#737373'">
+             [style.background]="currentStep() >= step ? 'rgb(var(--p-600))' : 'transparent'"
+             [style.border-color]="currentStep() >= step ? 'rgb(var(--p-600))' : 'rgb(var(--c-border) / 0.25)'"
+             [style.color]="currentStep() >= step ? 'rgb(var(--on-primary))' : 'rgb(var(--c-500))'">
           @if (currentStep() > step) {
             <span class="material-symbols-rounded" style="font-size:14px">check</span>
           } @else {
@@ -33,19 +33,19 @@
           }
         </div>
         <span class="text-[11px] font-medium transition-colors"
-              [style.color]="currentStep() >= step ? '#ffffff' : '#737373'">
+              [style.color]="currentStep() >= step ? 'rgb(var(--c-text))' : 'rgb(var(--c-500))'">
           {{ step === 1 ? 'Conta' : step === 2 ? 'Dados' : 'Empresa' }}
         </span>
       </div>
       @if (!last) {
-        <div class="w-6 h-px mx-1" style="background:rgba(255,255,255,0.2);"></div>
+        <div class="w-6 h-px mx-1" style="background: rgb(var(--c-border) / 0.2);"></div>
       }
     }
   </div>
 
   <!-- Form Card -->
   <div class="p-6"
-       style="background:#0a0a0a; border:1px solid rgba(255,255,255,0.12);">
+       style="background: rgb(var(--c-surface)); border: 1px solid rgb(var(--c-border) / 0.12);">
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
 
       <!-- ── Step 1: Conta ── -->
@@ -53,35 +53,35 @@
         <div class="flex flex-col gap-4 animate-fade-in">
 
           <div class="flex flex-col gap-1">
-            <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">Nome Completo</label>
+            <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">Nome Completo</label>
             <input type="text" formControlName="name" placeholder="Seu nome completo" class="auth-input"
                    [class.auth-input--error]="invalid('name')">
             @if (invalid('name')) {
-              <p class="text-[12px] mt-0.5" style="color:#ffb4ab;">Nome obrigatório (mín. 2 caracteres)</p>
+              <p class="text-[12px] mt-0.5" style="color: rgb(var(--f-danger));">Nome obrigatório (mín. 2 caracteres)</p>
             }
           </div>
 
           <div class="flex flex-col gap-1">
-            <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">Email Corporativo</label>
+            <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">Email Corporativo</label>
             <input type="email" formControlName="email" placeholder="voce@empresa.com" class="auth-input"
                    [class.auth-input--error]="invalid('email')">
             @if (invalid('email')) {
-              <p class="text-[12px] mt-0.5" style="color:#ffb4ab;">Email inválido</p>
+              <p class="text-[12px] mt-0.5" style="color: rgb(var(--f-danger));">Email inválido</p>
             }
           </div>
 
           <div class="flex flex-col gap-1">
-            <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">Senha</label>
+            <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">Senha</label>
             <input type="password" formControlName="password" placeholder="Mínimo 6 caracteres" class="auth-input"
                    [class.auth-input--error]="invalid('password')">
             @if (invalid('password')) {
-              <p class="text-[12px] mt-0.5" style="color:#ffb4ab;">Mínimo 6 caracteres</p>
+              <p class="text-[12px] mt-0.5" style="color: rgb(var(--f-danger));">Mínimo 6 caracteres</p>
             }
           </div>
 
           <button type="button" (click)="goToStep(2)"
                   class="mt-1 w-full h-11 text-[13px] font-medium transition-all flex items-center justify-center gap-2"
-                  style="background:#ffffff; color:#000000; border-radius:9999px;">
+                  style="background: rgb(var(--p-600)); color: rgb(var(--on-primary)); border-radius:9999px;">
             Continuar
             <span class="material-symbols-rounded text-lg">arrow_forward</span>
           </button>
@@ -95,16 +95,16 @@
           <!-- CPF / CNPJ + Telefone -->
           <div class="grid grid-cols-2 gap-3">
             <div class="flex flex-col gap-1">
-              <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">
-                CPF / CNPJ <span style="color:#5d5f5f;">(opcional)</span>
+              <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">
+                CPF / CNPJ <span style="color: rgb(var(--c-500));">(opcional)</span>
               </label>
               <input type="text" formControlName="cpfCnpj" placeholder="000.000.000-00"
                      class="auth-input" maxlength="18"
                      (input)="onCpfCnpjInput($event)">
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">
-                Telefone <span style="color:#5d5f5f;">(opcional)</span>
+              <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">
+                Telefone <span style="color: rgb(var(--c-500));">(opcional)</span>
               </label>
               <input type="text" formControlName="phone" placeholder="(00) 00000-0000"
                      class="auth-input" maxlength="15"
@@ -114,31 +114,32 @@
 
           <!-- CEP -->
           <div class="flex flex-col gap-1">
-            <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">
-              CEP <span style="color:#5d5f5f;">(opcional)</span>
+            <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">
+              CEP <span style="color: rgb(var(--c-500));">(opcional)</span>
             </label>
             <div class="relative">
               <input type="text" formControlName="cep" placeholder="00000-000"
                      class="auth-input pr-8" maxlength="9"
                      (input)="onCepInput($event)">
               @if (lookingUpCep()) {
-                <div class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 rounded-full animate-spin"
+                     style="border-color: rgb(var(--c-border) / 0.2); border-top-color: rgb(var(--c-text));"></div>
               }
             </div>
             @if (cepError()) {
-              <p class="text-[12px] mt-0.5" style="color:#ffb4ab;">{{ cepError() }}</p>
+              <p class="text-[12px] mt-0.5" style="color: rgb(var(--f-danger));">{{ cepError() }}</p>
             }
           </div>
 
           <!-- UF + Endereço -->
           <div class="grid grid-cols-[80px_1fr] gap-3">
             <div class="flex flex-col gap-1">
-              <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">UF</label>
+              <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">UF</label>
               <input type="text" formControlName="uf" placeholder="SP" maxlength="2"
                      class="auth-input uppercase">
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">Endereço</label>
+              <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">Endereço</label>
               <input type="text" formControlName="address" placeholder="Rua, Av..." class="auth-input">
             </div>
           </div>
@@ -146,12 +147,12 @@
           <!-- Número + Complemento -->
           <div class="grid grid-cols-[120px_1fr] gap-3">
             <div class="flex flex-col gap-1">
-              <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">Número</label>
+              <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">Número</label>
               <input type="text" formControlName="addressNumber" placeholder="123" class="auth-input">
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">
-                Complemento <span style="color:#5d5f5f;">(opcional)</span>
+              <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">
+                Complemento <span style="color: rgb(var(--c-500));">(opcional)</span>
               </label>
               <input type="text" formControlName="addressComplement" placeholder="Apto, Sala..." class="auth-input">
             </div>
@@ -160,13 +161,13 @@
           <div class="flex gap-3 mt-1">
             <button type="button" (click)="goToStep(1)"
                     class="flex-1 h-11 text-[13px] font-medium transition-all flex items-center justify-center gap-1.5"
-                    style="color:#ffffff; background:transparent; border:1px solid rgba(255,255,255,0.25); border-radius:9999px;">
+                    style="color: rgb(var(--c-text)); background:transparent; border:1px solid rgb(var(--c-border) / 0.25); border-radius:9999px;">
               <span class="material-symbols-rounded text-base">arrow_back</span>
               Voltar
             </button>
             <button type="button" (click)="goToStep(3)"
                     class="flex-1 h-11 text-[13px] font-medium transition-all flex items-center justify-center gap-2"
-                    style="background:#ffffff; color:#000000; border-radius:9999px;">
+                    style="background: rgb(var(--p-600)); color: rgb(var(--on-primary)); border-radius:9999px;">
               Continuar
               <span class="material-symbols-rounded text-lg">arrow_forward</span>
             </button>
@@ -179,23 +180,23 @@
         <div class="flex flex-col gap-4 animate-fade-in">
 
           <div class="flex flex-col gap-1">
-            <label class="text-[11px] font-medium uppercase tracking-[0.08em] text-white/50">
-              Nome da Empresa <span style="color:#5d5f5f;">(opcional)</span>
+            <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">
+              Nome da Empresa <span style="color: rgb(var(--c-500));">(opcional)</span>
             </label>
             <input type="text" formControlName="companyName" placeholder="Ex: TechNova Ltda" class="auth-input">
           </div>
 
           @if (error()) {
-            <div class="px-3 py-2.5 text-[13px] border" style="background:rgba(255,180,171,0.08); color:#ffb4ab; border-color:rgba(255,180,171,0.3);">
+            <div class="px-3 py-2.5 text-[13px] border" style="background: rgb(var(--f-danger) / 0.08); color: rgb(var(--f-danger)); border-color: rgb(var(--f-danger) / 0.3);">
               {{ error() }}
             </div>
           }
 
           <button type="submit" [disabled]="loading()"
                   class="mt-1 w-full h-11 text-[13px] font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-40"
-                  style="background:#ffffff; color:#000000; border-radius:9999px;">
+                  style="background: rgb(var(--p-600)); color: rgb(var(--on-primary)); border-radius:9999px;">
             @if (loading()) {
-              <div class="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+              <div class="w-4 h-4 border-2 rounded-full animate-spin" style="border-color: rgb(var(--on-primary) / 0.3); border-top-color: rgb(var(--on-primary));"></div>
             } @else {
               <span class="material-symbols-rounded text-lg">check</span>
             }
@@ -204,7 +205,7 @@
 
           <button type="button" (click)="goToStep(2)"
                   class="w-full h-10 text-[13px] font-medium transition-all flex items-center justify-center gap-1.5"
-                  style="color:#737373; background:transparent;">
+                  style="color: rgb(var(--c-500)); background:transparent;">
             <span class="material-symbols-rounded text-base">arrow_back</span>
             Voltar
           </button>
@@ -216,9 +217,9 @@
 
   <!-- Toggle to Login -->
   <div class="text-center">
-    <a routerLink="/auth/login" class="text-[12px] font-medium" style="color:#737373;">
+    <a routerLink="/auth/login" class="text-[12px] font-medium" style="color: rgb(var(--c-500));">
       Já possui uma conta?
-      <span class="font-medium text-white">Faça login</span>
+      <span class="font-medium" style="color: rgb(var(--c-text));">Faça login</span>
     </a>
   </div>
 

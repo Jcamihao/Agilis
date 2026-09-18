@@ -5,7 +5,7 @@
     <div class="flex items-center gap-3">
       <a
         routerLink="/projects"
-        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-white/5 hover:text-[--text-secondary] transition-colors"
+        class="p-2 rounded-lg text-[--text-tertiary] hover:bg-black/5 hover:text-[--text-secondary] transition-colors"
       >
         <span class="material-symbols-rounded text-xl">arrow_back</span>
       </a>
@@ -40,7 +40,7 @@
         </div>
       </div>
       <!-- View toggle -->
-      <div class="flex items-center bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-xl overflow-visible shadow-sm">
+      <div class="flex items-center bg-[#f5f4f0] border border-[rgba(35,34,32,0.08)] rounded-xl overflow-visible shadow-sm">
         <button class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold bg-primary-50 text-primary-600 cursor-default rounded-l-xl">
           <span class="material-symbols-rounded text-base">view_kanban</span>
           Kanban
@@ -69,7 +69,7 @@
                   [class.rotate-180]="showMoreViews()">expand_more</span>
           </button>
           @if (showMoreViews()) {
-            <div class="absolute left-0 top-full mt-1 z-50 w-44 bg-[#0a0a0a] border border-slate-100 rounded-xl shadow-xl overflow-hidden"
+            <div class="absolute left-0 top-full mt-1 z-50 w-44 bg-[#f5f4f0] border border-slate-100 rounded-xl shadow-xl overflow-hidden"
                  (click)="showMoreViews.set(false)">
               <a [routerLink]="['/projects', id, 'time-report']"
                  class="flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
@@ -123,7 +123,7 @@
         </button>
 
         @if (showActionsMenu()) {
-          <div class="absolute right-0 top-full mt-1 z-50 w-48 bg-[#0a0a0a] border border-slate-100 rounded-xl shadow-xl overflow-hidden"
+          <div class="absolute right-0 top-full mt-1 z-50 w-48 bg-[#f5f4f0] border border-slate-100 rounded-xl shadow-xl overflow-hidden"
                (click)="showActionsMenu.set(false)">
             <button (click)="openSprintModal(); showActionsMenu.set(false)"
                     class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors text-left">
@@ -146,7 +146,7 @@
 
   <!-- Filter Bar -->
   <div
-    class="flex items-center gap-3 bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.08)] p-2 mb-5 flex-shrink-0 shadow-sm"
+    class="flex items-center gap-3 bg-[#f5f4f0] rounded-xl border border-[rgba(35,34,32,0.08)] p-2 mb-5 flex-shrink-0 shadow-sm"
   >
     <div class="flex-1 relative">
       <span
@@ -270,7 +270,7 @@
                 (cdkDragStarted)="onDragStart()"
                 (cdkDragEnded)="onDragEnd()"
                 (click)="openDetailWithSubtasks(task)"
-                class="task-card bg-[#0a0a0a] rounded-xl p-4 border border-[rgba(255,255,255,0.07)] cursor-pointer select-none transition-all duration-150 group relative"
+                class="task-card bg-[#f5f4f0] rounded-xl p-4 border border-[rgba(35,34,32,0.07)] cursor-pointer select-none transition-all duration-150 group relative"
                 [class.border-primary-200]="column.key === 'IN_PROGRESS'"
                 [class.opacity-80]="column.key === 'DONE'"
               >
@@ -281,7 +281,7 @@
                          [class.border-primary-500]="isSelected(task.id)"
                          [class.bg-primary-500]="isSelected(task.id)"
                          [class.border-slate-300]="!isSelected(task.id)"
-                         [class.bg-[#0a0a0a]]="!isSelected(task.id)">
+                         [class.bg-[#f5f4f0]]="!isSelected(task.id)">
                       @if (isSelected(task.id)) {
                         <span class="material-symbols-rounded text-white" style="font-size: 13px;">check</span>
                       }
@@ -346,7 +346,7 @@
                 <!-- Assignee row -->
                 <div class="flex items-center gap-2 mb-2.5">
                   @if (task.assignee) {
-                    <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-black text-[9px] font-bold flex-shrink-0 overflow-hidden">
+                    <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 overflow-hidden">
                       @if (task.assignee.avatarUrl) {
                         <img [src]="task.assignee.avatarUrl" class="w-full h-full object-cover" />
                       } @else {
@@ -445,10 +445,10 @@
   <div
     class="fixed inset-y-0 right-0 z-50 flex w-full max-w-7xl shadow-2xl animate-slide-in-right"
   >
-    <div class="flex flex-col flex-1 bg-[#0a0a0a] overflow-hidden rounded-l-2xl">
+    <div class="flex flex-col flex-1 bg-[#f5f4f0] overflow-hidden rounded-l-2xl">
       <!-- Modal header -->
       <div
-        class="flex items-center justify-between px-6 py-4 border-b border-b-[rgba(255,255,255,0.07)] flex-shrink-0"
+        class="flex items-center justify-between px-6 py-4 border-b border-b-[rgba(35,34,32,0.07)] flex-shrink-0"
       >
         <div
           class="flex items-center gap-2 text-sm text-[--text-tertiary] min-w-0"
@@ -556,7 +556,7 @@
             }
           </div>
 
-          <div class="border-t border-[rgba(255,255,255,0.08)]"></div>
+          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
 
           <!-- Subtasks -->
           <div>
@@ -601,7 +601,7 @@
                       [class.text-slate-400]="sub.status === 'DONE'"
                     >{{ sub.title }}</span>
                     @if (sub.assignee) {
-                      <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-black text-[9px] font-bold flex-shrink-0 overflow-hidden">
+                      <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 overflow-hidden">
                         @if (sub.assignee.avatarUrl) {
                           <img [src]="sub.assignee.avatarUrl" class="w-full h-full object-cover" />
                         } @else {
@@ -679,12 +679,12 @@
             </div>
           }
 
-          <div class="border-t border-[rgba(255,255,255,0.08)]"></div>
+          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
 
           <!-- Approvals -->
           <ag-approval-panel [taskId]="detailTask()!.id" />
 
-          <div class="border-t border-[rgba(255,255,255,0.08)]"></div>
+          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
 
           <!-- Custom Fields -->
           <ag-custom-field-values
@@ -692,12 +692,12 @@
             [projectId]="detailTask()!.projectId"
             [initialValues]="detailTask()!.customFields" />
 
-          <div class="border-t border-[rgba(255,255,255,0.08)]"></div>
+          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
 
           <!-- Time Tracker -->
           <ag-time-tracker [taskId]="detailTask()!.id" />
 
-          <div class="border-t border-[rgba(255,255,255,0.08)]"></div>
+          <div class="border-t border-[rgba(35,34,32,0.08)]"></div>
 
           <!-- Comments -->
           <ag-comment-section [taskId]="detailTask()!.id" />
@@ -705,7 +705,7 @@
 
         <!-- RIGHT: sidebar -->
         <div
-          class="w-[296px] flex-shrink-0 border-l border-[rgba(255,255,255,0.08)] overflow-y-auto px-5 py-6 space-y-5 bg-[#fafafa]"
+          class="w-[296px] flex-shrink-0 border-l border-[rgba(35,34,32,0.08)] overflow-y-auto px-5 py-6 space-y-5 bg-[#fafafa]"
         >
           <!-- Status -->
           <div>
@@ -766,7 +766,7 @@
             </p>
             <button
               (click)="toggleAssigneePicker()"
-              class="w-full flex items-center gap-2.5 p-2.5 bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.08)] hover:border-primary-300 hover:bg-primary-50/30 transition-colors group text-left"
+              class="w-full flex items-center gap-2.5 p-2.5 bg-[#f5f4f0] rounded-xl border border-[rgba(35,34,32,0.08)] hover:border-primary-300 hover:bg-primary-50/30 transition-colors group text-left"
             >
               @if (detailTask()!.assignee) {
                 <div class="ag-avatar ag-avatar--md flex-shrink-0">
@@ -806,7 +806,7 @@
 
             @if (showAssigneePicker()) {
               <div
-                class="absolute left-0 right-0 top-full mt-1 bg-[#0a0a0a] rounded-xl shadow-xl border border-slate-200 z-20 overflow-hidden animate-scale-in"
+                class="absolute left-0 right-0 top-full mt-1 bg-[#f5f4f0] rounded-xl shadow-xl border border-slate-200 z-20 overflow-hidden animate-scale-in"
               >
                 <div class="p-2 border-b border-slate-100">
                   <p
@@ -883,7 +883,7 @@
               <div class="flex flex-col gap-1.5 mb-2">
                 @for (p of participantsOf(); track p.id) {
                   <div
-                    class="flex items-center gap-2 p-2 bg-[#0a0a0a] rounded-lg border border-[rgba(255,255,255,0.06)] group"
+                    class="flex items-center gap-2 p-2 bg-[#f5f4f0] rounded-lg border border-[rgba(35,34,32,0.06)] group"
                   >
                     <div class="ag-avatar ag-avatar--sm flex-shrink-0">
                       @if (p.user?.avatarUrl) {
@@ -914,7 +914,7 @@
 
             <button
               (click)="toggleParticipantPicker()"
-              class="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-[rgba(255,255,255,0.08)] text-[--text-tertiary] hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50/30 transition-colors text-sm"
+              class="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-[rgba(35,34,32,0.08)] text-[--text-tertiary] hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50/30 transition-colors text-sm"
             >
               <span class="material-symbols-rounded text-base">group_add</span>
               Adicionar participante
@@ -922,7 +922,7 @@
 
             @if (showParticipantPicker()) {
               <div
-                class="absolute left-0 right-0 top-full mt-1 bg-[#0a0a0a] rounded-xl shadow-xl border border-slate-200 z-20 overflow-hidden animate-scale-in"
+                class="absolute left-0 right-0 top-full mt-1 bg-[#f5f4f0] rounded-xl shadow-xl border border-slate-200 z-20 overflow-hidden animate-scale-in"
               >
                 <div class="p-2 border-b border-slate-100">
                   <p
@@ -984,7 +984,7 @@
               Data de Entrega
             </p>
             <div
-              class="p-3 bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.08)]"
+              class="p-3 bg-[#f5f4f0] rounded-xl border border-[rgba(35,34,32,0.08)]"
               [class.border-red-200]="
                 detailTask()!.dueDate && isOverdue(detailTask()!.dueDate!)
               "
@@ -1078,7 +1078,7 @@
               Criado em
             </p>
             <div
-              class="flex items-center gap-2 p-3 bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.08)]"
+              class="flex items-center gap-2 p-3 bg-[#f5f4f0] rounded-xl border border-[rgba(35,34,32,0.08)]"
             >
               <span
                 class="material-symbols-rounded text-base text-[--text-tertiary]"
@@ -1099,7 +1099,7 @@
                 Projeto
               </p>
               <div
-                class="flex items-center gap-2.5 p-2.5 bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.08)]"
+                class="flex items-center gap-2.5 p-2.5 bg-[#f5f4f0] rounded-xl border border-[rgba(35,34,32,0.08)]"
               >
                 <div
                   class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -1120,7 +1120,7 @@
           }
 
           <!-- Delete -->
-          <div class="pt-2 border-t border-[rgba(255,255,255,0.08)]">
+          <div class="pt-2 border-t border-[rgba(35,34,32,0.08)]">
             <button
               (click)="deleteDetailTask()"
               class="w-full ag-btn ag-btn--ghost ag-btn--sm justify-center text-red-500 hover:bg-red-50"
@@ -1143,17 +1143,17 @@
   >
     <div
       (click)="$event.stopPropagation()"
-      class="bg-[#0a0a0a] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in"
+      class="bg-[#f5f4f0] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in"
     >
       <div
-        class="flex items-center justify-between p-6 border-b border-b-[rgba(255,255,255,0.07)]"
+        class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]"
       >
         <h2 class="text-[15px] font-semibold text-[--text-primary]">
           Nova Tarefa
         </h2>
         <button
           (click)="closeModal()"
-          class="p-2 rounded-full hover:bg-white/5 transition-colors text-[--text-tertiary]"
+          class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]"
         >
           <span class="material-symbols-rounded">close</span>
         </button>
@@ -1235,7 +1235,7 @@
               <button type="button" (click)="toggleCreateAssigneePicker()"
                 class="ag-input w-full flex items-center gap-2 text-left h-[38px]">
                 @if (createAssignee()) {
-                  <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-black text-[9px] font-bold flex-shrink-0 overflow-hidden">
+                  <div class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 overflow-hidden">
                     @if (createAssignee()!.avatarUrl) {
                       <img [src]="createAssignee()!.avatarUrl" class="w-full h-full object-cover" />
                     } @else {
@@ -1252,13 +1252,13 @@
                 }
               </button>
               @if (showCreateAssigneePicker()) {
-                <div class="absolute left-0 right-0 top-full mt-1 bg-[#0a0a0a] rounded-xl shadow-xl border border-slate-200 z-30 overflow-hidden">
+                <div class="absolute left-0 right-0 top-full mt-1 bg-[#f5f4f0] rounded-xl shadow-xl border border-slate-200 z-30 overflow-hidden">
                   <div class="max-h-44 overflow-y-auto">
                     @for (m of companyMembers(); track m.id) {
                       <button type="button" (click)="setCreateAssignee(m)"
                         class="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-50 text-left"
                         [class.bg-primary-50]="createAssignee()?.id === m.id">
-                        <div class="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center text-black text-[10px] font-bold flex-shrink-0 overflow-hidden">
+                        <div class="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 overflow-hidden">
                           @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="w-full h-full object-cover" /> }
                           @else { {{ m.name.charAt(0) }} }
                         </div>
@@ -1300,7 +1300,7 @@
                 }
               </button>
               @if (showCreateParticipantPicker()) {
-                <div class="absolute left-0 right-0 top-full mt-1 bg-[#0a0a0a] rounded-xl shadow-xl border border-slate-200 z-30 overflow-hidden">
+                <div class="absolute left-0 right-0 top-full mt-1 bg-[#f5f4f0] rounded-xl shadow-xl border border-slate-200 z-30 overflow-hidden">
                   <div class="max-h-44 overflow-y-auto">
                     @for (m of createParticipantCandidates(); track m.id) {
                       <button type="button" (click)="toggleCreateParticipant(m)"
@@ -1377,15 +1377,15 @@
   <div (click)="closeSprintModal()"
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div (click)="$event.stopPropagation()"
-         class="bg-[#0a0a0a] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+         class="bg-[#f5f4f0] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
 
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(255,255,255,0.07)]">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
         <div class="flex items-center gap-2">
           <span class="material-symbols-rounded text-primary-600">sprint</span>
           <h2 class="text-[15px] font-semibold text-[--text-primary]">Nova Sprint</h2>
         </div>
         <button (click)="closeSprintModal()"
-                class="p-2 rounded-full hover:bg-white/5 transition-colors text-[--text-tertiary]">
+                class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
           <span class="material-symbols-rounded">close</span>
         </button>
       </div>
@@ -1442,7 +1442,7 @@
   <div (click)="closeConfig()"
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div (click)="$event.stopPropagation()"
-         class="bg-[#0a0a0a] rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in flex flex-col overflow-hidden"
+         class="bg-[#f5f4f0] rounded-2xl w-full max-w-2xl shadow-2xl animate-scale-in flex flex-col overflow-hidden"
          style="max-height: 88vh;">
 
       <!-- Header -->
@@ -1547,7 +1547,7 @@
                            class="ag-input py-1.5 text-sm font-medium" />
                   </div>
                   <button type="button" (click)="resetColumnLabel(col.key)"
-                          class="p-2 rounded-lg text-slate-400 hover:text-[--text-primary] hover:bg-white/5 transition-colors"
+                          class="p-2 rounded-lg text-slate-400 hover:text-[--text-primary] hover:bg-black/5 transition-colors"
                           [title]="'Restaurar padrão: ' + DEFAULT_COLUMNS[col.key]">
                     <span class="material-symbols-rounded text-lg">restart_alt</span>
                   </button>
@@ -1580,7 +1580,7 @@
                        class="ag-input pl-9" />
               </div>
               @if (addMemberSearch()) {
-                <div class="bg-[#0a0a0a] rounded-xl border border-slate-200 shadow-lg overflow-hidden max-h-40 overflow-y-auto">
+                <div class="bg-[#f5f4f0] rounded-xl border border-slate-200 shadow-lg overflow-hidden max-h-40 overflow-y-auto">
                   @if (!availableToAddProject().length) {
                     <p class="text-sm text-[--text-tertiary] text-center py-4">Nenhum membro disponível</p>
                   } @else {
@@ -1620,7 +1620,7 @@
                 @for (m of projectMembers(); track m.id) {
                   <div class="rounded-xl border transition-colors"
                        [class.border-slate-200]="openMenuMemberId() === m.userId"
-                       [class.bg-[#0a0a0a]]="openMenuMemberId() === m.userId"
+                       [class.bg-[#f5f4f0]]="openMenuMemberId() === m.userId"
                        [class.border-slate-100]="openMenuMemberId() !== m.userId"
                        [class.bg-slate-50]="openMenuMemberId() !== m.userId">
                     <div class="flex items-center gap-3 p-3 group">
@@ -1656,8 +1656,8 @@
                           @for (r of projectRoleOptions.slice(1); track r.key) {
                             <button (click)="changeProjectMemberRole(m.userId, r.key)"
                                     class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors"
-                                    [class.bg-primary-600]="m.role === r.key" [class.text-black]="m.role === r.key" [class.border-primary-600]="m.role === r.key"
-                                    [class.bg-[#0a0a0a]]="m.role !== r.key" [class.text-slate-600]="m.role !== r.key" [class.border-slate-200]="m.role !== r.key">
+                                    [class.bg-primary-600]="m.role === r.key" [class.text-white]="m.role === r.key" [class.border-primary-600]="m.role === r.key"
+                                    [class.bg-[#f5f4f0]]="m.role !== r.key" [class.text-slate-600]="m.role !== r.key" [class.border-slate-200]="m.role !== r.key">
                               @if (m.role === r.key) { <span class="material-symbols-rounded text-xs">check</span> }
                               {{ r.label }}
                             </button>
@@ -1746,7 +1746,7 @@
 @if (showTemplatePanel()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center" style="background: rgba(15,23,42,0.4); backdrop-filter: blur(4px);"
        (click)="showTemplatePanel.set(false)">
-    <div class="bg-[#0a0a0a] rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-scale-in"
+    <div class="bg-[#f5f4f0] rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-scale-in"
          (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
         <div>

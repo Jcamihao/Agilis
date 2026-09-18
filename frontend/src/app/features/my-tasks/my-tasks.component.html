@@ -13,7 +13,7 @@
   </div>
 
   <!-- Filter Bar -->
-  <div class="bg-[#0a0a0a] rounded-xl border border-[rgba(255,255,255,0.08)] shadow-sm p-2 flex flex-col sm:flex-row gap-3 items-center">
+  <div class="bg-[#f5f4f0] rounded-xl border border-[rgba(35,34,32,0.08)] shadow-sm p-2 flex flex-col sm:flex-row gap-3 items-center">
     <div class="flex-1 w-full relative">
       <span class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
       <input type="text" placeholder="Filtrar tarefas por nome..."
@@ -30,16 +30,16 @@
                 [class.bg-primary-50]="selectedStatuses().length > 0"
                 [class.text-primary-700]="selectedStatuses().length > 0"
                 [class.border-primary-200]="selectedStatuses().length > 0"
-                [class.bg-[#0a0a0a]]="selectedStatuses().length === 0"
+                [class.bg-[#f5f4f0]]="selectedStatuses().length === 0"
                 [class.text-slate-500]="selectedStatuses().length === 0"
                 [class.border-slate-200]="selectedStatuses().length === 0">
           <span class="material-symbols-rounded text-base">filter_list</span>
           Status
-          @if (selectedStatuses().length > 0) { <span class="bg-primary-600 text-black rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedStatuses().length }}</span> }
+          @if (selectedStatuses().length > 0) { <span class="bg-primary-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedStatuses().length }}</span> }
           <span class="material-symbols-rounded text-base">expand_more</span>
         </button>
         @if (openDropdown() === 'status') {
-          <div class="absolute top-full left-0 mt-1 bg-[#0a0a0a] border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[160px]"
+          <div class="absolute top-full left-0 mt-1 bg-[#f5f4f0] border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[160px]"
                (click)="$event.stopPropagation()">
             @for (f of statusFilters; track f.key) {
               <button (click)="toggleFilter('status', f.key)"
@@ -60,16 +60,16 @@
                 [class.bg-primary-50]="selectedPriorities().length > 0"
                 [class.text-primary-700]="selectedPriorities().length > 0"
                 [class.border-primary-200]="selectedPriorities().length > 0"
-                [class.bg-[#0a0a0a]]="selectedPriorities().length === 0"
+                [class.bg-[#f5f4f0]]="selectedPriorities().length === 0"
                 [class.text-slate-500]="selectedPriorities().length === 0"
                 [class.border-slate-200]="selectedPriorities().length === 0">
           <span class="material-symbols-rounded text-base">flag</span>
           Prioridade
-          @if (selectedPriorities().length > 0) { <span class="bg-primary-600 text-black rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedPriorities().length }}</span> }
+          @if (selectedPriorities().length > 0) { <span class="bg-primary-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedPriorities().length }}</span> }
           <span class="material-symbols-rounded text-base">expand_more</span>
         </button>
         @if (openDropdown() === 'priority') {
-          <div class="absolute top-full left-0 mt-1 bg-[#0a0a0a] border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[160px]"
+          <div class="absolute top-full left-0 mt-1 bg-[#f5f4f0] border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[160px]"
                (click)="$event.stopPropagation()">
             @for (f of priorityFilters; track f.key) {
               <button (click)="toggleFilter('priority', f.key)"
@@ -90,7 +90,7 @@
                 [class.bg-primary-50]="selectedProject() !== null"
                 [class.text-primary-700]="selectedProject() !== null"
                 [class.border-primary-200]="selectedProject() !== null"
-                [class.bg-[#0a0a0a]]="selectedProject() === null"
+                [class.bg-[#f5f4f0]]="selectedProject() === null"
                 [class.text-slate-500]="selectedProject() === null"
                 [class.border-slate-200]="selectedProject() === null">
           <span class="material-symbols-rounded text-base">folder</span>
@@ -98,7 +98,7 @@
           <span class="material-symbols-rounded text-base">expand_more</span>
         </button>
         @if (openDropdown() === 'project') {
-          <div class="absolute top-full left-0 mt-1 bg-[#0a0a0a] border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[180px]"
+          <div class="absolute top-full left-0 mt-1 bg-[#f5f4f0] border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[180px]"
                (click)="$event.stopPropagation()">
             <button (click)="selectedProject.set(null); toggleDropdown('project')"
                     class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 text-slate-500">
@@ -147,7 +147,7 @@
   } @else {
     <div class="flex flex-col gap-1.5">
       <!-- Table header -->
-      <div class="hidden md:grid grid-cols-[32px_3fr_1.5fr_1fr_1.5fr_1fr_40px] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[--text-tertiary] border-b border-[rgba(255,255,255,0.07)]">
+      <div class="hidden md:grid grid-cols-[32px_3fr_1.5fr_1fr_1.5fr_1fr_40px] gap-4 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[--text-tertiary] border-b border-[rgba(35,34,32,0.07)]">
         <div class="flex items-center justify-center">
           <span class="material-symbols-rounded text-lg opacity-40">check_box_outline_blank</span>
         </div>
@@ -161,7 +161,7 @@
 
       <!-- Rows -->
       @for (task of filteredTasks(); track task.id) {
-        <div class="bg-[#0a0a0a] border border-[rgba(255,255,255,0.07)] rounded-xl hover:bg-slate-50 transition-colors group
+        <div class="bg-[#f5f4f0] border border-[rgba(35,34,32,0.07)] rounded-xl hover:bg-slate-50 transition-colors group
                     grid grid-cols-[32px_1fr] md:grid-cols-[32px_3fr_1.5fr_1fr_1.5fr_1fr_40px] gap-4 items-center px-4 py-3 min-h-[64px]"
              [class.opacity-60]="task.status === 'DONE'">
 
@@ -234,7 +234,7 @@
               <span class="material-symbols-rounded text-xl">more_vert</span>
             </button>
             @if (openMenuId() === task.id) {
-              <div class="absolute right-0 top-full mt-1 bg-[#0a0a0a] border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[150px]"
+              <div class="absolute right-0 top-full mt-1 bg-[#f5f4f0] border border-slate-200 rounded-lg shadow-lg z-20 py-1 min-w-[150px]"
                    (click)="$event.stopPropagation()">
                 <button (click)="toggleStatus(task); toggleMenu(null)" class="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700">
                   <span class="material-symbols-rounded text-base">{{ task.status === 'DONE' ? 'restart_alt' : 'check_circle' }}</span>
@@ -267,10 +267,10 @@
   <div (click)="showCreateModal.set(false)"
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div (click)="$event.stopPropagation()"
-         class="bg-[#0a0a0a] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(255,255,255,0.07)]">
+         class="bg-[#f5f4f0] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+      <div class="flex items-center justify-between p-6 border-b border-b-[rgba(35,34,32,0.07)]">
         <h2 class="text-lg font-bold text-[--text-primary]">Nova Tarefa</h2>
-        <button (click)="showCreateModal.set(false)" class="p-2 rounded-full hover:bg-white/5 transition-colors text-[--text-tertiary]">
+        <button (click)="showCreateModal.set(false)" class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
           <span class="material-symbols-rounded">close</span>
         </button>
       </div>

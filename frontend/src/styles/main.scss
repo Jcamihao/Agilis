@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════
-// AGILIS DESIGN SYSTEM — Swiss Vanguard Studio
+// AGILIS DESIGN SYSTEM — Swiss Vanguard Studio (light/paper)
 // ═══════════════════════════════════════════
 
 @use '@angular/material' as mat;
@@ -8,12 +8,12 @@
 @tailwind components;
 @tailwind utilities;
 
-// ── Material Theme (dark) ──────────────────
-$agilis-primary: mat.m2-define-palette(mat.$m2-grey-palette, 50, 100, 300);
-$agilis-accent:  mat.m2-define-palette(mat.$m2-grey-palette, 50, 100, 300);
-$agilis-warn:    mat.m2-define-palette(mat.$m2-red-palette, A100);
+// ── Material Theme (light) ─────────────────
+$agilis-primary: mat.m2-define-palette(mat.$m2-grey-palette, 900, 700, A100);
+$agilis-accent:  mat.m2-define-palette(mat.$m2-grey-palette, 900, 700, A100);
+$agilis-warn:    mat.m2-define-palette(mat.$m2-red-palette, 700);
 
-$agilis-theme: mat.m2-define-dark-theme((
+$agilis-theme: mat.m2-define-light-theme((
   color: (primary: $agilis-primary, accent: $agilis-accent, warn: $agilis-warn),
   typography: mat.m2-define-typography-config($font-family: 'Hanken Grotesk, system-ui, sans-serif'),
   density: -1,
@@ -22,29 +22,78 @@ $agilis-theme: mat.m2-define-dark-theme((
 @include mat.all-component-themes($agilis-theme);
 
 // ── Design Tokens ──────────────────────────
+// RGB triples (no rgb() wrapper) so Tailwind's `rgb(var(--x) / <alpha-value>)`
+// pattern can compose them with opacity modifiers (bg-slate-500/50, etc).
+// LIGHT is the default palette; [data-theme="dark"] below overrides every
+// variable with the dark (Swiss Vanguard black-canvas) values — same shape
+// language, palette toggles as a feature rather than being hardcoded.
 :root {
-  // Canvas & surfaces
-  --color-canvas:         #000000;
-  --color-primary:        #ffffff;
-  --color-primary-light:  #e2e2e2;
-  --color-primary-dark:   #c4c7c8;
-  --color-accent:         #ffffff;
+  // Neutral scale (slate/gray) — 50 lightest role -> 950 darkest role
+  --c-50:  250 249 247;
+  --c-100: 243 241 236;
+  --c-200: 232 230 225;
+  --c-300: 217 214 207;
+  --c-400: 184 181 172;
+  --c-500: 154 151 143;
+  --c-600: 125 122 114;
+  --c-700: 98 95 88;
+  --c-800: 72 69 63;
+  --c-900: 48 46 42;
+  --c-950: 28 27 24;
 
-  --color-success:  #7cd992;
-  --color-warning:  #e8c468;
-  --color-danger:   #ffb4ab;
-  --color-info:     #8ec3ff;
+  // Primary (action) scale — 600 is the main fill color
+  --p-50:  243 241 236;
+  --p-100: 232 230 225;
+  --p-200: 217 214 207;
+  --p-300: 184 181 172;
+  --p-400: 154 151 143;
+  --p-500: 98 95 88;
+  --p-600: 35 34 32;
+  --p-700: 28 27 24;
+  --p-800: 20 19 18;
+  --p-900: 13 12 11;
+  --p-950: 0 0 0;
+  --on-primary: 245 244 240; // text/icon color sitting ON a --p-600 fill
 
-  --color-surface:       #0a0a0a;
-  --color-surface-2:     #131313;
-  --color-surface-3:     #1f1f1f;
-  --color-surface-hover: rgba(255, 255, 255, 0.03);
-  --color-border:        rgba(255, 255, 255, 0.12);
-  --color-border-strong: rgba(255, 255, 255, 0.38);
+  // Semantic surfaces
+  --c-canvas:    232 230 225;
+  --c-surface:   245 244 240;
+  --c-surface-2: 237 233 223;
+  --c-surface-3: 224 220 208;
+  --c-border:    35 34 32;   // composed with alpha for hairlines
+  --c-text:            35 34 32;
+  --c-text-secondary:  98 95 88;
+  --c-text-tertiary:   154 151 143;
 
-  --color-text:           #ffffff;
-  --color-text-secondary: #d4d4d4;
-  --color-text-tertiary:  #737373;
+  // Functional (status) colors
+  --f-success: 58 122 74;
+  --f-warning: 138 109 31;
+  --f-danger:  163 39 28;
+  --f-info:    42 93 148;
+
+  // Legacy aliases used across component templates — derived from the vars
+  // above so they stay theme-aware without touching every call site.
+  --color-canvas:         rgb(var(--c-canvas));
+  --color-primary:        rgb(var(--p-600));
+  --color-primary-light:  rgb(var(--p-400));
+  --color-primary-dark:   rgb(var(--p-800));
+  --color-accent:         rgb(var(--p-600));
+
+  --color-success:  rgb(var(--f-success));
+  --color-warning:  rgb(var(--f-warning));
+  --color-danger:   rgb(var(--f-danger));
+  --color-info:     rgb(var(--f-info));
+
+  --color-surface:       rgb(var(--c-surface));
+  --color-surface-2:     rgb(var(--c-surface-2));
+  --color-surface-3:     rgb(var(--c-surface-3));
+  --color-surface-hover: rgb(var(--c-border) / 0.03);
+  --color-border:        rgb(var(--c-border) / 0.12);
+  --color-border-strong: rgb(var(--c-border) / 0.35);
+
+  --color-text:           rgb(var(--c-text));
+  --color-text-secondary: rgb(var(--c-text-secondary));
+  --color-text-tertiary:  rgb(var(--c-text-tertiary));
 
   // Aliases used pervasively across component templates
   --text-primary:   var(--color-text);
@@ -63,7 +112,7 @@ $agilis-theme: mat.m2-define-dark-theme((
   --radius-2xl:  0px;
   --radius-full: 9999px;
 
-  // No drop shadows — depth is optical (hairlines + translucent layers).
+  // No drop shadows — depth is optical (hairlines only).
   --shadow-xs:         none;
   --shadow-sm:         none;
   --shadow:            none;
@@ -72,7 +121,7 @@ $agilis-theme: mat.m2-define-dark-theme((
   --shadow-card:       none;
   --shadow-card-hover: none;
   --shadow-primary:    none;
-  --shadow-glass:      0 8px 32px rgb(0 0 0 / 0.4);
+  --shadow-glass:      0 8px 32px rgb(var(--c-border) / 0.12);
 
   --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition:        200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -82,6 +131,51 @@ $agilis-theme: mat.m2-define-dark-theme((
   --sidebar-width:           248px;
   --sidebar-collapsed-width: 68px;
   --topbar-height:           60px;
+
+  color-scheme: light;
+}
+
+// ── Dark theme override ────────────────────
+// Toggled by setting data-theme="dark" on <html> (see ThemeService).
+:root[data-theme="dark"] {
+  --c-50:  26 26 26;
+  --c-100: 36 36 36;
+  --c-200: 51 51 51;
+  --c-300: 74 74 74;
+  --c-400: 115 115 115;
+  --c-500: 142 145 146;
+  --c-600: 168 171 172;
+  --c-700: 196 199 200;
+  --c-800: 226 226 226;
+  --c-900: 245 245 245;
+  --c-950: 255 255 255;
+
+  --p-50:  26 26 26;
+  --p-100: 36 36 36;
+  --p-200: 51 51 51;
+  --p-300: 93 95 95;
+  --p-400: 142 145 146;
+  --p-500: 196 199 200;
+  --p-600: 255 255 255;
+  --p-700: 226 226 226;
+  --p-800: 196 199 200;
+  --p-900: 142 145 146;
+  --p-950: 93 95 95;
+  --on-primary: 0 0 0;
+
+  --c-canvas:    0 0 0;
+  --c-surface:   10 10 10;
+  --c-surface-2: 19 19 19;
+  --c-surface-3: 31 31 31;
+  --c-border:    255 255 255;
+  --c-text:            255 255 255;
+  --c-text-secondary:  212 212 212;
+  --c-text-tertiary:   115 115 115;
+
+  --f-success: 124 217 146;
+  --f-warning: 232 196 104;
+  --f-danger:  255 180 171;
+  --f-info:    142 195 255;
 
   color-scheme: dark;
 }
@@ -131,12 +225,21 @@ body {
 }
 .ag-glyph--spin:hover { transform: rotate(45deg); }
 
+// ── Theme-aware surface helper classes ─────
+// Angular's Ivy style-binding reconciliation can stomp inline `style="…
+// rgb(var(--x))…"` on elements that ALSO carry an Angular [style.y] binding
+// (it re-applies its own cached snapshot of the static style string each CD
+// cycle instead of leaving unrelated properties alone). Routing themed
+// backgrounds through a real CSS class sidesteps that entirely.
+.ag-surface    { background: rgb(var(--c-surface)); }
+.ag-canvas-bg  { background: rgb(var(--c-canvas)); }
+
 // ── Design System ─────────────────────────
 @layer components {
 
   // ── Cards ──────────────────────────────
   .ag-card {
-    @apply bg-[#0a0a0a] border border-white/10;
+    @apply bg-[rgb(var(--c-surface))] border border-black/10;
     border-radius: 0;
     transition: border-color var(--transition), background var(--transition);
 
@@ -144,8 +247,8 @@ body {
       @apply cursor-pointer;
 
       &:hover {
-        background: rgba(255, 255, 255, 0.03);
-        border-color: rgba(255, 255, 255, 0.3);
+        background: rgb(var(--c-border) / 0.03);
+        border-color: rgb(var(--c-border) / 0.3);
       }
     }
   }
@@ -160,38 +263,40 @@ body {
     position: relative;
 
     &--primary {
-      color: #000000;
-      background: #ffffff;
-      border-color: #ffffff;
+      color: rgb(var(--c-surface));
+      background: rgb(var(--p-600));
+      border-color: rgb(var(--p-600));
 
       &:hover:not(:disabled) {
-        background: #000000;
-        color: #ffffff;
+        background: rgb(var(--p-950));
+        color: rgb(var(--on-primary));
       }
       &:active:not(:disabled) { transform: scale(0.98); }
     }
 
     &--secondary {
-      @apply bg-transparent text-white;
-      border-color: rgba(255, 255, 255, 0.25);
+      @apply bg-transparent;
+      color: rgb(var(--p-600));
+      border-color: rgb(var(--c-border) / 0.25);
 
-      &:hover:not(:disabled) { @apply bg-white text-black; }
+      &:hover:not(:disabled) { background: rgb(var(--p-600)); color: rgb(var(--c-surface)); }
       &:active:not(:disabled) { transform: scale(0.98); }
     }
 
     &--ghost {
-      @apply bg-transparent text-white/60 border-transparent;
-      &:hover:not(:disabled) { @apply text-white bg-white/5; }
+      @apply bg-transparent border-transparent;
+      color: rgb(var(--c-border) / 0.6);
+      &:hover:not(:disabled) { color: rgb(var(--p-600)); background: rgb(var(--c-border) / 0.05); }
     }
 
     &--danger {
-      color: #93000a;
+      color: rgb(var(--f-danger));
       background: transparent;
-      border-color: #ffb4ab;
+      border-color: rgb(var(--f-danger));
 
       &:hover:not(:disabled) {
-        background: #ffb4ab;
-        color: #93000a;
+        background: rgb(var(--f-danger));
+        color: rgb(var(--on-primary));
       }
     }
 
@@ -205,37 +310,41 @@ body {
     @apply inline-flex items-center gap-1 px-3 h-7 text-[11px] font-medium uppercase;
     border-radius: 9999px;
     letter-spacing: 0.06em;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #d4d4d4;
+    background: rgb(var(--c-border) / 0.05);
+    border: 1px solid rgb(var(--c-border) / 0.12);
+    color: rgb(var(--c-700));
 
-    &--primary { background: #ffffff; color: #000000; border-color: #ffffff; }
-    &--success { color: var(--color-success); border-color: rgba(124,217,146,0.3); }
-    &--warning { color: var(--color-warning); border-color: rgba(232,196,104,0.3); }
-    &--danger  { color: var(--color-danger);  border-color: rgba(255,180,171,0.3); }
-    &--info    { color: var(--color-info);    border-color: rgba(142,195,255,0.3); }
-    &--neutral { background: rgba(255, 255, 255, 0.06); color: #8e9192; }
+    &--primary { background: rgb(var(--p-600)); color: rgb(var(--c-surface)); border-color: rgb(var(--p-600)); }
+    &--success { color: var(--color-success); border-color: rgb(var(--f-success) / 0.3); }
+    &--warning { color: var(--color-warning); border-color: rgb(var(--f-warning) / 0.3); }
+    &--danger  { color: var(--color-danger);  border-color: rgb(var(--f-danger) / 0.3); }
+    &--info    { color: var(--color-info);    border-color: rgb(var(--f-info) / 0.3); }
+    &--neutral { background: rgb(var(--c-border) / 0.05); color: rgb(var(--c-500)); }
   }
 
   // ── Input (field canvas) ───────────────
   .ag-input {
-    @apply w-full px-3 py-2 bg-white/[0.02] text-sm text-white;
-    @apply placeholder-white/30 outline-none transition-all duration-150;
+    @apply w-full px-3 py-2 text-sm;
+    background: rgb(var(--c-border) / 0.02);
+    color: rgb(var(--p-600));
+    @apply outline-none transition-all duration-150;
     border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgb(var(--c-border) / 0.2);
     border-radius: 0;
 
-    &:hover:not(:focus):not(:disabled) { border-bottom-color: rgba(255, 255, 255, 0.38); }
+    &::placeholder { color: rgb(var(--c-border) / 0.35); }
+
+    &:hover:not(:focus):not(:disabled) { border-bottom-color: rgb(var(--c-border) / 0.4); }
 
     &:focus {
-      border-bottom-color: #ffffff;
+      border-bottom-color: rgb(var(--p-600));
     }
 
     &--sm { @apply px-2.5 py-1.5 text-xs; }
 
     &--error {
-      border-bottom-color: #ffb4ab;
-      &:focus { border-bottom-color: #ffb4ab; }
+      border-bottom-color: rgb(var(--f-danger));
+      &:focus { border-bottom-color: rgb(var(--f-danger)); }
     }
   }
 
@@ -243,8 +352,8 @@ body {
   .ag-spinner {
     display: inline-block;
     width: 14px; height: 14px;
-    border: 2px solid rgba(255,255,255,0.25);
-    border-top-color: #fff;
+    border: 2px solid rgb(var(--c-border) / 0.2);
+    border-top-color: rgb(var(--p-600));
     border-radius: 50%;
     animation: ag-spin 0.6s linear infinite;
   }
@@ -252,7 +361,8 @@ body {
 
   // ── Label ──────────────────────────────
   .ag-label {
-    @apply text-[11px] font-medium uppercase text-white/50 mb-1.5 block;
+    @apply text-[11px] font-medium uppercase mb-1.5 block;
+    color: rgb(var(--c-border) / 0.55);
     letter-spacing: 0.08em;
     &--required::after { content: ' *'; color: var(--color-danger); }
   }
@@ -261,9 +371,9 @@ body {
   .ag-avatar {
     @apply rounded-full object-cover flex-shrink-0;
     @apply flex items-center justify-center font-semibold uppercase;
-    background: #2a2a2a;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff;
+    background: rgb(var(--p-200));
+    border: 1px solid rgb(var(--c-border) / 0.15);
+    color: rgb(var(--p-600));
     letter-spacing: 0;
 
     &--sm  { @apply w-7 h-7 text-[11px]; }
@@ -275,7 +385,7 @@ body {
   // ── Priority ───────────────────────────
   .ag-priority {
     @apply inline-flex items-center gap-1.5 text-xs font-medium;
-    &--low    { color: #737373; }
+    &--low    { color: rgb(var(--c-500)); }
     &--medium { color: var(--color-info); }
     &--high   { color: var(--color-warning); }
     &--urgent { color: var(--color-danger); }
@@ -286,12 +396,12 @@ body {
     @apply inline-flex items-center gap-1.5 px-3 h-6 text-[11px] font-medium uppercase;
     border-radius: 9999px;
     letter-spacing: 0.06em;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgb(var(--c-border) / 0.12);
+    background: rgb(var(--c-border) / 0.03);
 
-    &--backlog  { color: #8e9192; }
+    &--backlog  { color: rgb(var(--c-500)); }
     &--progress { color: var(--color-info); }
-    &--review   { color: #c9a6ff; }
+    &--review   { color: #6d4fa8; }
     &--done     { color: var(--color-success); }
   }
 
@@ -299,14 +409,15 @@ body {
   .ag-skeleton {
     border-radius: 0;
     overflow: hidden;
-    background: linear-gradient(90deg, #131313 25%, #1f1f1f 50%, #131313 75%);
+    background: linear-gradient(90deg, rgb(var(--c-surface-2)) 25%, rgb(var(--c-surface-3)) 50%, rgb(var(--c-surface-2)) 75%);
     background-size: 200% 100%;
     animation: skeleton 1.6s ease-in-out infinite;
   }
 
   // ── Section title ──────────────────────
   .ag-section-title {
-    @apply text-[15px] font-medium text-white;
+    @apply text-[15px] font-medium;
+    color: rgb(var(--p-600));
     letter-spacing: -0.015em;
   }
 
@@ -318,7 +429,7 @@ body {
       font-family: var(--font-sans);
       font-size: 1.75rem;
       font-weight: 500;
-      color: #ffffff;
+      color: rgb(var(--p-600));
       letter-spacing: -0.025em;
       line-height: 1.15;
     }
@@ -329,7 +440,7 @@ body {
     font-family: var(--font-sans);
     font-size: 1.8rem;
     font-weight: 500;
-    color: #ffffff;
+    color: rgb(var(--p-600));
     letter-spacing: -0.025em;
     line-height: 1.15;
   }
@@ -344,15 +455,15 @@ body {
     border-radius: 9999px;
     letter-spacing: 0.06em;
     background: transparent;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: rgb(var(--p-600));
+    border: 1px solid rgb(var(--c-border) / 0.25);
   }
 
-  .ag-section-num  { @apply tabular-nums text-white/40; font-variant-numeric: tabular-nums; }
+  .ag-section-num  { @apply tabular-nums; color: rgb(var(--c-border) / 0.4); font-variant-numeric: tabular-nums; }
   .ag-section-label { letter-spacing: 0.06em; text-transform: uppercase; font-size: 11px; }
 
   // ── Divider ────────────────────────────
-  .ag-divider { border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 1rem 0; }
+  .ag-divider { border-top: 1px solid rgb(var(--c-border) / 0.1); margin: 1rem 0; }
 
   // ── Empty state ────────────────────────
   .ag-empty {
@@ -361,14 +472,14 @@ body {
     &__icon {
       @apply mb-4;
       font-size: 56px;
-      color: rgba(255, 255, 255, 0.15);
+      color: rgb(var(--c-border) / 0.15);
     }
     &__title {
       @apply text-base font-medium mb-1.5;
-      color: rgba(255, 255, 255, 0.5);
+      color: rgb(var(--c-border) / 0.55);
       letter-spacing: -0.01em;
     }
-    &__desc { @apply text-sm mb-6 max-w-xs leading-relaxed; color: rgba(255, 255, 255, 0.3); }
+    &__desc { @apply text-sm mb-6 max-w-xs leading-relaxed; color: rgb(var(--c-border) / 0.35); }
   }
 }
 
@@ -376,9 +487,9 @@ body {
 ::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgb(var(--c-border) / 0.15);
   border-radius: 999px;
-  &:hover { background: rgba(255, 255, 255, 0.3); }
+  &:hover { background: rgb(var(--c-border) / 0.3); }
 }
 
 // ── Material Overrides ─────────────────────
@@ -400,11 +511,11 @@ body {
 
 .mat-mdc-menu-panel {
   border-radius: 0 !important;
-  background: rgba(10, 10, 10, 0.92) !important;
+  background: rgba(245, 244, 240, 0.96) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgb(var(--c-border) / 0.12) !important;
+  box-shadow: 0 8px 32px rgb(var(--c-border) / 0.12) !important;
   min-width: 200px !important;
   overflow: hidden !important;
 }
@@ -415,7 +526,7 @@ body {
   border-radius: 0 !important;
   margin: 0 !important;
   letter-spacing: -0.01em !important;
-  color: #ffffff !important;
+  color: rgb(var(--p-600)) !important;
 }
 
 .mat-drawer { border-right: 1px solid var(--color-border) !important; }
@@ -424,16 +535,16 @@ body {
 .cdk-drag-preview {
   border-radius: 0;
   opacity: 0.95;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  background: #131313;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgb(var(--c-border) / 0.35);
+  background: rgb(var(--c-surface));
+  box-shadow: 0 8px 32px rgb(var(--c-border) / 0.15);
   transform: rotate(1deg) scale(1.02);
 }
 
 .cdk-drag-placeholder {
   border-radius: 0;
-  border: 1px dashed rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgb(var(--c-border) / 0.3);
+  background: rgb(var(--c-border) / 0.03);
   opacity: 0.6;
   min-height: 80px;
 }
@@ -444,8 +555,8 @@ body {
 }
 
 .kanban-column-active {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgb(var(--c-border) / 0.03);
+  border-color: rgb(var(--c-border) / 0.3) !important;
 }
 
 // ── Utilities ─────────────────────────────
@@ -457,15 +568,16 @@ body {
 }
 
 .glass {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(245, 244, 240, 0.75);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgb(var(--c-border) / 0.12);
 }
 
 .glass-dark {
-  background: rgba(0, 0, 0, 0.75);
+  background: rgb(var(--c-border) / 0.9);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgb(var(--c-border) / 0.12);
+  color: rgb(var(--c-surface));
 }

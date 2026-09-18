@@ -1,65 +1,65 @@
-<div class="flex flex-1 w-full h-screen" style="background: #000000;">
+<div class="flex flex-1 w-full h-screen" style="background: rgb(var(--c-canvas));">
 
   <!-- Left Panel: Editorial Branding (lg+) -->
   <div class="hidden lg:flex flex-col flex-1 relative overflow-hidden justify-between p-10"
-       style="background: #000000; border-right: 1px solid rgba(255,255,255,0.12);">
+       style="background: rgb(var(--c-canvas)); border-right: 1px solid rgb(var(--c-border) / 0.12);">
 
     <!-- Logo -->
     <div class="relative z-10 flex items-center gap-3">
-      <div class="w-9 h-9 flex items-center justify-center border border-white/25">
-        <span class="material-symbols-rounded text-white text-lg">space_dashboard</span>
+      <div class="w-9 h-9 flex items-center justify-center" style="border: 1px solid rgb(var(--c-border) / 0.25);">
+        <span class="material-symbols-rounded text-lg" style="color: rgb(var(--c-text));">space_dashboard</span>
       </div>
-      <span class="text-white font-medium text-xl tracking-[-0.02em]">
-        AGILIS <span class="ag-glyph text-white/50">✳︎</span>
+      <span class="font-medium text-xl tracking-[-0.02em]" style="color: rgb(var(--c-text));">
+        AGILIS <span class="ag-glyph" style="color: rgb(var(--c-border) / 0.5);">✳︎</span>
       </span>
     </div>
 
     <!-- Hero -->
     <div class="relative z-10 flex flex-col gap-6 max-w-lg mb-20">
-      <h1 class="text-[48px] font-medium leading-[1.1] tracking-[-0.04em] text-white">
+      <h1 class="text-[48px] font-medium leading-[1.1] tracking-[-0.04em]" style="color: rgb(var(--c-text));">
         Gerenciamento Pro para
-        <span style="color: #737373;">Equipes de Alta Performance</span>
+        <span style="color: rgb(var(--c-500));">Equipes de Alta Performance</span>
       </h1>
-      <p class="text-[16px] leading-[1.6]" style="color: #d4d4d4;">
+      <p class="text-[16px] leading-[1.6]" style="color: rgb(var(--c-700));">
         A plataforma B2B desenhada para desenvolvedores e gerentes que exigem precisão.
         Reduza a carga cognitiva e alcance resultados excepcionais.
       </p>
 
       <!-- Stats -->
       <div class="flex items-center gap-6 mt-2 pt-4 border-t"
-           style="border-color: rgba(255,255,255,0.12);">
+           style="border-color: rgb(var(--c-border) / 0.12);">
         <div class="flex flex-col gap-1">
-          <span class="text-[20px] font-medium leading-tight text-white">SSL/TLS</span>
+          <span class="text-[20px] font-medium leading-tight" style="color: rgb(var(--c-text));">SSL/TLS</span>
           <span class="text-[11px] font-medium uppercase tracking-[0.08em]"
-                style="color: #737373;">Conexão Criptografada</span>
+                style="color: rgb(var(--c-500));">Conexão Criptografada</span>
         </div>
       </div>
     </div>
 
     <!-- Testimonial -->
     <div class="relative z-10 flex items-center gap-4 p-4 w-max"
-         style="background: rgba(255,255,255,0.04);
-                border: 1px solid rgba(255,255,255,0.12);
+         style="background: rgb(var(--c-border) / 0.04);
+                border: 1px solid rgb(var(--c-border) / 0.12);
                 backdrop-filter: blur(12px);">
-      <div class="w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm flex-shrink-0 border border-white/15"
-           style="background: #2a2a2a; color: #ffffff;">AB</div>
+      <div class="w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm flex-shrink-0"
+           style="background: rgb(var(--p-200)); color: rgb(var(--c-text)); border: 1px solid rgb(var(--c-border) / 0.15);">AB</div>
       <div>
-        <p class="text-[14px] text-white">"A interface mais limpa que já usamos."</p>
-        <p class="text-[12px] font-medium" style="color: #737373;">Ana Costa, CTO TechNova</p>
+        <p class="text-[14px]" style="color: rgb(var(--c-text));">"A interface mais limpa que já usamos."</p>
+        <p class="text-[12px] font-medium" style="color: rgb(var(--c-500));">Ana Costa, CTO TechNova</p>
       </div>
     </div>
   </div>
 
   <!-- Right Panel: Form -->
   <div class="flex-1 flex flex-col justify-center items-center p-6 lg:p-10 relative"
-       style="background: #000000;">
+       style="background: rgb(var(--c-canvas));">
 
     <!-- Mobile logo -->
     <div class="lg:hidden flex items-center gap-3 absolute top-6 left-6">
-      <div class="w-8 h-8 flex items-center justify-center border border-white/25">
-        <span class="material-symbols-rounded text-white" style="font-size: 16px;">space_dashboard</span>
+      <div class="w-8 h-8 flex items-center justify-center" style="border: 1px solid rgb(var(--c-border) / 0.25);">
+        <span class="material-symbols-rounded" style="font-size: 16px; color: rgb(var(--c-text));">space_dashboard</span>
       </div>
-      <span class="font-medium text-lg text-white">AGILIS</span>
+      <span class="font-medium text-lg" style="color: rgb(var(--c-text));">AGILIS</span>
     </div>
 
     <div class="w-full max-w-[400px]">

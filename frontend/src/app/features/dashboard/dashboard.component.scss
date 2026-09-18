@@ -1,11 +1,11 @@
 // ── Dashboard card hover ──────────────────────────────────
 .dash-card {
-  background: #0a0a0a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #f5f4f0;
+  border: 1px solid rgba(35,34,32,0.12);
   border-radius: 0;
   transition: border-color 200ms ease, background 200ms ease;
 
-  &:hover { border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.02); }
+  &:hover { border-color: rgba(35,34,32,0.3); background: rgba(35,34,32,0.02); }
 }
 
 // ── Stat card icon circle ────────────────────────────────
@@ -32,7 +32,7 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(35,34,32,0.12);
   }
   &__axis-y {
     position: absolute;
@@ -40,7 +40,7 @@
     bottom: 0;
     left: 0;
     width: 1px;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(35,34,32,0.12);
   }
 }
 
@@ -51,7 +51,7 @@
   left: 19px;
   bottom: 0;
   width: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(35,34,32,0.1);
 }
 
 // ── Workload bar ──────────────────────────────────────────
@@ -59,7 +59,7 @@
   height: 6px;
   border-radius: 9999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(35,34,32,0.1);
 
   &__fill {
     height: 100%;
@@ -71,8 +71,8 @@
 // ── Onboarding Banner ─────────────────────────────────────
 .onboarding-banner {
   position: relative;
-  background: #0a0a0a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #f5f4f0;
+  border: 1px solid rgba(35,34,32,0.12);
   border-radius: 0;
   padding: 1.25rem 1.5rem;
 }
@@ -81,32 +81,32 @@
   background: transparent; border: none; cursor: pointer;
   color: #737373; border-radius: 0; padding: .15rem;
   display: flex; align-items: center;
-  &:hover { background: rgba(255,255,255,.08); }
+  &:hover { background: rgba(35,34,32,.08); }
 }
 .onboarding-top {
   display: flex; align-items: flex-start; gap: .875rem; margin-bottom: 1rem;
 }
-.onboarding-wave { font-size: 1.75rem; color: #ffffff; flex-shrink: 0; }
-.onboarding-title { font-size: 1rem; font-weight: 500; color: #ffffff; margin: 0 0 .2rem; }
+.onboarding-wave { font-size: 1.75rem; color: #232220; flex-shrink: 0; }
+.onboarding-title { font-size: 1rem; font-weight: 500; color: #232220; margin: 0 0 .2rem; }
 .onboarding-sub   { font-size: .825rem; color: #737373; margin: 0; }
 .onboarding-steps {
   display: flex; gap: .75rem; flex-wrap: wrap;
 }
 .onboarding-step {
   display: flex; align-items: center; gap: .5rem;
-  background: transparent; border: 1px solid rgba(255,255,255,.2);
+  background: transparent; border: 1px solid rgba(35,34,32,.2);
   border-radius: 9999px; padding: .6rem 1rem;
-  text-decoration: none; color: #ffffff; flex: 1; min-width: 160px;
+  text-decoration: none; color: #232220; flex: 1; min-width: 160px;
   font-size: .875rem; font-weight: 500;
   transition: background .15s, border-color .15s;
-  &:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.38); }
+  &:hover { background: rgba(35,34,32,.06); border-color: rgba(35,34,32,.38); }
 }
 .step-num {
   width: 20px; height: 20px; border-radius: 50%;
-  background: #ffffff; color: #000000; font-size: .7rem; font-weight: 600;
+  background: #232220; color: #f5f4f0; font-size: .7rem; font-weight: 600;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.step-icon  { font-size: 1rem; color: #ffffff; }
+.step-icon  { font-size: 1rem; color: #232220; }
 .step-label { flex: 1; }
 .step-arrow { font-size: 1rem; color: #5d5f5f; }
 
@@ -121,13 +121,13 @@
 .qa-chip {
   display: inline-flex; align-items: center; gap: .35rem;
   padding: .35rem .875rem; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.12); background: transparent;
+  border: 1px solid rgba(35,34,32,.12); background: transparent;
   font-size: .8rem; font-weight: 500; color: #c4c7c8;
   text-decoration: none; transition: all .15s;
   .material-symbols-rounded { font-size: .95rem; color: #5d5f5f; }
   &:hover {
-    border-color: rgba(255,255,255,.38); background: rgba(255,255,255,.06);
-    color: #ffffff;
-    .material-symbols-rounded { color: #ffffff; }
+    border-color: rgba(35,34,32,.38); background: rgba(35,34,32,.06);
+    color: #232220;
+    .material-symbols-rounded { color: #232220; }
   }
 }

@@ -1,26 +1,27 @@
 <aside
-  class="fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-smooth"
-  style="background: #000000; border-right: 1px solid rgba(255, 255, 255, 0.12)"
+  class="ag-surface fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-smooth"
+  style="border-right: 1px solid rgb(var(--c-border) / 0.12)"
   [style.width]="collapsed ? '68px' : '248px'"
 >
   <!-- Logo -->
   <div
     class="flex items-center h-[60px] px-4 flex-shrink-0"
-    style="border-bottom: 1px solid rgba(255, 255, 255, 0.12)"
+    style="border-bottom: 1px solid rgb(var(--c-border) / 0.12)"
   >
     <div class="flex items-center gap-3 min-w-0 overflow-hidden">
       <div
-        class="flex-shrink-0 w-8 h-8 flex items-center justify-center border border-white/25"
+        class="flex-shrink-0 w-8 h-8 flex items-center justify-center"
+        style="border: 1px solid rgb(var(--c-border) / 0.25)"
       >
-        <span class="text-white font-medium text-sm tracking-tight">A</span>
+        <span class="font-medium text-sm tracking-tight" style="color: rgb(var(--c-text))">A</span>
       </div>
       @if (!collapsed) {
         <div class="animate-fade-in min-w-0 overflow-hidden">
-          <p class="text-[15px] font-medium text-white tracking-[-0.02em] leading-none">
-            AGILIS <span class="ag-glyph ag-glyph--spin text-white/50">✳︎</span>
+          <p class="text-[15px] font-medium tracking-[-0.02em] leading-none" style="color: rgb(var(--c-text))">
+            AGILIS <span class="ag-glyph ag-glyph--spin" style="color: rgb(var(--c-border) / 0.5)">✳︎</span>
           </p>
           @if (companyName()) {
-            <p class="text-[11px] text-white/40 truncate max-w-36 mt-1 uppercase tracking-[0.06em]">{{ companyName() }}</p>
+            <p class="text-[11px] truncate max-w-36 mt-1 uppercase tracking-[0.06em]" style="color: rgb(var(--c-border) / 0.4)">{{ companyName() }}</p>
           }
         </div>
       }
@@ -32,7 +33,7 @@
 
     <!-- Principal (sem collapse) -->
     @if (!collapsed) {
-      <p class="px-3 py-1 mt-1 text-[10px] font-medium uppercase tracking-[0.1em]" style="color:#5d5f5f">
+      <p class="px-3 py-1 mt-1 text-[10px] font-medium uppercase tracking-[0.1em]" style="color: rgb(var(--c-600))">
         Principal
       </p>
     }
@@ -40,14 +41,14 @@
       <a [routerLink]="item.route" routerLinkActive #rlaMain="routerLinkActive"
          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
          class="nav-item flex items-center gap-3 px-3 py-[9px] cursor-pointer relative transition-all duration-150"
-         [style.background]="rlaMain.isActive ? 'rgba(255,255,255,0.08)' : ''"
+         [style.background]="rlaMain.isActive ? 'rgb(var(--c-border) / 0.08)' : ''"
          [class.nav-item--active]="rlaMain.isActive"
          [title]="collapsed ? item.label : ''">
         <span class="material-symbols-rounded text-[20px] flex-shrink-0 transition-colors"
-              [style.color]="rlaMain.isActive ? '#ffffff' : '#737373'">{{ item.icon }}</span>
+              [style.color]="rlaMain.isActive ? 'rgb(var(--c-text))' : 'rgb(var(--c-500))'">{{ item.icon }}</span>
         @if (!collapsed) {
           <span class="text-[13.5px] font-medium animate-fade-in truncate"
-                [style.color]="rlaMain.isActive ? '#ffffff' : '#c4c7c8'">{{ item.label }}</span>
+                [style.color]="rlaMain.isActive ? 'rgb(var(--c-text))' : 'rgb(var(--c-700))'">{{ item.label }}</span>
         }
       </a>
     }
@@ -56,7 +57,7 @@
     @for (section of sections; track section.key) {
 
       @if (collapsed) {
-        <div class="my-3 mx-2" style="border-top: 1px solid rgba(255,255,255,0.12)"></div>
+        <div class="my-3 mx-2" style="border-top: 1px solid rgb(var(--c-border) / 0.12)"></div>
       } @else {
         <!-- Section header -->
         <button
@@ -64,11 +65,11 @@
           class="w-full flex items-center justify-between px-3 pt-4 pb-1 group"
         >
           <span class="text-[10px] font-medium uppercase tracking-[0.1em] transition-colors"
-                [style.color]="isExpanded(section.key) ? '#8e9192' : '#5d5f5f'">
+                [style.color]="isExpanded(section.key) ? 'rgb(var(--c-600))' : 'rgb(var(--c-500))'">
             {{ section.label }}
           </span>
           <span class="material-symbols-rounded transition-transform duration-200 text-[14px]"
-                style="color:#5d5f5f"
+                style="color: rgb(var(--c-500))"
                 [class.rotate-180]="isExpanded(section.key)">
             expand_more
           </span>
@@ -80,14 +81,14 @@
         @for (item of section.items; track item.route) {
           <a [routerLink]="item.route" routerLinkActive #rla="routerLinkActive"
              class="nav-item flex items-center gap-3 px-3 py-[9px] cursor-pointer relative transition-all duration-150"
-             [style.background]="rla.isActive ? 'rgba(255,255,255,0.08)' : ''"
+             [style.background]="rla.isActive ? 'rgb(var(--c-border) / 0.08)' : ''"
              [class.nav-item--active]="rla.isActive"
              [title]="collapsed ? item.label : ''">
             <span class="material-symbols-rounded text-[20px] flex-shrink-0 transition-colors"
-                  [style.color]="rla.isActive ? '#ffffff' : '#737373'">{{ item.icon }}</span>
+                  [style.color]="rla.isActive ? 'rgb(var(--c-text))' : 'rgb(var(--c-500))'">{{ item.icon }}</span>
             @if (!collapsed) {
               <span class="text-[13.5px] font-medium animate-fade-in truncate"
-                    [style.color]="rla.isActive ? '#ffffff' : '#c4c7c8'">{{ item.label }}</span>
+                    [style.color]="rla.isActive ? 'rgb(var(--c-text))' : 'rgb(var(--c-700))'">{{ item.label }}</span>
             }
           </a>
         }
@@ -97,11 +98,11 @@
   </nav>
 
   <!-- User Area -->
-  <div class="p-3 flex-shrink-0" style="border-top: 1px solid rgba(255,255,255,0.12)">
+  <div class="p-3 flex-shrink-0" style="border-top: 1px solid rgb(var(--c-border) / 0.12)">
     <a routerLink="/profile"
        class="nav-item flex items-center gap-3 px-2.5 py-2.5 cursor-pointer transition-all duration-150 group">
-      <div class="flex-shrink-0 w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-white text-[11px] font-medium border border-white/15"
-           style="background: #2a2a2a">
+      <div class="flex-shrink-0 w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-medium"
+           style="background: rgb(var(--p-200)); color: rgb(var(--c-text)); border: 1px solid rgb(var(--c-border) / 0.15)">
         @if (user()?.avatarUrl) {
           <img [src]="user()!.avatarUrl" [alt]="user()!.name" class="w-full h-full object-cover" />
         } @else {
@@ -110,15 +111,29 @@
       </div>
       @if (!collapsed) {
         <div class="min-w-0 animate-fade-in flex-1">
-          <p class="text-[13px] font-medium truncate" style="color:#d4d4d4">{{ user()?.name }}</p>
-          <p class="text-[11px] truncate" style="color:#5d5f5f">{{ user()?.email }}</p>
+          <p class="text-[13px] font-medium truncate" style="color: rgb(var(--c-700))">{{ user()?.name }}</p>
+          <p class="text-[11px] truncate" style="color: rgb(var(--c-500))">{{ user()?.email }}</p>
         </div>
       }
     </a>
 
+    <button (click)="themeSvc.toggle()"
+            class="w-full mt-1 flex items-center gap-3 px-2.5 py-2 transition-colors"
+            style="color: rgb(var(--c-500))"
+            [title]="themeSvc.theme() === 'dark' ? 'Modo claro' : 'Modo escuro'">
+      <span class="material-symbols-rounded text-[18px] flex-shrink-0">
+        {{ themeSvc.theme() === 'dark' ? 'light_mode' : 'dark_mode' }}
+      </span>
+      @if (!collapsed) {
+        <span class="text-[13px] font-medium animate-fade-in">
+          {{ themeSvc.theme() === 'dark' ? 'Modo claro' : 'Modo escuro' }}
+        </span>
+      }
+    </button>
+
     <button (click)="toggleCollapse.emit()"
             class="w-full mt-1 flex items-center justify-center p-2 transition-colors"
-            style="color:#5d5f5f" title="Recolher menu">
+            style="color: rgb(var(--c-500))" title="Recolher menu">
       <span class="material-symbols-rounded text-[18px] transition-transform duration-300"
             [class.rotate-180]="collapsed">
         keyboard_double_arrow_left

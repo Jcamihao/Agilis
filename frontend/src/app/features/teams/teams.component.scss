@@ -1,7 +1,7 @@
 // ── Directory card ────────────────────────────────────────
 .dir-card {
-  background: #0a0a0a;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #f5f4f0;
+  border: 1px solid rgba(35,34,32,0.12);
   border-radius: 0;
   overflow: hidden;
   display: flex;
@@ -11,8 +11,8 @@
   transition: border-color 200ms ease, background 200ms ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(35,34,32,0.3);
+    background: rgba(35,34,32,0.02);
   }
 }
 
@@ -21,7 +21,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid #0a0a0a;
+  border: 2px solid #f5f4f0;
   margin-left: -8px;
   display: flex;
   align-items: center;
@@ -41,9 +41,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid #0a0a0a;
+  border: 2px solid #f5f4f0;
   margin-left: -8px;
-  background: #2a2a2a;
+  background: #d9d6cf;
   color: #c4c7c8;
   font-size: 10px;
   font-weight: 600;
@@ -55,7 +55,7 @@
 // ── Add card (dashed) ─────────────────────────────────────
 .add-card {
   background: transparent;
-  border: 1px dashed rgba(255, 255, 255, 0.25);
+  border: 1px dashed rgba(35,34,32,0.25);
   border-radius: 0;
   display: flex;
   flex-direction: column;
@@ -67,8 +67,8 @@
   transition: border-color 200ms, background 200ms;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(35,34,32,0.5);
+    background: rgba(35,34,32,0.03);
   }
 }
 
@@ -85,8 +85,8 @@
   color: #737373;
 
   &--active {
-    color: #ffffff;
-    border-bottom-color: #ffffff;
+    color: #232220;
+    border-bottom-color: #232220;
   }
 
   &:hover:not(.dir-tab--active) { color: #d4d4d4; }

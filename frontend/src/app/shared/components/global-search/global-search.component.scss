@@ -12,7 +12,7 @@
 
 .gs-modal {
   width: 100%; max-width: 600px; margin: 0 16px;
-  background: #0a0a0a; border-radius: 16px;
+  background: #f5f4f0; border-radius: 16px;
   box-shadow: 0 24px 64px -12px rgba(0,0,0,0.22), 0 8px 24px -8px rgba(0,0,0,0.12);
   overflow: hidden;
   animation: gs-slide-in 0.15s ease;
@@ -27,7 +27,7 @@
 .gs-search-icon { font-size: 20px; color: #5d5f5f; flex-shrink: 0; }
 .gs-input {
   flex: 1; border: none; outline: none; font-size: 15px;
-  color: #ffffff; background: transparent;
+  color: #232220; background: transparent;
   &::placeholder { color: #5d5f5f; }
 }
 .gs-spin {
@@ -37,7 +37,7 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 .gs-esc-key {
   font-size: 11px; color: #5d5f5f;
-  background: #0a0a0a; border: 1px solid rgba(255,255,255,0.12);
+  background: #f5f4f0; border: 1px solid rgba(35,34,32,0.12);
   border-radius: 4px; padding: 2px 6px; flex-shrink: 0; font-family: inherit;
 }
 
@@ -69,7 +69,7 @@
   width: 100%; padding: 8px 16px; border: none;
   background: transparent; cursor: pointer; text-align: left;
   transition: background 0.1s;
-  &:hover { background: #0a0a0a; }
+  &:hover { background: #f5f4f0; }
   &.gs-item--no-hover { cursor: default; &:hover { background: transparent; } }
 }
 .gs-status-dot {
@@ -88,7 +88,7 @@
 }
 .gs-item-info { display: flex; flex-direction: column; min-width: 0; }
 .gs-item-title {
-  font-size: 13px; font-weight: 500; color: #ffffff;
+  font-size: 13px; font-weight: 500; color: #232220;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;
 }
 .gs-item-meta {
@@ -101,11 +101,11 @@
 .gs-footer {
   display: flex; align-items: center; gap: 16px;
   padding: 10px 16px; border-top: 1px solid #f1f5f9;
-  background: #131313;
+  background: #ede9df;
   span { font-size: 11px; color: #5d5f5f; display: flex; align-items: center; gap: 4px; }
   kbd {
-    font-size: 10px; color: #8e9192; background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12); border-radius: 4px;
+    font-size: 10px; color: #8e9192; background: rgba(35,34,32,0.06);
+    border: 1px solid rgba(35,34,32,0.12); border-radius: 4px;
     padding: 1px 5px; font-family: inherit;
   }
 }

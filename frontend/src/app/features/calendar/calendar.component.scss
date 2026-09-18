@@ -3,12 +3,12 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 1px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(35,34,32,0.12);
   height: 100%;
 }
 
 .cal-header-cell {
-  background: #131313;
+  background: #ede9df;
   padding: 10px 8px;
   text-align: center;
   font-size: 11px;
@@ -19,20 +19,20 @@
 }
 
 .cal-cell {
-  background: #0a0a0a;
+  background: #f5f4f0;
   min-height: 105px;
   padding: 8px;
   cursor: pointer;
   transition: background 120ms;
 
-  &:hover { background: rgba(255, 255, 255, 0.04); }
-  &--outside { background: #050505; }
+  &:hover { background: rgba(35,34,32,0.04); }
+  &--outside { background: #ebe8e0; }
 }
 
 .cal-date-num {
   font-size: 13px;
   font-weight: 500;
-  color: #ffffff;
+  color: #232220;
   width: 24px;
   height: 24px;
   display: inline-flex;
@@ -41,7 +41,7 @@
   border-radius: 50%;
   margin-bottom: 5px;
 
-  &--today  { background: #ffffff; color: #000000; }
+  &--today  { background: #232220; color: #f5f4f0; }
   &--outside { color: #444748; }
 }
 
@@ -56,7 +56,7 @@
   text-overflow: ellipsis;
   cursor: pointer;
   transition: transform 100ms;
-  color: #ffffff;
+  color: #232220;
 
   &:hover { transform: scale(1.02); }
 }
@@ -66,12 +66,12 @@
   background: rgba(10, 10, 10, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(35,34,32,0.12);
 }
 
 // ── Backlog count pill ────────────────────────────────────
 .backlog-count {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(35,34,32,0.08);
   color: #c4c7c8;
   font-size: 11px;
   font-weight: 500;
@@ -96,9 +96,9 @@
     border: 1px solid rgba(255, 180, 171, 0.25);
   }
   &--design {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(35,34,32,0.06);
     color: #c4c7c8;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(35,34,32,0.15);
   }
   &--dev {
     background: rgba(142, 195, 255, 0.08);

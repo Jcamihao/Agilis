@@ -1,108 +1,58 @@
-const defaultColors = require('tailwindcss/colors');
-
-// Reverses a Tailwind hue's shade axis (50<->950, 100<->900, …, 500 fixed).
-// Light-mode usage in this codebase is: bg-{hue}-50/100 for a pale badge
-// background, text-{hue}-600/700 for readable saturated text, border-{hue}-200
-// for a subtle divider. Reversing the axis makes bg-{hue}-50 resolve to the
-// hue's near-black 950 tone (a dark tinted chip) and text-{hue}-600 resolve to
-// the hue's light 400 tone (bright enough to read on black) — same shade
-// tokens, correct dark-mode roles, zero per-file template changes needed.
-const SHADE_PAIRS = [[50, 950], [100, 900], [200, 800], [300, 700], [400, 600], [500, 500]];
-function invertHue(name) {
-  const scale = defaultColors[name];
-  if (!scale) return undefined;
-  const out = {};
-  for (const [a, b] of SHADE_PAIRS) {
-    out[a] = scale[b];
-    out[b] = scale[a];
-  }
-  return out;
+// Swiss Vanguard Studio — light (paper) is the default; dark (the original
+// black-canvas take) is a toggleable feature. Colors below reference CSS
+// custom properties (RGB triples, defined in src/styles/main.scss) instead
+// of literal hex, using Tailwind's `rgb(var(--x) / <alpha-value>)` pattern —
+// that's what lets a single `bg-slate-500` / `bg-primary-600` / `bg-surface`
+// class repaint itself when `[data-theme="dark"]` flips the variables,
+// with no per-component template changes.
+function v(name) {
+  return `rgb(var(${name}) / <alpha-value>)`;
 }
-const invertedHues = Object.fromEntries(
-  ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky',
-   'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
-    .map((name) => [name, invertHue(name)]),
-);
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{html,ts,scss}'],
-  darkMode: 'class',
+  darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
-        ...invertedHues,
-        // ── Swiss Vanguard Studio — monochrome system ──────────────────────
-        // `slate` / `gray` are remapped project-wide so that raw Tailwind
-        // utility classes (text-slate-600, bg-gray-50, …) already used across
-        // components fall into the new palette without per-file edits.
-        // `white` / `black` stay literal — too many templates rely on
-        // text-white/bg-black meaning true white/black to safely invert them.
-        // Inverted role-for-role: light-mode slate-50 (subtle bg) → dark
-        // elevated tone; slate-900 (primary text) → near-white. Monotonic
-        // dark→light so hover:bg-slate-50 still reads as "more elevated".
         slate: {
-          50:  '#1a1a1a',
-          100: '#242424',
-          200: '#333333',
-          300: '#4a4a4a',
-          400: '#737373',
-          500: '#8e9192',
-          600: '#a8abac',
-          700: '#c4c7c8',
-          800: '#e2e2e2',
-          900: '#f5f5f5',
-          950: '#ffffff',
+          50:  v('--c-50'),  100: v('--c-100'), 200: v('--c-200'), 300: v('--c-300'),
+          400: v('--c-400'), 500: v('--c-500'), 600: v('--c-600'), 700: v('--c-700'),
+          800: v('--c-800'), 900: v('--c-900'), 950: v('--c-950'),
         },
         gray: {
-          50:  '#0e0e0e',
-          100: '#1b1b1b',
-          200: '#1f1f1f',
-          300: '#2a2a2a',
-          400: '#353535',
-          500: '#444748',
-          600: '#8e9192',
-          700: '#c4c7c8',
-          800: '#e2e2e2',
-          900: '#f5f5f5',
-          950: '#ffffff',
+          50:  v('--c-50'),  100: v('--c-100'), 200: v('--c-200'), 300: v('--c-300'),
+          400: v('--c-400'), 500: v('--c-500'), 600: v('--c-600'), 700: v('--c-700'),
+          800: v('--c-800'), 900: v('--c-900'), 950: v('--c-950'),
         },
-        // primary-600/500 (the "main brand color" weight most templates use
-        // for buttons/links/icons) = white. Low numbers (pale-tint chip
-        // backgrounds in light mode) become dark elevated tones instead.
+        // primary-600 is the app's main action fill (dark charcoal in light
+        // mode, white in dark mode) — see --p-* variables.
         primary: {
-          50:  '#1a1a1a',
-          100: '#242424',
-          200: '#333333',
-          300: '#5d5f5f',
-          400: '#8e9192',
-          500: '#c4c7c8',
-          600: '#ffffff',
-          700: '#e2e2e2',
-          800: '#c4c7c8',
-          900: '#8e9192',
-          950: '#5d5f5f',
+          50:  v('--p-50'),  100: v('--p-100'), 200: v('--p-200'), 300: v('--p-300'),
+          400: v('--p-400'), 500: v('--p-500'), 600: v('--p-600'), 700: v('--p-700'),
+          800: v('--p-800'), 900: v('--p-900'), 950: v('--p-950'),
         },
         surface: {
-          DEFAULT:       '#000000',
-          secondary:     '#0a0a0a',
-          tertiary:      '#131313',
-          border:        'rgba(255,255,255,0.12)',
-          'border-strong': 'rgba(255,255,255,0.38)',
+          DEFAULT:       v('--c-surface'),
+          secondary:     v('--c-canvas'),
+          tertiary:      v('--c-surface-2'),
+          border:        'rgb(var(--c-border) / 0.12)',
+          'border-strong': 'rgb(var(--c-border) / 0.35)',
         },
         sidebar: {
-          DEFAULT:    '#000000',
-          hover:      'rgba(255,255,255,0.04)',
-          active:     'rgba(255,255,255,0.08)',
-          border:     'rgba(255,255,255,0.12)',
-          text:       '#737373',
-          'text-hover':   '#d4d4d4',
-          'text-active':  '#ffffff',
+          DEFAULT:    v('--c-surface'),
+          hover:      'rgb(var(--c-border) / 0.04)',
+          active:     'rgb(var(--c-border) / 0.08)',
+          border:     'rgb(var(--c-border) / 0.12)',
+          text:       v('--c-600'),
+          'text-hover':   v('--c-800'),
+          'text-active':  v('--c-900'),
         },
-        success: { DEFAULT: '#7cd992', light: 'rgba(124,217,146,0.12)', dark: '#3a7a4a' },
-        warning: { DEFAULT: '#e8c468', light: 'rgba(232,196,104,0.12)', dark: '#8a6d1f' },
-        danger:  { DEFAULT: '#ffb4ab', light: 'rgba(255,180,171,0.12)', dark: '#93000a' },
-        info:    { DEFAULT: '#8ec3ff', light: 'rgba(142,195,255,0.12)', dark: '#2a5d94' },
+        success: { DEFAULT: v('--f-success'), light: 'rgb(var(--f-success) / 0.1)', dark: v('--f-success') },
+        warning: { DEFAULT: v('--f-warning'), light: 'rgb(var(--f-warning) / 0.1)', dark: v('--f-warning') },
+        danger:  { DEFAULT: v('--f-danger'),  light: 'rgb(var(--f-danger) / 0.1)',  dark: v('--f-danger') },
+        info:    { DEFAULT: v('--f-info'),    light: 'rgb(var(--f-info) / 0.1)',    dark: v('--f-info') },
       },
       fontFamily: {
         sans: ['Hanken Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
@@ -136,7 +86,7 @@ module.exports = {
         '2xl': '0px',
         '3xl': '0px',
       },
-      // No drop shadows — depth comes from hairline borders + translucent layers.
+      // No drop shadows — depth comes from hairline borders, not elevation.
       boxShadow: {
         'xs':         'none',
         'sm':         'none',
@@ -149,7 +99,7 @@ module.exports = {
         'card-hover': 'none',
         'primary':    'none',
         'inner':      'none',
-        'glass':      '0 8px 32px rgb(0 0 0 / 0.4)',
+        'glass':      '0 8px 32px rgb(var(--c-border) / 0.15)',
         'none':       'none',
       },
       animation: {
