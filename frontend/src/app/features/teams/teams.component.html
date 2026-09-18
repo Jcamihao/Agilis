@@ -350,7 +350,7 @@
                                 <button (click)="changeRole(member.userId, r.key)"
                                         class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors"
                                         [class.bg-primary-600]="member.role === r.key"
-                                        [class.text-white]="member.role === r.key"
+                                        [class.text-on-primary]="member.role === r.key"
                                         [class.border-primary-600]="member.role === r.key"
                                         [class.bg-slate-50]="member.role !== r.key"
                                         [class.text-slate-600]="member.role !== r.key"

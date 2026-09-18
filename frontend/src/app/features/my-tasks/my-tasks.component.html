@@ -35,7 +35,7 @@
                 [class.border-slate-200]="selectedStatuses().length === 0">
           <span class="material-symbols-rounded text-base">filter_list</span>
           Status
-          @if (selectedStatuses().length > 0) { <span class="bg-primary-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedStatuses().length }}</span> }
+          @if (selectedStatuses().length > 0) { <span class="bg-primary-600 text-on-primary rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedStatuses().length }}</span> }
           <span class="material-symbols-rounded text-base">expand_more</span>
         </button>
         @if (openDropdown() === 'status') {
@@ -65,7 +65,7 @@
                 [class.border-slate-200]="selectedPriorities().length === 0">
           <span class="material-symbols-rounded text-base">flag</span>
           Prioridade
-          @if (selectedPriorities().length > 0) { <span class="bg-primary-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedPriorities().length }}</span> }
+          @if (selectedPriorities().length > 0) { <span class="bg-primary-600 text-on-primary rounded-full w-4 h-4 text-[10px] flex items-center justify-center">{{ selectedPriorities().length }}</span> }
           <span class="material-symbols-rounded text-base">expand_more</span>
         </button>
         @if (openDropdown() === 'priority') {

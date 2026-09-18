@@ -27,7 +27,7 @@
           <button (click)="activeFilter.set(f.key)"
                   class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   [class.bg-primary-600]="activeFilter() === f.key"
-                  [class.text-white]="activeFilter() === f.key"
+                  [class.text-on-primary]="activeFilter() === f.key"
                   [class.bg-[rgb(var(--c-surface))]]="activeFilter() !== f.key"
                   [class.text-slate-600]="activeFilter() !== f.key"
                   [class.border]="activeFilter() !== f.key"

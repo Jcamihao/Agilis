@@ -49,6 +49,9 @@ module.exports = {
           'text-hover':   v('--c-800'),
           'text-active':  v('--c-900'),
         },
+        // text/icon color for content sitting on a bg-primary-600 fill —
+        // use instead of text-white, since primary-600 flips light<->dark.
+        'on-primary': v('--on-primary'),
         success: { DEFAULT: v('--f-success'), light: 'rgb(var(--f-success) / 0.1)', dark: v('--f-success') },
         warning: { DEFAULT: v('--f-warning'), light: 'rgb(var(--f-warning) / 0.1)', dark: v('--f-warning') },
         danger:  { DEFAULT: v('--f-danger'),  light: 'rgb(var(--f-danger) / 0.1)',  dark: v('--f-danger') },
