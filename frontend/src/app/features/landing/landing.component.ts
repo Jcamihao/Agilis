@@ -19,6 +19,26 @@ const PILLS_REVEAL_DELAY_MS = 400;
 const COPY_TOOLTIP_DURATION_MS = 1800;
 const CONTACT_EMAIL = 'contato@agilis.app';
 
+interface FeatureCard {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface Differentiator {
+  title: string;
+  description: string;
+}
+
+interface PricingPlan {
+  name: string;
+  tagline: string;
+  features: string[];
+  ctaLabel: string;
+  ctaLink: string;
+  highlight?: boolean;
+}
+
 @Component({
   selector: 'ag-landing',
   standalone: true,
@@ -36,6 +56,84 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   readonly menuOpen = signal(false);
   readonly copied = signal(false);
   readonly contactEmail = CONTACT_EMAIL;
+  readonly currentYear = new Date().getFullYear();
+
+  readonly features: FeatureCard[] = [
+    {
+      icon: 'view_kanban',
+      title: 'Kanban Inteligente',
+      description: 'Arraste, solte e acompanhe tudo em tempo real, com campos personalizados pro fluxo da sua equipe.',
+    },
+    {
+      icon: 'account_tree',
+      title: 'Gantt & Sprints',
+      description: 'Planeje prazos e dependências visualmente, e rode sprints com metas claras pro time inteiro.',
+    },
+    {
+      icon: 'flag',
+      title: 'OKRs & Health Score',
+      description: 'Conecte metas ao trabalho do dia a dia e veja a saúde de cada projeto em tempo real.',
+    },
+    {
+      icon: 'smart_toy',
+      title: 'Assistente Agilis IA',
+      description: 'Resumos, alertas de risco e sugestões — sua copiloto acompanha o que importa, sem você pedir.',
+    },
+    {
+      icon: 'bolt',
+      title: 'Automações & Webhooks',
+      description: 'Regras sem código pra tarefas repetitivas, e integrações via webhook com o que você já usa.',
+    },
+    {
+      icon: 'insights',
+      title: 'Relatórios & Portfólio',
+      description: 'Visão consolidada de múltiplos projetos pra quem decide, sem precisar pedir status a ninguém.',
+    },
+  ];
+
+  readonly differentiators: Differentiator[] = [
+    {
+      title: 'Multiempresa de verdade',
+      description: 'Empresas, times e membros com permissões próprias — não é um plano único disfarçado de multiusuário.',
+    },
+    {
+      title: 'Segurança que não expõe detalhes',
+      description: 'Conexão criptografada e mensagens de erro genéricas — nada de stack trace na tela de quem não deveria ver.',
+    },
+    {
+      title: 'Design que reduz ruído',
+      description: 'Sem sombra, sem enfeite. Hierarquia clara pra você achar o que precisa em segundos, não minutos.',
+    },
+    {
+      title: 'Claro ou escuro, sua escolha',
+      description: 'Tema alternável, com a mesma consistência visual em cada tela do produto.',
+    },
+  ];
+
+  readonly pricingPlans: PricingPlan[] = [
+    {
+      name: 'Starter',
+      tagline: 'Pra times pequenos validando o fluxo.',
+      features: ['Kanban, Gantt e Calendário', 'Minhas Tarefas e Notificações', '1 empresa'],
+      ctaLabel: 'Testar grátis',
+      ctaLink: '/auth/register',
+    },
+    {
+      name: 'Business',
+      tagline: 'Pra operações com múltiplos times e projetos.',
+      features: ['Tudo do Starter', 'OKRs, Automações e Portfólio', 'Múltiplas equipes e empresas'],
+      ctaLabel: 'Falar com vendas',
+      ctaLink: '#contato',
+      highlight: true,
+    },
+    {
+      name: 'Enterprise',
+      tagline: 'Pra quem precisa de controle e suporte dedicado.',
+      features: ['Tudo do Business', 'Auditoria completa e SLA', 'Suporte prioritário'],
+      ctaLabel: 'Falar com vendas',
+      ctaLink: '#contato',
+    },
+  ];
 
   private readonly zone = inject(NgZone);
 

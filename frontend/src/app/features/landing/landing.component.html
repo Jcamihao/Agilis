@@ -1,19 +1,8 @@
-<div class="relative min-h-screen select-none md:select-auto" style="color: rgb(var(--c-text));">
+<div class="relative min-h-screen select-none md:select-auto" style="color: rgb(var(--c-text)); background: rgb(var(--c-canvas));">
 
-  <!-- Background Video: plays forward, then reverses back to the start
-       (boomerang loop) instead of hard-cutting — see setupBoomerangVideo(). -->
-  <video
-    #bgVideo
-    class="bg-video"
-    src="/vids/hero_vid.mp4"
-    autoplay
-    [muted]="true"
-    playsinline
-    preload="auto"
-  ></video>
-
-  <!-- Navigation Bar -->
-  <header class="fixed top-0 left-0 w-full z-10 px-5 sm:px-8 py-4 sm:py-5 flex justify-between items-center">
+  <!-- Navigation Bar (fixed, translucent — stays legible over the video and every section below) -->
+  <header class="fixed top-0 left-0 w-full z-20 px-5 sm:px-8 py-4 sm:py-5 flex justify-between items-center"
+          style="background: rgb(var(--c-canvas) / 0.75); backdrop-filter: blur(10px); border-bottom: 1px solid rgb(var(--c-border) / 0.08);">
     <!-- Logo -->
     <a routerLink="/" class="flex items-center gap-3">
       <span class="font-medium text-[21px] sm:text-[26px] tracking-tight" style="color: rgb(var(--c-text));">
@@ -71,72 +60,271 @@
     <a routerLink="/auth/login" (click)="closeMenu()" class="text-[32px] font-medium underline underline-offset-4 hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Entrar</a>
   </div>
 
-  <!-- Hero Section -->
-  <main class="relative z-[1] w-full h-screen flex flex-col justify-end pb-12 md:justify-center md:pb-0 px-5 sm:px-8 md:px-10 overflow-hidden">
-    <div class="max-w-xl relative z-10">
+  <!-- ═══════ HERO ═══════ -->
+  <section class="relative w-full h-screen overflow-hidden">
+    <!-- Background Video: plays forward, then reverses back to the start
+         (boomerang loop) instead of hard-cutting — see setupBoomerangVideo(). -->
+    <video
+      #bgVideo
+      class="bg-video"
+      src="/vids/hero_vid.mp4"
+      autoplay
+      [muted]="true"
+      playsinline
+      preload="auto"
+    ></video>
 
-      <!-- Blurred Intro Label -->
-      <div
-        class="blurred-intro mb-5 sm:mb-6 select-none font-normal"
-        style="font-size: clamp(18px, 4vw, 26px); line-height: 1.3; color: rgb(var(--c-text));"
-      >
-        Olá, essa é a Assistente Agilis IA,<br>
-        sua copiloto de produtividade e gestão.
+    <main class="relative z-[1] w-full h-full flex flex-col justify-end pb-12 md:justify-center md:pb-0 px-5 sm:px-8 md:px-10">
+      <div class="max-w-xl relative z-10">
+
+        <!-- Blurred Intro Label -->
+        <div
+          class="blurred-intro mb-5 sm:mb-6 select-none font-normal"
+          style="font-size: clamp(18px, 4vw, 26px); line-height: 1.3; color: rgb(var(--c-text));"
+        >
+          Olá, essa é a Assistente Agilis IA,<br>
+          sua copiloto de produtividade e gestão.
+        </div>
+
+        <!-- Typewriter Text -->
+        <p
+          class="mb-5 sm:mb-6 font-normal"
+          style="font-size: clamp(18px, 4vw, 26px); line-height: 1.35; min-height: 54px; color: rgb(var(--c-text));"
+        ><span>{{ typedText() }}</span><span
+            class="inline-block w-[2px] h-[1.1em] align-middle ml-[2px]"
+            [class.animate-blink]="showCursor()"
+            [class.opacity-0]="!showCursor()"
+            style="background: rgb(var(--c-text));"></span></p>
+
+        <!-- Action Pills -->
+        <div
+          class="flex flex-wrap gap-y-1 transition-all duration-500 ease-out"
+          [class.opacity-0]="!pillsVisible()"
+          [class.translate-y-2]="!pillsVisible()"
+          [class.opacity-100]="pillsVisible()"
+          [class.translate-y-0]="pillsVisible()"
+        >
+          <a routerLink="/auth/register"
+             class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
+            Testar grátis
+          </a>
+          <a href="#produto"
+             class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
+            Ver funcionalidades
+          </a>
+          <a href="#contato"
+             class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
+            Falar com vendas
+          </a>
+          <a href="#como-funciona"
+             class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
+            Ver como funciona
+          </a>
+
+          <!-- Outline pill: copy email -->
+          <button
+            type="button"
+            (click)="copyEmail()"
+            class="landing-pill landing-pill--outline inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap gap-2 sm:gap-3 transition-colors duration-200 relative group"
+          >
+            <span>Fale conosco: <span class="underline underline-offset-1">{{ contactEmail }}</span></span>
+            <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2">
+              <rect x="3.5" y="1" width="6.5" height="7.5" rx="1" />
+              <path d="M2 3.5H1.5C1.22386 3.5 1 3.72386 1 4V10C1 10.2761 1.22386 10.5 1.5 10.5H7.5C7.77614 10.5 8 10.2761 8 10V9.5" />
+            </svg>
+            <span class="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] px-2 py-0.5 rounded opacity-0 transition-opacity pointer-events-none"
+                  style="background: rgb(var(--c-text)); color: rgb(var(--c-canvas));"
+                  [class.opacity-100]="copied()">Copiado!</span>
+          </button>
+        </div>
+
+      </div>
+    </main>
+  </section>
+
+  <!-- ═══════ PRODUTO ═══════ -->
+  <section id="produto" class="relative z-[1] px-5 sm:px-8 md:px-10 py-20 md:py-28">
+    <div class="max-w-6xl mx-auto">
+      <div class="ag-section-badge">
+        <span class="ag-section-num">01</span>
+        <span class="ag-section-label">Produto</span>
+      </div>
+      <h2 class="text-[28px] sm:text-[36px] md:text-[42px] font-medium leading-[1.15] tracking-[-0.02em] mb-4 max-w-2xl"
+          style="color: rgb(var(--c-text));">
+        Tudo que sua operação precisa, num só lugar
+      </h2>
+      <p class="text-[15px] sm:text-[16px] leading-[1.6] max-w-xl mb-12" style="color: rgb(var(--c-500));">
+        Do planejamento à entrega: Agilis reúne os módulos que um time de verdade usa todo dia,
+        sem exigir dez ferramentas coladas com fita adesiva.
+      </p>
+
+      <!-- Feature grid -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (f of features; track f.title) {
+          <div class="landing-feature-card ag-card p-6">
+            <span class="material-symbols-rounded text-[26px] mb-4 block" style="color: rgb(var(--c-text));">{{ f.icon }}</span>
+            <h3 class="text-[16px] font-medium mb-1.5" style="color: rgb(var(--c-text));">{{ f.title }}</h3>
+            <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">{{ f.description }}</p>
+          </div>
+        }
       </div>
 
-      <!-- Typewriter Text -->
-      <p
-        class="mb-5 sm:mb-6 font-normal"
-        style="font-size: clamp(18px, 4vw, 26px); line-height: 1.35; min-height: 54px; color: rgb(var(--c-text));"
-      ><span>{{ typedText() }}</span><span
-          class="inline-block w-[2px] h-[1.1em] align-middle ml-[2px]"
-          [class.animate-blink]="showCursor()"
-          [class.opacity-0]="!showCursor()"
-          style="background: rgb(var(--c-text));"></span></p>
+      <!-- Como funciona -->
+      <div id="como-funciona" class="mt-20 grid sm:grid-cols-3 gap-8 scroll-mt-24">
+        <div class="flex flex-col gap-2">
+          <span class="text-[13px] font-medium" style="color: rgb(var(--c-border) / 0.5);">01</span>
+          <h4 class="text-[15px] font-medium" style="color: rgb(var(--c-text));">Crie sua empresa e convide o time</h4>
+          <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">Sem etapas escondidas — em minutos você já tem uma empresa e membros dentro do Agilis.</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <span class="text-[13px] font-medium" style="color: rgb(var(--c-border) / 0.5);">02</span>
+          <h4 class="text-[15px] font-medium" style="color: rgb(var(--c-text));">Organize projetos do seu jeito</h4>
+          <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">Kanban, Gantt, sprints ou lista — escolha a visão que faz sentido pra cada projeto.</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <span class="text-[13px] font-medium" style="color: rgb(var(--c-border) / 0.5);">03</span>
+          <h4 class="text-[15px] font-medium" style="color: rgb(var(--c-text));">Acompanhe sem precisar perguntar</h4>
+          <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">Métricas, health score e a Assistente Agilis IA avisam o que precisa de atenção.</p>
+        </div>
+      </div>
 
-      <!-- Action Pills -->
-      <div
-        class="flex flex-wrap gap-y-1 transition-all duration-500 ease-out"
-        [class.opacity-0]="!pillsVisible()"
-        [class.translate-y-2]="!pillsVisible()"
-        [class.opacity-100]="pillsVisible()"
-        [class.translate-y-0]="pillsVisible()"
-      >
-        <a routerLink="/auth/register"
-           class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
-          Testar grátis
-        </a>
-        <a href="#produto"
-           class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
-          Ver funcionalidades
-        </a>
-        <a href="#contato"
-           class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
-          Falar com vendas
-        </a>
-        <a href="#sobre"
-           class="landing-pill inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap transition-colors duration-200">
-          Ver como funciona
-        </a>
+      <!-- Diferenciais -->
+      <div class="mt-20 pt-16" style="border-top: 1px solid rgb(var(--c-border) / 0.1);">
+        <h3 class="text-[11px] font-medium uppercase tracking-[0.08em] mb-8" style="color: rgb(var(--c-500));">
+          Por que Agilis
+        </h3>
+        <div class="grid sm:grid-cols-2 gap-x-10 gap-y-8">
+          @for (d of differentiators; track d.title) {
+            <div class="flex gap-4">
+              <span class="ag-glyph text-[20px] leading-none flex-shrink-0 mt-0.5" style="color: rgb(var(--c-border) / 0.5);">✳︎</span>
+              <div>
+                <h4 class="text-[15px] font-medium mb-1" style="color: rgb(var(--c-text));">{{ d.title }}</h4>
+                <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">{{ d.description }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- Outline pill: copy email -->
+  <!-- ═══════ PREÇOS ═══════ -->
+  <section id="precos" class="relative z-[1] px-5 sm:px-8 md:px-10 py-20 md:py-28" style="background: rgb(var(--c-surface));">
+    <div class="max-w-6xl mx-auto">
+      <div class="ag-section-badge">
+        <span class="ag-section-num">02</span>
+        <span class="ag-section-label">Preços</span>
+      </div>
+      <h2 class="text-[28px] sm:text-[36px] md:text-[42px] font-medium leading-[1.15] tracking-[-0.02em] mb-4 max-w-2xl"
+          style="color: rgb(var(--c-text));">
+        Planos que crescem com o seu time
+      </h2>
+      <p class="text-[15px] sm:text-[16px] leading-[1.6] max-w-xl mb-12" style="color: rgb(var(--c-500));">
+        Comece sozinho e evolua pra uma operação com várias equipes e empresas, sem trocar de ferramenta.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-5">
+        @for (plan of pricingPlans; track plan.name) {
+          <div class="landing-pricing-card ag-card p-8" [class.landing-pricing-card--highlight]="plan.highlight">
+            @if (plan.highlight) {
+              <span class="text-[11px] font-medium uppercase tracking-[0.08em] w-max px-2.5 py-1 rounded-full"
+                    style="background: rgb(var(--c-text)); color: rgb(var(--c-canvas));">Mais escolhido</span>
+            }
+            <h3 class="text-[20px] font-medium" style="color: rgb(var(--c-text));">{{ plan.name }}</h3>
+            <p class="text-[13.5px] leading-[1.5]" style="color: rgb(var(--c-500));">{{ plan.tagline }}</p>
+            <ul class="flex flex-col gap-2.5 flex-1">
+              @for (feat of plan.features; track feat) {
+                <li class="flex items-start gap-2 text-[13.5px]" style="color: rgb(var(--c-text));">
+                  <span class="material-symbols-rounded text-[16px] mt-0.5 flex-shrink-0" style="color: rgb(var(--c-500));">check</span>
+                  {{ feat }}
+                </li>
+              }
+            </ul>
+            @if (plan.ctaLink.startsWith('/')) {
+              <a [routerLink]="plan.ctaLink" class="ag-btn ag-btn--primary w-full justify-center">{{ plan.ctaLabel }}</a>
+            } @else {
+              <a [href]="plan.ctaLink" class="ag-btn ag-btn--secondary w-full justify-center">{{ plan.ctaLabel }}</a>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ SOBRE ═══════ -->
+  <section id="sobre" class="relative z-[1] px-5 sm:px-8 md:px-10 py-20 md:py-28">
+    <div class="max-w-3xl mx-auto">
+      <div class="ag-section-badge">
+        <span class="ag-section-num">03</span>
+        <span class="ag-section-label">Sobre</span>
+      </div>
+      <h2 class="text-[28px] sm:text-[36px] md:text-[42px] font-medium leading-[1.15] tracking-[-0.02em] mb-6"
+          style="color: rgb(var(--c-text));">
+        Gestão de projetos sem o modo apagar incêndio
+      </h2>
+      <p class="text-[16px] leading-[1.7] mb-4" style="color: rgb(var(--c-700));">
+        Agilis nasceu pra tirar a operação do time do modo reativo. Construímos uma plataforma que
+        uma equipe aprende em minutos e usa todo santo dia — sem esconder complexidade atrás de
+        telas bonitas, e sem exigir que alguém vire especialista na ferramenta só pra organizar o
+        próprio trabalho.
+      </p>
+      <p class="text-[16px] leading-[1.7] mb-10" style="color: rgb(var(--c-700));">
+        Cada módulo existe porque resolve um problema real de quem gerencia projeto, equipe ou
+        empresa — não porque "toda ferramenta de gestão tem isso".
+      </p>
+
+      <!-- Trust row -->
+      <div class="flex items-center gap-6 pt-6" style="border-top: 1px solid rgb(var(--c-border) / 0.12);">
+        <div class="flex flex-col gap-1">
+          <span class="text-[18px] font-medium leading-tight" style="color: rgb(var(--c-text));">SSL/TLS</span>
+          <span class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-500));">
+            Conexão Criptografada
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════ CONTATO ═══════ -->
+  <section id="contato" class="relative z-[1] px-5 sm:px-8 md:px-10 py-20 md:py-28" style="background: rgb(var(--c-surface));">
+    <div class="max-w-2xl mx-auto text-center flex flex-col items-center">
+      <div class="ag-section-badge">
+        <span class="ag-section-num">04</span>
+        <span class="ag-section-label">Contato</span>
+      </div>
+      <h2 class="text-[28px] sm:text-[36px] md:text-[42px] font-medium leading-[1.15] tracking-[-0.02em] mb-4"
+          style="color: rgb(var(--c-text));">
+        Bora conversar?
+      </h2>
+      <p class="text-[15px] sm:text-[16px] leading-[1.6] max-w-md mb-8" style="color: rgb(var(--c-500));">
+        Dúvida sobre planos, uma demonstração ou só quer trocar uma ideia — escreve pra gente.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3">
         <button
           type="button"
           (click)="copyEmail()"
-          class="landing-pill landing-pill--outline inline-flex items-center justify-center rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap gap-2 sm:gap-3 transition-colors duration-200 relative group"
+          class="landing-pill landing-pill--outline inline-flex items-center justify-center rounded-full text-[14px] sm:text-[15px] px-5 py-2.5 whitespace-nowrap gap-2 sm:gap-3 transition-colors duration-200 relative"
         >
-          <span>Fale conosco: <span class="underline underline-offset-1">{{ contactEmail }}</span></span>
+          <span>{{ contactEmail }}</span>
           <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2">
             <rect x="3.5" y="1" width="6.5" height="7.5" rx="1" />
             <path d="M2 3.5H1.5C1.22386 3.5 1 3.72386 1 4V10C1 10.2761 1.22386 10.5 1.5 10.5H7.5C7.77614 10.5 8 10.2761 8 10V9.5" />
           </svg>
-          <span class="absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] px-2 py-0.5 rounded opacity-0 transition-opacity pointer-events-none"
+          <span class="absolute -top-8 left-1/2 -translate-x-1/2 text-[11px] px-2 py-0.5 rounded opacity-0 transition-opacity pointer-events-none"
                 style="background: rgb(var(--c-text)); color: rgb(var(--c-canvas));"
                 [class.opacity-100]="copied()">Copiado!</span>
         </button>
+        <a routerLink="/auth/register" class="ag-btn ag-btn--primary">Testar grátis</a>
       </div>
-
     </div>
-  </main>
+  </section>
+
+  <!-- Footer -->
+  <footer class="relative z-[1] px-5 sm:px-8 md:px-10 py-8 flex flex-col sm:flex-row gap-2 items-center justify-between text-[12px]"
+          style="border-top: 1px solid rgb(var(--c-border) / 0.1); color: rgb(var(--c-500));">
+    <span>© {{ currentYear }} Agilis</span>
+    <span class="flex items-center gap-1.5">Feito com <span class="ag-glyph">✳︎</span></span>
+  </footer>
 
 </div>
