@@ -1,65 +1,5 @@
 <div class="relative min-h-screen select-none md:select-auto" style="color: rgb(var(--c-text)); background: rgb(var(--c-canvas));">
 
-  <!-- Navigation Bar (fixed, translucent — stays legible over the video and every section below) -->
-  <header class="fixed top-0 left-0 w-full z-20 px-5 sm:px-8 py-4 sm:py-5 flex justify-between items-center"
-          style="background: rgb(var(--c-canvas) / 0.75); backdrop-filter: blur(10px); border-bottom: 1px solid rgb(var(--c-border) / 0.08);">
-    <!-- Logo -->
-    <a routerLink="/" class="flex items-center gap-3">
-      <span class="font-medium text-[21px] sm:text-[26px] tracking-tight" style="color: rgb(var(--c-text));">
-        Agilis
-      </span>
-      <span class="ag-glyph ag-glyph--spin text-[25px] sm:text-[30px] select-none tracking-[-0.02em] leading-none"
-            style="color: rgb(var(--c-text));">✳︎</span>
-    </a>
-
-    <!-- Desktop Nav Links -->
-    <nav class="hidden md:flex items-center text-[18px] font-normal" style="color: rgb(var(--c-text));">
-      <a href="#produto" class="hover:opacity-60 transition-opacity">Produto</a><span class="mr-1">,</span>
-      <a href="#precos" class="hover:opacity-60 transition-opacity">Preços</a><span class="mr-1">,</span>
-      <a href="#sobre" class="hover:opacity-60 transition-opacity">Sobre</a><span class="mr-1">,</span>
-      <a href="#contato" class="hover:opacity-60 transition-opacity">Contato</a>
-    </nav>
-
-    <!-- Desktop CTA -->
-    <div class="hidden md:block">
-      <a routerLink="/auth/login" class="text-[18px] underline underline-offset-2 hover:opacity-60 transition-opacity"
-         style="color: rgb(var(--c-text));">
-        Entrar
-      </a>
-    </div>
-
-    <!-- Mobile Hamburger -->
-    <button
-      type="button"
-      (click)="toggleMenu()"
-      class="md:hidden flex flex-col justify-center items-center gap-[5px] w-8 h-8 focus:outline-none z-20 relative"
-      aria-label="Abrir menu de navegação"
-    >
-      <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
-            [style.transform]="menuOpen() ? 'translateY(7px) rotate(45deg)' : 'none'"></span>
-      <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
-            [style.opacity]="menuOpen() ? 0 : 1"></span>
-      <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
-            [style.transform]="menuOpen() ? 'translateY(-7px) rotate(-45deg)' : 'none'"></span>
-    </button>
-  </header>
-
-  <!-- Mobile Overlay -->
-  <div
-    class="fixed inset-0 backdrop-blur-sm z-[9] flex flex-col justify-center px-8 gap-8 transition-opacity duration-300 md:hidden"
-    style="background: rgb(var(--c-canvas) / 0.97);"
-    [class.opacity-100]="menuOpen()"
-    [class.opacity-0]="!menuOpen()"
-    [class.pointer-events-auto]="menuOpen()"
-    [class.pointer-events-none]="!menuOpen()"
-  >
-    <a href="#produto" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Produto</a>
-    <a href="#precos" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Preços</a>
-    <a href="#sobre" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Sobre</a>
-    <a href="#contato" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Contato</a>
-    <a routerLink="/auth/login" (click)="closeMenu()" class="text-[32px] font-medium underline underline-offset-4 hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Entrar</a>
-  </div>
-
   <!-- ═══════ HERO ═══════ -->
   <section class="relative w-full h-screen overflow-hidden">
     <!-- Background Video: plays forward, then reverses back to the start
@@ -73,6 +13,66 @@
       playsinline
       preload="auto"
     ></video>
+
+    <!-- Navigation Bar: scrolls away with the hero (not sticky), fully
+         transparent — sits directly over the video, no background of its own. -->
+    <header class="absolute top-0 left-0 w-full z-20 px-5 sm:px-8 py-4 sm:py-5 flex justify-between items-center">
+      <!-- Logo -->
+      <a routerLink="/" class="flex items-center gap-3">
+        <span class="font-medium text-[21px] sm:text-[26px] tracking-tight" style="color: rgb(var(--c-text));">
+          Agilis
+        </span>
+        <span class="ag-glyph ag-glyph--spin text-[25px] sm:text-[30px] select-none tracking-[-0.02em] leading-none"
+              style="color: rgb(var(--c-text));">✳︎</span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center text-[18px] font-normal" style="color: rgb(var(--c-text));">
+        <a href="#produto" class="hover:opacity-60 transition-opacity">Produto</a><span class="mr-1">,</span>
+        <a href="#precos" class="hover:opacity-60 transition-opacity">Preços</a><span class="mr-1">,</span>
+        <a href="#sobre" class="hover:opacity-60 transition-opacity">Sobre</a><span class="mr-1">,</span>
+        <a href="#contato" class="hover:opacity-60 transition-opacity">Contato</a>
+      </nav>
+
+      <!-- Desktop CTA -->
+      <div class="hidden md:block">
+        <a routerLink="/auth/login"
+           class="landing-pill inline-flex items-center justify-center rounded-full text-[15px] font-medium px-5 py-2 transition-colors duration-200">
+          Entrar
+        </a>
+      </div>
+
+      <!-- Mobile Hamburger -->
+      <button
+        type="button"
+        (click)="toggleMenu()"
+        class="md:hidden flex flex-col justify-center items-center gap-[5px] w-8 h-8 focus:outline-none z-20 relative"
+        aria-label="Abrir menu de navegação"
+      >
+        <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
+              [style.transform]="menuOpen() ? 'translateY(7px) rotate(45deg)' : 'none'"></span>
+        <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
+              [style.opacity]="menuOpen() ? 0 : 1"></span>
+        <span class="hamburger-bar w-6 h-[2px]" style="background: rgb(var(--c-text));"
+              [style.transform]="menuOpen() ? 'translateY(-7px) rotate(-45deg)' : 'none'"></span>
+      </button>
+    </header>
+
+    <!-- Mobile Overlay -->
+    <div
+      class="fixed inset-0 backdrop-blur-sm z-[9] flex flex-col justify-center px-8 gap-8 transition-opacity duration-300 md:hidden"
+      style="background: rgb(var(--c-canvas) / 0.97);"
+      [class.opacity-100]="menuOpen()"
+      [class.opacity-0]="!menuOpen()"
+      [class.pointer-events-auto]="menuOpen()"
+      [class.pointer-events-none]="!menuOpen()"
+    >
+      <a href="#produto" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Produto</a>
+      <a href="#precos" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Preços</a>
+      <a href="#sobre" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Sobre</a>
+      <a href="#contato" (click)="closeMenu()" class="text-[32px] font-medium hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Contato</a>
+      <a routerLink="/auth/login" (click)="closeMenu()" class="text-[32px] font-medium underline underline-offset-4 hover:opacity-60 transition-opacity" style="color: rgb(var(--c-text));">Entrar</a>
+    </div>
 
     <main class="relative z-[1] w-full h-full flex flex-col justify-end pb-12 md:justify-center md:pb-0 px-5 sm:px-8 md:px-10">
       <div class="max-w-xl relative z-10">
@@ -143,63 +143,63 @@
   </section>
 
   <!-- ═══════ PRODUTO ═══════ -->
-  <section id="produto" class="relative z-[1] px-5 sm:px-8 md:px-10 py-20 md:py-28">
+  <section id="produto" class="relative z-[1] px-5 sm:px-8 md:px-10 py-28 md:py-40">
     <div class="max-w-6xl mx-auto">
       <div class="ag-section-badge">
         <span class="ag-section-num">01</span>
         <span class="ag-section-label">Produto</span>
       </div>
-      <h2 class="text-[28px] sm:text-[36px] md:text-[42px] font-medium leading-[1.15] tracking-[-0.02em] mb-4 max-w-2xl"
+      <h2 class="text-[34px] sm:text-[44px] md:text-[54px] font-medium leading-[1.15] tracking-[-0.02em] mb-4 max-w-3xl"
           style="color: rgb(var(--c-text));">
         Tudo que sua operação precisa, num só lugar
       </h2>
-      <p class="text-[15px] sm:text-[16px] leading-[1.6] max-w-xl mb-12" style="color: rgb(var(--c-500));">
+      <p class="text-[17px] sm:text-[19px] leading-[1.65] max-w-2xl mb-14" style="color: rgb(var(--c-500));">
         Do planejamento à entrega: Agilis reúne os módulos que um time de verdade usa todo dia,
         sem exigir dez ferramentas coladas com fita adesiva.
       </p>
 
       <!-- Feature grid -->
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         @for (f of features; track f.title) {
-          <div class="landing-feature-card ag-card p-6">
-            <span class="material-symbols-rounded text-[26px] mb-4 block" style="color: rgb(var(--c-text));">{{ f.icon }}</span>
-            <h3 class="text-[16px] font-medium mb-1.5" style="color: rgb(var(--c-text));">{{ f.title }}</h3>
-            <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">{{ f.description }}</p>
+          <div class="landing-feature-card ag-card p-10">
+            <span class="material-symbols-rounded text-[30px] mb-5 block" style="color: rgb(var(--c-text));">{{ f.icon }}</span>
+            <h3 class="text-[19px] font-medium mb-2" style="color: rgb(var(--c-text));">{{ f.title }}</h3>
+            <p class="text-[15px] leading-[1.6]" style="color: rgb(var(--c-500));">{{ f.description }}</p>
           </div>
         }
       </div>
 
       <!-- Como funciona -->
-      <div id="como-funciona" class="mt-20 grid sm:grid-cols-3 gap-8 scroll-mt-24">
+      <div id="como-funciona" class="mt-24 grid sm:grid-cols-3 gap-10 scroll-mt-24">
         <div class="flex flex-col gap-2">
-          <span class="text-[13px] font-medium" style="color: rgb(var(--c-border) / 0.5);">01</span>
-          <h4 class="text-[15px] font-medium" style="color: rgb(var(--c-text));">Crie sua empresa e convide o time</h4>
-          <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">Sem etapas escondidas — em minutos você já tem uma empresa e membros dentro do Agilis.</p>
+          <span class="text-[15px] font-medium" style="color: rgb(var(--c-border) / 0.5);">01</span>
+          <h4 class="text-[19px] font-medium" style="color: rgb(var(--c-text));">Crie sua empresa e convide o time</h4>
+          <p class="text-[15px] leading-[1.6]" style="color: rgb(var(--c-500));">Sem etapas escondidas — em minutos você já tem uma empresa e membros dentro do Agilis.</p>
         </div>
         <div class="flex flex-col gap-2">
-          <span class="text-[13px] font-medium" style="color: rgb(var(--c-border) / 0.5);">02</span>
-          <h4 class="text-[15px] font-medium" style="color: rgb(var(--c-text));">Organize projetos do seu jeito</h4>
-          <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">Kanban, Gantt, sprints ou lista — escolha a visão que faz sentido pra cada projeto.</p>
+          <span class="text-[15px] font-medium" style="color: rgb(var(--c-border) / 0.5);">02</span>
+          <h4 class="text-[19px] font-medium" style="color: rgb(var(--c-text));">Organize projetos do seu jeito</h4>
+          <p class="text-[15px] leading-[1.6]" style="color: rgb(var(--c-500));">Kanban, Gantt, sprints ou lista — escolha a visão que faz sentido pra cada projeto.</p>
         </div>
         <div class="flex flex-col gap-2">
-          <span class="text-[13px] font-medium" style="color: rgb(var(--c-border) / 0.5);">03</span>
-          <h4 class="text-[15px] font-medium" style="color: rgb(var(--c-text));">Acompanhe sem precisar perguntar</h4>
-          <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">Métricas, health score e a Assistente Agilis IA avisam o que precisa de atenção.</p>
+          <span class="text-[15px] font-medium" style="color: rgb(var(--c-border) / 0.5);">03</span>
+          <h4 class="text-[19px] font-medium" style="color: rgb(var(--c-text));">Acompanhe sem precisar perguntar</h4>
+          <p class="text-[15px] leading-[1.6]" style="color: rgb(var(--c-500));">Métricas, health score e a Assistente Agilis IA avisam o que precisa de atenção.</p>
         </div>
       </div>
 
       <!-- Diferenciais -->
-      <div class="mt-20 pt-16" style="border-top: 1px solid rgb(var(--c-border) / 0.1);">
+      <div class="mt-24 pt-16" style="border-top: 1px solid rgb(var(--c-border) / 0.1);">
         <h3 class="text-[11px] font-medium uppercase tracking-[0.08em] mb-8" style="color: rgb(var(--c-500));">
           Por que Agilis
         </h3>
-        <div class="grid sm:grid-cols-2 gap-x-10 gap-y-8">
+        <div class="grid sm:grid-cols-2 gap-x-12 gap-y-10">
           @for (d of differentiators; track d.title) {
             <div class="flex gap-4">
-              <span class="ag-glyph text-[20px] leading-none flex-shrink-0 mt-0.5" style="color: rgb(var(--c-border) / 0.5);">✳︎</span>
+              <span class="ag-glyph text-[24px] leading-none flex-shrink-0 mt-0.5" style="color: rgb(var(--c-border) / 0.5);">✳︎</span>
               <div>
-                <h4 class="text-[15px] font-medium mb-1" style="color: rgb(var(--c-text));">{{ d.title }}</h4>
-                <p class="text-[13.5px] leading-[1.55]" style="color: rgb(var(--c-500));">{{ d.description }}</p>
+                <h4 class="text-[19px] font-medium mb-2" style="color: rgb(var(--c-text));">{{ d.title }}</h4>
+                <p class="text-[15px] leading-[1.6]" style="color: rgb(var(--c-500));">{{ d.description }}</p>
               </div>
             </div>
           }
@@ -209,32 +209,32 @@
   </section>
 
   <!-- ═══════ PREÇOS ═══════ -->
-  <section id="precos" class="relative z-[1] px-5 sm:px-8 md:px-10 py-20 md:py-28" style="background: rgb(var(--c-surface));">
+  <section id="precos" class="relative z-[1] px-5 sm:px-8 md:px-10 py-28 md:py-40" style="background: rgb(var(--c-surface));">
     <div class="max-w-6xl mx-auto">
       <div class="ag-section-badge">
         <span class="ag-section-num">02</span>
         <span class="ag-section-label">Preços</span>
       </div>
-      <h2 class="text-[28px] sm:text-[36px] md:text-[42px] font-medium leading-[1.15] tracking-[-0.02em] mb-4 max-w-2xl"
+      <h2 class="text-[34px] sm:text-[44px] md:text-[54px] font-medium leading-[1.15] tracking-[-0.02em] mb-4 max-w-3xl"
           style="color: rgb(var(--c-text));">
         Planos que crescem com o seu time
       </h2>
-      <p class="text-[15px] sm:text-[16px] leading-[1.6] max-w-xl mb-12" style="color: rgb(var(--c-500));">
+      <p class="text-[17px] sm:text-[19px] leading-[1.65] max-w-2xl mb-14" style="color: rgb(var(--c-500));">
         Comece sozinho e evolua pra uma operação com várias equipes e empresas, sem trocar de ferramenta.
       </p>
 
-      <div class="grid md:grid-cols-3 gap-5">
+      <div class="grid md:grid-cols-3 gap-6">
         @for (plan of pricingPlans; track plan.name) {
-          <div class="landing-pricing-card ag-card p-8" [class.landing-pricing-card--highlight]="plan.highlight">
+          <div class="landing-pricing-card ag-card p-10" [class.landing-pricing-card--highlight]="plan.highlight">
             @if (plan.highlight) {
               <span class="text-[11px] font-medium uppercase tracking-[0.08em] w-max px-2.5 py-1 rounded-full"
                     style="background: rgb(var(--c-text)); color: rgb(var(--c-canvas));">Mais escolhido</span>
             }
-            <h3 class="text-[20px] font-medium" style="color: rgb(var(--c-text));">{{ plan.name }}</h3>
-            <p class="text-[13.5px] leading-[1.5]" style="color: rgb(var(--c-500));">{{ plan.tagline }}</p>
+            <h3 class="text-[24px] font-medium" style="color: rgb(var(--c-text));">{{ plan.name }}</h3>
+            <p class="text-[15px] leading-[1.55]" style="color: rgb(var(--c-500));">{{ plan.tagline }}</p>
             <ul class="flex flex-col gap-2.5 flex-1">
               @for (feat of plan.features; track feat) {
-                <li class="flex items-start gap-2 text-[13.5px]" style="color: rgb(var(--c-text));">
+                <li class="flex items-start gap-2 text-[15px]" style="color: rgb(var(--c-text));">
                   <span class="material-symbols-rounded text-[16px] mt-0.5 flex-shrink-0" style="color: rgb(var(--c-500));">check</span>
                   {{ feat }}
                 </li>
@@ -252,23 +252,23 @@
   </section>
 
   <!-- ═══════ SOBRE ═══════ -->
-  <section id="sobre" class="relative z-[1] px-5 sm:px-8 md:px-10 py-20 md:py-28">
+  <section id="sobre" class="relative z-[1] px-5 sm:px-8 md:px-10 py-28 md:py-40">
     <div class="max-w-3xl mx-auto">
       <div class="ag-section-badge">
         <span class="ag-section-num">03</span>
         <span class="ag-section-label">Sobre</span>
       </div>
-      <h2 class="text-[28px] sm:text-[36px] md:text-[42px] font-medium leading-[1.15] tracking-[-0.02em] mb-6"
+      <h2 class="text-[34px] sm:text-[44px] md:text-[54px] font-medium leading-[1.15] tracking-[-0.02em] mb-6"
           style="color: rgb(var(--c-text));">
         Gestão de projetos sem o modo apagar incêndio
       </h2>
-      <p class="text-[16px] leading-[1.7] mb-4" style="color: rgb(var(--c-700));">
+      <p class="text-[18px] leading-[1.75] mb-5" style="color: rgb(var(--c-700));">
         Agilis nasceu pra tirar a operação do time do modo reativo. Construímos uma plataforma que
         uma equipe aprende em minutos e usa todo santo dia — sem esconder complexidade atrás de
         telas bonitas, e sem exigir que alguém vire especialista na ferramenta só pra organizar o
         próprio trabalho.
       </p>
-      <p class="text-[16px] leading-[1.7] mb-10" style="color: rgb(var(--c-700));">
+      <p class="text-[18px] leading-[1.75] mb-12" style="color: rgb(var(--c-700));">
         Cada módulo existe porque resolve um problema real de quem gerencia projeto, equipe ou
         empresa — não porque "toda ferramenta de gestão tem isso".
       </p>
@@ -276,7 +276,7 @@
       <!-- Trust row -->
       <div class="flex items-center gap-6 pt-6" style="border-top: 1px solid rgb(var(--c-border) / 0.12);">
         <div class="flex flex-col gap-1">
-          <span class="text-[18px] font-medium leading-tight" style="color: rgb(var(--c-text));">SSL/TLS</span>
+          <span class="text-[20px] font-medium leading-tight" style="color: rgb(var(--c-text));">SSL/TLS</span>
           <span class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-500));">
             Conexão Criptografada
           </span>
@@ -286,17 +286,17 @@
   </section>
 
   <!-- ═══════ CONTATO ═══════ -->
-  <section id="contato" class="relative z-[1] px-5 sm:px-8 md:px-10 py-20 md:py-28" style="background: rgb(var(--c-surface));">
+  <section id="contato" class="relative z-[1] px-5 sm:px-8 md:px-10 py-28 md:py-40" style="background: rgb(var(--c-surface));">
     <div class="max-w-2xl mx-auto text-center flex flex-col items-center">
       <div class="ag-section-badge">
         <span class="ag-section-num">04</span>
         <span class="ag-section-label">Contato</span>
       </div>
-      <h2 class="text-[28px] sm:text-[36px] md:text-[42px] font-medium leading-[1.15] tracking-[-0.02em] mb-4"
+      <h2 class="text-[34px] sm:text-[44px] md:text-[54px] font-medium leading-[1.15] tracking-[-0.02em] mb-4"
           style="color: rgb(var(--c-text));">
         Bora conversar?
       </h2>
-      <p class="text-[15px] sm:text-[16px] leading-[1.6] max-w-md mb-8" style="color: rgb(var(--c-500));">
+      <p class="text-[17px] sm:text-[19px] leading-[1.65] max-w-lg mb-10" style="color: rgb(var(--c-500));">
         Dúvida sobre planos, uma demonstração ou só quer trocar uma ideia — escreve pra gente.
       </p>
 
