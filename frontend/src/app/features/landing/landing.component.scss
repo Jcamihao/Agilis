@@ -17,6 +17,29 @@
   object-fit: cover;
   object-position: 70% center;
   pointer-events: none;
+  filter: brightness(1) contrast(1);
+  transition: filter 400ms ease;
+}
+
+// Dark mode: dim + add contrast to the footage itself, plus a dark scrim on
+// top, so the hero reads as genuinely dark instead of just the text/pills
+// flipping color over an unchanged bright video. Light mode is untouched —
+// :host-context matches the `[data-theme="dark"]` attribute set on <html>.
+:host-context([data-theme='dark']) .bg-video {
+  filter: brightness(0.6) contrast(1.15);
+}
+
+.bg-video-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: transparent;
+  transition: background 400ms ease;
+}
+
+:host-context([data-theme='dark']) .bg-video-scrim {
+  background: rgb(var(--c-canvas) / 0.5);
 }
 
 .blurred-intro {

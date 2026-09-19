@@ -519,7 +519,7 @@ body {
 
 .mat-mdc-menu-panel {
   border-radius: 0 !important;
-  background: rgba(245, 244, 240, 0.96) !important;
+  background: rgb(var(--c-surface) / 0.96) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
   border: 1px solid rgb(var(--c-border) / 0.12) !important;
@@ -534,7 +534,7 @@ body {
   border-radius: 0 !important;
   margin: 0 !important;
   letter-spacing: -0.01em !important;
-  color: rgb(var(--p-600)) !important;
+  color: rgb(var(--c-text)) !important;
 }
 
 .mat-drawer { border-right: 1px solid var(--color-border) !important; }
@@ -576,7 +576,7 @@ body {
 }
 
 .glass {
-  background: rgba(245, 244, 240, 0.75);
+  background: rgb(var(--c-surface) / 0.75);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid rgb(var(--c-border) / 0.12);
