@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ThemeService } from '../../core/services/theme.service';
 
 const TYPEWRITER_TEXT =
   'Que bom te ver por aqui. Times organizados tendem a nos encontrar. O que vamos organizar hoje?';
@@ -57,6 +58,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   readonly copied = signal(false);
   readonly contactEmail = CONTACT_EMAIL;
   readonly currentYear = new Date().getFullYear();
+  readonly themeSvc = inject(ThemeService);
 
   readonly features: FeatureCard[] = [
     {
