@@ -2,7 +2,7 @@
 
 ## Product Surface
 
-- IA Operacional: OpenAI com contexto real do workspace para resumos, planos de ação, gargalos, sugestão de responsáveis e perguntas executivas.
+- IA Operacional: Selah IA (serviço interno) com contexto real do workspace para resumos, planos de ação, gargalos, sugestão de responsáveis e perguntas executivas.
 - Health Score: pontuação 0-100 por empresa, equipe e projeto usando atraso, produtividade, SLA, backlog e inatividade.
 - WhatsApp Integration: Evolution API para cobranças, lembretes e alertas manuais ou por automação.
 - Process Center: processos versionados com documentação, checklist, tarefas, aprovações/automações e execuções rastreáveis.
@@ -63,9 +63,9 @@ Tabelas V4:
 
 ## AI Strategy
 
-- Modelo padrão: `gpt-4o-mini`.
-- Prompt com métricas reais e contexto resumido.
-- Baixa temperatura para respostas operacionais.
+- Toda a IA passa pelo Selah IA (`/v1/adapters/agilis/workspace/*`): prompts específicos do Agilis, provedor e modelo configurados no Selah, saída estruturada e validada.
+- O Agilis só monta os dados do workspace, chama o Selah e persiste o histórico das conversas.
+- Prompt com métricas reais e contexto resumido; temperatura baixa nas respostas operacionais.
 - Persistência de histórico por conversa.
 - Próximo passo: RAG com documentos do Process Center e permissões por empresa.
 

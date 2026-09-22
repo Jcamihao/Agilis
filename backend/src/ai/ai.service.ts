@@ -1,38 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Observable, Subject } from 'rxjs';
+import { formatActionPlan, formatAssignees, formatBottlenecks, formatBullets } from './ai.formatters';
+import { SelahAiClientService, SelahAiError, SelahWorkspaceContext } from './selah-ai-client.service';
 
-interface OllamaChatMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-interface WorkspaceContext {
+interface WorkspaceContext extends SelahWorkspaceContext {
   companyId: string;
-  totalTasks: number;
-  overdueTasks: number;
-  completedTasks: number;
-  activeProjects: number;
-  topOverdueUsers: { name: string; count: number }[];
-  backlogCount: number;
-  teamCount: number;
 }
 
+const clip = (text: string | null | undefined, max: number) => String(text ?? '').slice(0, max);
+
+// Toda a IA (prompts, provedor, modelo) vive no Selah IA; aqui ficam so os dados do Agilis e a persistencia das conversas.
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
-  private readonly ollamaUrl: string;
-  private readonly ollamaModel: string;
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: ConfigService,
-  ) {
-    this.ollamaUrl   = this.config.get<string>('OLLAMA_URL')   ?? 'http://localhost:11434';
-    this.ollamaModel = this.config.get<string>('OLLAMA_MODEL') ?? 'mistral';
-    this.logger.log(`AI Provider: Ollama | Model: ${this.ollamaModel} | URL: ${this.ollamaUrl}`);
-  }
+    private readonly selah: SelahAiClientService,
+  ) {}
 
   // ── Workspace context ─────────────────────────────────────────────────────
 
@@ -65,24 +50,27 @@ export class AiService {
     return { companyId, totalTasks: total, overdueTasks: overdue, completedTasks: completed, activeProjects: projects, topOverdueUsers, backlogCount: total - completed - overdue, teamCount: teams };
   }
 
-  private buildSystemPrompt(ctx: WorkspaceContext): string {
-    return `Você é um assistente de IA integrado ao Agilis, uma plataforma de gestão operacional.
+  private toWorkspacePayload(ctx: WorkspaceContext): SelahWorkspaceContext {
+    const { companyId: _companyId, ...workspace } = ctx;
+    return workspace;
+  }
 
-CONTEXTO DO WORKSPACE (dados em tempo real):
-- Total de tarefas: ${ctx.totalTasks}
-- Tarefas atrasadas: ${ctx.overdueTasks}
-- Tarefas concluídas: ${ctx.completedTasks}
-- Tarefas em backlog: ${ctx.backlogCount}
-- Projetos ativos: ${ctx.activeProjects}
-- Equipes: ${ctx.teamCount}
-- Taxa de conclusão: ${ctx.totalTasks > 0 ? Math.round((ctx.completedTasks / ctx.totalTasks) * 100) : 0}%
-${ctx.topOverdueUsers.length > 0 ? `- Usuários com mais atrasos: ${ctx.topOverdueUsers.map((u) => `${u.name} (${u.count})`).join(', ')}` : ''}
+  private describeError(err: unknown): string {
+    if (err instanceof SelahAiError) {
+      if (err.status === 0) return 'O assistente de IA ainda não está configurado.';
+      if (err.status === 429) {
+        return err.retryAfterSeconds
+          ? `O assistente de IA está com muitas solicitações. Tente novamente em ${err.retryAfterSeconds}s.`
+          : 'O assistente de IA está com muitas solicitações. Tente novamente em instantes.';
+      }
+    }
+    return 'O assistente de IA está indisponível no momento. Tente novamente em instantes.';
+  }
 
-REGRAS:
-- Responda sempre em português do Brasil
-- Seja direto, objetivo e útil
-- Use dados reais do contexto nas respostas
-- Formate listas com marcadores quando apropriado`;
+  private fail(err: unknown, operation: string): never {
+    const status = err instanceof SelahAiError ? err.status : 'n/a';
+    this.logger.error(`Selah IA falhou em ${operation} (status=${status})`);
+    throw new ServiceUnavailableException(this.describeError(err));
   }
 
   // ── Chat ──────────────────────────────────────────────────────────────────
@@ -106,7 +94,14 @@ REGRAS:
     });
 
     try {
-      const reply = await this.ollamaChat(this.buildSystemPrompt(ctx), history, message);
+      const reply = await this.selah.chat({
+        message,
+        history: history.map((m) => ({
+          role: (m.role === 'assistant' ? 'assistant' : 'user') as 'user' | 'assistant',
+          content: clip(m.content, 4000),
+        })),
+        workspace: this.toWorkspacePayload(ctx),
+      });
 
       await this.prisma.aiMessage.createMany({
         data: [
@@ -116,44 +111,10 @@ REGRAS:
       });
 
       return { reply, conversationId: convId };
-    } catch (err: any) {
-      this.logger.error(`Ollama error: ${err.message}`);
-      return { reply: `❌ Erro ao processar: ${err.message}`, conversationId: convId! };
+    } catch (err: unknown) {
+      this.logger.error(`Selah IA falhou no chat (status=${err instanceof SelahAiError ? err.status : 'n/a'})`);
+      return { reply: `❌ ${this.describeError(err)}`, conversationId: convId! };
     }
-  }
-
-  chatStream(companyId: string, userId: string, message: string): Observable<string> {
-    const subject = new Subject<string>();
-
-    this.buildContext(companyId).then(async (ctx) => {
-      try {
-        let fullReply = '';
-        await this.ollamaChatStream(this.buildSystemPrompt(ctx), message, (chunk) => {
-          fullReply += chunk;
-          subject.next(chunk);
-        });
-
-        await this.prisma.aiConversation.create({
-          data: {
-            companyId, userId,
-            title: message.slice(0, 60),
-            messages: {
-              create: [
-                { role: 'user',      content: message, userId },
-                { role: 'assistant', content: fullReply },
-              ],
-            },
-          },
-        });
-
-        subject.complete();
-      } catch (err: any) {
-        subject.next(`❌ Erro: ${err.message}`);
-        subject.complete();
-      }
-    });
-
-    return subject.asObservable();
   }
 
   // ── Capabilities ──────────────────────────────────────────────────────────
@@ -166,15 +127,19 @@ REGRAS:
     if (!project) return 'Projeto não encontrado.';
 
     const done    = project.tasks.filter((t) => t.status === 'DONE').length;
-    const total   = project.tasks.length;
     const overdue = project.tasks.filter((t) => t.dueDate && t.dueDate < new Date() && t.status !== 'DONE');
 
-    return this.simpleCompletion(
-      `Resuma o projeto "${project.name}" em 3-4 frases executivas:
-- ${total} tarefas no total, ${done} concluídas (${total > 0 ? Math.round((done / total) * 100) : 0}%)
-- ${overdue.length} tarefas atrasadas
-${overdue.length > 0 ? `- Atrasadas: ${overdue.slice(0, 3).map((t) => t.title).join(', ')}` : ''}`,
-    );
+    try {
+      return await this.selah.summarizeProject({
+        projectName: clip(project.name, 200),
+        totalTasks: project.tasks.length,
+        doneTasks: done,
+        overdueTasks: overdue.length,
+        overdueTaskTitles: overdue.slice(0, 3).map((t) => clip(t.title, 200)),
+      });
+    } catch (err) {
+      this.fail(err, 'resumo de projeto');
+    }
   }
 
   async summarizeTask(taskId: string): Promise<string> {
@@ -187,16 +152,17 @@ ${overdue.length > 0 ? `- Atrasadas: ${overdue.slice(0, 3).map((t) => t.title).j
     });
     if (!task) return 'Tarefa não encontrada.';
 
-    const comments = task.comments.length > 0
-      ? task.comments.map((c) => `${c.author.name}: ${c.content.slice(0, 100)}`).join('\n')
-      : 'Sem comentários.';
-
-    return this.simpleCompletion(
-      `Resuma esta tarefa em 2-3 frases:
-Título: ${task.title} | Status: ${task.status} | Prioridade: ${task.priority}
-Responsável: ${task.assignee?.name ?? 'Sem responsável'}
-Comentários:\n${comments}`,
-    );
+    try {
+      return await this.selah.summarizeTask({
+        title: clip(task.title, 200),
+        status: task.status,
+        priority: task.priority,
+        assigneeName: task.assignee?.name ?? null,
+        comments: task.comments.map((c) => ({ authorName: clip(c.author.name, 120), content: clip(c.content, 1000) })),
+      });
+    } catch (err) {
+      this.fail(err, 'resumo de tarefa');
+    }
   }
 
   async generateActionPlan(projectId: string): Promise<string> {
@@ -213,20 +179,20 @@ Comentários:\n${comments}`,
     });
     if (!project) return 'Projeto não encontrado.';
 
-    const taskList = project.tasks
-      .map((t) => `- ${t.title} [${t.priority}] ${t.assignee ? `(@${t.assignee.name})` : ''} ${t.dueDate ? `vence: ${t.dueDate.toLocaleDateString('pt-BR')}` : ''}`)
-      .join('\n');
-
-    return this.simpleCompletion(
-      `Crie um plano de ação para o projeto "${project.name}":
-${taskList}
-
-## Prioridades Imediatas (esta semana)
-## Próximos Passos (próximas 2 semanas)
-## Riscos Identificados
-## Recomendações`,
-      1000,
-    );
+    try {
+      const plan = await this.selah.actionPlan({
+        projectName: clip(project.name, 200),
+        tasks: project.tasks.map((t) => ({
+          title: clip(t.title, 200),
+          priority: t.priority,
+          assigneeName: t.assignee?.name ?? null,
+          dueDateLabel: t.dueDate ? t.dueDate.toLocaleDateString('pt-BR') : null,
+        })),
+      });
+      return formatActionPlan(plan);
+    } catch (err) {
+      this.fail(err, 'plano de ação');
+    }
   }
 
   async identifyBottlenecks(companyId: string): Promise<string> {
@@ -241,15 +207,20 @@ ${taskList}
       take: 10,
     });
 
-    return this.simpleCompletion(
-      `Identifique gargalos operacionais:
-- Tarefas atrasadas: ${ctx.overdueTasks}
-- Responsáveis com mais atrasos: ${ctx.topOverdueUsers.map((u) => `${u.name} (${u.count})`).join(', ') || 'N/A'}
-- Paradas há +7 dias: ${stagnant.map((t) => `"${t.title}" [${t.status}] em ${t.project.name}${t.assignee ? ` (@${t.assignee.name})` : ''}`).join('\n') || 'Nenhuma'}
-
-Liste os 3 principais gargalos e sugira ações corretivas.`,
-      800,
-    );
+    try {
+      const analysis = await this.selah.bottlenecks({
+        workspace: this.toWorkspacePayload(ctx),
+        stagnantTasks: stagnant.map((t) => ({
+          title: clip(t.title, 200),
+          status: t.status,
+          projectName: clip(t.project.name, 200),
+          assigneeName: t.assignee?.name ?? null,
+        })),
+      });
+      return formatBottlenecks(analysis);
+    } catch (err) {
+      this.fail(err, 'gargalos');
+    }
   }
 
   async suggestAssignee(taskId: string): Promise<string> {
@@ -269,12 +240,16 @@ Liste os 3 principais gargalos e sugira ações corretivas.`,
       })),
     );
 
-    return this.simpleCompletion(
-      `Sugira o melhor responsável para: "${task.title}" [${task.priority}]
-Carga da equipe:\n${workloads.map((w) => `${w.name}: ${w.pending} pendentes`).join('\n')}
-Sugira 1-2 pessoas com justificativa.`,
-      400,
-    );
+    try {
+      const suggestions = await this.selah.suggestAssignee({
+        taskTitle: clip(task.title, 200),
+        taskPriority: task.priority,
+        members: workloads.slice(0, 30).map((w) => ({ name: clip(w.name, 120), pendingTasks: w.pending })),
+      });
+      return formatAssignees(suggestions);
+    } catch (err) {
+      this.fail(err, 'sugestão de responsável');
+    }
   }
 
   async getConversations(companyId: string, limit = 20) {
@@ -296,71 +271,6 @@ Sugira 1-2 pessoas com justificativa.`,
     });
   }
 
-  getProviderInfo() {
-    return { provider: 'ollama', model: this.ollamaModel, url: this.ollamaUrl };
-  }
-
-  // ── Ollama ────────────────────────────────────────────────────────────────
-
-  private async ollamaChat(
-    systemPrompt: string,
-    history: { role: string; content: string }[],
-    message: string,
-  ): Promise<string> {
-    const messages: OllamaChatMessage[] = [
-      { role: 'system', content: systemPrompt },
-      ...history.map((m) => ({ role: (m.role === 'assistant' ? 'assistant' : 'user') as 'user' | 'assistant', content: m.content })),
-      { role: 'user', content: message },
-    ];
-
-    const res = await fetch(`${this.ollamaUrl}/v1/chat/completions`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ model: this.ollamaModel, messages, stream: false }),
-    });
-
-    if (!res.ok) throw new Error(`Ollama HTTP ${res.status}: ${await res.text()}`);
-
-    const data = await res.json() as any;
-    return data.choices?.[0]?.message?.content ?? 'Sem resposta do modelo.';
-  }
-
-  private async ollamaChatStream(
-    systemPrompt: string,
-    message: string,
-    onChunk: (chunk: string) => void,
-  ): Promise<void> {
-    const messages: OllamaChatMessage[] = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user',   content: message },
-    ];
-
-    const res = await fetch(`${this.ollamaUrl}/v1/chat/completions`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ model: this.ollamaModel, messages, stream: true }),
-    });
-
-    if (!res.ok || !res.body) throw new Error(`Ollama HTTP ${res.status}`);
-
-    const reader  = res.body.getReader();
-    const decoder = new TextDecoder();
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const lines = decoder.decode(value).split('\n').filter((l) => l.startsWith('data: '));
-      for (const line of lines) {
-        const json = line.slice(6).trim();
-        if (json === '[DONE]') return;
-        try {
-          const delta = (JSON.parse(json) as any).choices?.[0]?.delta?.content;
-          if (delta) onChunk(delta);
-        } catch { /* ignore malformed chunks */ }
-      }
-    }
-  }
-
   async generateStrategicBrief(companyId: string): Promise<{
     generatedAt: string;
     summary: string;
@@ -374,7 +284,7 @@ Sugira 1-2 pessoas com justificativa.`,
 
     const [
       totalTasks, doneTasks, overdueTasks, backlogTasks,
-      activeProjects, members, recentInsights, overdueByUser,
+      activeProjects, members, recentInsights,
     ] = await Promise.all([
       this.prisma.task.count({ where: { project: { companyId } } }),
       this.prisma.task.count({ where: { project: { companyId }, status: 'DONE' } }),
@@ -388,77 +298,37 @@ Sugira 1-2 pessoas com justificativa.`,
         take: 5,
         select: { type: true, severity: true, title: true, description: true },
       }).catch(() => []),
-      this.prisma.task.groupBy({
-        by: ['assigneeId'],
-        where: { project: { companyId }, dueDate: { lt: new Date() }, status: { not: 'DONE' }, assigneeId: { not: null } },
-        _count: { assigneeId: true },
-        orderBy: { _count: { assigneeId: 'desc' } },
-        take: 3,
-      }).catch(() => []),
     ]);
 
     const completionRate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
     const recentDone     = await this.prisma.task.count({ where: { project: { companyId }, status: 'DONE', updatedAt: { gte: since30 } } });
     const weeklyVelocity = Math.round((recentDone / 30) * 7);
 
-    const insightsSummary = recentInsights.length > 0
-      ? recentInsights.map((i) => `[${i.severity}] ${i.title}: ${i.description}`).join('\n')
-      : 'Nenhum insight crítico no momento.';
-
-    const prompt = `Você é um consultor estratégico sênior. Analise os dados abaixo e gere um brief estratégico executivo em português:
-
-MÉTRICAS:
-- Total de tarefas: ${totalTasks} | Concluídas: ${doneTasks} (${completionRate}%)
-- Tarefas atrasadas: ${overdueTasks} | Em backlog: ${backlogTasks}
-- Projetos ativos: ${activeProjects} | Membros: ${members}
-- Velocidade semanal: ${weeklyVelocity} tarefas/semana (últimos 30 dias)
-
-INSIGHTS AUTOMÁTICOS:
-${insightsSummary}
-
-Gere uma análise estratégica com 4 seções claramente separadas por "###":
-### RESUMO EXECUTIVO
-(2-3 frases sobre o estado geral da operação)
-
-### PRINCIPAIS RISCOS
-(3 riscos concretos baseados nos dados)
-
-### OPORTUNIDADES
-(2-3 oportunidades de melhoria identificadas)
-
-### RECOMENDAÇÕES
-(3-4 ações prioritárias com impacto esperado)`;
-
-    const raw = await this.simpleCompletion(prompt, 1200);
-
-    const section = (name: string) => {
-      const re = new RegExp(`###\\s*${name}\\s*([\\s\\S]*?)(?=###|$)`, 'i');
-      return raw.match(re)?.[1]?.trim() ?? '';
-    };
+    let brief;
+    try {
+      brief = await this.selah.strategicBrief({
+        metrics: { totalTasks, doneTasks, overdueTasks, backlogTasks, activeProjects, members, completionRate, weeklyVelocity },
+        insights: recentInsights.map((i) => ({
+          severity: String(i.severity),
+          title: clip(i.title, 200),
+          description: clip(i.description, 600),
+        })),
+      });
+    } catch (err) {
+      this.fail(err, 'brief estratégico');
+    }
 
     return {
       generatedAt: new Date().toISOString(),
-      summary: section('RESUMO EXECUTIVO'),
-      risks: section('PRINCIPAIS RISCOS'),
-      opportunities: section('OPORTUNIDADES'),
-      recommendations: section('RECOMENDAÇÕES'),
+      summary: brief.summary,
+      risks: formatBullets(brief.risks),
+      opportunities: formatBullets(brief.opportunities),
+      recommendations: formatBullets(brief.recommendations),
       teamHealth: `${members} membros | Velocidade: ${weeklyVelocity} tarefas/semana | Taxa de conclusão: ${completionRate}%`,
       metrics: {
         totalTasks, doneTasks, overdueTasks, backlogTasks,
         activeProjects, members, completionRate, weeklyVelocity,
       },
     };
-  }
-
-  private async simpleCompletion(prompt: string, maxTokens = 600): Promise<string> {
-    try {
-      return await this.ollamaChat(
-        'Você é um assistente especialista em gestão operacional. Responda em português do Brasil de forma concisa e útil.',
-        [],
-        prompt,
-      );
-    } catch (err: any) {
-      return `Erro ao chamar IA: ${err.message}`;
-    }
   }
 }

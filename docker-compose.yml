@@ -46,7 +46,7 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://agilis:agilis123@postgres:5432/agilis_db?schema=public
-      JWT_SECRET: jOXckDUB8pAPwLyTfsEZG/quKL7/VZbH+5KQd41adZw=
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
       JWT_EXPIRES_IN: 7d
       NODE_ENV: production
       PORT: 3000
@@ -55,8 +55,12 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       MAIL_PROVIDER: resend
-      RESEND_API_KEY: re_DUJS2K8A_Ks1MZ3kNjxziojyVsAQLy55c
+      RESEND_API_KEY: ${RESEND_API_KEY:?Defina RESEND_API_KEY no .env}
       MAIL_FROM: Agilis <onboarding@resend.dev>
+      SELAH_IA_BASE_URL: ${SELAH_IA_BASE_URL:-}
+      SELAH_IA_API_KEY: ${SELAH_IA_API_KEY:-}
+      SELAH_IA_SOURCE_APP: AgilisBack
+      SELAH_IA_TIMEOUT_MS: ${SELAH_IA_TIMEOUT_MS:-30000}
     ports:
       - '3000:3000'
     volumes:
@@ -92,15 +96,6 @@ services:
     volumes:
       - agilis-n8n-data:/home/node/.n8n
 
-  ollama:
-    image: ollama/ollama
-    container_name: agilis-ollama
-    restart: unless-stopped
-    ports:
-      - '11434:11434'
-    volumes:
-      - agilis-ollama-data:/root/.ollama
-
   uptime-kuma:
     image: louislam/uptime-kuma:1
     container_name: agilis-uptime
@@ -114,5 +109,4 @@ volumes:
   agilis-postgres-data:
   agilis-redis-data:
   agilis-n8n-data:
-  agilis-ollama-data:
   agilis-kuma-data:

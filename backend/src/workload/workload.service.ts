@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AiService } from '../ai/ai.service';
+import { formatRedistribution } from '../ai/ai.formatters';
+import { SelahAiClientService, SelahAiError } from '../ai/selah-ai-client.service';
 
 export interface MemberWorkload {
   user: { id: string; name: string; avatarUrl: string | null };
@@ -18,9 +19,11 @@ export interface MemberWorkload {
 
 @Injectable()
 export class WorkloadService {
+  private readonly logger = new Logger(WorkloadService.name);
+
   constructor(
     private readonly prisma: PrismaService,
-    private readonly ai: AiService,
+    private readonly selah: SelahAiClientService,
   ) {}
 
   // ── Company workload ───────────────────────────────────────────────────────
@@ -61,19 +64,25 @@ export class WorkloadService {
       return { suggestion: 'Carga de trabalho equilibrada. Nenhuma redistribuição necessária no momento.' };
     }
 
-    const prompt = `Analise a carga de trabalho da equipe e sugira redistribuição de tarefas.
+    const toPayload = (member: (typeof members)[number]) => ({
+      name: member.user.name.slice(0, 120),
+      openTasks: member.total,
+      overdueTasks: member.overdue,
+      capacityScore: member.capacityScore,
+    });
 
-Membros sobrecarregados:
-${overloaded.map(m => `- ${m.user.name}: ${m.total} tarefas abertas, ${m.overdue} atrasadas, score ${m.capacityScore}/100`).join('\n')}
-
-Membros disponíveis:
-${available.map(m => `- ${m.user.name}: ${m.total} tarefas abertas, score ${m.capacityScore}/100`).join('\n')}
-
-Sugira quais tarefas redistribuir e para quem, de forma objetiva e acionável. Máximo 200 palavras.`;
-
-    const suggestion = await (this.ai as any).simpleCompletion(prompt, 400).catch(
-      () => 'Não foi possível gerar sugestão de IA no momento.',
-    );
+    let suggestion: string;
+    try {
+      suggestion = formatRedistribution(
+        await this.selah.workloadRedistribution({
+          overloaded: overloaded.slice(0, 30).map(toPayload),
+          available: available.slice(0, 30).map(toPayload),
+        }),
+      );
+    } catch (err) {
+      this.logger.error(`Selah IA falhou na redistribuição de carga (status=${err instanceof SelahAiError ? err.status : 'n/a'})`);
+      suggestion = 'Não foi possível gerar sugestão de IA no momento.';
+    }
 
     return { suggestion, overloaded: overloaded.length, available: available.length };
   }

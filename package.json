@@ -1,6 +1,6 @@
 {
   "name": "agilis",
-  "version": "2.9.3",
+  "version": "3.0.0",
   "description": "Agilis — Plataforma de Gestão Operacional",
   "private": true,
   "scripts": {
@@ -32,12 +32,6 @@
     "n8n:down": "docker compose stop n8n",
     "n8n:logs": "docker compose logs -f n8n",
 
-    "ollama:up": "docker compose up -d ollama && echo \"\\n✅ Ollama disponível em http://localhost:11434\"",
-    "ollama:down": "docker compose stop ollama",
-    "ollama:logs": "docker compose logs -f ollama",
-    "ollama:pull": "docker exec agilis-ollama ollama pull mistral",
-    "ollama:pull:llama": "docker exec agilis-ollama ollama pull llama3.2:3b",
-    "ollama:list": "docker exec agilis-ollama ollama list",
 
     "uptime:up": "docker compose up -d uptime-kuma && echo \"\\n✅ Uptime Kuma disponível em http://localhost:3002\"",
     "uptime:down": "docker compose stop uptime-kuma",

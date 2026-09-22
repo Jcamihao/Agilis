@@ -140,7 +140,7 @@ export class IaComponent implements OnInit, AfterViewChecked {
           const updated = [...msgs];
           updated[updated.length - 1] = {
             role: 'assistant',
-            content: '❌ Erro ao processar a resposta. Verifique se o Ollama está rodando (`npm run ollama:up`) e se o modelo está baixado (`npm run ollama:pull`).',
+            content: '❌ Erro ao processar a resposta. O assistente de IA (Selah IA) pode estar indisponível; tente novamente em instantes.',
           };
           return updated;
         });

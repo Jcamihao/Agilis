@@ -8,7 +8,7 @@ Plataforma moderna de gestão operacional inspirada em ClickUp, Linear, Jira e N
 |--------|------------|
 | **Backend** | NestJS 10 · Prisma 5 · PostgreSQL · Redis · JWT |
 | **Frontend** | Angular 16 · Angular Material · TailwindCSS · Angular CDK |
-| **IA** | Ollama (Mistral/Llama) — local, sem custo de API |
+| **IA** | Selah IA (serviço interno da codeStage; prompts, provedor e modelo ficam lá) |
 | **Infra** | Docker Compose · MinIO · N8N · Uptime Kuma |
 
 ## Início Rápido
@@ -30,7 +30,7 @@ npm run dev
 | Swagger | http://localhost:3000/docs | — |
 | Prisma Studio | `npm run db:studio` | — |
 | N8N | http://localhost:5678 | admin / agilis123 |
-| Ollama | http://localhost:11434 | — |
+| Selah IA | `SELAH_IA_BASE_URL` (ex.: http://localhost:3010) | chave `AgilisBack` |
 
 ---
 
@@ -57,7 +57,7 @@ npm run dev
 - **Wiki de Projetos** — editor rich text por projeto
 
 ### Inteligência & Analytics
-- **Assistente IA** — chat com Ollama (Mistral), contexto do workspace em tempo real, resumo de projetos/tarefas, plano de ação, gargalos, sugestão de responsável
+- **Assistente IA** — chat via Selah IA, contexto do workspace em tempo real, resumo de projetos/tarefas, plano de ação, gargalos, sugestão de responsável
 - **Portfolio Executivo** (`/portfolio`) — visão consolidada de todos os projetos: progresso %, health score, velocidade, previsão de entrega, riscos, OKR linkado, sortável/buscável
 - **Brief Estratégico IA** — análise estruturada gerada por IA (Resumo Executivo, Riscos, Oportunidades, Recomendações) com métricas consolidadas
 - **OKRs e Metas** — Objectives + Key Results com progress tracking
@@ -93,7 +93,7 @@ npm run dev
 Agilis/
 ├── backend/                    # NestJS API
 │   ├── src/
-│   │   ├── ai/                 # Ollama chat + resumos + brief estratégico
+│   │   ├── ai/                 # Cliente do Selah IA + conversas, resumos, gargalos e brief estratégico
 │   │   ├── auth/               # JWT + guards
 │   │   ├── automation/         # Motor de automações + cron
 │   │   ├── calendar/           # Calendário + exportação iCal
@@ -128,7 +128,7 @@ Agilis/
 │       │   └── guards/         # AuthGuard
 │       └── layout/             # Sidebar, Topbar, MainLayout
 │
-├── docker-compose.yml          # PostgreSQL · Redis · MinIO · N8N · Ollama · Uptime Kuma
+├── docker-compose.yml          # PostgreSQL · Redis · MinIO · N8N · Uptime Kuma
 └── package.json                # Scripts raiz (dev, build, setup, …)
 ```
 
@@ -144,8 +144,6 @@ npm run db:seed          # Popular banco com dados demo
 npm run db:reset         # Reset completo (perda de dados)
 npm run db:studio        # Abrir Prisma Studio
 npm run n8n:up           # Subir N8N
-npm run ollama:up        # Subir Ollama
-npm run ollama:pull      # Baixar modelo Mistral
 npm run infra:logs       # Ver logs de todos os containers
 ```
 

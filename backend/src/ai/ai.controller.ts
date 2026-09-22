@@ -1,15 +1,12 @@
-import { Controller, Post, Get, Body, Param, Query, UseGuards, Sse, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Post, Get, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { AiService } from './ai.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, MaxLength } from 'class-validator';
 
 class ChatDto {
-  @IsString() message: string;
+  @IsString() @MaxLength(4000) message: string;
   @IsString() companyId: string;
   @IsString() @IsOptional() conversationId?: string;
 }
@@ -25,25 +22,6 @@ export class AiController {
   @ApiOperation({ summary: 'Chat com IA sobre o workspace' })
   chat(@Body() dto: ChatDto, @CurrentUser('id') userId: string) {
     return this.service.chat(dto.companyId, userId, dto.message, dto.conversationId);
-  }
-
-  @Post('chat/stream')
-  @ApiOperation({ summary: 'Chat streaming (SSE) com IA' })
-  async chatStream(
-    @Body() dto: ChatDto,
-    @CurrentUser('id') userId: string,
-    @Res() res: Response,
-  ) {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    const stream = this.service.chatStream(dto.companyId, userId, dto.message);
-    stream.subscribe({
-      next: (chunk) => res.write(`data: ${JSON.stringify({ chunk })}\n\n`),
-      complete: () => { res.write('data: [DONE]\n\n'); res.end(); },
-      error: () => res.end(),
-    });
   }
 
   @Get('conversations')
