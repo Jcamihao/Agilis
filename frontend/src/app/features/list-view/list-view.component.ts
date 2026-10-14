@@ -12,6 +12,7 @@ import { UsersService, CompanyMember } from '../../core/services/users.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { ToastService } from '../../core/services/toast.service';
+import { formatDate, initials } from '../../core/utils/format';
 import {
   Task, TaskStatus, KanbanBoard, TASK_STATUS_CONFIG, PRIORITY_CONFIG, Priority, Project, Sprint,
 } from '../../core/models';
@@ -357,18 +358,13 @@ export class ListViewComponent implements OnInit {
     return !!date && new Date(date) < new Date();
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-  }
+  readonly formatDate = formatDate;
 
   subtaskCount(task: Task): number {
     return (task as any)._count?.subtasks ?? 0;
   }
 
-  initials(name: string): string {
-    const parts = name.trim().split(' ');
-    return parts.length >= 2 ? parts[0][0] + parts[parts.length - 1][0] : parts[0].slice(0, 2);
-  }
+  readonly initials = initials;
 
   trackById(_: number, t: Task) { return t.id; }
 }

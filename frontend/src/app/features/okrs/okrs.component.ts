@@ -7,6 +7,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { OkrsService } from '../../core/services/okrs.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Objective, KeyResult, ObjectiveStatus } from '../../core/models';
+import { formatDateYear, initials } from '../../core/utils/format';
 
 type ModalMode = 'objective' | 'key-result' | 'update-kr' | null;
 
@@ -227,14 +228,9 @@ export class OkrsComponent implements OnInit {
     return '#ef4444';
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
+  readonly formatDate = formatDateYear;
 
-  initials(name: string): string {
-    const p = name.trim().split(' ');
-    return p.length >= 2 ? p[0][0] + p[p.length - 1][0] : p[0].slice(0, 2);
-  }
+  readonly initials = initials;
 
   closeModal() { this.modal.set(null); }
 }

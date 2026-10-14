@@ -8,8 +8,7 @@ import { NotificationsService } from '../../core/services/notifications.service'
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { User, Notification, NOTIFICATION_CONFIG } from '../../core/models';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { timeAgo } from '../../core/utils/format';
 
 @Component({
   selector: 'ag-profile',
@@ -287,8 +286,6 @@ export class ProfileComponent implements OnInit {
   getNotifColor(type: string): string {
     return NOTIFICATION_CONFIG[type as keyof typeof NOTIFICATION_CONFIG]?.color ?? '#6366f1';
   }
-  timeAgo(date: string): string {
-    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR });
-  }
+  readonly timeAgo = timeAgo;
 
 }

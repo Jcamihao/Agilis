@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { TasksService } from '../../core/services/tasks.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { Task, PRIORITY_CONFIG, TASK_STATUS_CONFIG, TaskStatus, Priority, Project } from '../../core/models';
+import { formatDate } from '../../core/utils/format';
 
 @Component({
   selector: 'ag-my-tasks',
@@ -175,7 +176,5 @@ export class MyTasksComponent implements OnInit {
            d.getDate() === now.getDate();
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-  }
+  readonly formatDate = formatDate;
 }

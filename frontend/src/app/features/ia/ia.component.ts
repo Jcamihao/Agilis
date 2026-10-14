@@ -17,8 +17,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { AiService, AiConversationSummary } from '../../core/services/ai.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { Project } from '../../core/models';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { timeAgo } from '../../core/utils/format';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -223,9 +222,7 @@ export class IaComponent implements OnInit, AfterViewChecked {
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  timeAgo(dateStr: string) {
-    return formatDistanceToNow(new Date(dateStr), { addSuffix: true, locale: ptBR });
-  }
+  readonly timeAgo = timeAgo;
 
   lastMessage(conv: AiConversationSummary): string {
     const msg = conv.messages?.[0];

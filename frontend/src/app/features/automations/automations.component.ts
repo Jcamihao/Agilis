@@ -6,8 +6,7 @@ import {
   AutomationService, AutomationRule, AutomationTrigger,
   AutomationActionType, AutomationExecution
 } from '../../core/services/automation.service';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { timeAgo } from '../../core/utils/format';
 
 const TRIGGER_LABELS: Record<AutomationTrigger, string> = {
   TASK_CREATED:        'Tarefa criada',
@@ -236,5 +235,5 @@ export class AutomationsComponent implements OnInit {
   }
 
   closeModal() { this.showRuleModal.set(false); this.saving.set(false); this.editingRule.set(null); }
-  timeAgo(d: string) { return formatDistanceToNow(new Date(d), { addSuffix: true, locale: ptBR }); }
+  readonly timeAgo = timeAgo;
 }

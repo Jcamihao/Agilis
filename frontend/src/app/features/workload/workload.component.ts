@@ -9,6 +9,7 @@ import { ProjectsService } from '../../core/services/projects.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Project } from '../../core/models';
+import { initials } from '../../core/utils/format';
 
 @Component({
   selector: 'ag-workload',
@@ -113,8 +114,5 @@ export class WorkloadComponent implements OnInit {
     return h > 0 ? `${h}h${m > 0 ? ` ${m}min` : ''}` : `${m}min`;
   }
 
-  initials(name: string): string {
-    const p = name.trim().split(' ');
-    return p.length >= 2 ? p[0][0] + p[p.length - 1][0] : p[0].slice(0, 2);
-  }
+  readonly initials = initials;
 }

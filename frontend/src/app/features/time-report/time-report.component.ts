@@ -7,6 +7,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { TimeTrackingService, ProjectTimeReport } from '../../core/services/time-tracking.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { Project } from '../../core/models';
+import { formatDateTime, initials } from '../../core/utils/format';
 
 @Component({
   selector: 'ag-time-report',
@@ -48,14 +49,7 @@ export class TimeReportComponent implements OnInit {
     return total ? Math.round((part / total) * 100) : 0;
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('pt-BR', {
-      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
-    });
-  }
+  readonly formatDate = formatDateTime;
 
-  initials(name: string): string {
-    const p = name.trim().split(' ');
-    return p.length >= 2 ? p[0][0] + p[p.length - 1][0] : p[0].slice(0, 2);
-  }
+  readonly initials = initials;
 }

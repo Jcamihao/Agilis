@@ -8,6 +8,7 @@ import { DragDropModule, CdkDragDrop, transferArrayItem } from '@angular/cdk/dra
 import { SprintsService } from '../../core/services/sprints.service';
 import { TasksService } from '../../core/services/tasks.service';
 import { Sprint, Task, KanbanBoard, SprintStatus } from '../../core/models';
+import { formatDate } from '../../core/utils/format';
 
 interface SprintLane {
   sprint: Sprint | null;
@@ -255,10 +256,7 @@ export class SprintPlanningComponent implements OnInit {
     return m[s] ?? '#64748b';
   }
 
-  formatDate(d?: string): string {
-    if (!d) return '';
-    return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-  }
+  readonly formatDate = formatDate;
 
   isOverdue(dueDate: string): boolean {
     return new Date(dueDate) < new Date();

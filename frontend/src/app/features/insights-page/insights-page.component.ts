@@ -6,6 +6,7 @@ import { InsightsService } from '../../core/services/insights.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Insight, InsightType, InsightSeverity } from '../../core/models';
+import { formatDateTime } from '../../core/utils/format';
 
 @Component({
   selector: 'ag-insights-page',
@@ -111,7 +112,5 @@ export class InsightsPageComponent implements OnInit {
     return this.all().filter(i => i.type === key).length;
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-  }
+  readonly formatDate = formatDateTime;
 }

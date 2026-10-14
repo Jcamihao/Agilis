@@ -7,8 +7,7 @@ import { CommentsService } from '../../../core/services/comments.service';
 import { AttachmentsService } from '../../../core/services/attachments.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Comment, Attachment, User } from '../../../core/models';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { timeAgo } from '../../../core/utils/format';
 
 @Component({
   selector: 'ag-comment-section',
@@ -212,7 +211,5 @@ export class CommentSectionComponent implements OnInit {
     return comment.authorId === this.currentUser()?.id;
   }
 
-  timeAgo(date: string): string {
-    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR });
-  }
+  readonly timeAgo = timeAgo;
 }

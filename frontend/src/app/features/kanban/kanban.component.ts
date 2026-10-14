@@ -20,6 +20,7 @@ import { CommentSectionComponent } from '../../shared/components/comment-section
 import { TimeTrackerComponent } from '../../shared/components/time-tracker/time-tracker.component';
 import { CustomFieldValuesComponent } from '../../shared/components/custom-fields/custom-field-values.component';
 import { ApprovalPanelComponent } from '../../shared/components/approval-panel/approval-panel.component';
+import { formatDate } from '../../core/utils/format';
 import {
   Task, TaskStatus, KanbanBoard, TASK_STATUS_CONFIG, PRIORITY_CONFIG, Priority, Project, Sprint,
 } from '../../core/models';
@@ -941,9 +942,7 @@ export class KanbanComponent implements OnInit {
     return !!date && new Date(date) < new Date();
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-  }
+  readonly formatDate = formatDate;
 
   formatFullDate(date: string): string {
     return new Date(date).toLocaleDateString('pt-BR', {

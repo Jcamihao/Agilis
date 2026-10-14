@@ -29,8 +29,7 @@ import {
   TASK_STATUS_CONFIG,
   WIDGET_CONFIG,
 } from '../../core/models';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { formatDate, timeAgo } from '../../core/utils/format';
 
 @Component({
   selector: 'ag-dashboard',
@@ -270,23 +269,13 @@ export class DashboardComponent implements OnInit {
   isOverdue(date: string): boolean {
     return new Date(date) < new Date();
   }
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: 'short',
-    });
-  }
+  readonly formatDate = formatDate;
   formatShortDate(date: string): string {
     return new Date(date)
       .toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
       .slice(0, 5);
   }
-  timeAgo(date: string): string {
-    return formatDistanceToNow(new Date(date), {
-      addSuffix: true,
-      locale: ptBR,
-    });
-  }
+  readonly timeAgo = timeAgo;
   getActivityLabel(action: string): string {
     const map: Record<string, string> = {
       task_created: ' criou uma tarefa',

@@ -9,8 +9,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { AuditService } from '../../core/services/audit.service';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { timeAgo } from '../../core/utils/format';
 
 const ACTION_META: Record<
   string,
@@ -132,7 +131,5 @@ export class AuditComponent implements OnInit {
       value: String(value),
     }));
   }
-  timeAgo(d: string) {
-    return formatDistanceToNow(new Date(d), { addSuffix: true, locale: ptBR });
-  }
+  readonly timeAgo = timeAgo;
 }

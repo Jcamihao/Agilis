@@ -4,8 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { WebhookService, Webhook, WebhookDelivery, WEBHOOK_EVENTS } from '../../core/services/webhook.service';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { timeAgo } from '../../core/utils/format';
 
 @Component({
   selector: 'ag-webhooks',
@@ -185,9 +184,7 @@ export class WebhooksComponent implements OnInit {
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  timeAgo(dateStr: string) {
-    return formatDistanceToNow(new Date(dateStr), { addSuffix: true, locale: ptBR });
-  }
+  readonly timeAgo = timeAgo;
 
   eventLabel(value: string): string {
     return WEBHOOK_EVENTS.find((e) => e.value === value)?.label ?? value;

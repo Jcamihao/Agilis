@@ -7,6 +7,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TimeTrackingService, TimeEntry, TaskTimeLog } from '../../../core/services/time-tracking.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
+import { formatDateTime } from '../../../core/utils/format';
 
 @Component({
   selector: 'ag-time-tracker',
@@ -257,7 +258,5 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 
   fmt(min: number) { return this.svc.formatDuration(min); }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-  }
+  readonly formatDate = formatDateTime;
 }
