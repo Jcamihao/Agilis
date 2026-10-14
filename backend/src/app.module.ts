@@ -22,10 +22,8 @@ import { MetricsModule } from './metrics/metrics.module';
 import { ReportsModule } from './reports/reports.module';
 import { AiModule } from './ai/ai.module';
 import { HealthScoreModule } from './health-score/health-score.module';
-import { ProcessCenterModule } from './process-center/process-center.module';
 import { InsightsModule } from './insights/insights.module';
 import { SprintsModule } from './sprints/sprints.module';
-import { WebhookModule } from './webhooks/webhook.module';
 import { RedisModule } from './redis/redis.module';
 import { QueueModule } from './queue/queue.module';
 import { MailModule } from './mail/mail.module';
@@ -33,7 +31,6 @@ import { TimeTrackingModule } from './time-tracking/time-tracking.module';
 import { OkrsModule } from './okrs/okrs.module';
 import { WorkloadModule } from './workload/workload.module';
 import { CustomFieldsModule } from './custom-fields/custom-fields.module';
-import { WikiModule } from './wiki/wiki.module';
 import { ApprovalsModule } from './approvals/approvals.module';
 import { UploadModule } from './upload/upload.module';
 import { SearchModule } from './search/search.module';
@@ -63,10 +60,8 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     ReportsModule,
     AiModule,
     HealthScoreModule,
-    ProcessCenterModule,
     InsightsModule,
     SprintsModule,
-    WebhookModule,
     RedisModule,
     QueueModule,
     MailModule,
@@ -74,7 +69,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     OkrsModule,
     WorkloadModule,
     CustomFieldsModule,
-    WikiModule,
     ApprovalsModule,
     UploadModule,
     SearchModule,

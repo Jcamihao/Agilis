@@ -9,7 +9,7 @@
         [formControl]="queryControl"
         type="text"
         class="gs-input"
-        placeholder="Buscar tarefas, projetos, membros, wiki…"
+        placeholder="Buscar tarefas, projetos, membros…"
         autocomplete="off"
       />
       @if (loading()) {
@@ -83,22 +83,6 @@
                   <span class="gs-item-meta">{{ m.email }}</span>
                 </div>
               </div>
-            }
-          </div>
-        }
-
-        <!-- Wiki Pages -->
-        @if (r.wikiPages.length > 0) {
-          <div class="gs-section">
-            <p class="gs-section-label">
-              <span class="material-symbols-rounded">menu_book</span> Wiki de Projetos
-            </p>
-            @for (page of r.wikiPages; track page.id) {
-              <button class="gs-item" (click)="goWiki(page.project.id, page.id)">
-                <span class="material-symbols-rounded gs-wiki-icon">{{ page.icon }}</span>
-                <span class="gs-item-title">{{ page.title }}</span>
-                <span class="gs-item-meta">{{ page.project.name }}</span>
-              </button>
             }
           </div>
         }

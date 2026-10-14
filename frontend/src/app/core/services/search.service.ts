@@ -4,13 +4,11 @@ import { ApiService } from './api.service';
 export interface SearchTask    { id: string; title: string; status: string; priority: string; project: { id: string; name: string; color: string }; assignee?: { id: string; name: string } }
 export interface SearchProject { id: string; name: string; color: string; icon: string; description?: string }
 export interface SearchMember  { id: string; name: string; email: string; avatarUrl?: string }
-export interface SearchWiki    { id: string; title: string; icon: string; project: { id: string; name: string } }
 
 export interface SearchResults {
   tasks:    SearchTask[];
   projects: SearchProject[];
   members:  SearchMember[];
-  wikiPages: SearchWiki[];
 }
 
 @Injectable({ providedIn: 'root' })

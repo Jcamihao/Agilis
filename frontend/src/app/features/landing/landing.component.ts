@@ -71,8 +71,8 @@ export class LandingComponent implements OnInit, OnDestroy {
     },
     {
       icon: 'bolt',
-      title: 'Automações & Webhooks',
-      description: 'Regras sem código pra tarefas repetitivas, e integrações via webhook com o que você já usa.',
+      title: 'Automações',
+      description: 'Regras sem código que disparam notificações e e-mails quando uma tarefa muda, atrasa ou é atribuída.',
     },
     {
       icon: 'insights',

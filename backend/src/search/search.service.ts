@@ -6,12 +6,12 @@ export class SearchService {
   constructor(private readonly prisma: PrismaService) {}
 
   async search(q: string, companyId: string) {
-    if (!q || q.trim().length < 2) return { tasks: [], projects: [], members: [], wikiPages: [] };
+    if (!q || q.trim().length < 2) return { tasks: [], projects: [], members: [] };
 
     const contains = q.trim();
     const mode = 'insensitive' as const;
 
-    const [tasks, projects, members, wikiPages] = await Promise.all([
+    const [tasks, projects, members] = await Promise.all([
       this.prisma.task.findMany({
         where: { project: { companyId }, title: { contains, mode } },
         select: {
@@ -32,21 +32,12 @@ export class SearchService {
         select: { user: { select: { id: true, name: true, email: true, avatarUrl: true } } },
         take: 5,
       }),
-      this.prisma.wikiPage.findMany({
-        where: { project: { companyId }, title: { contains, mode } },
-        select: {
-          id: true, title: true, icon: true,
-          project: { select: { id: true, name: true } },
-        },
-        take: 5,
-      }),
     ]);
 
     return {
       tasks,
       projects,
       members: members.map((m) => m.user),
-      wikiPages,
     };
   }
 }

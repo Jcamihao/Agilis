@@ -87,7 +87,7 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
   hasResults(): boolean {
     const r = this.results();
     if (!r) return false;
-    return r.tasks.length + r.projects.length + r.members.length + r.wikiPages.length > 0;
+    return r.tasks.length + r.projects.length + r.members.length > 0;
   }
 
   isEmpty(): boolean {
@@ -102,11 +102,6 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
 
   goProject(id: string) {
     this.router.navigate(['/projects', id, 'kanban']);
-    this.close.emit();
-  }
-
-  goWiki(projectId: string, pageId: string) {
-    this.router.navigate(['/projects', projectId, 'wiki'], { queryParams: { page: pageId } });
     this.close.emit();
   }
 

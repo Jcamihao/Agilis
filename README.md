@@ -44,15 +44,12 @@ npm run dev
 - **Minhas Tarefas** — fila pessoal com filtros de status/prioridade
 
 ### Produtividade
-- **Busca Global** (⌘K) — modal de busca universal: tarefas, projetos, membros, wiki
+- **Busca Global** (⌘K) — modal de busca universal: tarefas, projetos, membros
 - **Ações em Massa** — seleção múltipla no kanban + barra flutuante (mover status, excluir)
 - **Templates de Tarefa** — CRUD de templates corporativos, aplicar template no kanban
 - **Recorrência de Tarefas** — DAILY/WEEKLY/BIWEEKLY/MONTHLY, cron diário recria tarefas DONE
 - **Aprovações** — fluxo de aprovação com múltiplos aprovadores e etapas
 - **Time Tracking** — apontamento de horas por tarefa + registro de ponto (entrada/saída)
-
-### Comunicação & Conhecimento
-- **Wiki de Projetos** — editor rich text por projeto
 
 ### Inteligência & Analytics
 - **Assistente IA** — chat via Selah IA, contexto do workspace em tempo real, resumo de projetos/tarefas, plano de ação, gargalos, sugestão de responsável
@@ -68,14 +65,11 @@ npm run dev
 - **Motor de Automações** — regras "se evento X → ação Y" (CRUD completo + engine de execução)
   - Triggers: tarefa criada, status alterado, prazo vencido, comentário, atribuição
   - Ações: mudar status, atribuir usuário, notificar, criar tarefa, e-mail
-- **Webhooks** — HTTP callbacks para eventos do sistema
-- **N8N** — integração via webhook para automações externas
 
 ### Administração
 - **Relatórios** (CSV / Excel / PDF) — Tarefas, Produtividade, Auditoria, Time Tracking, OKRs
 - **Auditoria** — log completo de todas as ações (quem, o quê, quando)
 - **Log de Auditoria** — exportável em CSV/Excel
-- **Centro de Processos** — fluxos de processo com etapas e checklists
 
 ### Onboarding
 - **Wizard de Primeiro Acesso** — 3 passos guiados: criar empresa → projeto → primeira tarefa
@@ -105,7 +99,6 @@ Agilis/
 │   │   ├── task-templates/     # Templates reutilizáveis
 │   │   ├── tasks/              # Kanban + bulk + recorrência
 │   │   ├── time-tracking/      # Apontamento de horas + ponto
-│   │   ├── webhooks/           # HTTP callbacks
 │   │   └── workload/           # Carga de trabalho da equipe
 │   └── prisma/
 │       ├── schema.prisma       # Modelo de dados completo
@@ -148,6 +141,7 @@ npm run infra:logs       # Ver logs de todos os containers
 **v2.5.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.3.0** — Remoção de Wiki de Projetos, Centro de Processos e Webhooks (editor de documentos, fluxos BPM/checklist e integrações de saída fora do escopo de gestão de tarefas) e das 9 dependências Tiptap, que ficaram sem uso. Fila BullMQ de webhooks removida; a de e-mail permanece
 - **v3.2.0** — Fim da auditoria ponytail: remoção de Labels e de Status Personalizados (dava pra criar, mas nenhuma tarefa podia usar), da aba "Geral" placeholder em Configurações do Projeto, de 17 rotas/métodos sem chamador (okrs summary/link, time-tracking active/my-log/update, métricas me/team, forecast por projeto, audit por entidade, custom-fields em lote, IA resumir tarefa/sugerir responsável, health-score por escopo, webhooks/events) e de 3 colunas nunca usadas
 - **v3.1.1 a v3.1.4** — Remoção de 18 dependências sem uso, Angular Material (menu do usuário virou dropdown nativo; CSS global 157 kB → 65 kB), código morto e helpers de formatação unificados em `core/utils/format.ts`
 - **v3.1.0** — Remoção de Gestão de Riscos, Centro de Operações, SLA e Gantt/Dependências entre tarefas (escopo focado em PM; SLA duplicava o sinal de "tarefa atrasada" sob outro nome, dependências nunca tinham UI de criação). Insights replanejado: regra de SLA trocada por "tarefa urgente sem responsável"; Health Score e Dashboard param de reimplementar a lista de Insights e passam a linkar pra ela. Relatórios e Auditoria deixam de ter uma versão duplicada mais fraca dentro de Métricas

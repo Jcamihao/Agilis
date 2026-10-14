@@ -359,8 +359,6 @@ export const WIDGET_CONFIG: Record<
 
 export type InsightType = 'RISK' | 'BOTTLENECK' | 'DELAY_PREDICTION' | 'RECOMMENDATION' | 'ACHIEVEMENT';
 export type InsightSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-export type ProcessStepType = 'DOCUMENTATION' | 'CHECKLIST' | 'TASK' | 'APPROVAL';
-export type ProcessStatus = 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
 
 export interface HealthScore {
   id: string;
@@ -397,63 +395,6 @@ export interface Insight {
   createdAt: string;
 }
 
-export interface ProcessStep {
-  id: string;
-  title: string;
-  description?: string;
-  type: ProcessStepType;
-  order: number;
-  content?: any;
-  isRequired: boolean;
-  estimatedMin?: number;
-  checklistItems?: Array<{ id: string; label: string; isRequired: boolean; order: number }>;
-}
-
-export interface ChecklistItemAnswer {
-  id: string;
-  instanceStepId: string;
-  itemId: string;
-  isChecked: boolean;
-}
-
-export interface ProcessInstanceStep {
-  id: string;
-  instanceId: string;
-  stepId: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'DONE' | 'SKIPPED';
-  notes?: string;
-  completedAt?: string;
-  completedBy?: string;
-  step: ProcessStep;
-  answers: ChecklistItemAnswer[];
-}
-
-export interface ProcessInstance {
-  id: string;
-  processId: string;
-  status: 'RUNNING' | 'COMPLETED' | 'CANCELLED';
-  createdAt: string;
-  completedAt?: string;
-  steps: ProcessInstanceStep[];
-}
-
-export interface Process {
-  id: string;
-  name: string;
-  description?: string;
-  companyId: string;
-  teamId?: string;
-  status: ProcessStatus;
-  icon: string;
-  color: string;
-  version: number;
-  createdAt: string;
-  updatedAt: string;
-  steps?: ProcessStep[];
-  instances?: ProcessInstance[];
-  _count?: { steps: number; instances: number };
-}
-
 // ── Custom Fields ─────────────────────────────────────────────────────────────
 
 export type CustomFieldType =
@@ -485,35 +426,6 @@ export interface TaskCustomFieldEntry {
   fieldType: CustomFieldType;
   options: string[];
   value: string | null;
-}
-
-// ── Wiki ──────────────────────────────────────────────────────────────────────
-
-export interface WikiPage {
-  id: string;
-  projectId: string;
-  parentId: string | null;
-  title: string;
-  content: string;
-  icon: string;
-  position: number;
-  createdAt: string;
-  updatedAt: string;
-  createdBy?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
-  updatedBy?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
-  children?: WikiPage[];
-  revisions?: WikiPageRevision[];
-  _count?: { children: number; revisions: number };
-}
-
-export interface WikiPageRevision {
-  id: string;
-  pageId: string;
-  content: string;
-  title: string;
-  authorId: string;
-  createdAt: string;
-  author?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
 }
 
 // ── Approvals ─────────────────────────────────────────────────────────────────

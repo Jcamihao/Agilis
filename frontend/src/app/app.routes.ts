@@ -63,11 +63,6 @@ export const routes: Routes = [
         title: 'Tempo — Agilis',
       },
       {
-        path: 'projects/:id/wiki',
-        loadComponent: () => import('./features/wiki/wiki.component').then((m) => m.WikiComponent),
-        title: 'Wiki — Agilis',
-      },
-      {
         path: 'approvals',
         loadComponent: () => import('./features/approvals/approvals.component').then((m) => m.ApprovalsComponent),
         title: 'Aprovações — Agilis',
@@ -146,16 +141,6 @@ export const routes: Routes = [
         path: 'audit',
         loadComponent: () => import('./features/audit/audit.component').then((m) => m.AuditComponent),
         title: 'Auditoria — Agilis',
-      },
-      {
-        path: 'webhooks',
-        loadComponent: () => import('./features/webhooks/webhooks.component').then((m) => m.WebhooksComponent),
-        title: 'Webhooks — Agilis',
-      },
-      {
-        path: 'process-center',
-        loadComponent: () => import('./features/process-center/process-center.component').then((m) => m.ProcessCenterComponent),
-        title: 'Centro de Processos — Agilis',
       },
       {
         path: 'projects/:id/sprint-planning',

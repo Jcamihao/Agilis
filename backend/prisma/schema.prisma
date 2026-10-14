@@ -111,20 +111,6 @@ enum InsightSeverity {
   CRITICAL
 }
 
-
-enum ProcessStepType {
-  DOCUMENTATION
-  CHECKLIST
-  TASK
-  APPROVAL
-}
-
-enum ProcessStatus {
-  DRAFT
-  ACTIVE
-  ARCHIVED
-}
-
 enum HealthEntity {
   COMPANY
   TEAM
@@ -148,8 +134,6 @@ model Company {
   healthScores    HealthScore[]
 
   aiConversations AiConversation[]
-  processes       Process[]
-  webhooks        Webhook[]
   objectives      Objective[]
   taskTemplates   TaskTemplate[]
 
@@ -190,9 +174,6 @@ model User {
   taskParticipations   TaskParticipant[] @relation("taskParticipations")
   timeEntries          TimeEntry[]
   ownedObjectives      Objective[]      @relation("ownedObjectives")
-  wikiPagesCreated     WikiPage[]       @relation("wikiCreated")
-  wikiPagesUpdated     WikiPage[]       @relation("wikiUpdated")
-  wikiRevisions        WikiPageRevision[] @relation("wikiRevisions")
   approvalRequests     TaskApproval[]   @relation("approvalRequests")
   approvalReviews      TaskApproval[]   @relation("approvalReviews")
   taskTemplates         TaskTemplate[]     @relation("taskTemplateCreator")
@@ -277,7 +258,6 @@ model Project {
   members      ProjectMember[]
   teams        ProjectTeam[]
   customFields CustomField[]
-  wikiPages    WikiPage[]
 
   @@map("projects")
 }
@@ -582,109 +562,6 @@ model HealthScore {
   @@map("health_scores")
 }
 
-
-// ─── V4: Process Center ──────────────────────────────────────────────────────
-
-model Process {
-  id          String        @id @default(uuid())
-  name        String
-  description String?
-  companyId   String
-  teamId      String?
-  status      ProcessStatus @default(DRAFT)
-  icon        String        @default("account_tree")
-  color       String        @default("#6366f1")
-  version     Int           @default(1)
-  createdById String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  company   Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  steps     ProcessStep[]
-  instances ProcessInstance[]
-
-  @@index([companyId, status])
-  @@map("processes")
-}
-
-model ProcessStep {
-  id           String          @id @default(uuid())
-  processId    String
-  title        String
-  description  String?
-  type         ProcessStepType
-  order        Int             @default(0)
-  content      Json?
-  isRequired   Boolean         @default(true)
-  estimatedMin Int?
-
-  process        Process               @relation(fields: [processId], references: [id], onDelete: Cascade)
-  checklistItems ChecklistItem[]
-  instanceSteps  ProcessInstanceStep[]
-
-  @@index([processId, order])
-  @@map("process_steps")
-}
-
-model ChecklistItem {
-  id         String  @id @default(uuid())
-  stepId     String
-  label      String
-  isRequired Boolean @default(false)
-  order      Int     @default(0)
-
-  step    ProcessStep           @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  answers ChecklistItemAnswer[]
-
-  @@map("checklist_items")
-}
-
-model ProcessInstance {
-  id            String    @id @default(uuid())
-  processId     String
-  triggeredById String
-  status        String    @default("RUNNING") // RUNNING | COMPLETED | CANCELLED
-  completedAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  process Process               @relation(fields: [processId], references: [id], onDelete: Cascade)
-  steps   ProcessInstanceStep[]
-
-  @@index([processId, status])
-  @@map("process_instances")
-}
-
-model ProcessInstanceStep {
-  id          String    @id @default(uuid())
-  instanceId  String
-  stepId      String
-  status      String    @default("PENDING") // PENDING | IN_PROGRESS | DONE | SKIPPED
-  completedAt DateTime?
-  completedBy String?
-  notes       String?
-
-  instance ProcessInstance       @relation(fields: [instanceId], references: [id], onDelete: Cascade)
-  step     ProcessStep           @relation(fields: [stepId], references: [id], onDelete: Cascade)
-  answers  ChecklistItemAnswer[]
-
-  @@unique([instanceId, stepId])
-  @@map("process_instance_steps")
-}
-
-model ChecklistItemAnswer {
-  id             String  @id @default(uuid())
-  instanceStepId String
-  itemId         String
-  isChecked      Boolean @default(false)
-
-  instanceStep ProcessInstanceStep @relation(fields: [instanceStepId], references: [id], onDelete: Cascade)
-  item         ChecklistItem       @relation(fields: [itemId], references: [id], onDelete: Cascade)
-
-  @@unique([instanceStepId, itemId])
-  @@map("checklist_item_answers")
-}
-
 // ─── V4: Insights ────────────────────────────────────────────────────────────
 
 model Insight {
@@ -725,43 +602,6 @@ model Activity {
   task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
 
   @@map("activities")
-}
-
-// ─── Webhooks ─────────────────────────────────────────────────────────────────
-
-model Webhook {
-  id        String   @id @default(uuid())
-  companyId String
-  name      String
-  url       String
-  events    String[]
-  secret    String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  company    Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  deliveries WebhookDelivery[]
-
-  @@index([companyId])
-  @@map("webhooks")
-}
-
-model WebhookDelivery {
-  id         String   @id @default(uuid())
-  webhookId  String
-  event      String
-  payload    Json
-  statusCode Int?
-  success    Boolean
-  durationMs Int?
-  error      String?
-  createdAt  DateTime @default(now())
-
-  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
-
-  @@index([webhookId, createdAt(sort: Desc)])
-  @@map("webhook_deliveries")
 }
 
 // ─── OKRs ─────────────────────────────────────────────────────────────────────
@@ -876,47 +716,6 @@ model CustomFieldValue {
   @@unique([customFieldId, taskId])
   @@index([taskId])
   @@map("custom_field_values")
-}
-
-// ─── Wiki / Docs ───────────────────────────────────────────────────────────────
-
-model WikiPage {
-  id        String   @id @default(uuid())
-  projectId String
-  parentId  String?
-  title     String
-  content   String   @default("")
-  icon      String   @default("article")
-  position  Int      @default(0)
-  createdById String
-  updatedById String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  project   Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  parent    WikiPage?        @relation("WikiTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children  WikiPage[]       @relation("WikiTree")
-  createdBy User             @relation("wikiCreated", fields: [createdById], references: [id])
-  updatedBy User             @relation("wikiUpdated", fields: [updatedById], references: [id])
-  revisions WikiPageRevision[]
-
-  @@index([projectId, position])
-  @@map("wiki_pages")
-}
-
-model WikiPageRevision {
-  id         String   @id @default(uuid())
-  pageId     String
-  content    String
-  title      String
-  authorId   String
-  createdAt  DateTime @default(now())
-
-  page   WikiPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
-  author User     @relation("wikiRevisions", fields: [authorId], references: [id])
-
-  @@index([pageId])
-  @@map("wiki_page_revisions")
 }
 
 // ─── Task Approvals ───────────────────────────────────────────────────────────

@@ -55,13 +55,6 @@ export class SidebarComponent {
       ],
     },
     {
-      key: 'process',
-      label: 'Processos',
-      items: [
-        { label: 'Centro de Processos', icon: 'account_tree', route: '/process-center' },
-      ],
-    },
-    {
       key: 'intel',
       label: 'Inteligência',
       items: [
@@ -80,7 +73,6 @@ export class SidebarComponent {
         { label: 'Automações',          icon: 'auto_awesome',  route: '/automations' },
         { label: 'Métricas',            icon: 'bar_chart',     route: '/metrics' },
         { label: 'Relatórios',          icon: 'summarize',     route: '/reports' },
-        { label: 'Webhooks',            icon: 'webhook',       route: '/webhooks' },
         { label: 'Auditoria',           icon: 'verified_user', route: '/audit' },
       ],
     },

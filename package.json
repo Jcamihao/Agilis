@@ -1,6 +1,6 @@
 {
   "name": "agilis",
-  "version": "3.2.3",
+  "version": "3.3.0",
   "description": "Agilis — Plataforma de Gestão Operacional",
   "private": true,
   "scripts": {
