@@ -29,19 +29,6 @@ export class AutomationCron {
         task,
         companyId: task.project.companyId,
       });
-
-      // Atualiza SLA se existir
-      await this.prisma.slaRecord.upsert({
-        where: { taskId: task.id },
-        update: { isBreached: true },
-        create: {
-          taskId: task.id,
-          isBreached: true,
-          delayMinutes: task.dueDate
-            ? Math.floor((Date.now() - task.dueDate.getTime()) / 60000)
-            : null,
-        },
-      }).catch(() => {});
     }
 
     if (overdue.length > 0) {

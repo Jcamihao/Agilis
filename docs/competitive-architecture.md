@@ -3,7 +3,7 @@
 ## Product Surface
 
 - IA Operacional: Selah IA (serviço interno) com contexto real do workspace para resumos, planos de ação, gargalos, sugestão de responsáveis e perguntas executivas.
-- Health Score: pontuação 0-100 por empresa, equipe e projeto usando atraso, produtividade, SLA, backlog e inatividade.
+- Health Score: pontuação 0-100 por empresa, equipe e projeto usando atraso, produtividade, backlog e inatividade.
 - WhatsApp Integration: Evolution API para cobranças, lembretes e alertas manuais ou por automação.
 - Process Center: processos versionados com documentação, checklist, tarefas, aprovações/automações e execuções rastreáveis.
 - Insights Inteligentes: riscos, gargalos, atrasos previstos, recomendações e conquistas gerados automaticamente.
@@ -71,15 +71,11 @@ Tabelas V4:
 
 ## Angular UI
 
-Rota: `/competitive`
-
-Abas:
-
-- IA Operacional
-- Health Score
-- Insights
-- Processos
-- WhatsApp
+A rota `/competitive` que reunia IA Operacional, Health Score, Insights,
+Processos e WhatsApp numa aba só foi removida (v3.1.0) — era puramente um
+agregador de chamadas que já existiam em `/ia` e `/process-center`, sem
+dado ou lógica própria. Cada módulo abaixo continua com sua própria rota:
+`/ia`, `/health-score`, `/insights`, `/process-center`.
 
 ## Scaling Plan
 

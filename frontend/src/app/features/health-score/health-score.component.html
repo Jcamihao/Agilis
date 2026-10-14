@@ -162,56 +162,18 @@
       </div>
     }
 
-    <!-- ── All Insights ── -->
-    <div>
-      <h3 class="text-base font-bold text-[--text-primary] mb-3 flex items-center gap-2">
+    <!-- Insights live in their own triage inbox now — just link out, don't
+         re-render the same list here too. -->
+    <a routerLink="/insights"
+      class="ag-card p-4 flex items-center justify-between hover:border-primary-300 transition-colors group">
+      <div class="flex items-center gap-3">
         <span class="material-symbols-rounded text-lg text-slate-400">tips_and_updates</span>
-        Insights e Recomendações
-      </h3>
-
-      @if (!insights().length) {
-        <div class="ag-card flex flex-col items-center justify-center py-10">
-          <span class="material-symbols-rounded text-4xl text-emerald-400 mb-3">emoji_events</span>
-          <p class="font-semibold text-[--text-secondary]">Nenhum insight crítico</p>
-          <p class="text-sm text-[--text-tertiary] mt-1">Operação saudável — continue monitorando</p>
+        <div>
+          <p class="text-sm font-semibold text-[--text-primary]">Insights e Recomendações</p>
+          <p class="text-xs text-[--text-tertiary]">Veja todos os alertas e sugestões geradas pra sua operação</p>
         </div>
-      } @else {
-        <div class="flex flex-col gap-3">
-          @for (ins of insights(); track ins.id) {
-            <div class="ag-card p-4 flex items-start gap-4"
-              [style.border-left]="'3px solid ' + severityConfig(ins.severity).color">
-              <!-- Icon -->
-              <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                [style.background]="severityConfig(ins.severity).bg">
-                <span class="material-symbols-rounded text-lg"
-                  [style.color]="severityConfig(ins.severity).color">
-                  {{ typeIcon(ins.type) }}
-                </span>
-              </div>
-
-              <!-- Content -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 mb-0.5">
-                  <p class="text-sm font-semibold text-[--text-primary]">{{ ins.title }}</p>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                    [style.background]="severityConfig(ins.severity).bg"
-                    [style.color]="severityConfig(ins.severity).color">
-                    {{ severityConfig(ins.severity).label }}
-                  </span>
-                </div>
-                <p class="text-sm text-[--text-secondary] leading-relaxed">{{ ins.description }}</p>
-              </div>
-
-              <!-- Dismiss -->
-              <button (click)="dismissInsight(ins.id)"
-                class="p-1.5 rounded-lg text-slate-300 hover:bg-slate-100 hover:text-slate-600 transition-colors flex-shrink-0"
-                title="Dispensar">
-                <span class="material-symbols-rounded text-base">close</span>
-              </button>
-            </div>
-          }
-        </div>
-      }
-    </div>
+      </div>
+      <span class="material-symbols-rounded text-slate-300 group-hover:text-primary-500 transition-colors">arrow_forward</span>
+    </a>
   }
 </div>

@@ -29,7 +29,7 @@ export class InsightsService {
   }
 
   async generate(companyId: string) {
-    const [overdue, stagnant, backlog, slaBreaches, riskyProjects] = await Promise.all([
+    const [overdue, stagnant, backlog, unassignedUrgent, riskyProjects] = await Promise.all([
       this.prisma.task.findMany({
         where: { project: { companyId }, dueDate: { lt: new Date() }, status: { not: 'DONE' } },
         include: { assignee: { select: { name: true } }, project: { select: { id: true, name: true } } },
@@ -46,7 +46,17 @@ export class InsightsService {
         take: 10,
       }),
       this.prisma.task.count({ where: { project: { companyId }, status: 'BACKLOG' } }),
-      this.prisma.slaRecord.count({ where: { isBreached: true, task: { project: { companyId } } } }),
+      this.prisma.task.findMany({
+        where: {
+          project: { companyId },
+          assigneeId: null,
+          status: { not: 'DONE' },
+          dueDate: { lt: new Date(Date.now() + 3 * 86_400_000) },
+        },
+        include: { project: { select: { id: true, name: true } } },
+        orderBy: { dueDate: 'asc' },
+        take: 10,
+      }),
       this.prisma.project.findMany({
         where: { companyId, isArchived: false },
         select: {
@@ -101,15 +111,17 @@ export class InsightsService {
       });
     }
 
-    if (slaBreaches) {
+    if (unassignedUrgent.length) {
       insights.push({
         companyId,
         type: 'RISK',
-        severity: slaBreaches > 10 ? 'CRITICAL' : 'HIGH',
-        title: 'Risco de contrato por violação de SLA',
-        description: `${slaBreaches} registros de SLA foram violados. Acione alertas preventivos e revise metas por fila.`,
-        metadata: { slaBreaches },
-        expiresAt: this.expiresInDays(7),
+        severity: unassignedUrgent.length >= 5 ? 'HIGH' : 'MEDIUM',
+        title: `${unassignedUrgent.length} tarefa(s) urgente(s) sem responsável`,
+        description: `${unassignedUrgent[0].title} em ${unassignedUrgent[0].project.name} vence em breve e não tem ninguém atribuído. Defina um responsável antes do prazo.`,
+        entityType: 'task',
+        entityId: unassignedUrgent[0].id,
+        metadata: { count: unassignedUrgent.length },
+        expiresAt: this.expiresInDays(3),
       });
     }
 
@@ -137,7 +149,7 @@ export class InsightsService {
         type: 'ACHIEVEMENT',
         severity: 'LOW',
         title: 'Operação sem riscos críticos',
-        description: 'Nenhum gargalo severo foi detectado agora. Continue monitorando SLA, backlog e tarefas próximas do vencimento.',
+        description: 'Nenhum gargalo severo foi detectado agora. Continue monitorando backlog e tarefas próximas do vencimento.',
         expiresAt: this.expiresInDays(3),
       });
     }

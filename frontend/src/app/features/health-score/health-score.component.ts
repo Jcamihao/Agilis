@@ -2,6 +2,7 @@ import {
   Component, OnInit, signal, inject, computed, ChangeDetectionStrategy, ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { HealthScoreService } from '../../core/services/health-score.service';
 import { InsightsService } from '../../core/services/insights.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -12,7 +13,7 @@ import { HealthScoreOverview, Insight } from '../../core/models';
   selector: 'ag-health-score',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './health-score.component.html',
   styleUrls: ['./health-score.component.scss'],
 })
@@ -75,13 +76,6 @@ export class HealthScoreComponent implements OnInit {
     });
   }
 
-  dismissInsight(id: string) {
-    this.insightsSvc.dismiss(id).subscribe(() => {
-      this.insights.update(l => l.filter(i => i.id !== id));
-      this.cdr.markForCheck();
-    });
-  }
-
   scoreGrade(score: number): string {
     if (score >= 85) return 'A';
     if (score >= 70) return 'B';
@@ -130,7 +124,6 @@ export class HealthScoreComponent implements OnInit {
   breakdownItems(breakdown: Record<string, number>): { label: string; value: number; positive: boolean }[] {
     const labels: Record<string, { label: string; positive: boolean }> = {
       overdueDeduction:    { label: 'Tarefas atrasadas',   positive: false },
-      slaDeduction:        { label: 'Violações de SLA',    positive: false },
       backlogDeduction:    { label: 'Backlog acumulado',   positive: false },
       inactivityDeduction: { label: 'Inatividade',         positive: false },
       completionBonus:     { label: 'Taxa de conclusão',   positive: true },

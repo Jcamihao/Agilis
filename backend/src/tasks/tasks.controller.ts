@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
-import { CreateTaskDto, UpdateTaskDto, MoveTaskDto, CreateSubtaskDto, AddDependencyDto, BulkUpdateTasksDto } from './dto/create-task.dto';
+import { CreateTaskDto, UpdateTaskDto, MoveTaskDto, CreateSubtaskDto, BulkUpdateTasksDto } from './dto/create-task.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -112,32 +112,4 @@ export class TasksController {
     return this.tasksService.deleteSubtask(parentId, subtaskId, userId);
   }
 
-  // ── Dependencies ──────────────────────────────────────────────────────────
-
-  @Get(':id/dependencies')
-  @ApiOperation({ summary: 'Listar dependências da tarefa' })
-  listDependencies(@Param('id') id: string, @CurrentUser('id') userId: string) {
-    return this.tasksService.listDependencies(id, userId);
-  }
-
-  @Post(':id/dependencies')
-  @ApiOperation({ summary: 'Adicionar dependência' })
-  addDependency(
-    @Param('id') taskId: string,
-    @Body() dto: AddDependencyDto,
-    @CurrentUser('id') userId: string,
-  ) {
-    return this.tasksService.addDependency(taskId, dto, userId);
-  }
-
-  @Delete(':id/dependencies/:dependsOnId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remover dependência' })
-  removeDependency(
-    @Param('id') taskId: string,
-    @Param('dependsOnId') dependsOnId: string,
-    @CurrentUser('id') userId: string,
-  ) {
-    return this.tasksService.removeDependency(taskId, dependsOnId, userId);
-  }
 }

@@ -131,12 +131,6 @@ enum HealthEntity {
   PROJECT
 }
 
-enum DependencyType {
-  BLOCKS
-  RELATES_TO
-  DUPLICATE
-}
-
 model Company {
   id        String   @id @default(uuid())
   name      String
@@ -203,7 +197,6 @@ model User {
   wikiRevisions        WikiPageRevision[] @relation("wikiRevisions")
   approvalRequests     TaskApproval[]   @relation("approvalRequests")
   approvalReviews      TaskApproval[]   @relation("approvalReviews")
-  ownedRisks           Risk[]           @relation("riskOwner")
   taskTemplates         TaskTemplate[]     @relation("taskTemplateCreator")
 
   @@map("users")
@@ -287,7 +280,6 @@ model Project {
   teams        ProjectTeam[]
   customFields CustomField[]
   wikiPages    WikiPage[]
-  risks        Risk[]
 
   @@map("projects")
 }
@@ -335,11 +327,8 @@ model Task {
   labels       TaskLabel[]
   comments     Comment[]
   attachments  Attachment[]
-  sla          SlaRecord?
   executions   AutomationExecution[]
   participants TaskParticipant[]
-  blockedBy    TaskDependency[]      @relation("dependentTask")
-  blocking     TaskDependency[]      @relation("dependsOnTask")
   timeEntries       TimeEntry[]
   keyResultTasks    KeyResultTask[]
   customFieldValues CustomFieldValue[]
@@ -347,20 +336,6 @@ model Task {
 
   @@index([parentId])
   @@map("tasks")
-}
-
-model TaskDependency {
-  id          String             @id @default(uuid())
-  taskId      String
-  dependsOnId String
-  type        DependencyType     @default(BLOCKS)
-  createdAt   DateTime           @default(now())
-
-  task        Task               @relation("dependentTask", fields: [taskId], references: [id], onDelete: Cascade)
-  dependsOn   Task               @relation("dependsOnTask", fields: [dependsOnId], references: [id], onDelete: Cascade)
-
-  @@unique([taskId, dependsOnId])
-  @@map("task_dependencies")
 }
 
 model TimeEntry {
@@ -537,25 +512,6 @@ model AutomationExecution {
 
   @@index([ruleId, createdAt(sort: Desc)])
   @@map("automation_executions")
-}
-
-model SlaRecord {
-  id                String    @id @default(uuid())
-  taskId            String    @unique
-  firstResponseAt   DateTime?
-  resolvedAt        DateTime?
-  responseMinutes   Int?
-  resolutionMinutes Int?
-  delayMinutes      Int?
-  isBreached        Boolean   @default(false)
-  targetResponseMin Int?
-  targetResolveMin  Int?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@map("sla_records")
 }
 
 model AuditLog {
@@ -1037,64 +993,6 @@ model TaskApproval {
   @@index([approverId, status])
   @@index([requestedById])
   @@map("task_approvals")
-}
-
-// ─── Sprint 14: Risk Management ──────────────────────────────────────────────
-
-enum RiskImpact {
-  VERY_LOW
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum RiskProbability {
-  VERY_LOW
-  LOW
-  MEDIUM
-  HIGH
-  VERY_HIGH
-}
-
-enum RiskStatus {
-  OPEN
-  MITIGATED
-  ACCEPTED
-  CLOSED
-}
-
-enum RiskCategory {
-  TECHNICAL
-  SCHEDULE
-  BUDGET
-  RESOURCE
-  EXTERNAL
-  QUALITY
-  OTHER
-}
-
-model Risk {
-  id          String          @id @default(uuid())
-  projectId   String
-  title       String
-  description String?
-  category    RiskCategory    @default(OTHER)
-  impact      RiskImpact      @default(MEDIUM)
-  probability RiskProbability @default(MEDIUM)
-  status      RiskStatus      @default(OPEN)
-  ownerId     String?
-  mitigation  String?
-  dueDate     DateTime?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  owner   User?   @relation("riskOwner", fields: [ownerId], references: [id])
-
-  @@index([projectId, status])
-  @@index([ownerId])
-  @@map("risks")
 }
 
 // ─── Task Templates ───────────────────────────────────────────────────────────

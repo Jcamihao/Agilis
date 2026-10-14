@@ -6,82 +6,35 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { MetricsService } from '../../core/services/metrics.service';
-import { ReportsService } from '../../core/services/reports.service';
-import { AuditService } from '../../core/services/audit.service';
 import { PRIORITY_CONFIG } from '../../core/models';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-
-const ACTION_META: Record<string, { badgeClass: string }> = {
-  CREATE:        { badgeClass: 'bg-blue-100 text-blue-800' },
-  UPDATE:        { badgeClass: 'bg-emerald-100 text-emerald-800' },
-  DELETE:        { badgeClass: 'bg-red-100 text-red-800' },
-  STATUS_CHANGE: { badgeClass: 'bg-emerald-100 text-emerald-800' },
-  ASSIGN:        { badgeClass: 'bg-emerald-100 text-emerald-800' },
-  COMMENT:       { badgeClass: 'bg-blue-100 text-blue-800' },
-  EXPORT:        { badgeClass: 'bg-purple-100 text-purple-800' },
-  LOGIN:         { badgeClass: 'bg-slate-100 text-slate-600' },
-  LOGOUT:        { badgeClass: 'bg-slate-100 text-slate-600' },
-  AUTH_FAIL:     { badgeClass: 'bg-red-600 text-white' },
-};
 
 @Component({
   selector: 'ag-metrics',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './metrics.component.html',
   styleUrls: ['./metrics.component.scss'],
 })
 export class MetricsComponent implements OnInit {
   private readonly auth    = inject(AuthService);
   private readonly metrics = inject(MetricsService);
-  private readonly reports = inject(ReportsService);
-  private readonly audit   = inject(AuditService);
-  private readonly route   = inject(ActivatedRoute);
-  private readonly fb      = inject(FormBuilder);
 
   readonly PRIORITY_CONFIG = PRIORITY_CONFIG;
 
-  // ── Active tab ────────────────────────────────────────────────────────────
-  activeTab = signal<'metrics' | 'reports' | 'audit'>('metrics');
-
-  // ── Metrics ───────────────────────────────────────────────────────────────
   companyLoading = signal(true);
   selectedDays   = signal(30);
   company        = signal<any>(null);
   users          = signal<any[]>([]);
   dayOptions     = [7, 14, 30, 90];
 
-  // ── Reports ───────────────────────────────────────────────────────────────
-  downloading     = signal<string | null>(null);
-  downloadSuccess = signal(false);
-  reportForm = this.fb.group({ type: ['tasks'], from: [''], to: [''], format: ['csv'] });
-
-  // ── Audit ─────────────────────────────────────────────────────────────────
-  auditLoading = signal(true);
-  logs         = signal<any[]>([]);
-  auditPage    = signal<any>(null);
-  currentPage  = signal(1);
-  auditSearch  = signal('');
-
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit() {
-    const path = this.route.snapshot.routeConfig?.path ?? '';
-    if (path === 'reports') this.activeTab.set('reports');
-    else if (path === 'audit') this.activeTab.set('audit');
-
     this.loadMetrics();
-    this.loadAudit();
   }
 
-  setTab(tab: 'metrics' | 'reports' | 'audit') { this.activeTab.set(tab); }
-
-  // ── Metrics ───────────────────────────────────────────────────────────────
   loadMetrics() {
     const cid = this.auth.currentCompanyId();
     if (!cid) { this.companyLoading.set(false); return; }
@@ -141,58 +94,4 @@ export class MetricsComponent implements OnInit {
   };
 
   totalTasks = () => this.statusBreakdown().reduce((s: number, b: any) => s + b.count, 0);
-
-  // ── Reports ───────────────────────────────────────────────────────────────
-  downloadQuick(type: string, format: 'csv' | 'excel') {
-    this.reportForm.patchValue({ type, format });
-    this.generateReport();
-  }
-
-  generateReport() {
-    const val = this.reportForm.value;
-    const cid = this.auth.currentCompanyId();
-    if (!cid) return;
-    const fmt = (val.format as 'csv' | 'excel') || 'csv';
-    const key = `${val.type}_${fmt}`;
-    this.downloading.set(key);
-    const filters: Record<string, string> = {};
-    if (val.from) filters['from'] = val.from!;
-    if (val.to)   filters['to']   = val.to!;
-    try {
-      if (val.type === 'tasks')       this.reports.downloadTasks(cid, fmt, filters);
-      if (val.type === 'productivity') this.reports.downloadProductivity(cid, fmt);
-      if (val.type === 'audit')       this.reports.downloadAudit(cid, fmt, val.from || undefined, val.to || undefined);
-      setTimeout(() => {
-        this.downloading.set(null);
-        this.downloadSuccess.set(true);
-        setTimeout(() => this.downloadSuccess.set(false), 3000);
-      }, 800);
-    } catch { this.downloading.set(null); }
-  }
-
-  // ── Audit ─────────────────────────────────────────────────────────────────
-  loadAudit() {
-    const cid = this.auth.currentCompanyId();
-    if (!cid) { this.auditLoading.set(false); return; }
-    this.auditLoading.set(true);
-    const filters: Record<string, string> = { page: String(this.currentPage()), limit: '50' };
-    if (this.auditSearch()) filters['search'] = this.auditSearch();
-    this.audit.getAll(cid, filters).subscribe({
-      next: (data: any) => { this.logs.set(data.items ?? data); this.auditPage.set(data); this.auditLoading.set(false); },
-      error: () => this.auditLoading.set(false),
-    });
-  }
-
-  nextPage() { this.currentPage.update((p) => p + 1); this.loadAudit(); }
-  prevPage() { if (this.currentPage() > 1) { this.currentPage.update((p) => p - 1); this.loadAudit(); } }
-
-  getActionMeta(action: string) {
-    return ACTION_META[action] ?? { badgeClass: 'bg-slate-100 text-slate-600' };
-  }
-
-  formatDateTime(d: string): string {
-    return new Date(d).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  }
-
-  timeAgo(d: string) { return formatDistanceToNow(new Date(d), { addSuffix: true, locale: ptBR }); }
 }

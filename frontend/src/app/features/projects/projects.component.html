@@ -180,11 +180,6 @@
                     <span class="material-symbols-rounded text-base">schedule</span>
                     Tempo
                   </a>
-                  <a [routerLink]="['/projects', project.id, 'gantt']"
-                     class="text-sm font-medium text-[--text-secondary] hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-                    <span class="material-symbols-rounded text-base">account_tree</span>
-                    Gantt
-                  </a>
                   <a [routerLink]="['/projects', project.id, 'list']"
                      class="text-sm font-medium text-[--text-secondary] hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
                     <span class="material-symbols-rounded text-base">table_rows</span>
@@ -258,9 +253,6 @@
               </td>
               <td class="px-4 py-3.5 text-right">
                 <div class="flex items-center justify-end gap-1.5">
-                  <a [routerLink]="['/projects', project.id, 'gantt']" class="ag-btn ag-btn--ghost ag-btn--sm" title="Gantt">
-                    <span class="material-symbols-rounded text-base">account_tree</span>
-                  </a>
                   <a [routerLink]="['/projects', project.id, 'list']" class="ag-btn ag-btn--ghost ag-btn--sm" title="Lista">
                     <span class="material-symbols-rounded text-base">table_rows</span>
                   </a>

@@ -67,9 +67,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       description: 'Arraste, solte e acompanhe tudo em tempo real, com campos personalizados pro fluxo da sua equipe.',
     },
     {
-      icon: 'account_tree',
-      title: 'Gantt & Sprints',
-      description: 'Planeje prazos e dependências visualmente, e rode sprints com metas claras pro time inteiro.',
+      icon: 'sprint',
+      title: 'Sprints & Calendário',
+      description: 'Rode sprints com metas claras pro time inteiro, e acompanhe prazos num calendário só pra todos os projetos.',
     },
     {
       icon: 'flag',
@@ -116,7 +116,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     {
       name: 'Starter',
       tagline: 'Pra times pequenos validando o fluxo.',
-      features: ['Kanban, Gantt e Calendário', 'Minhas Tarefas e Notificações', '1 empresa'],
+      features: ['Kanban, Sprints e Calendário', 'Minhas Tarefas e Notificações', '1 empresa'],
       ctaLabel: 'Testar grátis',
       ctaLink: '/auth/register',
     },
@@ -131,7 +131,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     {
       name: 'Enterprise',
       tagline: 'Pra quem precisa de controle e suporte dedicado.',
-      features: ['Tudo do Business', 'Auditoria completa e SLA', 'Suporte prioritário'],
+      features: ['Tudo do Business', 'Auditoria completa', 'Suporte prioritário'],
       ctaLabel: 'Falar com vendas',
       ctaLink: '#contato',
     },

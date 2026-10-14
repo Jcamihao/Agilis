@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, IsDateString, IsNumber, Allow, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { DependencyType, Priority, TaskStatus } from '@prisma/client';
+import { Priority, TaskStatus } from '@prisma/client';
 
 export class UpdateTaskDto {
   @IsString() @IsNotEmpty() @IsOptional() title?: string;
@@ -135,16 +135,4 @@ export class BulkUpdateTasksDto {
   @IsUUID()
   @IsOptional()
   sprintId?: string | null;
-}
-
-export class AddDependencyDto {
-  @ApiProperty()
-  @IsUUID()
-  @IsNotEmpty()
-  dependsOnId: string;
-
-  @ApiProperty({ enum: DependencyType, default: DependencyType.BLOCKS })
-  @IsEnum(DependencyType)
-  @IsOptional()
-  type?: DependencyType;
 }

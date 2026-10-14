@@ -99,7 +99,6 @@
                   @if (sortKey() === 'forecast') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
                 </span>
               </th>
-              <th class="px-4 py-3 text-center">Riscos</th>
               <th class="px-4 py-3 text-center">OKR</th>
               <th class="px-4 py-3"></th>
             </tr>
@@ -177,19 +176,6 @@
                     </div>
                   } @else {
                     <span class="text-[--text-secondary] text-xs">Sem dados</span>
-                  }
-                </td>
-
-                <!-- Risk count -->
-                <td class="px-4 py-4 text-center">
-                  @if (p.riskCount > 0) {
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold"
-                          style="background:#fff7ed; color:#c2410c;">
-                      <span class="material-symbols-rounded" style="font-size:11px">warning</span>
-                      {{ p.riskCount }}
-                    </span>
-                  } @else {
-                    <span class="text-[--text-secondary] text-xs">—</span>
                   }
                 </td>
 

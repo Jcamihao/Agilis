@@ -30,12 +30,6 @@
           Lista
         </button>
         <div class="w-px h-5 bg-slate-100"></div>
-        <a [routerLink]="['/projects', id, 'gantt']"
-          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
-          <span class="material-symbols-rounded text-base">account_tree</span>
-          Gantt
-        </a>
-        <div class="w-px h-5 bg-slate-100"></div>
         <a [routerLink]="['/projects', id, 'time-report']"
           class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
           <span class="material-symbols-rounded text-base">schedule</span>
@@ -46,11 +40,6 @@
           class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
           <span class="material-symbols-rounded text-base">menu_book</span>
           Wiki
-        </a>
-        <a [routerLink]="['/projects', id, 'risks']"
-          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-[--text-secondary] hover:bg-slate-50 transition-colors">
-          <span class="material-symbols-rounded text-base">warning_amber</span>
-          Riscos
         </a>
         <div class="w-px h-5 bg-slate-100"></div>
         <a [routerLink]="['/projects', id, 'settings']"

@@ -63,11 +63,6 @@ export const routes: Routes = [
         title: 'Tempo — Agilis',
       },
       {
-        path: 'projects/:id/gantt',
-        loadComponent: () => import('./features/gantt/gantt.component').then((m) => m.GanttComponent),
-        title: 'Gantt — Agilis',
-      },
-      {
         path: 'projects/:id/wiki',
         loadComponent: () => import('./features/wiki/wiki.component').then((m) => m.WikiComponent),
         title: 'Wiki — Agilis',
@@ -81,11 +76,6 @@ export const routes: Routes = [
         path: 'projects/:id/settings',
         loadComponent: () => import('./features/project-settings/project-settings.component').then((m) => m.ProjectSettingsComponent),
         title: 'Configurações do Projeto — Agilis',
-      },
-      {
-        path: 'projects/:id/risks',
-        loadComponent: () => import('./features/risks/risks.component').then((m) => m.RisksComponent),
-        title: 'Riscos — Agilis',
       },
       {
         path: 'my-tasks',
@@ -128,11 +118,6 @@ export const routes: Routes = [
         title: 'Assistente IA — Agilis',
       },
       {
-        path: 'competitive',
-        loadComponent: () => import('./features/competitive/competitive.component').then((m) => m.CompetitiveComponent),
-        title: 'Centro de Operações — Agilis',
-      },
-      {
         path: 'workload',
         loadComponent: () => import('./features/workload/workload.component').then((m) => m.WorkloadComponent),
         title: 'Carga de Trabalho — Agilis',
@@ -161,11 +146,6 @@ export const routes: Routes = [
         path: 'audit',
         loadComponent: () => import('./features/audit/audit.component').then((m) => m.AuditComponent),
         title: 'Auditoria — Agilis',
-      },
-      {
-        path: 'sla',
-        loadComponent: () => import('./features/sla/sla.component').then((m) => m.SlaComponent),
-        title: 'SLA — Agilis',
       },
       {
         path: 'webhooks',

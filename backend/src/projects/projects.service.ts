@@ -230,12 +230,7 @@ export class ProjectsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const [risksByProject, healthScores, objectives] = await Promise.all([
-      this.prisma.risk.groupBy({
-        by: ['projectId'],
-        where: { project: { companyId } },
-        _count: { id: true },
-      }).catch(() => []),
+    const [healthScores, objectives] = await Promise.all([
       this.prisma.healthScore.findMany({
         where: { companyId, entityType: 'PROJECT' },
         orderBy: { calculatedAt: 'desc' },
@@ -247,7 +242,6 @@ export class ProjectsService {
       }).catch(() => []),
     ]);
 
-    const riskMap = Object.fromEntries(risksByProject.map((r: any) => [r.projectId, r._count.id]));
     // Keep only latest score per project
     const seenHealth = new Set<string>();
     const healthMap: Record<string, { score: number; grade: string }> = {};
@@ -293,7 +287,6 @@ export class ProjectsService {
         id: p.id, name: p.name, color: p.color, icon: p.icon,
         total, done, overdue, progress,
         memberCount: p._count.members,
-        riskCount:   riskMap[p.id] ?? 0,
         health:      healthMap[p.id] ?? null,
         forecastDate,
         forecastDays,

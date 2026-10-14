@@ -39,7 +39,6 @@ npm run dev
 ### Núcleo Operacional
 - **Kanban Board** — drag-and-drop, colunas customizáveis, filtros, swimlanes
 - **Lista de Tarefas** — view tabular com ordenação, filtros avançados, edição inline
-- **Gantt Chart** — timeline com dependências visuais (setas SVG), bloqueios e tipos de dependência
 - **Calendário** — views mês/semana/dia, tarefas por data de vencimento, exportação iCal (.ics)
 - **Sprint Planning** — drag-and-drop de tarefas entre sprints, burndown chart SVG (ideal vs real)
 - **Minhas Tarefas** — fila pessoal com filtros de status/prioridade
@@ -51,21 +50,19 @@ npm run dev
 - **Recorrência de Tarefas** — DAILY/WEEKLY/BIWEEKLY/MONTHLY, cron diário recria tarefas DONE
 - **Aprovações** — fluxo de aprovação com múltiplos aprovadores e etapas
 - **Time Tracking** — apontamento de horas por tarefa + registro de ponto (entrada/saída)
-- **SLA** — configuração e monitoramento de SLAs por prioridade/projeto
 
 ### Comunicação & Conhecimento
 - **Wiki de Projetos** — editor rich text por projeto
 
 ### Inteligência & Analytics
 - **Assistente IA** — chat via Selah IA, contexto do workspace em tempo real, resumo de projetos/tarefas, plano de ação, gargalos, sugestão de responsável
-- **Portfolio Executivo** (`/portfolio`) — visão consolidada de todos os projetos: progresso %, health score, velocidade, previsão de entrega, riscos, OKR linkado, sortável/buscável
+- **Portfolio Executivo** (`/portfolio`) — visão consolidada de todos os projetos: progresso %, health score, velocidade, previsão de entrega, OKR linkado, sortável/buscável
 - **Brief Estratégico IA** — análise estruturada gerada por IA (Resumo Executivo, Riscos, Oportunidades, Recomendações) com métricas consolidadas
 - **OKRs e Metas** — Objectives + Key Results com progress tracking
 - **Health Score** — score A/B/C/D por projeto, calculado automaticamente
-- **Insights** — alertas automáticos (CRON horário): tarefas atrasadas, estagnação, backlog excessivo, SLA
+- **Insights** — alertas automáticos (CRON horário): tarefas atrasadas, estagnação, backlog excessivo, tarefas urgentes sem responsável
 - **Workload** — carga de trabalho por membro (14 dias), sugestão de rebalanceamento via IA
 - **Métricas** — KPIs por usuário, equipe e empresa
-- **Risks** — matriz de riscos (impacto × probabilidade), mitigação e acompanhamento
 
 ### Automações & Integrações
 - **Motor de Automações** — regras "se evento X → ação Y" (CRUD completo + engine de execução)
@@ -79,8 +76,6 @@ npm run dev
 - **Auditoria** — log completo de todas as ações (quem, o quê, quando)
 - **Log de Auditoria** — exportável em CSV/Excel
 - **Centro de Processos** — fluxos de processo com etapas e checklists
-- **Centro de Operações** — monitoramento e indicadores operacionais
-- **SLA** — configuração de SLAs com breach detection
 
 ### Onboarding
 - **Wizard de Primeiro Acesso** — 3 passos guiados: criar empresa → projeto → primeira tarefa
@@ -105,7 +100,6 @@ Agilis/
 │   │   ├── okrs/               # Objectives + Key Results
 │   │   ├── projects/           # Projetos + portfolio + forecast
 │   │   ├── reports/            # CSV/Excel: tarefas, produtividade, time, OKRs
-│   │   ├── risks/              # Gestão de riscos
 │   │   ├── search/             # Busca global
 │   │   ├── sprints/            # Sprint planning + burndown
 │   │   ├── task-templates/     # Templates reutilizáveis
@@ -154,6 +148,7 @@ npm run infra:logs       # Ver logs de todos os containers
 **v2.5.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.1.0** — Remoção de Gestão de Riscos, Centro de Operações, SLA e Gantt/Dependências entre tarefas (escopo focado em PM; SLA duplicava o sinal de "tarefa atrasada" sob outro nome, dependências nunca tinham UI de criação). Insights replanejado: regra de SLA trocada por "tarefa urgente sem responsável"; Health Score e Dashboard param de reimplementar a lista de Insights e passam a linkar pra ela. Relatórios e Auditoria deixam de ter uma versão duplicada mais fraca dentro de Métricas
 - **v2.5.0** — Remoção de Chat em tempo real, Mural/Announcements e HR (escopo focado em PM, sem intranet/RH)
 - **v2.4.0** — Remoção de Telegram, Portal do Cliente, Intake Forms e Wiki Corporativa (escopo focado em PM, sem intranet/RH/agência)
 - **v2.3.2** — Correção de mapeamento Prisma (`@map`) em colunas de migrations manuais

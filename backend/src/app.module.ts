@@ -18,7 +18,6 @@ import { AttachmentsModule } from './attachments/attachments.module';
 // V3
 import { AuditModule } from './audit/audit.module';
 import { AutomationModule } from './automation/automation.module';
-import { SlaModule } from './sla/sla.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { ReportsModule } from './reports/reports.module';
 import { AiModule } from './ai/ai.module';
@@ -36,7 +35,6 @@ import { WorkloadModule } from './workload/workload.module';
 import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { WikiModule } from './wiki/wiki.module';
 import { ApprovalsModule } from './approvals/approvals.module';
-import { RisksModule } from './risks/risks.module';
 import { LabelsModule } from './labels/labels.module';
 import { TaskStatusConfigModule } from './task-status-config/task-status-config.module';
 import { UploadModule } from './upload/upload.module';
@@ -63,7 +61,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     AttachmentsModule,
     AuditModule,
     AutomationModule,
-    SlaModule,
     MetricsModule,
     ReportsModule,
     AiModule,
@@ -81,7 +78,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     CustomFieldsModule,
     WikiModule,
     ApprovalsModule,
-    RisksModule,
     LabelsModule,
     TaskStatusConfigModule,
     UploadModule,

@@ -11,7 +11,6 @@ export interface PortfolioProject {
   overdue: number;
   progress: number;
   memberCount: number;
-  riskCount: number;
   health: { score: number; grade: string } | null;
   forecastDate: string | null;
   forecastDays: number | null;

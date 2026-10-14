@@ -130,9 +130,6 @@ export class KanbanComponent implements OnInit {
   creatingSubtask  = signal(false);
   expandedCards    = signal<Set<string>>(new Set());
 
-  // ── Dependencies ──────────────────────────────────────────────────────────
-  dependencies     = signal<{ blockedBy: any[]; blocking: any[] }>({ blockedBy: [], blocking: [] });
-
   // ── Config modal ──────────────────────────────────────────────────────────
   showConfig    = signal(false);
   configTab     = signal<'general' | 'columns' | 'members' | 'danger'>('general');
@@ -744,7 +741,6 @@ export class KanbanComponent implements OnInit {
   openDetailWithSubtasks(task: Task) {
     this.openDetail(task);
     this.loadSubtasks(task.id);
-    this.loadDependencies(task.id);
   }
 
   loadSubtasks(taskId: string) {
@@ -752,12 +748,6 @@ export class KanbanComponent implements OnInit {
     this.tasksService.listSubtasks(taskId).subscribe({
       next: (list) => { this.subtasks.set(list); this.subtasksLoading.set(false); this.cdr.markForCheck(); },
       error: () => this.subtasksLoading.set(false),
-    });
-  }
-
-  loadDependencies(taskId: string) {
-    this.tasksService.listDependencies(taskId).subscribe({
-      next: (deps) => { this.dependencies.set(deps); this.cdr.markForCheck(); },
     });
   }
 
@@ -810,12 +800,6 @@ export class KanbanComponent implements OnInit {
     const list = this.subtasks();
     if (!list.length) return 0;
     return Math.round((this.subtaskDoneCount() / list.length) * 100);
-  }
-
-  removeDep(taskId: string, depId: string) {
-    this.tasksService.removeDependency(taskId, depId).subscribe({
-      next: () => this.loadDependencies(taskId),
-    });
   }
 
   private updateSubtaskCountInBoard(taskId: string, count: number) {

@@ -35,7 +35,6 @@ export class ReportsService {
         project:  { select: { name: true } },
         assignee: { select: { name: true, email: true } },
         creator:  { select: { name: true } },
-        sla:      true,
         _count:   { select: { comments: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -58,8 +57,6 @@ export class ReportsService {
       createdAt:      t.createdAt.toLocaleDateString('pt-BR'),
       updatedAt:      t.updatedAt.toLocaleDateString('pt-BR'),
       comments:       t._count.comments,
-      slaBreached:    t.sla?.isBreached ? 'Sim' : 'Não',
-      resolutionMin:  t.sla?.resolutionMinutes ?? '',
     }));
 
     if (format === 'csv')   return this.toCsv(rows);

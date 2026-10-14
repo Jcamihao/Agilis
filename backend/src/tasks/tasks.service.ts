@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { RedisService } from '../redis/redis.service';
 import { OkrsService } from '../okrs/okrs.service';
-import { CreateTaskDto, UpdateTaskDto, UpdateTaskStatusDto, MoveTaskDto, CreateSubtaskDto, AddDependencyDto, BulkUpdateTasksDto } from './dto/create-task.dto';
-import { DependencyType, TaskStatus } from '@prisma/client';
+import { CreateTaskDto, UpdateTaskDto, UpdateTaskStatusDto, MoveTaskDto, CreateSubtaskDto, BulkUpdateTasksDto } from './dto/create-task.dto';
+import { TaskStatus } from '@prisma/client';
 import { EVENTS } from '../events/agilis-events';
 
 const TASKS_CACHE_TTL = 30;
@@ -37,7 +37,6 @@ export class TasksService {
         creator:   { select: { id: true, name: true } },
         sprint:    { select: { id: true, name: true, status: true, startDate: true, endDate: true } },
         labels:    { include: { label: true } },
-        blockedBy: { select: { dependsOnId: true, type: true } },
         _count:    { select: { comments: true, subtasks: true, timeEntries: true } },
       },
       orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
@@ -94,12 +93,6 @@ export class TasksService {
         subtasks: {
           include: { assignee: { select: { id: true, name: true, avatarUrl: true } } },
           orderBy: { createdAt: 'asc' },
-        },
-        blockedBy: {
-          include: { dependsOn: { select: { id: true, title: true, status: true, priority: true } } },
-        },
-        blocking: {
-          include: { task: { select: { id: true, title: true, status: true, priority: true } } },
         },
       },
     });
@@ -325,48 +318,6 @@ export class TasksService {
 
     this.invalidateProjectCache(subtask.projectId);
     return this.prisma.task.delete({ where: { id: subtaskId } });
-  }
-
-  // ── Dependencies ──────────────────────────────────────────────────────────
-
-  async listDependencies(taskId: string, userId: string) {
-    const task = await this.prisma.task.findUnique({ where: { id: taskId }, include: { project: true } });
-    if (!task) throw new NotFoundException('Tarefa não encontrada');
-    await this.checkCompanyAccess(task.project.companyId, userId);
-
-    const [blockedBy, blocking] = await Promise.all([
-      this.prisma.taskDependency.findMany({
-        where: { taskId },
-        include: { dependsOn: { select: { id: true, title: true, status: true, priority: true } } },
-      }),
-      this.prisma.taskDependency.findMany({
-        where: { dependsOnId: taskId },
-        include: { task: { select: { id: true, title: true, status: true, priority: true } } },
-      }),
-    ]);
-
-    return { blockedBy, blocking };
-  }
-
-  async addDependency(taskId: string, dto: AddDependencyDto, userId: string) {
-    if (taskId === dto.dependsOnId) throw new ConflictException('Uma tarefa não pode depender de si mesma');
-
-    const task = await this.prisma.task.findUnique({ where: { id: taskId }, include: { project: true } });
-    if (!task) throw new NotFoundException('Tarefa não encontrada');
-    await this.checkCompanyAccess(task.project.companyId, userId);
-
-    return this.prisma.taskDependency.create({
-      data: { taskId, dependsOnId: dto.dependsOnId, type: dto.type ?? DependencyType.BLOCKS },
-      include: { dependsOn: { select: { id: true, title: true, status: true } } },
-    });
-  }
-
-  async removeDependency(taskId: string, dependsOnId: string, userId: string) {
-    const task = await this.prisma.task.findUnique({ where: { id: taskId }, include: { project: true } });
-    if (!task) throw new NotFoundException('Tarefa não encontrada');
-    await this.checkCompanyAccess(task.project.companyId, userId);
-
-    await this.prisma.taskDependency.deleteMany({ where: { taskId, dependsOnId } });
   }
 
   // ── Recurrence cron ──────────────────────────────────────────────────────

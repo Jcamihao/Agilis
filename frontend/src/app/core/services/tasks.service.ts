@@ -39,13 +39,4 @@ export class TasksService {
   deleteSubtask(parentId: string, subtaskId: string) {
     return this.api.delete<void>(`/tasks/${parentId}/subtasks/${subtaskId}`);
   }
-
-  // Dependencies
-  listDependencies(taskId: string) { return this.api.get<{ blockedBy: any[]; blocking: any[] }>(`/tasks/${taskId}/dependencies`); }
-  addDependency(taskId: string, dependsOnId: string, type = 'BLOCKS') {
-    return this.api.post<any>(`/tasks/${taskId}/dependencies`, { dependsOnId, type });
-  }
-  removeDependency(taskId: string, dependsOnId: string) {
-    return this.api.delete<void>(`/tasks/${taskId}/dependencies/${dependsOnId}`);
-  }
 }

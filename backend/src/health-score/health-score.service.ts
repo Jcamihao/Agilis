@@ -5,7 +5,6 @@ import { Prisma } from '@prisma/client';
 
 interface ScoreBreakdown {
   overdueDeduction: number;
-  slaDeduction: number;
   backlogDeduction: number;
   inactivityDeduction: number;
   completionBonus: number;
@@ -35,48 +34,33 @@ export class HealthScoreService {
   // ── Company Score ─────────────────────────────────────────────────────────
 
   async calculateCompanyScore(companyId: string) {
-    const [
-      total,
-      overdue,
-      completed,
-      slaBreached,
-      slaTotal,
-      backlog,
-      lastActivity,
-    ] = await Promise.all([
-      this.prisma.task.count({ where: { project: { companyId } } }),
-      this.prisma.task.count({
-        where: {
-          project: { companyId },
-          dueDate: { lt: new Date() },
-          status: { not: 'DONE' },
-        },
-      }),
-      this.prisma.task.count({
-        where: { project: { companyId }, status: 'DONE' },
-      }),
-      this.prisma.slaRecord.count({
-        where: { isBreached: true, task: { project: { companyId } } },
-      }),
-      this.prisma.slaRecord.count({
-        where: { task: { project: { companyId } } },
-      }),
-      this.prisma.task.count({
-        where: { project: { companyId }, status: 'BACKLOG' },
-      }),
-      this.prisma.activity.findFirst({
-        where: { task: { project: { companyId } } },
-        orderBy: { createdAt: 'desc' },
-        select: { createdAt: true },
-      }),
-    ]);
+    const [total, overdue, completed, backlog, lastActivity] =
+      await Promise.all([
+        this.prisma.task.count({ where: { project: { companyId } } }),
+        this.prisma.task.count({
+          where: {
+            project: { companyId },
+            dueDate: { lt: new Date() },
+            status: { not: 'DONE' },
+          },
+        }),
+        this.prisma.task.count({
+          where: { project: { companyId }, status: 'DONE' },
+        }),
+        this.prisma.task.count({
+          where: { project: { companyId }, status: 'BACKLOG' },
+        }),
+        this.prisma.activity.findFirst({
+          where: { task: { project: { companyId } } },
+          orderBy: { createdAt: 'desc' },
+          select: { createdAt: true },
+        }),
+      ]);
 
     const { score, breakdown } = this.computeScore(
       total,
       overdue,
       completed,
-      slaBreached,
-      slaTotal,
       backlog,
       lastActivity?.createdAt,
     );
@@ -136,8 +120,6 @@ export class HealthScoreService {
       total,
       overdue,
       completed,
-      0,
-      0,
       backlog,
     );
 
@@ -189,8 +171,6 @@ export class HealthScoreService {
       total,
       overdue,
       completed,
-      0,
-      0,
       backlog,
       lastActivity?.createdAt,
     );
@@ -280,20 +260,17 @@ export class HealthScoreService {
     total: number,
     overdue: number,
     completed: number,
-    slaBreached: number,
-    slaTotal: number,
     backlog: number,
     lastActivity?: Date,
   ): { score: number; breakdown: ScoreBreakdown } {
     let base = 100;
 
-    // Overdue penalty: up to -35 points
+    // Overdue penalty: up to -55 points. Used to be split into a -35 "overdue"
+    // deduction plus a separate -20 "SLA breach" one, but SlaRecord.isBreached
+    // was only ever set true for tasks past their dueDate — same signal twice.
+    // Folded into one so the removed SLA field doesn't just inflate every score.
     const overdueRate = total > 0 ? overdue / total : 0;
-    const overdueDeduction = Math.round(Math.min(35, overdueRate * 100));
-
-    // SLA breach penalty: up to -20 points
-    const slaRate = slaTotal > 0 ? slaBreached / slaTotal : 0;
-    const slaDeduction = Math.round(Math.min(20, slaRate * 40));
+    const overdueDeduction = Math.round(Math.min(55, overdueRate * 140));
 
     // Backlog penalty: up to -15 points
     const backlogRate = total > 0 ? backlog / total : 0;
@@ -321,7 +298,6 @@ export class HealthScoreService {
         100,
         base -
           overdueDeduction -
-          slaDeduction -
           backlogDeduction -
           inactivityDeduction +
           completionBonus,
@@ -333,7 +309,6 @@ export class HealthScoreService {
       breakdown: {
         base,
         overdueDeduction,
-        slaDeduction,
         backlogDeduction,
         inactivityDeduction,
         completionBonus,
