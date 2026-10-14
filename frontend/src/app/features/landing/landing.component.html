@@ -2,13 +2,13 @@
 
   <!-- ═══════ HERO ═══════ -->
   <section class="relative w-full h-screen overflow-hidden">
-    <!-- Background Video: plays forward, then reverses back to the start
-         (boomerang loop) instead of hard-cutting — see setupBoomerangVideo(). -->
+    <!-- Background video: one file with forward + reversed playback baked in (hero_boomerang.mp4),
+         so the native loop is a seamless boomerang with no JS seeking. -->
     <video
-      #bgVideo
       class="bg-video"
-      src="/vids/hero_vid.mp4"
+      src="/vids/hero_boomerang.mp4"
       autoplay
+      loop
       [muted]="true"
       playsinline
       preload="auto"
