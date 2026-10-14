@@ -144,7 +144,8 @@
         <div class="w-px h-5 mx-1" style="background: rgb(var(--c-border) / 0.12);"></div>
 
         <!-- User Menu -->
-        <button [matMenuTriggerFor]="userMenu"
+        <div class="relative" #userMenuWrap>
+        <button (click)="showUserMenu.set(!showUserMenu())"
                 class="flex items-center gap-2 px-2 py-1.5 transition-colors cursor-pointer"
                 onmouseover="this.style.background='rgb(var(--c-border) / 0.05)'"
                 onmouseout="this.style.background=''">
@@ -164,21 +165,27 @@
           </span>
         </button>
 
-        <mat-menu #userMenu="matMenu" xPosition="before">
-          <div class="px-4 py-3" style="border-bottom: 1px solid rgb(var(--c-border) / 0.1);">
-            <p class="text-[13px] font-medium tracking-[-0.01em]" style="color: rgb(var(--c-text));">{{ user()?.name }}</p>
-            <p class="text-[12px] mt-0.5" style="color: rgb(var(--c-border) / 0.5);">{{ user()?.email }}</p>
+        @if (showUserMenu()) {
+          <div class="absolute right-0 top-full mt-1 w-56 z-50 overflow-hidden animate-scale-in"
+               style="background: rgb(var(--c-surface) / 0.96);
+                      backdrop-filter: blur(20px) saturate(180%);
+                      border: 1px solid rgb(var(--c-border) / 0.12);">
+            <div class="px-4 py-3" style="border-bottom: 1px solid rgb(var(--c-border) / 0.1);">
+              <p class="text-[13px] font-medium tracking-[-0.01em]" style="color: rgb(var(--c-text));">{{ user()?.name }}</p>
+              <p class="text-[12px] mt-0.5" style="color: rgb(var(--c-border) / 0.5);">{{ user()?.email }}</p>
+            </div>
+            <a routerLink="/profile" (click)="showUserMenu.set(false)" class="user-menu-item">
+              <span class="material-symbols-rounded text-lg">person</span>Meu Perfil
+            </a>
+            <a routerLink="/companies" (click)="showUserMenu.set(false)" class="user-menu-item">
+              <span class="material-symbols-rounded text-lg">corporate_fare</span>Empresa
+            </a>
+            <div style="border-top: 1px solid rgb(var(--c-border) / 0.1); margin: 4px 0;"></div>
+            <button (click)="showUserMenu.set(false); logout()" class="user-menu-item" style="color: rgb(var(--f-danger));">
+              <span class="material-symbols-rounded text-lg">logout</span>Sair
+            </button>
           </div>
-          <a mat-menu-item routerLink="/profile">
-            <span class="material-symbols-rounded mr-2 text-lg">person</span>Meu Perfil
-          </a>
-          <a mat-menu-item routerLink="/companies">
-            <span class="material-symbols-rounded mr-2 text-lg">corporate_fare</span>Empresa
-          </a>
-          <div style="border-top: 1px solid rgb(var(--c-border) / 0.1); margin: 4px 0;"></div>
-          <button mat-menu-item (click)="logout()" style="color: rgb(var(--f-danger));">
-            <span class="material-symbols-rounded mr-2 text-lg">logout</span>Sair
-          </button>
-        </mat-menu>
+        }
+        </div>
       </div>
     </header>

@@ -9,7 +9,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../core/services/auth.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService, CompanyMember } from '../../core/services/users.service';
@@ -20,7 +19,7 @@ import { Project, Team } from '../../core/models';
   selector: 'ag-projects',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, MatDialogModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss']
 })

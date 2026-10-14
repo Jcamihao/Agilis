@@ -1,9 +1,8 @@
 import {
-  Component, Output, EventEmitter, inject, ChangeDetectionStrategy, OnInit, signal, ChangeDetectorRef, HostListener,
+  Component, Output, EventEmitter, inject, ChangeDetectionStrategy, OnInit, signal, ChangeDetectorRef, HostListener, ElementRef, ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { MatMenuModule } from '@angular/material/menu';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationsService } from '../../core/services/notifications.service';
 import { Notification, NOTIFICATION_CONFIG } from '../../core/models';
@@ -15,7 +14,7 @@ import { GlobalSearchComponent } from '../../shared/components/global-search/glo
   selector: 'ag-topbar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterLink, MatMenuModule, GlobalSearchComponent],
+  imports: [CommonModule, RouterLink, GlobalSearchComponent],
   templateUrl: './topbar.component.html',
   styleUrls: ['./topbar.component.scss']
 })
@@ -30,6 +29,8 @@ export class TopbarComponent implements OnInit {
 
   showSearch        = signal(false);
   showNotifications = signal(false);
+  showUserMenu      = signal(false);
+  @ViewChild('userMenuWrap') userMenuWrap?: ElementRef<HTMLElement>;
   notifications     = signal<Notification[]>([]);
   notifLoading      = signal(false);
 
@@ -38,6 +39,16 @@ export class TopbarComponent implements OnInit {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       this.showSearch.update((v) => !v);
+    }
+    if (e.key === 'Escape') this.showUserMenu.set(false);
+  }
+
+  // The header's backdrop-filter traps `position: fixed` children inside the
+  // bar, so a full-screen click-catcher can't work — check clicks manually.
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent) {
+    if (this.showUserMenu() && !this.userMenuWrap?.nativeElement.contains(e.target as Node)) {
+      this.showUserMenu.set(false);
     }
   }
 

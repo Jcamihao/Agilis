@@ -2,24 +2,9 @@
 // AGILIS DESIGN SYSTEM — Swiss Vanguard Studio (light/paper)
 // ═══════════════════════════════════════════
 
-@use '@angular/material' as mat;
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-// ── Material Theme (light) ─────────────────
-$agilis-primary: mat.m2-define-palette(mat.$m2-grey-palette, 900, 700, A100);
-$agilis-accent:  mat.m2-define-palette(mat.$m2-grey-palette, 900, 700, A100);
-$agilis-warn:    mat.m2-define-palette(mat.$m2-red-palette, 700);
-
-$agilis-theme: mat.m2-define-light-theme((
-  color: (primary: $agilis-primary, accent: $agilis-accent, warn: $agilis-warn),
-  typography: mat.m2-define-typography-config($font-family: 'Hanken Grotesk, system-ui, sans-serif'),
-  density: -1,
-));
-
-@include mat.all-component-themes($agilis-theme);
 
 // ── Design Tokens ──────────────────────────
 // RGB triples (no rgb() wrapper) so Tailwind's `rgb(var(--x) / <alpha-value>)`
@@ -209,7 +194,7 @@ body {
 }
 
 // ── Material Symbols ──────────────────────
-.mat-icon, .material-symbols-rounded {
+.material-symbols-rounded {
   font-family: 'Material Symbols Rounded';
   font-weight: normal;
   font-style: normal;
@@ -499,45 +484,6 @@ body {
   border-radius: 999px;
   &:hover { background: rgb(var(--c-border) / 0.3); }
 }
-
-// ── Material Overrides ─────────────────────
-.mat-mdc-form-field {
-  --mdc-outlined-text-field-container-shape: 0px;
-  font-family: var(--font-sans) !important;
-}
-
-.mat-mdc-dialog-container {
-  --mdc-dialog-container-shape: 0px !important;
-  padding: 0 !important;
-}
-
-.mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-shape: 0px;
-}
-
-.mat-mdc-chip { font-size: 12px !important; }
-
-.mat-mdc-menu-panel {
-  border-radius: 0 !important;
-  background: rgb(var(--c-surface) / 0.96) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1px solid rgb(var(--c-border) / 0.12) !important;
-  box-shadow: 0 8px 32px rgb(var(--c-border) / 0.12) !important;
-  min-width: 200px !important;
-  overflow: hidden !important;
-}
-
-.mat-mdc-menu-item {
-  font-family: var(--font-sans) !important;
-  font-size: 13.5px !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  letter-spacing: -0.01em !important;
-  color: rgb(var(--c-text)) !important;
-}
-
-.mat-drawer { border-right: 1px solid var(--color-border) !important; }
 
 // ── Kanban Drag ───────────────────────────
 .cdk-drag-preview {
