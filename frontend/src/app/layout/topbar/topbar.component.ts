@@ -30,6 +30,7 @@ export class TopbarComponent implements OnInit {
   showNotifications = signal(false);
   showUserMenu      = signal(false);
   @ViewChild('userMenuWrap') userMenuWrap?: ElementRef<HTMLElement>;
+  @ViewChild('notifWrap') notifWrap?: ElementRef<HTMLElement>;
   notifications     = signal<Notification[]>([]);
   notifLoading      = signal(false);
 
@@ -39,15 +40,22 @@ export class TopbarComponent implements OnInit {
       e.preventDefault();
       this.showSearch.update((v) => !v);
     }
-    if (e.key === 'Escape') this.showUserMenu.set(false);
+    if (e.key === 'Escape') {
+      this.showUserMenu.set(false);
+      this.showNotifications.set(false);
+    }
   }
 
   // The header's backdrop-filter traps `position: fixed` children inside the
   // bar, so a full-screen click-catcher can't work — check clicks manually.
   @HostListener('document:click', ['$event'])
   onDocumentClick(e: MouseEvent) {
-    if (this.showUserMenu() && !this.userMenuWrap?.nativeElement.contains(e.target as Node)) {
+    const target = e.target as Node;
+    if (this.showUserMenu() && !this.userMenuWrap?.nativeElement.contains(target)) {
       this.showUserMenu.set(false);
+    }
+    if (this.showNotifications() && !this.notifWrap?.nativeElement.contains(target)) {
+      this.showNotifications.set(false);
     }
   }
 

@@ -34,7 +34,7 @@
       <div class="flex items-center gap-1 ml-auto">
 
         <!-- Notification Bell -->
-        <div class="relative">
+        <div class="relative" #notifWrap>
           <button (click)="toggleNotifications()"
                   class="relative w-9 h-9 flex items-center justify-center transition-all duration-150"
                   [style.background]="showNotifications() ? 'rgb(var(--c-border) / 0.08)' : 'transparent'"
@@ -127,7 +127,6 @@
               </div>
             </div>
 
-            <div (click)="showNotifications.set(false)" class="fixed inset-0 z-40"></div>
           }
         </div>
 
