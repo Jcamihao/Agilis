@@ -109,9 +109,7 @@ describe('AiService (Agilis -> Selah IA)', () => {
     const service = new AiService(prisma, selah);
 
     expect(await service.summarizeProject('x')).toBe('Projeto não encontrado.');
-    expect(await service.summarizeTask('x')).toBe('Tarefa não encontrada.');
     expect(await service.generateActionPlan('x')).toBe('Projeto não encontrado.');
-    expect(await service.suggestAssignee('x')).toBe('Tarefa não encontrada.');
     expect(selah.summarizeProject).not.toHaveBeenCalled();
   });
 

@@ -46,13 +46,7 @@ export class TimeTrackingService {
     return this.api.get<TaskTimeLog>(`/time-tracking/tasks/${taskId}`);
   }
 
-  getActiveTimer(taskId: string) {
-    return this.api.get<TimeEntry | null>(`/time-tracking/tasks/${taskId}/active`);
-  }
 
-  updateEntry(id: string, data: { durationMin?: number; description?: string }) {
-    return this.api.patch<TimeEntry>(`/time-tracking/entries/${id}`, data);
-  }
 
   deleteEntry(id: string) {
     return this.api.delete<void>(`/time-tracking/entries/${id}`);
@@ -62,9 +56,6 @@ export class TimeTrackingService {
     return this.api.get<ProjectTimeReport>(`/time-tracking/projects/${projectId}/report`);
   }
 
-  myLog(companyId?: string) {
-    return this.api.get<TimeEntry[]>('/time-tracking/my-log', companyId ? { companyId } : {});
-  }
 
   formatDuration(minutes: number): string {
     if (!minutes) return '0min';

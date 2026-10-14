@@ -83,12 +83,6 @@ export class ProjectsController {
     return this.projectsService.removeMember(id, targetUserId, userId);
   }
 
-  @Get(':id/forecast')
-  @ApiOperation({ summary: 'Previsão de entrega baseada em velocidade' })
-  forecast(@Param('id') id: string, @CurrentUser('id') userId: string) {
-    return this.projectsService.getForecast(id, userId);
-  }
-
   @Patch(':id/columns')
   @ApiOperation({ summary: 'Atualizar nomes das colunas' })
   updateColumns(

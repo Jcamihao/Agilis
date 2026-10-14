@@ -35,8 +35,6 @@ import { WorkloadModule } from './workload/workload.module';
 import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { WikiModule } from './wiki/wiki.module';
 import { ApprovalsModule } from './approvals/approvals.module';
-import { LabelsModule } from './labels/labels.module';
-import { TaskStatusConfigModule } from './task-status-config/task-status-config.module';
 import { UploadModule } from './upload/upload.module';
 import { SearchModule } from './search/search.module';
 import { TaskTemplatesModule } from './task-templates/task-templates.module';
@@ -78,8 +76,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     CustomFieldsModule,
     WikiModule,
     ApprovalsModule,
-    LabelsModule,
-    TaskStatusConfigModule,
     UploadModule,
     SearchModule,
     TaskTemplatesModule,

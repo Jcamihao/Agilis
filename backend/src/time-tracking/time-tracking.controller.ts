@@ -56,26 +56,7 @@ export class TimeTrackingController {
     return this.svc.listByTask(taskId, userId);
   }
 
-  @Get('tasks/:taskId/active')
-  @ApiOperation({ summary: 'Timer ativo do usuário na tarefa' })
-  getActiveTimer(
-    @Param('taskId') taskId: string,
-    @CurrentUser('id') userId: string,
-  ) {
-    return this.svc.getActiveTimer(taskId, userId);
-  }
-
   // ── Entry CRUD ────────────────────────────────────────────────────────────
-
-  @Patch('entries/:id')
-  @ApiOperation({ summary: 'Editar entrada de tempo' })
-  updateEntry(
-    @Param('id') id: string,
-    @Body() dto: UpdateTimeEntryDto,
-    @CurrentUser('id') userId: string,
-  ) {
-    return this.svc.updateEntry(id, userId, dto);
-  }
 
   @Delete('entries/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -98,12 +79,4 @@ export class TimeTrackingController {
     return this.svc.projectReport(projectId, userId);
   }
 
-  @Get('my-log')
-  @ApiOperation({ summary: 'Meu histórico de tempo' })
-  myLog(
-    @CurrentUser('id') userId: string,
-    @Query('companyId') companyId?: string,
-  ) {
-    return this.svc.myLog(userId, companyId);
-  }
 }

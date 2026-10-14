@@ -1,12 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { Objective, KeyResult, OkrSummary } from '../models';
+import { Objective, KeyResult } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class OkrsService {
   private readonly api = inject(ApiService);
 
-  summary()           { return this.api.get<OkrSummary>('/okrs/summary'); }
   list()              { return this.api.get<Objective[]>('/okrs'); }
   get(id: string)     { return this.api.get<Objective>(`/okrs/${id}`); }
 
@@ -27,11 +26,4 @@ export class OkrsService {
   }
   deleteKR(id: string) { return this.api.delete<void>(`/okrs/key-results/${id}`); }
 
-  // Tasks
-  linkTasks(keyResultId: string, taskIds: string[]) {
-    return this.api.post<KeyResult>(`/okrs/key-results/${keyResultId}/tasks`, { taskIds });
-  }
-  unlinkTask(keyResultId: string, taskId: string) {
-    return this.api.delete<void>(`/okrs/key-results/${keyResultId}/tasks/${taskId}`);
-  }
 }

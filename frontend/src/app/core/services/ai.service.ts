@@ -27,9 +27,6 @@ export class AiService {
     return this.api.post<{ summary: string }>(`/ai/summarize/project/${projectId}`, {});
   }
 
-  summarizeTask(taskId: string) {
-    return this.api.post<{ summary: string }>(`/ai/summarize/task/${taskId}`, {});
-  }
 
   actionPlan(projectId: string) {
     return this.api.post<{ plan: string }>(`/ai/action-plan/${projectId}`, {});

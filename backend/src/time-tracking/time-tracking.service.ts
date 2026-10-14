@@ -63,19 +63,6 @@ export class TimeTrackingService {
     });
   }
 
-  // ── Update entry ──────────────────────────────────────────────────────────
-  async updateEntry(entryId: string, userId: string, dto: UpdateTimeEntryDto) {
-    const entry = await this.prisma.timeEntry.findUnique({ where: { id: entryId } });
-    if (!entry) throw new NotFoundException('Entrada não encontrada');
-    if (entry.userId !== userId) throw new ForbiddenException('Sem permissão para editar esta entrada');
-
-    return this.prisma.timeEntry.update({
-      where: { id: entryId },
-      data: dto,
-      include: { user: { select: USER_SELECT } },
-    });
-  }
-
   // ── Delete entry ──────────────────────────────────────────────────────────
   async deleteEntry(entryId: string, userId: string) {
     const entry = await this.prisma.timeEntry.findUnique({ where: { id: entryId } });
@@ -98,14 +85,6 @@ export class TimeTrackingService {
     const activeTimer = entries.find((e) => !e.endedAt) ?? null;
 
     return { entries, totalMin, activeTimer };
-  }
-
-  // ── Running timer for current user on task ────────────────────────────────
-  async getActiveTimer(taskId: string, userId: string) {
-    return this.prisma.timeEntry.findFirst({
-      where: { taskId, userId, endedAt: null },
-      include: { user: { select: USER_SELECT } },
-    });
   }
 
   // ── Project report ────────────────────────────────────────────────────────
@@ -147,21 +126,6 @@ export class TimeTrackingService {
       byUser: [...byUser.values()].sort((a, b) => b.totalMin - a.totalMin),
       recentEntries: entries.slice(0, 50),
     };
-  }
-
-  // ── My time log ───────────────────────────────────────────────────────────
-  async myLog(userId: string, companyId?: string) {
-    return this.prisma.timeEntry.findMany({
-      where: {
-        userId,
-        ...(companyId ? { task: { project: { companyId } } } : {}),
-      },
-      include: {
-        task: { select: { id: true, title: true, status: true, project: { select: { id: true, name: true, color: true } } } },
-      },
-      orderBy: { startedAt: 'desc' },
-      take: 100,
-    });
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

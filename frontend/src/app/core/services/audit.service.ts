@@ -14,7 +14,4 @@ export class AuditService {
   getStats(companyId: string) {
     return this.api.get<any>('/audit/stats', { companyId });
   }
-  getByEntity(entityType: string, entityId: string) {
-    return this.api.get<any[]>(`/audit/${entityType}/${entityId}`);
-  }
 }

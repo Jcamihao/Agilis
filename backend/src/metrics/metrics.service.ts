@@ -78,24 +78,6 @@ export class MetricsService {
 
   // ── Por equipe ─────────────────────────────────────────────────────────────
 
-  async getTeamMetrics(teamId: string, days = 30) {
-    const since = new Date(Date.now() - days * 86_400_000);
-
-    const [totalTasks, completedTasks, overdueTasks, backlogTasks, memberCount] = await Promise.all([
-      this.prisma.task.count({ where: { project: { teamId } } }),
-      this.prisma.task.count({ where: { project: { teamId }, status: 'DONE', updatedAt: { gte: since } } }),
-      this.prisma.task.count({ where: { project: { teamId }, dueDate: { lt: new Date() }, status: { not: 'DONE' } } }),
-      this.prisma.task.count({ where: { project: { teamId }, status: 'BACKLOG' } }),
-      this.prisma.teamMember.count({ where: { teamId } }),
-    ]);
-
-    const efficiency = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-    const backlogRate = totalTasks > 0 ? Math.round((backlogTasks / totalTasks) * 100) : 0;
-    const throughput = days > 0 ? Math.round(completedTasks / days * 7) : 0; // per week
-
-    return { teamId, totalTasks, completedTasks, overdueTasks, backlogTasks, memberCount, efficiency, backlogRate, throughput, days };
-  }
-
   async getCompanyMetrics(companyId: string, days = 30) {
     const since = new Date(Date.now() - days * 86_400_000);
 

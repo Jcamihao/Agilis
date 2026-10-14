@@ -11,10 +11,4 @@ export class MetricsService {
   getAllUsers(companyId: string, days = 30) {
     return this.api.get<any[]>('/metrics/company/users', { companyId, days: String(days) });
   }
-  getMyMetrics(companyId: string, days = 30) {
-    return this.api.get<any>('/metrics/user/me', { companyId, days: String(days) });
-  }
-  getTeam(teamId: string, days = 30) {
-    return this.api.get<any>(`/metrics/team/${teamId}`, { days: String(days) });
-  }
 }

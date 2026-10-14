@@ -125,21 +125,6 @@ export class OkrsService {
 
   // ── Link tasks ─────────────────────────────────────────────────────────────
 
-  async linkTasks(keyResultId: string, taskIds: string[]) {
-    await this.prisma.keyResultTask.createMany({
-      data: taskIds.map(taskId => ({ keyResultId, taskId })),
-      skipDuplicates: true,
-    });
-    return this.prisma.keyResult.findUnique({
-      where: { id: keyResultId },
-      include: { tasks: { include: { task: { select: { id: true, title: true, status: true } } } } },
-    });
-  }
-
-  async unlinkTask(keyResultId: string, taskId: string) {
-    return this.prisma.keyResultTask.deleteMany({ where: { keyResultId, taskId } });
-  }
-
   // ── Auto-update progress when task completes ───────────────────────────────
 
   async syncKeyResultFromTasks(taskId: string) {
@@ -168,17 +153,6 @@ export class OkrsService {
   }
 
   // ── Company summary ───────────────────────────────────────────────────────
-
-  async summary(companyId: string) {
-    const objs = await this.listObjectives(companyId);
-    const total     = objs.length;
-    const active    = objs.filter(o => o.status === 'ACTIVE').length;
-    const completed = objs.filter(o => o.status === 'COMPLETED').length;
-    const avgProgress = total
-      ? Math.round(objs.reduce((s, o) => s + o.progress, 0) / total)
-      : 0;
-    return { total, active, completed, avgProgress, objectives: objs };
-  }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 

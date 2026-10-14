@@ -47,14 +47,6 @@ export class CustomFieldsController {
     return this.svc.getTaskValues(taskId);
   }
 
-  @Post('tasks/:taskId/custom-fields')
-  setValues(
-    @Param('taskId') taskId: string,
-    @Body() body: { values: { customFieldId: string; value: string | null }[] },
-  ) {
-    return this.svc.setValues(taskId, body.values);
-  }
-
   @Patch('tasks/:taskId/custom-fields/:fieldId')
   setValue(
     @Param('taskId') taskId: string,

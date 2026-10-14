@@ -25,11 +25,6 @@ export class OkrsController {
     return this.svc.listObjectives(req.user.companyId);
   }
 
-  @Get('summary')
-  summary(@Req() req: any) {
-    return this.svc.summary(req.user.companyId);
-  }
-
   @Get(':id')
   get(@Param('id') id: string) {
     return this.svc.getObjective(id);
@@ -69,13 +64,4 @@ export class OkrsController {
 
   // ── Tasks ──────────────────────────────────────────────────────────────────
 
-  @Post('key-results/:id/tasks')
-  linkTasks(@Param('id') id: string, @Body() dto: LinkTasksDto) {
-    return this.svc.linkTasks(id, dto.taskIds);
-  }
-
-  @Delete('key-results/:id/tasks/:taskId')
-  unlinkTask(@Param('id') id: string, @Param('taskId') taskId: string) {
-    return this.svc.unlinkTask(id, taskId);
-  }
 }

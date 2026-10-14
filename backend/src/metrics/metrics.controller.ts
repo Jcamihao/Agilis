@@ -29,16 +29,6 @@ export class MetricsController {
     return this.service.getAllUsersMetrics(companyId, days);
   }
 
-  @Get('user/me')
-  @ApiOperation({ summary: 'Minhas métricas' })
-  myMetrics(
-    @CurrentUser('id') userId: string,
-    @Query('companyId') companyId: string,
-    @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number,
-  ) {
-    return this.service.getUserMetrics(userId, companyId, days);
-  }
-
   @Get('user/:userId')
   @ApiOperation({ summary: 'Métricas de um usuário específico' })
   userMetrics(
@@ -49,12 +39,4 @@ export class MetricsController {
     return this.service.getUserMetrics(userId, companyId, days);
   }
 
-  @Get('team/:teamId')
-  @ApiOperation({ summary: 'Métricas de uma equipe' })
-  teamMetrics(
-    @Param('teamId') teamId: string,
-    @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number,
-  ) {
-    return this.service.getTeamMetrics(teamId, days);
-  }
 }

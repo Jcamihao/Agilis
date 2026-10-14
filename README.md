@@ -148,6 +148,8 @@ npm run infra:logs       # Ver logs de todos os containers
 **v2.5.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.2.0** — Fim da auditoria ponytail: remoção de Labels e de Status Personalizados (dava pra criar, mas nenhuma tarefa podia usar), da aba "Geral" placeholder em Configurações do Projeto, de 17 rotas/métodos sem chamador (okrs summary/link, time-tracking active/my-log/update, métricas me/team, forecast por projeto, audit por entidade, custom-fields em lote, IA resumir tarefa/sugerir responsável, health-score por escopo, webhooks/events) e de 3 colunas nunca usadas
+- **v3.1.1 a v3.1.4** — Remoção de 18 dependências sem uso, Angular Material (menu do usuário virou dropdown nativo; CSS global 157 kB → 65 kB), código morto e helpers de formatação unificados em `core/utils/format.ts`
 - **v3.1.0** — Remoção de Gestão de Riscos, Centro de Operações, SLA e Gantt/Dependências entre tarefas (escopo focado em PM; SLA duplicava o sinal de "tarefa atrasada" sob outro nome, dependências nunca tinham UI de criação). Insights replanejado: regra de SLA trocada por "tarefa urgente sem responsável"; Health Score e Dashboard param de reimplementar a lista de Insights e passam a linkar pra ela. Relatórios e Auditoria deixam de ter uma versão duplicada mais fraca dentro de Métricas
 - **v2.5.0** — Remoção de Chat em tempo real, Mural/Announcements e HR (escopo focado em PM, sem intranet/RH)
 - **v2.4.0** — Remoção de Telegram, Portal do Cliente, Intake Forms e Wiki Corporativa (escopo focado em PM, sem intranet/RH/agência)

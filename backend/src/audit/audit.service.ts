@@ -11,7 +11,6 @@ export interface AuditLogDto {
   oldValues?: Record<string, any>;
   newValues?: Record<string, any>;
   ipAddress?: string;
-  userAgent?: string;
 }
 
 @Injectable()
@@ -56,14 +55,6 @@ export class AuditService {
     ]);
 
     return { items, total, page, limit };
-  }
-
-  async findByEntity(entityType: string, entityId: string) {
-    return this.prisma.auditLog.findMany({
-      where: { entityType, entityId },
-      include: { user: { select: { id: true, name: true, avatarUrl: true } } },
-      orderBy: { createdAt: 'desc' },
-    });
   }
 
   async getStats(companyId: string) {

@@ -296,46 +296,6 @@ export class ProjectsService {
     });
   }
 
-  async getForecast(projectId: string, userId: string) {
-    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
-    if (!project) throw new NotFoundException('Projeto não encontrado');
-    await this.checkCompanyAccess(project.companyId, userId);
-
-    const since30 = new Date(Date.now() - 30 * 86_400_000);
-
-    const [allTasks, recentDone] = await Promise.all([
-      this.prisma.task.count({ where: { projectId } }),
-      this.prisma.task.count({
-        where: { projectId, status: 'DONE', updatedAt: { gte: since30 } },
-      }),
-    ]);
-
-    const doneTasks = await this.prisma.task.count({ where: { projectId, status: 'DONE' } });
-    const remaining = allTasks - doneTasks;
-    const dailyVelocity = recentDone / 30;
-
-    const forecastDays = dailyVelocity > 0 ? Math.ceil(remaining / dailyVelocity) : null;
-    const forecastDate = forecastDays != null
-      ? new Date(Date.now() + forecastDays * 86_400_000).toISOString().slice(0, 10)
-      : null;
-
-    const progress = allTasks > 0 ? Math.round((doneTasks / allTasks) * 100) : 0;
-
-    return {
-      projectId,
-      projectName: project.name,
-      totalTasks: allTasks,
-      doneTasks,
-      remaining,
-      progress,
-      dailyVelocity: Math.round(dailyVelocity * 100) / 100,
-      weeklyVelocity: Math.round(dailyVelocity * 7 * 10) / 10,
-      forecastDays,
-      forecastDate,
-      confidence: dailyVelocity > 0 ? (recentDone >= 5 ? 'HIGH' : 'MEDIUM') : 'LOW',
-    };
-  }
-
   private async checkCompanyAccess(companyId: string, userId: string) {
     const membership = await this.prisma.userCompany.findFirst({ where: { companyId, userId } });
     if (!membership) throw new ForbiddenException('Sem acesso a este projeto');

@@ -42,12 +42,6 @@ export class AiController {
     return this.service.summarizeProject(id).then((summary) => ({ summary }));
   }
 
-  @Post('summarize/task/:id')
-  @ApiOperation({ summary: 'Resumir tarefa com IA' })
-  summarizeTask(@Param('id') id: string) {
-    return this.service.summarizeTask(id).then((summary) => ({ summary }));
-  }
-
   @Post('action-plan/:projectId')
   @ApiOperation({ summary: 'Gerar plano de ação para projeto' })
   actionPlan(@Param('projectId') id: string) {
@@ -58,12 +52,6 @@ export class AiController {
   @ApiOperation({ summary: 'Identificar gargalos no workspace' })
   bottlenecks(@Query('companyId') companyId: string) {
     return this.service.identifyBottlenecks(companyId).then((analysis) => ({ analysis }));
-  }
-
-  @Post('suggest-assignee/:taskId')
-  @ApiOperation({ summary: 'Sugerir responsável para tarefa' })
-  suggestAssignee(@Param('taskId') taskId: string) {
-    return this.service.suggestAssignee(taskId).then((suggestion) => ({ suggestion }));
   }
 
   @Post('strategic-brief')

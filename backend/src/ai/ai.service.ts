@@ -1,6 +1,6 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { formatActionPlan, formatAssignees, formatBottlenecks, formatBullets } from './ai.formatters';
+import { formatActionPlan, formatBottlenecks, formatBullets } from './ai.formatters';
 import { SelahAiClientService, SelahAiError, SelahWorkspaceContext } from './selah-ai-client.service';
 
 interface WorkspaceContext extends SelahWorkspaceContext {
@@ -142,29 +142,6 @@ export class AiService {
     }
   }
 
-  async summarizeTask(taskId: string): Promise<string> {
-    const task = await this.prisma.task.findUnique({
-      where: { id: taskId },
-      include: {
-        assignee: { select: { name: true } },
-        comments: { include: { author: { select: { name: true } } }, orderBy: { createdAt: 'desc' }, take: 5 },
-      },
-    });
-    if (!task) return 'Tarefa não encontrada.';
-
-    try {
-      return await this.selah.summarizeTask({
-        title: clip(task.title, 200),
-        status: task.status,
-        priority: task.priority,
-        assigneeName: task.assignee?.name ?? null,
-        comments: task.comments.map((c) => ({ authorName: clip(c.author.name, 120), content: clip(c.content, 1000) })),
-      });
-    } catch (err) {
-      this.fail(err, 'resumo de tarefa');
-    }
-  }
-
   async generateActionPlan(projectId: string): Promise<string> {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
@@ -220,35 +197,6 @@ export class AiService {
       return formatBottlenecks(analysis);
     } catch (err) {
       this.fail(err, 'gargalos');
-    }
-  }
-
-  async suggestAssignee(taskId: string): Promise<string> {
-    const task = await this.prisma.task.findUnique({
-      where: { id: taskId },
-      include: { project: { include: { team: { include: { members: { include: { user: { select: { id: true, name: true } } } } } } } } },
-    });
-    if (!task) return 'Tarefa não encontrada.';
-
-    const members = task.project.team?.members ?? [];
-    if (members.length === 0) return 'Sem membros na equipe.';
-
-    const workloads = await Promise.all(
-      members.map(async (m) => ({
-        name:    m.user.name,
-        pending: await this.prisma.task.count({ where: { assigneeId: m.user.id, status: { not: 'DONE' } } }),
-      })),
-    );
-
-    try {
-      const suggestions = await this.selah.suggestAssignee({
-        taskTitle: clip(task.title, 200),
-        taskPriority: task.priority,
-        members: workloads.slice(0, 30).map((w) => ({ name: clip(w.name, 120), pendingTasks: w.pending })),
-      });
-      return formatAssignees(suggestions);
-    } catch (err) {
-      this.fail(err, 'sugestão de responsável');
     }
   }
 

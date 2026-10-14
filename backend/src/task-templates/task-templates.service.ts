@@ -76,7 +76,6 @@ export class TaskTemplatesService {
       include: {
         assignee: { select: { id: true, name: true, avatarUrl: true } },
         creator:  { select: { id: true, name: true } },
-        labels:   { include: { label: true } },
         _count:   { select: { comments: true, subtasks: true, timeEntries: true } },
       },
     });

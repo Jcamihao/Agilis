@@ -142,8 +142,6 @@ model Company {
   users           UserCompany[]
   teams           Team[]
   projects        Project[]
-  statuses        TaskStatusConfig[]
-  labels          Label[]
   automations     AutomationRule[]
   auditLogs       AuditLog[]
   insights        Insight[]
@@ -324,7 +322,6 @@ model Task {
   parent       Task?                 @relation("subtasks", fields: [parentId], references: [id], onDelete: Cascade)
   subtasks     Task[]                @relation("subtasks")
   activities   Activity[]
-  labels       TaskLabel[]
   comments     Comment[]
   attachments  Attachment[]
   executions   AutomationExecution[]
@@ -524,7 +521,6 @@ model AuditLog {
   oldValues  Json?
   newValues  Json?
   ipAddress  String?
-  userAgent  String?
   createdAt  DateTime    @default(now())
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -542,7 +538,6 @@ model AiConversation {
   companyId String
   userId    String?
   title     String   @default("Nova conversa")
-  model     String   @default("gpt-4o-mini")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -558,7 +553,6 @@ model AiMessage {
   conversationId String
   role           String // 'user' | 'assistant' | 'system'
   content        String
-  tokensUsed     Int?
   userId         String?
   createdAt      DateTime @default(now())
 
@@ -716,44 +710,6 @@ model Insight {
 }
 
 // ─── Auxiliares ──────────────────────────────────────────────────────────────
-
-model Label {
-  id        String   @id @default(uuid())
-  companyId String
-  name      String
-  color     String   @default("#6366f1")
-  createdAt DateTime @default(now())
-
-  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  tasks   TaskLabel[]
-
-  @@index([companyId])
-  @@map("labels")
-}
-
-model TaskLabel {
-  taskId  String
-  labelId String
-
-  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
-
-  @@id([taskId, labelId])
-  @@map("task_labels")
-}
-
-model TaskStatusConfig {
-  id        String   @id @default(uuid())
-  name      String
-  color     String   @default("#6366f1")
-  order     Int      @default(0)
-  companyId String
-  createdAt DateTime @default(now())
-
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@map("task_status_configs")
-}
 
 model Activity {
   id         String   @id @default(uuid())

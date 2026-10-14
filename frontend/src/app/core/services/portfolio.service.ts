@@ -18,29 +18,11 @@ export interface PortfolioProject {
   okrProgress: number | null;
 }
 
-export interface ProjectForecast {
-  projectId: string;
-  projectName: string;
-  totalTasks: number;
-  doneTasks: number;
-  remaining: number;
-  progress: number;
-  dailyVelocity: number;
-  weeklyVelocity: number;
-  forecastDays: number | null;
-  forecastDate: string | null;
-  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
-}
-
 @Injectable({ providedIn: 'root' })
 export class PortfolioService {
   private readonly api = inject(ApiService);
 
   getPortfolio(companyId: string) {
     return this.api.get<PortfolioProject[]>('/projects/portfolio', { companyId });
-  }
-
-  getForecast(projectId: string) {
-    return this.api.get<ProjectForecast>(`/projects/${projectId}/forecast`);
   }
 }

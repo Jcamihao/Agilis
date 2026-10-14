@@ -583,10 +583,3 @@ export interface Objective {
   updatedAt: string;
 }
 
-export interface OkrSummary {
-  total: number;
-  active: number;
-  completed: number;
-  avgProgress: number;
-  objectives: Objective[];
-}

@@ -33,13 +33,11 @@ describe('SelahAiClientService', () => {
       .fn()
       .mockResolvedValueOnce({ data: { summary: 'resumo' } })
       .mockResolvedValueOnce({ data: { plan: { immediatePriorities: ['a'] } } })
-      .mockResolvedValueOnce({ data: { suggestions: [{ name: 'Ana', reason: 'x' }] } })
       .mockResolvedValueOnce({ data: { brief: { summary: 'b' } } });
     const service = withHttp(new SelahAiClientService(config(configured)), post);
 
     expect(await service.summarizeProject({} as any)).toBe('resumo');
     expect((await service.actionPlan({} as any)).immediatePriorities).toEqual(['a']);
-    expect(await service.suggestAssignee({} as any)).toEqual([{ name: 'Ana', reason: 'x' }]);
     expect((await service.strategicBrief({} as any)).summary).toBe('b');
     expect(post.mock.calls[1][0]).toContain('/action-plan');
   });

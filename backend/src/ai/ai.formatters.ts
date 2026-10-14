@@ -27,11 +27,6 @@ export const formatBottlenecks = (analysis: SelahBottleneckAnalysis) => {
   return `${analysis.overview}\n\n${items}`;
 };
 
-export const formatAssignees = (suggestions: { name: string; reason: string }[]) =>
-  suggestions.length
-    ? suggestions.map((item, index) => `${index + 1}. ${item.name} — ${item.reason}`).join('\n')
-    : 'Sem sugestão clara de responsável.';
-
 export const formatRedistribution = (redistribution: SelahRedistribution) => {
   if (!redistribution.moves.length) {
     return redistribution.overview;

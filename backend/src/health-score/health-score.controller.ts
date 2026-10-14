@@ -21,21 +21,6 @@ export class HealthScoreController {
     return { company, teams, projects };
   }
 
-  @Get('company/:companyId')
-  company(@Param('companyId') companyId: string) {
-    return this.service.getCompanyScore(companyId);
-  }
-
-  @Get('teams')
-  teams(@Query('companyId') companyId: string) {
-    return this.service.getTeamsScores(companyId);
-  }
-
-  @Get('projects')
-  projects(@Query('companyId') companyId: string) {
-    return this.service.getProjectsScores(companyId);
-  }
-
   @Get('recalculate')
   async recalculate(@Query('companyId') companyId: string) {
     const score = await this.service.calculateCompanyScore(companyId);

@@ -36,9 +36,6 @@ export class CustomFieldsService {
     return this.api.patch<CustomFieldValue>(`/tasks/${taskId}/custom-fields/${customFieldId}`, { value });
   }
 
-  setValues(taskId: string, values: { customFieldId: string; value: string | null }[]) {
-    return this.api.post<CustomFieldValue[]>(`/tasks/${taskId}/custom-fields`, { values });
-  }
 
   // ── Display helpers ────────────────────────────────────────────────────────
 

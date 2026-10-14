@@ -1,4 +1,4 @@
-import { formatActionPlan, formatAssignees, formatBottlenecks, formatBullets, formatRedistribution } from './ai.formatters';
+import { formatActionPlan, formatBottlenecks, formatBullets, formatRedistribution } from './ai.formatters';
 
 describe('ai formatters (texto simples, a tela usa whitespace-pre-wrap)', () => {
   it('formats the action plan by section and skips empty ones', () => {
@@ -26,9 +26,7 @@ describe('ai formatters (texto simples, a tela usa whitespace-pre-wrap)', () => 
     expect(formatBottlenecks({ overview: 'Tudo certo.', bottlenecks: [] })).toBe('Tudo certo.');
   });
 
-  it('formats assignee suggestions and the empty case', () => {
-    expect(formatAssignees([{ name: 'Carla', reason: 'Menor carga' }])).toBe('1. Carla — Menor carga');
-    expect(formatAssignees([])).toBe('Sem sugestão clara de responsável.');
+  it('formats bullet lists', () => {
     expect(formatBullets(['a', 'b'])).toBe('• a\n• b');
   });
 

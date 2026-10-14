@@ -42,12 +42,6 @@ export class WebhookController {
     return this.service.list(companyId);
   }
 
-  @Get('events')
-  @ApiOperation({ summary: 'Listar eventos disponíveis' })
-  events() {
-    return { events: VALID_EVENTS };
-  }
-
   @Get(':id/deliveries')
   @ApiOperation({ summary: 'Histórico de entregas do webhook' })
   deliveries(@Param('id') id: string, @Query('limit') limit?: string) {

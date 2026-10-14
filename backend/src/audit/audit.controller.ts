@@ -33,9 +33,4 @@ export class AuditController {
     return this.service.getStats(companyId);
   }
 
-  @Get(':entityType/:entityId')
-  @ApiOperation({ summary: 'Histórico de uma entidade específica' })
-  findByEntity(@Param('entityType') entityType: string, @Param('entityId') entityId: string) {
-    return this.service.findByEntity(entityType, entityId);
-  }
 }

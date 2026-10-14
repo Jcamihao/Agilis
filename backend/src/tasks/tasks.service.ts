@@ -36,7 +36,6 @@ export class TasksService {
         assignee:  { select: { id: true, name: true, avatarUrl: true } },
         creator:   { select: { id: true, name: true } },
         sprint:    { select: { id: true, name: true, status: true, startDate: true, endDate: true } },
-        labels:    { include: { label: true } },
         _count:    { select: { comments: true, subtasks: true, timeEntries: true } },
       },
       orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
@@ -80,7 +79,6 @@ export class TasksService {
         assignee: { select: { id: true, name: true, avatarUrl: true, email: true } },
         creator: { select: { id: true, name: true, avatarUrl: true } },
         sprint: { select: { id: true, name: true, status: true, startDate: true, endDate: true } },
-        labels: { include: { label: true } },
         comments: true,
         activities: {
           include: { user: { select: { id: true, name: true, avatarUrl: true } } },

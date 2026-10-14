@@ -37,14 +37,6 @@ export interface SelahProjectSummaryPayload {
   overdueTaskTitles: string[];
 }
 
-export interface SelahTaskSummaryPayload {
-  title: string;
-  status: string;
-  priority: string;
-  assigneeName: string | null;
-  comments: { authorName: string; content: string }[];
-}
-
 export interface SelahActionPlanPayload {
   projectName: string;
   tasks: { title: string; priority: string; assigneeName: string | null; dueDateLabel: string | null }[];
@@ -53,12 +45,6 @@ export interface SelahActionPlanPayload {
 export interface SelahBottlenecksPayload {
   workspace: SelahWorkspaceContext;
   stagnantTasks: { title: string; status: string; projectName: string; assigneeName: string | null }[];
-}
-
-export interface SelahSuggestAssigneePayload {
-  taskTitle: string;
-  taskPriority: string;
-  members: { name: string; pendingTasks: number }[];
 }
 
 export interface SelahStrategicBriefPayload {
@@ -138,22 +124,12 @@ export class SelahAiClientService {
     return (await this.post<{ summary: string }>('project-summary', payload)).summary;
   }
 
-  async summarizeTask(payload: SelahTaskSummaryPayload) {
-    return (await this.post<{ summary: string }>('task-summary', payload)).summary;
-  }
-
   async actionPlan(payload: SelahActionPlanPayload) {
     return (await this.post<{ plan: SelahActionPlan }>('action-plan', payload)).plan;
   }
 
   async bottlenecks(payload: SelahBottlenecksPayload) {
     return (await this.post<{ analysis: SelahBottleneckAnalysis }>('bottlenecks', payload)).analysis;
-  }
-
-  async suggestAssignee(payload: SelahSuggestAssigneePayload) {
-    return (
-      await this.post<{ suggestions: { name: string; reason: string }[] }>('suggest-assignee', payload)
-    ).suggestions;
   }
 
   async workloadRedistribution(payload: SelahRedistributionPayload) {

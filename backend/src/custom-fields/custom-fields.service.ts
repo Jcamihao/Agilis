@@ -83,19 +83,6 @@ export class CustomFieldsService {
     });
   }
 
-  async setValues(taskId: string, values: { customFieldId: string; value: string | null }[]) {
-    await Promise.all(
-      values.map(({ customFieldId, value }) =>
-        this.prisma.customFieldValue.upsert({
-          where:  { customFieldId_taskId: { customFieldId, taskId } },
-          update: { value: value ?? null },
-          create: { customFieldId, taskId, value: value ?? null },
-        }),
-      ),
-    );
-    return this.getTaskValues(taskId);
-  }
-
   async setValue(taskId: string, customFieldId: string, value: string | null) {
     return this.prisma.customFieldValue.upsert({
       where:  { customFieldId_taskId: { customFieldId, taskId } },
