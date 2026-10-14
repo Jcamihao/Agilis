@@ -158,61 +158,53 @@ export interface ApiResponse<T> {
 
 export const TASK_STATUS_CONFIG: Record<
   TaskStatus,
-  { label: string; color: string; icon: string; class: string }
+  { label: string; color: string; icon: string }
 > = {
   BACKLOG: {
     label: 'Backlog',
     color: '#94a3b8',
     icon: 'circle',
-    class: 'ag-status--backlog',
   },
   IN_PROGRESS: {
     label: 'Em Andamento',
     color: '#3b82f6',
     icon: 'autorenew',
-    class: 'ag-status--progress',
   },
   IN_REVIEW: {
     label: 'Em Revisão',
     color: '#8b5cf6',
     icon: 'rate_review',
-    class: 'ag-status--review',
   },
   DONE: {
     label: 'Concluído',
     color: '#10b981',
     icon: 'check_circle',
-    class: 'ag-status--done',
   },
 };
 
 export const PRIORITY_CONFIG: Record<
   Priority,
-  { label: string; color: string; icon: string; class: string }
+  { label: string; color: string; icon: string }
 > = {
   LOW: {
     label: 'Baixa',
     color: '#94a3b8',
     icon: 'arrow_downward',
-    class: 'ag-priority--low',
   },
   MEDIUM: {
     label: 'Média',
     color: '#3b82f6',
     icon: 'drag_handle',
-    class: 'ag-priority--medium',
   },
   HIGH: {
     label: 'Alta',
     color: '#f97316',
     icon: 'arrow_upward',
-    class: 'ag-priority--high',
   },
   CRITICAL: {
     label: 'Crítica',
     color: '#ef4444',
     icon: 'priority_high',
-    class: 'ag-priority--critical',
   },
 };
 

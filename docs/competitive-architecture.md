@@ -13,7 +13,6 @@
 Eventos atuais:
 
 - `task.created`
-- `task.updated`
 - `task.status_changed`
 - `task.assigned`
 - `task.overdue`

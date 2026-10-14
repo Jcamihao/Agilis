@@ -3,7 +3,6 @@ import { Task, Comment, User } from '@prisma/client';
 // ── Event names ──────────────────────────────────────────────────────────────
 export const EVENTS = {
   TASK_CREATED:        'task.created',
-  TASK_UPDATED:        'task.updated',
   TASK_STATUS_CHANGED: 'task.status_changed',
   TASK_ASSIGNED:       'task.assigned',
   TASK_OVERDUE:        'task.overdue',

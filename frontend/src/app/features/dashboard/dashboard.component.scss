@@ -21,39 +21,6 @@
   .dash-card:hover & { transform: scale(1.1); }
 }
 
-// ── Chart axis placeholder ────────────────────────────────
-.chart-area {
-  position: relative;
-  flex: 1;
-
-  &__axis-x {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgb(var(--c-border) / 0.12);
-  }
-  &__axis-y {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 1px;
-    background: rgb(var(--c-border) / 0.12);
-  }
-}
-
-// ── Activity timeline line ────────────────────────────────
-.activity-line {
-  position: absolute;
-  top: 40px;
-  left: 19px;
-  bottom: 0;
-  width: 2px;
-  background: rgb(var(--c-border) / 0.1);
-}
-
 // ── Workload bar ──────────────────────────────────────────
 .workload-bar {
   height: 6px;
