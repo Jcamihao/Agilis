@@ -35,8 +35,7 @@ const ACTION_META: Record<
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './audit.component.html',
-  styleUrls: ['./audit.component.scss'],
+  templateUrl: './audit.component.html'
 })
 export class AuditComponent implements OnInit {
   private readonly auth = inject(AuthService);

@@ -8,8 +8,7 @@ import { ThemeService } from './core/services/theme.service';
   selector: 'ag-root',
   standalone: true,
   imports: [RouterOutlet, ToastContainerComponent, ConfirmDialogComponent],
-  template: `<router-outlet /><ag-toast-container /><ag-confirm-dialog />`,
-  styleUrls: ['./app.component.scss']
+  template: `<router-outlet /><ag-toast-container /><ag-confirm-dialog />`
 })
 export class AppComponent {
   // Injected solely so the constructor runs on bootstrap and applies the

@@ -11,8 +11,7 @@ import { CompaniesService } from '../../core/services/companies.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterOutlet, SidebarComponent, TopbarComponent, OnboardingWizardComponent],
-  templateUrl: './main-layout.component.html',
-  styleUrls: ['./main-layout.component.scss']
+  templateUrl: './main-layout.component.html'
 })
 export class MainLayoutComponent implements OnInit {
   private readonly companiesSvc = inject(CompaniesService);

@@ -20,8 +20,7 @@ const ROLE_CFG: Record<string, { label: string; badgeClass: string }> = {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './members.component.html',
-  styleUrls: ['./members.component.scss'],
+  templateUrl: './members.component.html'
 })
 export class MembersComponent implements OnInit {
   private readonly auth    = inject(AuthService);

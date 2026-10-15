@@ -91,27 +91,6 @@ export class NotificationListenerService {
     }
   }
 
-  // ── Comentário criado ──────────────────────────────────────────────────
-  @OnEvent(EVENTS.COMMENT_CREATED)
-  async onCommentCreated(payload: any) {
-    const { comment, task, actor } = payload;
-    const toNotify = new Set<string>();
-
-    if (task.assigneeId && task.assigneeId !== actor.id) toNotify.add(task.assigneeId);
-    if (task.creatorId  && task.creatorId  !== actor.id) toNotify.add(task.creatorId);
-
-    for (const userId of toNotify) {
-      await this.notifications.create({
-        userId,
-        type:       'TASK_COMMENTED',
-        title:      'Novo comentário na tarefa',
-        content:    `${actor.name} comentou em "${task.title}"`,
-        entityType: 'task',
-        entityId:   task.id,
-      });
-    }
-  }
-
   // ── Membro adicionado ao projeto ───────────────────────────────────────
   @OnEvent(EVENTS.PROJECT_MEMBER_ADDED)
   async onProjectMemberAdded(payload: any) {

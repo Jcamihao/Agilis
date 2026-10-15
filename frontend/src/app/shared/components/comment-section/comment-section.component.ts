@@ -14,8 +14,7 @@ import { timeAgo } from '../../../core/utils/format';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './comment-section.component.html',
-  styleUrls: ['./comment-section.component.scss']
+  templateUrl: './comment-section.component.html'
 })
 export class CommentSectionComponent implements OnInit {
   @Input({ required: true }) taskId!: string;

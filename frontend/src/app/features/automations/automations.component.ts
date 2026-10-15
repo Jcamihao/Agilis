@@ -45,8 +45,7 @@ const OPERATORS = [
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './automations.component.html',
-  styleUrls: ['./automations.component.scss']
+  templateUrl: './automations.component.html'
 })
 export class AutomationsComponent implements OnInit {
   private readonly auth = inject(AuthService);

@@ -93,30 +93,4 @@ export class CustomFieldsService {
 
   // ── Include helper — used by TasksService ─────────────────────────────────
 
-  async enrichTasks(tasks: any[], projectId: string) {
-    const fields = await this.listByProject(projectId);
-    if (!fields.length) return tasks.map(t => ({ ...t, customFields: [] }));
-
-    const taskIds = tasks.map(t => t.id);
-    const allValues = await this.prisma.customFieldValue.findMany({
-      where: { taskId: { in: taskIds } },
-    });
-
-    const valueMap = new Map<string, Map<string, string | null>>();
-    for (const v of allValues) {
-      if (!valueMap.has(v.taskId)) valueMap.set(v.taskId, new Map());
-      valueMap.get(v.taskId)!.set(v.customFieldId, v.value);
-    }
-
-    return tasks.map(task => ({
-      ...task,
-      customFields: fields.map(f => ({
-        fieldId:   f.id,
-        fieldName: f.name,
-        fieldType: f.type,
-        options:   f.options,
-        value:     valueMap.get(task.id)?.get(f.id) ?? null,
-      })),
-    }));
-  }
 }

@@ -291,11 +291,6 @@ export interface DashboardWidget {
   config?: any;
 }
 
-export interface CalendarDay {
-  date: string;
-  tasks: Task[];
-}
-
 export interface CalendarRange {
   start: string;
   end: string;

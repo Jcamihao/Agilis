@@ -16,8 +16,7 @@ import { PRIORITY_CONFIG } from '../../core/models';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink],
-  templateUrl: './metrics.component.html',
-  styleUrls: ['./metrics.component.scss'],
+  templateUrl: './metrics.component.html'
 })
 export class MetricsComponent implements OnInit {
   private readonly auth    = inject(AuthService);

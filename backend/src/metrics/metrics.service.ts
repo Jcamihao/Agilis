@@ -7,39 +7,6 @@ export class MetricsService {
 
   // ── Por usuário ────────────────────────────────────────────────────────────
 
-  async getUserMetrics(userId: string, companyId: string, days = 30) {
-    const since = new Date(Date.now() - days * 86_400_000);
-
-    const [completed, overdue, inProgress, backlog, productivity] = await Promise.all([
-      this.prisma.task.count({
-        where: { assigneeId: userId, project: { companyId }, status: 'DONE', updatedAt: { gte: since } },
-      }),
-
-      this.prisma.task.count({
-        where: {
-          assigneeId: userId, project: { companyId },
-          dueDate: { lt: new Date() }, status: { not: 'DONE' },
-        },
-      }),
-
-      this.prisma.task.count({
-        where: { assigneeId: userId, project: { companyId }, status: 'IN_PROGRESS' },
-      }),
-
-      this.prisma.task.count({
-        where: { assigneeId: userId, project: { companyId }, status: 'BACKLOG' },
-      }),
-
-      // Completed per day (last 14 days)
-      this.getCompletedPerDay(userId, companyId, 14),
-    ]);
-
-    const total = completed + overdue + inProgress + backlog;
-    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-    return { userId, completed, overdue, inProgress, backlog, completionRate, productivity, days };
-  }
-
   async getAllUsersMetrics(companyId: string, days = 30) {
     const since = new Date(Date.now() - days * 86_400_000);
 

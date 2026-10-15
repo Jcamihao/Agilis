@@ -38,13 +38,6 @@ export class RedisService {
     } catch {}
   }
 
-  async delPattern(pattern: string): Promise<void> {
-    try {
-      const keys = await this.client.keys(pattern);
-      if (keys.length) await this.client.del(...keys);
-    } catch {}
-  }
-
   // ── JWT Blacklist ─────────────────────────────────────────────────────────
 
   async blacklistToken(jti: string, ttlSeconds: number): Promise<void> {
@@ -59,34 +52,4 @@ export class RedisService {
     }
   }
 
-  // ── Presence ──────────────────────────────────────────────────────────────
-
-  async setPresence(userId: string, status: 'ONLINE' | 'AWAY' | 'OFFLINE'): Promise<void> {
-    if (status === 'OFFLINE') {
-      await this.client.del(`presence:${userId}`);
-    } else {
-      await this.client.setex(`presence:${userId}`, 35, status);
-    }
-  }
-
-  async getPresence(userId: string): Promise<'ONLINE' | 'AWAY' | 'OFFLINE'> {
-    try {
-      const val = await this.client.get(`presence:${userId}`);
-      return (val as 'ONLINE' | 'AWAY') ?? 'OFFLINE';
-    } catch {
-      return 'OFFLINE';
-    }
-  }
-
-  async getManyPresence(userIds: string[]): Promise<Record<string, 'ONLINE' | 'AWAY' | 'OFFLINE'>> {
-    if (!userIds.length) return {};
-    try {
-      const values = await this.client.mget(userIds.map((id) => `presence:${id}`));
-      return Object.fromEntries(
-        userIds.map((id, i) => [id, (values[i] as 'ONLINE' | 'AWAY') ?? 'OFFLINE']),
-      );
-    } catch {
-      return Object.fromEntries(userIds.map((id) => [id, 'OFFLINE' as const]));
-    }
-  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "agilis",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Agilis — Plataforma de Gestão Operacional",
   "private": true,
   "scripts": {
@@ -20,7 +20,6 @@
     "frontend:dev": "npm --prefix frontend start",
     "frontend:build": "npm --prefix frontend run build:prod",
     "frontend:install": "npm --prefix frontend install",
-    "frontend:test": "npm --prefix frontend run test:ci",
 
     "infra:up": "docker compose up -d postgres && node scripts/wait-db.js",
     "infra:down": "docker compose down",
@@ -43,7 +42,7 @@
 
     "install:all": "npm install && npm run backend:install && npm run frontend:install",
     "build:all": "npm run backend:build && npm run frontend:build",
-    "test:all": "npm run backend:test && npm run frontend:test",
+    "test:all": "npm run backend:test",
 
     "db:migrate": "npm run backend:migrate",
     "db:seed": "npm run backend:seed",

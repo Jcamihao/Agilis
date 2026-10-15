@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { EVENTS } from '../events/agilis-events';
 import { CreateCommentDto, UpdateCommentDto } from './dto/comment.dto';
 
 // Extrai @menções do conteúdo: retorna lista de nomes em lowercase
@@ -14,6 +16,7 @@ export class CommentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly events: EventEmitter2,
   ) {}
 
   async findByTask(taskId: string, userId: string) {
@@ -44,7 +47,7 @@ export class CommentsService {
 
     const author = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, email: true },
     });
 
     // Resolve menções: busca por nome parcial (case-insensitive)
@@ -94,6 +97,8 @@ export class CommentsService {
         await this.notifications.notifyMention(task.id, mentioned.id, author.name, task.title);
       }
     }
+
+    this.events.emit(EVENTS.COMMENT_CREATED, { comment, task, actor: author, companyId: task.project.companyId });
 
     // Registrar atividade
     await this.prisma.activity.create({

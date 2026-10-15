@@ -20,8 +20,7 @@ import { Project, Team } from '../../core/models';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink, ReactiveFormsModule],
-  templateUrl: './projects.component.html',
-  styleUrls: ['./projects.component.scss']
+  templateUrl: './projects.component.html'
 })
 export class ProjectsComponent implements OnInit {
   private readonly auth = inject(AuthService);

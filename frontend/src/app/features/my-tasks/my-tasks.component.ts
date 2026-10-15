@@ -13,8 +13,7 @@ import { formatDate } from '../../core/utils/format';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink, ReactiveFormsModule],
-  templateUrl: './my-tasks.component.html',
-  styleUrls: ['./my-tasks.component.scss'],
+  templateUrl: './my-tasks.component.html'
 })
 export class MyTasksComponent implements OnInit {
   private readonly auth = inject(AuthService);

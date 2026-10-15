@@ -155,14 +155,4 @@ export class ApprovalsService {
     });
   }
 
-  getCompanyPending(companyId: string) {
-    return this.prisma.taskApproval.findMany({
-      where: {
-        status: 'PENDING',
-        task: { project: { companyId } },
-      },
-      include: APPROVAL_INCLUDE,
-      orderBy: { createdAt: 'desc' },
-    });
-  }
 }

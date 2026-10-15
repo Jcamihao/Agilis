@@ -1,8 +1,7 @@
-import { Controller, Get, Param, Query, UseGuards, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MetricsService } from './metrics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('metrics')
 @UseGuards(JwtAuthGuard)
@@ -28,15 +27,4 @@ export class MetricsController {
   ) {
     return this.service.getAllUsersMetrics(companyId, days);
   }
-
-  @Get('user/:userId')
-  @ApiOperation({ summary: 'Métricas de um usuário específico' })
-  userMetrics(
-    @Param('userId') userId: string,
-    @Query('companyId') companyId: string,
-    @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number,
-  ) {
-    return this.service.getUserMetrics(userId, companyId, days);
-  }
-
 }

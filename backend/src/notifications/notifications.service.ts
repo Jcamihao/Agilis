@@ -111,17 +111,6 @@ export class NotificationsService {
 
   // ── Helpers de notificação por evento ────────────────────────────────────
 
-  async notifyTaskAssigned(taskId: string, assigneeId: string, assignerName: string, taskTitle: string) {
-    return this.create({
-      userId: assigneeId,
-      type: NotificationType.TASK_ASSIGNED,
-      title: 'Nova tarefa atribuída',
-      content: `${assignerName} atribuiu a tarefa "${taskTitle}" a você`,
-      entityType: 'task',
-      entityId: taskId,
-    });
-  }
-
   async notifyComment(taskId: string, recipientId: string, commenterName: string, taskTitle: string) {
     return this.create({
       userId: recipientId,

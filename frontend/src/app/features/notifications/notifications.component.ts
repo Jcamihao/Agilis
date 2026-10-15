@@ -9,8 +9,7 @@ import { timeAgo } from '../../core/utils/format';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  templateUrl: './notifications.component.html',
-  styleUrls: ['./notifications.component.scss']
+  templateUrl: './notifications.component.html'
 })
 export class NotificationsComponent implements OnInit {
   private readonly service = inject(NotificationsService);

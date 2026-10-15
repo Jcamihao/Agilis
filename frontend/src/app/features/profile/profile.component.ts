@@ -15,8 +15,7 @@ import { timeAgo } from '../../core/utils/format';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
+  templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements OnInit {
   private readonly auth = inject(AuthService);
