@@ -7,8 +7,7 @@
     "start": "ng serve --port 4200",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
-    "watch": "ng build --watch --configuration development",
-    "lint": "ng lint"
+    "watch": "ng build --watch --configuration development"
   },
   "private": true,
   "dependencies": {
