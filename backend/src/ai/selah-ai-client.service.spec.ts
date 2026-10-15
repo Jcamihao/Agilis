@@ -7,76 +7,81 @@ const configured = {
   SELAH_IA_API_KEY: 'chave-do-agilis',
 };
 
-const withHttp = (service: SelahAiClientService, post: jest.Mock) => {
-  (service as any).http = { post };
-  return service;
-};
+const reply = (body: unknown, status = 200, headers: Record<string, string> = {}) =>
+  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...headers } });
 
 describe('SelahAiClientService', () => {
+  let fetchMock: jest.SpyInstance;
+
+  beforeEach(() => {
+    fetchMock = jest.spyOn(global, 'fetch');
+  });
+
+  afterEach(() => {
+    fetchMock.mockRestore();
+  });
+
   it('sends the app key and source app to the Agilis adapter route', async () => {
-    const post = jest.fn().mockResolvedValue({ data: { answer: 'ola' } });
-    const service = withHttp(new SelahAiClientService(config(configured)), post);
+    fetchMock.mockResolvedValue(reply({ answer: 'ola' }));
+    const service = new SelahAiClientService(config(configured));
 
     const answer = await service.chat({ message: 'oi', history: [], workspace: {} as any });
 
     expect(answer).toBe('ola');
-    const [url, payload, options] = post.mock.calls[0];
+    const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe('http://selah.test/v1/adapters/agilis/workspace/chat');
-    expect(payload.message).toBe('oi');
+    expect(JSON.parse(options.body).message).toBe('oi');
     expect(options.headers['X-Selah-Api-Key']).toBe('chave-do-agilis');
     expect(options.headers['X-Source-App']).toBe('AgilisBack');
     expect(options.headers['X-Request-Id']).toBeTruthy();
   });
 
   it('unwraps each capability from the Selah response', async () => {
-    const post = jest
-      .fn()
-      .mockResolvedValueOnce({ data: { summary: 'resumo' } })
-      .mockResolvedValueOnce({ data: { plan: { immediatePriorities: ['a'] } } })
-      .mockResolvedValueOnce({ data: { brief: { summary: 'b' } } });
-    const service = withHttp(new SelahAiClientService(config(configured)), post);
+    fetchMock
+      .mockResolvedValueOnce(reply({ summary: 'resumo' }))
+      .mockResolvedValueOnce(reply({ plan: { immediatePriorities: ['a'] } }))
+      .mockResolvedValueOnce(reply({ brief: { summary: 'b' } }));
+    const service = new SelahAiClientService(config(configured));
 
     expect(await service.summarizeProject({} as any)).toBe('resumo');
     expect((await service.actionPlan({} as any)).immediatePriorities).toEqual(['a']);
     expect((await service.strategicBrief({} as any)).summary).toBe('b');
-    expect(post.mock.calls[1][0]).toContain('/action-plan');
+    expect(fetchMock.mock.calls[1][0]).toContain('/action-plan');
   });
 
   it('fails clearly, without calling the network, when Selah is not configured', async () => {
-    const post = jest.fn();
-    const service = withHttp(new SelahAiClientService(config({})), post);
+    const service = new SelahAiClientService(config({}));
 
     await expect(service.chat({} as any)).rejects.toMatchObject({ status: 0 });
-    expect(post).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('exposes the rate limit wait time from a 429', async () => {
-    const post = jest.fn().mockRejectedValue({
-      message: 'x',
-      response: { status: 429, data: { message: 'Rate limit exceeded', retryAfterSeconds: 12.2 }, headers: {} },
-    });
-    const service = withHttp(new SelahAiClientService(config(configured)), post);
+    fetchMock.mockResolvedValue(reply({ message: 'Rate limit exceeded', retryAfterSeconds: 12.2 }, 429));
+    const service = new SelahAiClientService(config(configured));
 
     const error = await service.chat({} as any).catch((e) => e);
 
     expect(error).toBeInstanceOf(SelahAiError);
     expect(error.status).toBe(429);
+    expect(error.message).toBe('Rate limit exceeded');
     expect(error.retryAfterSeconds).toBe(13);
   });
 
-  it('falls back to the Retry-After header and wraps network errors', async () => {
-    const withHeader = withHttp(
-      new SelahAiClientService(config(configured)),
-      jest.fn().mockRejectedValue({ response: { status: 429, data: {}, headers: { 'retry-after': '7' } } }),
-    );
-    expect((await withHeader.chat({} as any).catch((e) => e)).retryAfterSeconds).toBe(7);
+  it('falls back to the Retry-After header, keeps non-JSON errors and wraps network errors', async () => {
+    const service = new SelahAiClientService(config(configured));
 
-    const offline = withHttp(
-      new SelahAiClientService(config(configured)),
-      jest.fn().mockRejectedValue({ message: 'connect ECONNREFUSED' }),
-    );
-    const error = await offline.chat({} as any).catch((e) => e);
-    expect(error.status).toBe(0);
-    expect(error.message).toContain('ECONNREFUSED');
+    fetchMock.mockResolvedValueOnce(reply({}, 429, { 'Retry-After': '7' }));
+    expect((await service.chat({} as any).catch((e) => e)).retryAfterSeconds).toBe(7);
+
+    fetchMock.mockResolvedValueOnce(new Response('<html>boom</html>', { status: 500, statusText: 'Internal Server Error' }));
+    const upstream = await service.chat({} as any).catch((e) => e);
+    expect(upstream.status).toBe(500);
+    expect(upstream.retryAfterSeconds).toBeUndefined();
+
+    fetchMock.mockRejectedValueOnce(new Error('connect ECONNREFUSED'));
+    const offline = await service.chat({} as any).catch((e) => e);
+    expect(offline.status).toBe(0);
+    expect(offline.message).toContain('ECONNREFUSED');
   });
 });

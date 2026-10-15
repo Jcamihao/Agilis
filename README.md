@@ -132,9 +132,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.5.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
+**v3.6.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.6.0** — Enxugamento: adapter SMTP e `nodemailer` saem (produção usa Resend; sem `RESEND_API_KEY` o e-mail cai no adapter Noop), `axios` vira `fetch` nativo no cliente do Selah IA, `date-fns` sai do backend (calendário usa `Date`) e o `members` reaproveita o `timeAgo`. 17 imports/variáveis sem uso removidos. Sem migration
 - **v3.5.0** — Remoção do Health Score (score A/B/C/D por projeto, cron noturno, tela `/health-score`, card do dashboard, coluna do Portfolio e card da landing). O sinal de saúde já existe de forma mais direta em Insights (atrasos, estagnação, backlog) e no % de progresso/atrasos do Portfolio. Migration `20261014000006_remove_health_score` apaga `health_scores` e o enum `HealthEntity`
 - **v3.4.0** — Remoção de OKRs e Metas (Objectives, Key Results e vínculo com tarefas): módulo, tela, relatório, coluna "OKR" do Portfolio e atalho do dashboard saem; migration `20261014000005_remove_okrs` apaga `objectives`, `key_results` e `key_result_tasks`
 - **v3.3.3** — Banco idêntico ao schema do Prisma pela primeira vez: `task_templates.priority` (era `text`, o model declara o enum `Priority`) convertida com fallback seguro para `MEDIUM`, e `updated_at` sem default. Removido o script `lint` do frontend (não havia target no angular.json)

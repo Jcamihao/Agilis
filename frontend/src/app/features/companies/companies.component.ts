@@ -2,7 +2,6 @@ import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@ang
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
 import { CompaniesService } from '../../core/services/companies.service';
 import { Company } from '../../core/models';
 
@@ -15,7 +14,6 @@ import { Company } from '../../core/models';
   styleUrls: ['./companies.component.scss']
 })
 export class CompaniesComponent implements OnInit {
-  private readonly auth = inject(AuthService);
   private readonly service = inject(CompaniesService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);

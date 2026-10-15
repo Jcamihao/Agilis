@@ -9,7 +9,6 @@ import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/
 import { of, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SearchService, SearchResults } from '../../../core/services/search.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { CompaniesService } from '../../../core/services/companies.service';
 import { Company } from '../../../core/models';
 
@@ -26,7 +25,6 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
   private readonly searchSvc  = inject(SearchService);
-  private readonly auth       = inject(AuthService);
   private readonly companySvc = inject(CompaniesService);
   private readonly router     = inject(Router);
   private readonly destroy$   = new Subject<void>();

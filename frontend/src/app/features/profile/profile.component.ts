@@ -5,7 +5,6 @@ import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { NotificationsService } from '../../core/services/notifications.service';
-import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { User, Notification, NOTIFICATION_CONFIG } from '../../core/models';
 import { timeAgo } from '../../core/utils/format';
@@ -22,7 +21,6 @@ export class ProfileComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly notifService = inject(NotificationsService);
   private readonly fb = inject(FormBuilder);
-  private readonly toastSvc = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
 
   readonly toast = signal('');

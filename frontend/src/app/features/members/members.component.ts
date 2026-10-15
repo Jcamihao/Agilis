@@ -5,8 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { MembersService, OrgMember } from '../../core/services/members.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../core/services/confirm.service';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { timeAgo } from '../../core/utils/format';
 
 const ROLE_CFG: Record<string, { label: string; badgeClass: string }> = {
   OWNER:  { label: 'Proprietário', badgeClass: 'bg-amber-100 text-amber-700 border border-amber-200' },
@@ -153,7 +152,7 @@ export class MembersComponent implements OnInit {
   isOwner(member: OrgMember) { return member.role === 'OWNER'; }
 
   joinedAgo(date: string): string {
-    return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR });
+    return timeAgo(date);
   }
 
 }

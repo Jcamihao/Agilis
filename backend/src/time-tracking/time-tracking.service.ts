@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { StartTimerDto, StopTimerDto, ManualEntryDto, UpdateTimeEntryDto } from './dto/time-tracking.dto';
+import { StartTimerDto, StopTimerDto, ManualEntryDto } from './dto/time-tracking.dto';
 
 const USER_SELECT = { id: true, name: true, avatarUrl: true };
 

@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { TimeTrackingService, TimeEntry, TaskTimeLog } from '../../../core/services/time-tracking.service';
+import { TimeTrackingService, TimeEntry } from '../../../core/services/time-tracking.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { formatDateTime } from '../../../core/utils/format';

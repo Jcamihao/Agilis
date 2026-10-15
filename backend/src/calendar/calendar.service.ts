@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { startOfDay, endOfDay, eachDayOfInterval, format } from 'date-fns';
 import * as crypto from 'crypto';
+
+const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const endOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+const pad = (n: number) => String(n).padStart(2, '0');
+const ymd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 @Injectable()
 export class CalendarService {
@@ -30,14 +34,13 @@ export class CalendarService {
     // Agrupar por dia (YYYY-MM-DD)
     const grouped: Record<string, typeof tasks> = {};
 
-    const allDays = eachDayOfInterval({ start, end });
-    for (const day of allDays) {
-      grouped[format(day, 'yyyy-MM-dd')] = [];
+    for (let day = new Date(start); day <= end; day.setDate(day.getDate() + 1)) {
+      grouped[ymd(day)] = [];
     }
 
     for (const task of tasks) {
       if (!task.dueDate) continue;
-      const key = format(new Date(task.dueDate), 'yyyy-MM-dd');
+      const key = ymd(new Date(task.dueDate));
       if (grouped[key]) {
         grouped[key].push(task);
       }
@@ -62,7 +65,7 @@ export class CalendarService {
       take: 2000,
     });
 
-    const stamp = format(new Date(), "yyyyMMdd'T'HHmmss'Z'");
+    const stamp = new Date().toISOString().replace(/[-:]|\.\d{3}/g, '');
     const lines: string[] = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -76,7 +79,7 @@ export class CalendarService {
     for (const task of tasks) {
       if (!task.dueDate) continue;
       const uid = crypto.createHash('md5').update(task.id).digest('hex');
-      const due = format(new Date(task.dueDate), "yyyyMMdd");
+      const due = ymd(new Date(task.dueDate)).replace(/-/g, '');
       const title = this.escapeIcal(task.title);
       const desc  = this.escapeIcal(`[${task.project.name}] Prioridade: ${task.priority} | Status: ${task.status}`);
       const assignee = task.assignee?.name ? `ORGANIZER;CN=${task.assignee.name}:MAILTO:noreply@agilis.app\r\n` : '';

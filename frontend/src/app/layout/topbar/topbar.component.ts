@@ -2,7 +2,7 @@ import {
   Component, Output, EventEmitter, inject, ChangeDetectionStrategy, OnInit, signal, ChangeDetectorRef, HostListener, ElementRef, ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationsService } from '../../core/services/notifications.service';
 import { Notification, NOTIFICATION_CONFIG } from '../../core/models';
@@ -21,7 +21,6 @@ export class TopbarComponent implements OnInit {
   @Output() menuToggle = new EventEmitter<void>();
 
   private readonly auth    = inject(AuthService);
-  private readonly router  = inject(Router);
   private readonly cdr     = inject(ChangeDetectorRef);
   readonly notifService    = inject(NotificationsService);
   readonly user            = this.auth.user;

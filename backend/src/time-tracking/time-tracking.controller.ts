@@ -1,10 +1,10 @@
 import {
-  Controller, Get, Post, Patch, Delete,
-  Param, Body, Query, UseGuards, HttpCode, HttpStatus,
+  Controller, Get, Post, Delete,
+  Param, Body, UseGuards, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TimeTrackingService } from './time-tracking.service';
-import { StartTimerDto, StopTimerDto, ManualEntryDto, UpdateTimeEntryDto } from './dto/time-tracking.dto';
+import { StartTimerDto, StopTimerDto, ManualEntryDto } from './dto/time-tracking.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 

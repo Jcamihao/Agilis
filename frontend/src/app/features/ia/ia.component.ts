@@ -6,14 +6,12 @@ import {
   ElementRef,
   OnInit,
   ViewChild,
-  computed,
   inject,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { ToastService } from '../../core/services/toast.service';
 import { AiService, AiConversationSummary } from '../../core/services/ai.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { Project } from '../../core/models';
@@ -38,7 +36,6 @@ export class IaComponent implements OnInit, AfterViewChecked {
   private readonly ai = inject(AiService);
   private readonly projectsService = inject(ProjectsService);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly toastSvc = inject(ToastService);
 
   readonly toast = signal<{msg: string; type: 'success' | 'error'} | null>(null);
   private showToast(msg: string, type: 'success' | 'error' = 'error') {

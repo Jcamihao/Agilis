@@ -54,7 +54,6 @@ services:
       CORS_ORIGIN: http://localhost:4200
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      MAIL_PROVIDER: resend
       RESEND_API_KEY: ${RESEND_API_KEY:?Defina RESEND_API_KEY no .env}
       MAIL_FROM: Agilis <onboarding@resend.dev>
       SELAH_IA_BASE_URL: ${SELAH_IA_BASE_URL:-}

@@ -46,7 +46,6 @@ export class ApprovalPanelComponent implements OnInit {
   ngOnInit() { this.load(); }
 
   load() {
-    const userId = this.auth.user()?.id ?? '';
     this.svc.getForTask(this.taskId).subscribe({
       next: (res: any) => {
         const list: TaskApproval[] = res?.data ?? res ?? [];
