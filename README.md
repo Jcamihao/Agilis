@@ -52,9 +52,8 @@ npm run dev
 
 ### Inteligência & Analytics
 - **Assistente IA** — chat via Selah IA, contexto do workspace em tempo real, resumo de projetos/tarefas, plano de ação, gargalos, sugestão de responsável
-- **Portfolio Executivo** (`/portfolio`) — visão consolidada de todos os projetos: progresso %, health score, velocidade, previsão de entrega, sortável/buscável
+- **Portfolio Executivo** (`/portfolio`) — visão consolidada de todos os projetos: progresso %, velocidade, previsão de entrega, sortável/buscável
 - **Brief Estratégico IA** — análise estruturada gerada por IA (Resumo Executivo, Riscos, Oportunidades, Recomendações) com métricas consolidadas
-- **Health Score** — score A/B/C/D por projeto, calculado automaticamente
 - **Insights** — alertas automáticos (CRON horário): tarefas atrasadas, estagnação, backlog excessivo, tarefas urgentes sem responsável
 - **Workload** — carga de trabalho por membro (14 dias), sugestão de rebalanceamento via IA
 - **Métricas** — KPIs por usuário, equipe e empresa
@@ -86,7 +85,6 @@ Agilis/
 │   │   ├── calendar/           # Calendário + exportação iCal
 │   │   ├── companies/          # Multi-tenant
 │   │   ├── dashboard-widgets/  # Widgets customizáveis
-│   │   ├── health-score/       # Score automático por projeto
 │   │   ├── insights/           # Insights CRON horário
 │   │   ├── metrics/            # KPIs por usuário/equipe/empresa
 │   │   ├── projects/           # Projetos + portfolio + forecast
@@ -134,9 +132,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.4.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
+**v3.5.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.5.0** — Remoção do Health Score (score A/B/C/D por projeto, cron noturno, tela `/health-score`, card do dashboard, coluna do Portfolio e card da landing). O sinal de saúde já existe de forma mais direta em Insights (atrasos, estagnação, backlog) e no % de progresso/atrasos do Portfolio. Migration `20261014000006_remove_health_score` apaga `health_scores` e o enum `HealthEntity`
 - **v3.4.0** — Remoção de OKRs e Metas (Objectives, Key Results e vínculo com tarefas): módulo, tela, relatório, coluna "OKR" do Portfolio e atalho do dashboard saem; migration `20261014000005_remove_okrs` apaga `objectives`, `key_results` e `key_result_tasks`
 - **v3.3.3** — Banco idêntico ao schema do Prisma pela primeira vez: `task_templates.priority` (era `text`, o model declara o enum `Priority`) convertida com fallback seguro para `MEDIUM`, e `updated_at` sem default. Removido o script `lint` do frontend (não havia target no angular.json)
 - **v3.3.2** — Infra enxuta: n8n e Uptime Kuma saem do docker-compose (nenhum código falava com eles; o n8n só fazia sentido com os webhooks removidos), junto com os scripts `n8n:*`, `uptime:*` e os `evolution:*` (que já apontavam pra um serviço inexistente) e as menções a MinIO (uploads são em disco local). O compose agora sobe só PostgreSQL, Redis, backend e frontend

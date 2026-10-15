@@ -230,23 +230,6 @@ export class ProjectsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const healthScores = await this.prisma.healthScore.findMany({
-      where: { companyId, entityType: 'PROJECT' },
-      orderBy: { calculatedAt: 'desc' },
-      select: { entityId: true, score: true },
-    }).catch(() => []);
-
-    // Keep only latest score per project
-    const seenHealth = new Set<string>();
-    const healthMap: Record<string, { score: number; grade: string }> = {};
-    for (const h of healthScores as any[]) {
-      if (!seenHealth.has(h.entityId)) {
-        seenHealth.add(h.entityId);
-        const grade = h.score >= 80 ? 'A' : h.score >= 60 ? 'B' : h.score >= 40 ? 'C' : 'D';
-        healthMap[h.entityId] = { score: h.score, grade };
-      }
-    }
-
     return projects.map((p) => {
       const total     = p.tasks.length;
       const done      = p.tasks.filter((t) => t.status === 'DONE').length;
@@ -266,7 +249,6 @@ export class ProjectsService {
         id: p.id, name: p.name, color: p.color, icon: p.icon,
         total, done, overdue, progress,
         memberCount: p._count.members,
-        health:      healthMap[p.id] ?? null,
         forecastDate,
         forecastDays,
         dailyVelocity: Math.round(dailyVelocity * 10) / 10,

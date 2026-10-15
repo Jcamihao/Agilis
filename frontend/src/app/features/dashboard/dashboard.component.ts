@@ -17,9 +17,8 @@ import { AuthService } from '../../core/services/auth.service';
 import { CompaniesService } from '../../core/services/companies.service';
 import { TasksService } from '../../core/services/tasks.service';
 import { DashboardWidgetsService } from '../../core/services/dashboard-widgets.service';
-import { HealthScoreService } from '../../core/services/health-score.service';
 import { InsightsService } from '../../core/services/insights.service';
-import { HealthScore, Insight } from '../../core/models';
+import { Insight } from '../../core/models';
 import {
   DashboardStats,
   Task,
@@ -44,7 +43,6 @@ export class DashboardComponent implements OnInit {
   private readonly companiesService = inject(CompaniesService);
   private readonly tasksService = inject(TasksService);
   private readonly widgetsService = inject(DashboardWidgetsService);
-  private readonly healthScoreSvc = inject(HealthScoreService);
   private readonly insightsSvc = inject(InsightsService);
 
   readonly PRIORITY_CONFIG = PRIORITY_CONFIG;
@@ -61,7 +59,6 @@ export class DashboardComponent implements OnInit {
   widgetData = signal<Partial<Record<WidgetType, any>>>({});
   productivityData = signal<{ date: string; count: number }[]>([]);
   teamWorkload = signal<any[]>([]);
-  companyHealthScore = signal<HealthScore | null>(null);
   topInsights = signal<Insight[]>([]);
 
   today = new Date().toLocaleDateString('pt-BR', {
@@ -131,11 +128,8 @@ export class DashboardComponent implements OnInit {
       error: () => this.myTasksLoading.set(false),
     });
 
-    // Load health score + top insights
+    // Load top insights
     if (companyId) {
-      this.healthScoreSvc.overview(companyId).subscribe({
-        next: (ov) => this.companyHealthScore.set(ov?.company ?? null),
-      });
       this.insightsSvc.list(companyId).subscribe({
         next: (res: any) => {
           const list: Insight[] = res?.data ?? res ?? [];
@@ -284,22 +278,6 @@ export class DashboardComponent implements OnInit {
       comment_added: ' comentou em uma tarefa',
     };
     return map[action] ?? ` fez: ${action}`;
-  }
-
-  scoreColor(score: number): string {
-    if (score >= 85) return '#10b981';
-    if (score >= 70) return '#3b82f6';
-    if (score >= 50) return '#f59e0b';
-    if (score >= 30) return '#ef4444';
-    return '#7f1d1d';
-  }
-
-  scoreLabel(score: number): string {
-    if (score >= 85) return 'Excelente';
-    if (score >= 70) return 'Bom';
-    if (score >= 50) return 'Regular';
-    if (score >= 30) return 'Crítico';
-    return 'Alerta Máximo';
   }
 
   insightSeverityColor(sev: string): string {

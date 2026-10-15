@@ -60,9 +60,9 @@ export class LandingComponent implements OnInit, OnDestroy {
       description: 'Rode sprints com metas claras pro time inteiro, e acompanhe prazos num calendário só pra todos os projetos.',
     },
     {
-      icon: 'favorite',
-      title: 'Health Score',
-      description: 'Veja a saúde de cada projeto em tempo real, com atrasos, backlog e inatividade num só número.',
+      icon: 'tips_and_updates',
+      title: 'Insights automáticos',
+      description: 'Atrasos, tarefas paradas e backlog acumulado viram alertas prontos, sem você montar relatório.',
     },
     {
       icon: 'smart_toy',

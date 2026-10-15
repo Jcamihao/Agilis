@@ -118,11 +118,6 @@ export const routes: Routes = [
         title: 'Carga de Trabalho — Agilis',
       },
       {
-        path: 'health-score',
-        loadComponent: () => import('./features/health-score/health-score.component').then((m) => m.HealthScoreComponent),
-        title: 'Health Score — Agilis',
-      },
-      {
         path: 'insights',
         loadComponent: () => import('./features/insights-page/insights-page.component').then((m) => m.InsightsPageComponent),
         title: 'Insights — Agilis',

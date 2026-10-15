@@ -21,7 +21,6 @@ import { AutomationModule } from './automation/automation.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { ReportsModule } from './reports/reports.module';
 import { AiModule } from './ai/ai.module';
-import { HealthScoreModule } from './health-score/health-score.module';
 import { InsightsModule } from './insights/insights.module';
 import { SprintsModule } from './sprints/sprints.module';
 import { RedisModule } from './redis/redis.module';
@@ -58,7 +57,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     MetricsModule,
     ReportsModule,
     AiModule,
-    HealthScoreModule,
     InsightsModule,
     SprintsModule,
     RedisModule,

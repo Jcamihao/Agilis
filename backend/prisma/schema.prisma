@@ -111,12 +111,6 @@ enum InsightSeverity {
   CRITICAL
 }
 
-enum HealthEntity {
-  COMPANY
-  TEAM
-  PROJECT
-}
-
 model Company {
   id        String   @id @default(uuid())
   name      String
@@ -131,7 +125,6 @@ model Company {
   automations     AutomationRule[]
   auditLogs       AuditLog[]
   insights        Insight[]
-  healthScores    HealthScore[]
 
   aiConversations AiConversation[]
   taskTemplates   TaskTemplate[]
@@ -538,25 +531,6 @@ model AiMessage {
 
   @@index([conversationId, createdAt])
   @@map("ai_messages")
-}
-
-// ─── V4: Health Score ────────────────────────────────────────────────────────
-
-model HealthScore {
-  id           String       @id @default(uuid())
-  entityType   HealthEntity
-  entityId     String
-  companyId    String
-  score        Int
-  breakdown    Json
-  trend        Json?
-  calculatedAt DateTime     @default(now())
-
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@index([entityType, entityId])
-  @@index([companyId, calculatedAt(sort: Desc)])
-  @@map("health_scores")
 }
 
 // ─── V4: Insights ────────────────────────────────────────────────────────────

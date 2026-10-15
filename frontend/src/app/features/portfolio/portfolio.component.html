@@ -86,12 +86,6 @@
                   @if (sortKey() === 'overdue') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
                 </span>
               </th>
-              <th class="px-4 py-3 text-center cursor-pointer" (click)="sort('health')">
-                <span class="flex items-center justify-center gap-1 font-semibold text-[--text-secondary]">
-                  Health
-                  @if (sortKey() === 'health') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
-                </span>
-              </th>
               <th class="px-4 py-3 text-center">Velocidade</th>
               <th class="px-4 py-3 text-center cursor-pointer" (click)="sort('forecast')">
                 <span class="flex items-center justify-center gap-1 font-semibold text-[--text-secondary]">
@@ -146,18 +140,6 @@
                       <span class="material-symbols-rounded" style="font-size:12px">check_circle</span>
                       0
                     </span>
-                  }
-                </td>
-
-                <!-- Health Score -->
-                <td class="px-4 py-4 text-center">
-                  @if (p.health) {
-                    <div class="flex flex-col items-center">
-                      <span class="text-lg font-bold" [style.color]="healthColor(p.health.score)">{{ p.health.score }}</span>
-                      <span class="text-[10px] font-semibold" [style.color]="healthColor(p.health.score)">{{ p.health.grade }}</span>
-                    </div>
-                  } @else {
-                    <span class="text-[--text-secondary] text-xs">—</span>
                   }
                 </td>
 

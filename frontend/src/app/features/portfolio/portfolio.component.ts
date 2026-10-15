@@ -6,7 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { PortfolioService, PortfolioProject } from '../../core/services/portfolio.service';
 import { AiService } from '../../core/services/ai.service';
 
-type SortKey = 'name' | 'progress' | 'overdue' | 'health' | 'forecast';
+type SortKey = 'name' | 'progress' | 'overdue' | 'forecast';
 
 @Component({
   selector: 'ag-portfolio',
@@ -39,7 +39,6 @@ export class PortfolioComponent implements OnInit {
       if (key === 'name')     { av = a.name;        bv = b.name; }
       if (key === 'progress') { av = a.progress;     bv = b.progress; }
       if (key === 'overdue')  { av = a.overdue;      bv = b.overdue; }
-      if (key === 'health')   { av = a.health?.score ?? -1; bv = b.health?.score ?? -1; }
       if (key === 'forecast') { av = a.forecastDays ?? 9999; bv = b.forecastDays ?? 9999; }
       const cmp = av < bv ? -1 : av > bv ? 1 : 0;
       return this.sortAsc() ? cmp : -cmp;
@@ -54,7 +53,7 @@ export class PortfolioComponent implements OnInit {
       totalProjects:  ps.length,
       avgProgress:    Math.round(ps.reduce((s, p) => s + p.progress, 0) / ps.length),
       totalOverdue:   ps.reduce((s, p) => s + p.overdue, 0),
-      atRisk:         ps.filter((p) => p.overdue > 0 || (p.health && p.health.score < 50)).length,
+      atRisk:         ps.filter((p) => p.overdue > 0).length,
       onTrack:        ps.filter((p) => p.progress >= 70 && p.overdue === 0).length,
     };
   });
@@ -94,13 +93,6 @@ export class PortfolioComponent implements OnInit {
       },
       error: () => this.briefLoading.set(false),
     });
-  }
-
-  healthColor(score: number): string {
-    if (score >= 80) return '#10b981';
-    if (score >= 60) return '#f59e0b';
-    if (score >= 40) return '#f97316';
-    return '#ef4444';
   }
 
   progressColor(pct: number): string {

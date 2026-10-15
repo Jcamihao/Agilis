@@ -355,25 +355,6 @@ export const WIDGET_CONFIG: Record<
 export type InsightType = 'RISK' | 'BOTTLENECK' | 'DELAY_PREDICTION' | 'RECOMMENDATION' | 'ACHIEVEMENT';
 export type InsightSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
-export interface HealthScore {
-  id: string;
-  entityType: 'COMPANY' | 'TEAM' | 'PROJECT';
-  entityId: string;
-  companyId: string;
-  score: number;
-  breakdown: Record<string, number>;
-  trend?: any;
-  calculatedAt: string;
-  label: string;
-  color: string;
-}
-
-export interface HealthScoreOverview {
-  company: HealthScore;
-  teams: Array<{ team: Team; score: number; breakdown: any; label: string; color: string }>;
-  projects: Array<{ project: Project; score: number; breakdown: any; label: string; color: string }>;
-}
-
 export interface Insight {
   id: string;
   companyId: string;
