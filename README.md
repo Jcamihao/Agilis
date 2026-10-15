@@ -52,9 +52,8 @@ npm run dev
 
 ### Inteligência & Analytics
 - **Assistente IA** — chat via Selah IA, contexto do workspace em tempo real, resumo de projetos/tarefas, plano de ação, gargalos, sugestão de responsável
-- **Portfolio Executivo** (`/portfolio`) — visão consolidada de todos os projetos: progresso %, health score, velocidade, previsão de entrega, OKR linkado, sortável/buscável
+- **Portfolio Executivo** (`/portfolio`) — visão consolidada de todos os projetos: progresso %, health score, velocidade, previsão de entrega, sortável/buscável
 - **Brief Estratégico IA** — análise estruturada gerada por IA (Resumo Executivo, Riscos, Oportunidades, Recomendações) com métricas consolidadas
-- **OKRs e Metas** — Objectives + Key Results com progress tracking
 - **Health Score** — score A/B/C/D por projeto, calculado automaticamente
 - **Insights** — alertas automáticos (CRON horário): tarefas atrasadas, estagnação, backlog excessivo, tarefas urgentes sem responsável
 - **Workload** — carga de trabalho por membro (14 dias), sugestão de rebalanceamento via IA
@@ -66,7 +65,7 @@ npm run dev
   - Ações: mudar status, atribuir usuário, notificar, criar tarefa, e-mail
 
 ### Administração
-- **Relatórios** (CSV / Excel / PDF) — Tarefas, Produtividade, Auditoria, Time Tracking, OKRs
+- **Relatórios** (CSV / Excel / PDF) — Tarefas, Produtividade, Auditoria, Time Tracking
 - **Auditoria** — log completo de todas as ações (quem, o quê, quando)
 - **Log de Auditoria** — exportável em CSV/Excel
 
@@ -90,9 +89,8 @@ Agilis/
 │   │   ├── health-score/       # Score automático por projeto
 │   │   ├── insights/           # Insights CRON horário
 │   │   ├── metrics/            # KPIs por usuário/equipe/empresa
-│   │   ├── okrs/               # Objectives + Key Results
 │   │   ├── projects/           # Projetos + portfolio + forecast
-│   │   ├── reports/            # CSV/Excel: tarefas, produtividade, time, OKRs
+│   │   ├── reports/            # CSV/Excel: tarefas, produtividade, time
 │   │   ├── search/             # Busca global
 │   │   ├── sprints/            # Sprint planning + burndown
 │   │   ├── task-templates/     # Templates reutilizáveis
@@ -136,9 +134,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v2.5.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
+**v3.4.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.4.0** — Remoção de OKRs e Metas (Objectives, Key Results e vínculo com tarefas): módulo, tela, relatório, coluna "OKR" do Portfolio e atalho do dashboard saem; migration `20261014000005_remove_okrs` apaga `objectives`, `key_results` e `key_result_tasks`
 - **v3.3.3** — Banco idêntico ao schema do Prisma pela primeira vez: `task_templates.priority` (era `text`, o model declara o enum `Priority`) convertida com fallback seguro para `MEDIUM`, e `updated_at` sem default. Removido o script `lint` do frontend (não havia target no angular.json)
 - **v3.3.2** — Infra enxuta: n8n e Uptime Kuma saem do docker-compose (nenhum código falava com eles; o n8n só fazia sentido com os webhooks removidos), junto com os scripts `n8n:*`, `uptime:*` e os `evolution:*` (que já apontavam pra um serviço inexistente) e as menções a MinIO (uploads são em disco local). O compose agora sobe só PostgreSQL, Redis, backend e frontend
 - **v3.3.1** — Auditoria pós-remoções: 9 métodos de service sem chamador (presença do Redis do Chat, e-mail, notificações, métricas por usuário), 12 dependências (stack Karma/Jasmine sem nenhum teste de frontend, supertest, @nestjs/testing, ts-loader, swagger-ui-express, platform-browser-dynamic), 12 `.scss` vazios e chaves JWT de refresh sem uso. Correção: o evento `comment.created` era escutado (automações e notificações) mas nunca emitido; agora o `CommentsService` o emite, então automações com gatilho "comentário criado" passam a disparar

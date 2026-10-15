@@ -28,7 +28,6 @@ import { RedisModule } from './redis/redis.module';
 import { QueueModule } from './queue/queue.module';
 import { MailModule } from './mail/mail.module';
 import { TimeTrackingModule } from './time-tracking/time-tracking.module';
-import { OkrsModule } from './okrs/okrs.module';
 import { WorkloadModule } from './workload/workload.module';
 import { CustomFieldsModule } from './custom-fields/custom-fields.module';
 import { ApprovalsModule } from './approvals/approvals.module';
@@ -66,7 +65,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     QueueModule,
     MailModule,
     TimeTrackingModule,
-    OkrsModule,
     WorkloadModule,
     CustomFieldsModule,
     ApprovalsModule,

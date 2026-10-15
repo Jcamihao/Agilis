@@ -15,7 +15,6 @@ export interface PortfolioProject {
   forecastDate: string | null;
   forecastDays: number | null;
   dailyVelocity: number;
-  okrProgress: number | null;
 }
 
 @Injectable({ providedIn: 'root' })

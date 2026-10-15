@@ -118,11 +118,6 @@ export const routes: Routes = [
         title: 'Carga de Trabalho — Agilis',
       },
       {
-        path: 'okrs',
-        loadComponent: () => import('./features/okrs/okrs.component').then((m) => m.OkrsComponent),
-        title: 'OKRs e Metas — Agilis',
-      },
-      {
         path: 'health-score',
         loadComponent: () => import('./features/health-score/health-score.component').then((m) => m.HealthScoreComponent),
         title: 'Health Score — Agilis',

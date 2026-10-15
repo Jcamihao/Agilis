@@ -61,13 +61,6 @@ export class ReportsComponent {
       icon: 'schedule',
       color: '#06b6d4',
     },
-    {
-      key: 'okrs',
-      title: 'OKRs e Key Results',
-      description: 'Objetivos estratégicos, key results e percentual de progresso por responsável.',
-      icon: 'flag',
-      color: '#ec4899',
-    },
   ];
 
   printPdf() {
@@ -93,7 +86,6 @@ export class ReportsComponent {
       if (reportKey === 'productivity') this.reportsService.downloadProductivity(companyId, format);
       if (reportKey === 'audit')        this.reportsService.downloadAudit(companyId, format, from || undefined, to || undefined);
       if (reportKey === 'time-tracking') this.reportsService.downloadTimeTracking(companyId, format, from || undefined, to || undefined);
-      if (reportKey === 'okrs')         this.reportsService.downloadOkrs(companyId, format);
 
       setTimeout(() => {
         this.downloading.set(null);

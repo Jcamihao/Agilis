@@ -55,10 +55,4 @@ export class ReportsService {
     const params = this.buildParams({ companyId, format, from, to });
     this.download('/reports/time-tracking', params, `time-tracking-${Date.now()}.${ext}`);
   }
-
-  downloadOkrs(companyId: string, format: 'csv' | 'excel') {
-    const ext = format === 'excel' ? 'xlsx' : 'csv';
-    const params = this.buildParams({ companyId, format });
-    this.download('/reports/okrs', params, `okrs-${Date.now()}.${ext}`);
-  }
 }

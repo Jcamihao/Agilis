@@ -163,47 +163,6 @@ export class ReportsService {
     return { data: rows, total: rows.length };
   }
 
-  // ── OKRs Report ────────────────────────────────────────────────────────────
-
-  async exportOkrs(companyId: string, format: ReportFormat) {
-    const objectives = await this.prisma.objective.findMany({
-      where:   { companyId },
-      include: {
-        owner:      { select: { name: true, email: true } },
-        keyResults: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const rows: Record<string, any>[] = [];
-    for (const obj of objectives) {
-      for (const kr of obj.keyResults) {
-        const progress = kr.targetValue > 0
-          ? Math.round(((kr.currentValue - kr.startValue) / (kr.targetValue - kr.startValue)) * 100)
-          : 0;
-        rows.push({
-          objetivo:    obj.title,
-          responsavel: obj.owner.name,
-          email:       obj.owner.email,
-          status:      obj.status,
-          inicio:      obj.startDate.toLocaleDateString('pt-BR'),
-          fim:         obj.endDate.toLocaleDateString('pt-BR'),
-          keyResult:   kr.title,
-          tipo:        kr.type,
-          valorInicial: kr.startValue,
-          valorAtual:  kr.currentValue,
-          meta:        kr.targetValue,
-          unidade:     kr.unit ?? '',
-          progresso:   `${Math.max(0, Math.min(100, progress))}%`,
-        });
-      }
-    }
-
-    if (format === 'csv')   return this.toCsv(rows);
-    if (format === 'excel') return this.toExcel(rows, 'OKRs');
-    return { data: rows, total: rows.length };
-  }
-
   // ── Format helpers ─────────────────────────────────────────────────────────
 
   private toCsv(rows: Record<string, any>[]): string {

@@ -4,8 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { RedisService } from '../redis/redis.service';
-import { OkrsService } from '../okrs/okrs.service';
-import { CreateTaskDto, UpdateTaskDto, UpdateTaskStatusDto, MoveTaskDto, CreateSubtaskDto, BulkUpdateTasksDto } from './dto/create-task.dto';
+import { CreateTaskDto, UpdateTaskDto, MoveTaskDto, CreateSubtaskDto, BulkUpdateTasksDto } from './dto/create-task.dto';
 import { TaskStatus } from '@prisma/client';
 import { EVENTS } from '../events/agilis-events';
 
@@ -18,7 +17,6 @@ export class TasksService {
     private readonly events: EventEmitter2,
     private readonly audit: AuditService,
     private readonly redis: RedisService,
-    private readonly okrs: OkrsService,
   ) {}
 
   async findByProject(projectId: string, userId: string) {
@@ -220,7 +218,6 @@ export class TasksService {
     });
     this.audit.log({ userId, companyId: task.project.companyId, action: 'STATUS_CHANGE', entityType: 'task', entityId: id, oldValues: { status: task.status }, newValues: { status: dto.status } });
     this.invalidateProjectCache(task.project.id);
-    this.okrs.syncKeyResultFromTasks(id).catch(() => {});
 
     return updated;
   }

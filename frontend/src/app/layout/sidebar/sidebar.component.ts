@@ -60,7 +60,6 @@ export class SidebarComponent {
       items: [
         { label: 'Portfolio Executivo', icon: 'account_tree',     route: '/portfolio' },
         { label: 'Assistente IA',     icon: 'smart_toy',        route: '/ia' },
-        { label: 'OKRs e Metas',      icon: 'target',           route: '/okrs' },
         { label: 'Health Score',      icon: 'monitor_heart',    route: '/health-score' },
         { label: 'Insights',          icon: 'tips_and_updates', route: '/insights' },
         { label: 'Carga de Trabalho', icon: 'heatmap',          route: '/workload' },

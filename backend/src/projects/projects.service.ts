@@ -230,17 +230,11 @@ export class ProjectsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const [healthScores, objectives] = await Promise.all([
-      this.prisma.healthScore.findMany({
-        where: { companyId, entityType: 'PROJECT' },
-        orderBy: { calculatedAt: 'desc' },
-        select: { entityId: true, score: true },
-      }).catch(() => []),
-      this.prisma.objective.findMany({
-        where: { companyId },
-        include: { keyResults: { select: { startValue: true, currentValue: true, targetValue: true } } },
-      }).catch(() => []),
-    ]);
+    const healthScores = await this.prisma.healthScore.findMany({
+      where: { companyId, entityType: 'PROJECT' },
+      orderBy: { calculatedAt: 'desc' },
+      select: { entityId: true, score: true },
+    }).catch(() => []);
 
     // Keep only latest score per project
     const seenHealth = new Set<string>();
@@ -268,21 +262,6 @@ export class ProjectsService {
       const forecastDays = dailyVelocity > 0 ? Math.ceil(remaining / dailyVelocity) : null;
       const forecastDate = forecastDays != null ? new Date(Date.now() + forecastDays * 86_400_000).toISOString().slice(0, 10) : null;
 
-      // OKR: find objectives linked to this project (by naming convention / company scope)
-      const objProgress = objectives.length > 0 ? (() => {
-        let krDone = 0, krTotal = 0;
-        for (const obj of objectives) {
-          for (const kr of obj.keyResults) {
-            krTotal++;
-            const p = kr.targetValue > kr.startValue
-              ? (kr.currentValue - kr.startValue) / (kr.targetValue - kr.startValue)
-              : 0;
-            krDone += Math.max(0, Math.min(1, p));
-          }
-        }
-        return krTotal > 0 ? Math.round((krDone / krTotal) * 100) : 0;
-      })() : null;
-
       return {
         id: p.id, name: p.name, color: p.color, icon: p.icon,
         total, done, overdue, progress,
@@ -291,7 +270,6 @@ export class ProjectsService {
         forecastDate,
         forecastDays,
         dailyVelocity: Math.round(dailyVelocity * 10) / 10,
-        okrProgress: objProgress,
       };
     });
   }

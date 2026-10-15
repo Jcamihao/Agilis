@@ -134,7 +134,6 @@ model Company {
   healthScores    HealthScore[]
 
   aiConversations AiConversation[]
-  objectives      Objective[]
   taskTemplates   TaskTemplate[]
 
   @@map("companies")
@@ -173,7 +172,6 @@ model User {
   aiMessages           AiMessage[]
   taskParticipations   TaskParticipant[] @relation("taskParticipations")
   timeEntries          TimeEntry[]
-  ownedObjectives      Objective[]      @relation("ownedObjectives")
   approvalRequests     TaskApproval[]   @relation("approvalRequests")
   approvalReviews      TaskApproval[]   @relation("approvalReviews")
   taskTemplates         TaskTemplate[]     @relation("taskTemplateCreator")
@@ -307,7 +305,6 @@ model Task {
   executions   AutomationExecution[]
   participants TaskParticipant[]
   timeEntries       TimeEntry[]
-  keyResultTasks    KeyResultTask[]
   customFieldValues CustomFieldValue[]
   approvals         TaskApproval[]     @relation("taskApprovals")
 
@@ -602,73 +599,6 @@ model Activity {
   task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
 
   @@map("activities")
-}
-
-// ─── OKRs ─────────────────────────────────────────────────────────────────────
-
-enum ObjectiveStatus {
-  DRAFT
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-enum KeyResultType {
-  PERCENTAGE
-  NUMBER
-  CURRENCY
-  BOOLEAN
-}
-
-model Objective {
-  id          String          @id @default(uuid())
-  companyId   String
-  ownerId     String
-  title       String
-  description String?
-  status      ObjectiveStatus @default(ACTIVE)
-  startDate   DateTime
-  endDate     DateTime
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
-  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  owner      User        @relation("ownedObjectives", fields: [ownerId], references: [id])
-  keyResults KeyResult[]
-
-  @@index([companyId, status])
-  @@map("objectives")
-}
-
-model KeyResult {
-  id            String        @id @default(uuid())
-  objectiveId   String
-  title         String
-  type          KeyResultType @default(PERCENTAGE)
-  startValue    Float         @default(0)
-  targetValue   Float
-  currentValue  Float         @default(0)
-  unit          String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  objective Objective       @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
-  tasks     KeyResultTask[]
-
-  @@index([objectiveId])
-  @@map("key_results")
-}
-
-model KeyResultTask {
-  id          String @id @default(uuid())
-  keyResultId String
-  taskId      String
-
-  keyResult KeyResult @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
-  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@unique([keyResultId, taskId])
-  @@map("key_result_tasks")
 }
 
 // ─── Custom Fields ─────────────────────────────────────────────────────────────

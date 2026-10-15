@@ -60,9 +60,9 @@ export class LandingComponent implements OnInit, OnDestroy {
       description: 'Rode sprints com metas claras pro time inteiro, e acompanhe prazos num calendário só pra todos os projetos.',
     },
     {
-      icon: 'flag',
-      title: 'OKRs & Health Score',
-      description: 'Conecte metas ao trabalho do dia a dia e veja a saúde de cada projeto em tempo real.',
+      icon: 'favorite',
+      title: 'Health Score',
+      description: 'Veja a saúde de cada projeto em tempo real, com atrasos, backlog e inatividade num só número.',
     },
     {
       icon: 'smart_toy',
@@ -111,7 +111,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     {
       name: 'Business',
       tagline: 'Pra operações com múltiplos times e projetos.',
-      features: ['Tudo do Starter', 'OKRs, Automações e Portfólio', 'Múltiplas equipes e empresas'],
+      features: ['Tudo do Starter', 'Automações e Portfólio', 'Múltiplas equipes e empresas'],
       ctaLabel: 'Falar com vendas',
       ctaLink: '#contato',
       highlight: true,

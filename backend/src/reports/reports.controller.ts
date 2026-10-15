@@ -1,6 +1,6 @@
 import { Controller, Get, Query, Res, UseGuards, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 import { Response } from 'express';
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -68,17 +68,6 @@ export class ReportsController {
   ) {
     const result = await this.service.exportTimeTracking(companyId, format, from, to);
     return this.send(res!, result, format, 'time-tracking');
-  }
-
-  @Get('okrs')
-  @ApiOperation({ summary: 'Relatório de OKRs e Key Results' })
-  async okrs(
-    @Query('companyId') companyId: string,
-    @Query('format') format: Format = 'json',
-    @Res() res?: Response,
-  ) {
-    const result = await this.service.exportOkrs(companyId, format);
-    return this.send(res!, result, format, 'okrs');
   }
 
   private send(res: Response, result: any, format: Format, name: string) {

@@ -99,7 +99,6 @@
                   @if (sortKey() === 'forecast') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
                 </span>
               </th>
-              <th class="px-4 py-3 text-center">OKR</th>
               <th class="px-4 py-3"></th>
             </tr>
           </thead>
@@ -176,15 +175,6 @@
                     </div>
                   } @else {
                     <span class="text-[--text-secondary] text-xs">Sem dados</span>
-                  }
-                </td>
-
-                <!-- OKR progress -->
-                <td class="px-4 py-4 text-center">
-                  @if (p.okrProgress !== null) {
-                    <span class="text-sm font-semibold" style="color:#ec4899">{{ p.okrProgress }}%</span>
-                  } @else {
-                    <span class="text-[--text-secondary] text-xs">—</span>
                   }
                 </td>
 
