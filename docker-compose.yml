@@ -78,35 +78,6 @@ services:
     ports:
       - '4200:80'
 
-  n8n:
-    image: n8nio/n8n
-    container_name: agilis-n8n
-    restart: unless-stopped
-    ports:
-      - '5678:5678'
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=admin
-      - N8N_BASIC_AUTH_PASSWORD=agilis123
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://localhost:5678/
-      - GENERIC_TIMEZONE=America/Sao_Paulo
-    volumes:
-      - agilis-n8n-data:/home/node/.n8n
-
-  uptime-kuma:
-    image: louislam/uptime-kuma:1
-    container_name: agilis-uptime
-    restart: unless-stopped
-    ports:
-      - '3002:3001'
-    volumes:
-      - agilis-kuma-data:/app/data
-
 volumes:
   agilis-postgres-data:
   agilis-redis-data:
-  agilis-n8n-data:
-  agilis-kuma-data:

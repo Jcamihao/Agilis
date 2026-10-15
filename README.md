@@ -9,7 +9,7 @@ Plataforma moderna de gestão operacional inspirada em ClickUp, Linear, Jira e N
 | **Backend** | NestJS 10 · Prisma 5 · PostgreSQL · Redis · JWT |
 | **Frontend** | Angular 16 · Angular Material · TailwindCSS · Angular CDK |
 | **IA** | Selah IA (serviço interno da codeStage; prompts, provedor e modelo ficam lá) |
-| **Infra** | Docker Compose · MinIO · N8N · Uptime Kuma |
+| **Infra** | Docker Compose · PostgreSQL · Redis |
 
 ## Início Rápido
 
@@ -29,7 +29,6 @@ npm run dev
 | Backend API | http://localhost:3000/api/v1 | JWT Bearer |
 | Swagger | http://localhost:3000/docs | — |
 | Prisma Studio | `npm run db:studio` | — |
-| N8N | http://localhost:5678 | admin / agilis123 |
 | Selah IA | `SELAH_IA_BASE_URL` (ex.: http://localhost:3010) | chave `AgilisBack` |
 
 ---
@@ -115,7 +114,7 @@ Agilis/
 │       │   └── guards/         # AuthGuard
 │       └── layout/             # Sidebar, Topbar, MainLayout
 │
-├── docker-compose.yml          # PostgreSQL · Redis · MinIO · N8N · Uptime Kuma
+├── docker-compose.yml          # PostgreSQL · Redis
 └── package.json                # Scripts raiz (dev, build, setup, …)
 ```
 
@@ -130,7 +129,6 @@ npm run db:migrate       # Rodar migrations pendentes
 npm run db:seed          # Popular banco com dados demo
 npm run db:reset         # Reset completo (perda de dados)
 npm run db:studio        # Abrir Prisma Studio
-npm run n8n:up           # Subir N8N
 npm run infra:logs       # Ver logs de todos os containers
 ```
 
@@ -141,6 +139,7 @@ npm run infra:logs       # Ver logs de todos os containers
 **v2.5.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.3.2** — Infra enxuta: n8n e Uptime Kuma saem do docker-compose (nenhum código falava com eles; o n8n só fazia sentido com os webhooks removidos), junto com os scripts `n8n:*`, `uptime:*` e os `evolution:*` (que já apontavam pra um serviço inexistente) e as menções a MinIO (uploads são em disco local). O compose agora sobe só PostgreSQL, Redis, backend e frontend
 - **v3.3.1** — Auditoria pós-remoções: 9 métodos de service sem chamador (presença do Redis do Chat, e-mail, notificações, métricas por usuário), 12 dependências (stack Karma/Jasmine sem nenhum teste de frontend, supertest, @nestjs/testing, ts-loader, swagger-ui-express, platform-browser-dynamic), 12 `.scss` vazios e chaves JWT de refresh sem uso. Correção: o evento `comment.created` era escutado (automações e notificações) mas nunca emitido; agora o `CommentsService` o emite, então automações com gatilho "comentário criado" passam a disparar
 - **v3.3.0** — Remoção de Wiki de Projetos, Centro de Processos e Webhooks (editor de documentos, fluxos BPM/checklist e integrações de saída fora do escopo de gestão de tarefas) e das 9 dependências Tiptap, que ficaram sem uso. Fila BullMQ de webhooks removida; a de e-mail permanece
 - **v3.2.0** — Fim da auditoria ponytail: remoção de Labels e de Status Personalizados (dava pra criar, mas nenhuma tarefa podia usar), da aba "Geral" placeholder em Configurações do Projeto, de 17 rotas/métodos sem chamador (okrs summary/link, time-tracking active/my-log/update, métricas me/team, forecast por projeto, audit por entidade, custom-fields em lote, IA resumir tarefa/sugerir responsável, health-score por escopo, webhooks/events) e de 3 colunas nunca usadas

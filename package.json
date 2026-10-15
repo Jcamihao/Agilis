@@ -1,6 +1,6 @@
 {
   "name": "agilis",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "Agilis — Plataforma de Gestão Operacional",
   "private": true,
   "scripts": {
@@ -26,19 +26,6 @@
     "infra:reset": "docker compose down -v && docker compose up -d postgres && node scripts/wait-db.js",
     "infra:logs": "docker compose logs -f",
     "infra:status": "docker compose ps",
-
-    "n8n:up": "docker compose up -d n8n && echo \"\\n✅ N8N disponível em http://localhost:5678 (admin / agilis123)\"",
-    "n8n:down": "docker compose stop n8n",
-    "n8n:logs": "docker compose logs -f n8n",
-
-
-    "uptime:up": "docker compose up -d uptime-kuma && echo \"\\n✅ Uptime Kuma disponível em http://localhost:3002\"",
-    "uptime:down": "docker compose stop uptime-kuma",
-    "uptime:logs": "docker compose logs -f uptime-kuma",
-
-    "evolution:up": "docker compose up -d evolution && echo \"\\n✅ Evolution API disponível em http://localhost:8080\\n   API Key: agilis_evolution_key\"",
-    "evolution:down": "docker compose stop evolution",
-    "evolution:logs": "docker compose logs -f evolution",
 
     "install:all": "npm install && npm run backend:install && npm run frontend:install",
     "build:all": "npm run backend:build && npm run frontend:build",
