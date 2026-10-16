@@ -17,7 +17,6 @@ import { DashboardWidgetsModule } from './dashboard-widgets/dashboard-widgets.mo
 import { AttachmentsModule } from './attachments/attachments.module';
 // V3
 import { AutomationModule } from './automation/automation.module';
-import { MetricsModule } from './metrics/metrics.module';
 import { ReportsModule } from './reports/reports.module';
 import { AiModule } from './ai/ai.module';
 import { InsightsModule } from './insights/insights.module';
@@ -52,7 +51,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     DashboardWidgetsModule,
     AttachmentsModule,
     AutomationModule,
-    MetricsModule,
     ReportsModule,
     AiModule,
     InsightsModule,

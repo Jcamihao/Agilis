@@ -103,11 +103,6 @@ export const routes: Routes = [
         title: 'Portfolio Executivo — Agilis',
       },
       {
-        path: 'metrics',
-        loadComponent: () => import('./features/metrics/metrics.component').then((m) => m.MetricsComponent),
-        title: 'Métricas — Agilis',
-      },
-      {
         path: 'ia',
         loadComponent: () => import('./features/ia/ia.component').then((m) => m.IaComponent),
         title: 'Assistente IA — Agilis',

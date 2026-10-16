@@ -56,7 +56,6 @@ npm run dev
 - **Brief Estratégico IA** — análise estruturada gerada por IA (Resumo Executivo, Riscos, Oportunidades, Recomendações) com métricas consolidadas
 - **Insights** — alertas automáticos (CRON horário): tarefas atrasadas, estagnação, backlog excessivo, tarefas urgentes sem responsável
 - **Workload** — carga de trabalho por membro (14 dias), sugestão de rebalanceamento via IA
-- **Métricas** — KPIs por usuário, equipe e empresa
 
 ### Automações & Integrações
 - **Motor de Automações** — regras "se evento X → ação Y" (CRUD completo + engine de execução)
@@ -84,7 +83,6 @@ Agilis/
 │   │   ├── companies/          # Multi-tenant
 │   │   ├── dashboard-widgets/  # Widgets customizáveis
 │   │   ├── insights/           # Insights CRON horário
-│   │   ├── metrics/            # KPIs por usuário/equipe/empresa
 │   │   ├── projects/           # Projetos + portfolio + forecast
 │   │   ├── reports/            # CSV/Excel: tarefas, produtividade, time
 │   │   ├── search/             # Busca global
@@ -130,9 +128,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.7.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
+**v3.8.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.8.0** — Remoção da página de Métricas (módulo, tela `/metrics` e item do menu): repetia taxa de conclusão e atrasos que o Dashboard e o Portfolio já mostram, e o card "Saúde dos Projetos" exibia um "+X% vs. mês anterior" que não vinha de dado nenhum (era `taxa − 89`). Sem migration (não havia tabela própria)
 - **v3.7.0** — Remoção da Auditoria (módulo, tela `/audit`, relatório e item do menu): só 2 pontos do código gravavam no log (criar tarefa e mudar status), então a tela mostrava quase nada apesar de prometer "log completo". Sai também o item "Auditoria completa" do plano Enterprise da landing. Migration `20261015000001_remove_audit_log` apaga `audit_logs` e o enum `AuditAction`
 - **v3.6.0** — Enxugamento: adapter SMTP e `nodemailer` saem (produção usa Resend; sem `RESEND_API_KEY` o e-mail cai no adapter Noop), `axios` vira `fetch` nativo no cliente do Selah IA, `date-fns` sai do backend (calendário usa `Date`) e o `members` reaproveita o `timeAgo`. 17 imports/variáveis sem uso removidos. Sem migration
 - **v3.5.0** — Remoção do Health Score (score A/B/C/D por projeto, cron noturno, tela `/health-score`, card do dashboard, coluna do Portfolio e card da landing). O sinal de saúde já existe de forma mais direta em Insights (atrasos, estagnação, backlog) e no % de progresso/atrasos do Portfolio. Migration `20261014000006_remove_health_score` apaga `health_scores` e o enum `HealthEntity`
