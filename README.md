@@ -128,9 +128,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.8.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
+**v3.8.1** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.8.1** — Correção de deploy: o `angular.json` perdeu o `fileReplacements` da configuração `production` (commit e172678), então `npm run build:prod` empacotava o `environment.ts` de dev e o navegador chamaria `http://localhost:3000/api/v1`. Agora o build de produção usa `environment.prod.ts` (`/api/v1`, relativo, atrás do proxy)
 - **v3.8.0** — Remoção da página de Métricas (módulo, tela `/metrics` e item do menu): repetia taxa de conclusão e atrasos que o Dashboard e o Portfolio já mostram, e o card "Saúde dos Projetos" exibia um "+X% vs. mês anterior" que não vinha de dado nenhum (era `taxa − 89`). Sem migration (não havia tabela própria)
 - **v3.7.0** — Remoção da Auditoria (módulo, tela `/audit`, relatório e item do menu): só 2 pontos do código gravavam no log (criar tarefa e mudar status), então a tela mostrava quase nada apesar de prometer "log completo". Sai também o item "Auditoria completa" do plano Enterprise da landing. Migration `20261015000001_remove_audit_log` apaga `audit_logs` e o enum `AuditAction`
 - **v3.6.0** — Enxugamento: adapter SMTP e `nodemailer` saem (produção usa Resend; sem `RESEND_API_KEY` o e-mail cai no adapter Noop), `axios` vira `fetch` nativo no cliente do Selah IA, `date-fns` sai do backend (calendário usa `Date`) e o `members` reaproveita o `timeAgo`. 17 imports/variáveis sem uso removidos. Sem migration
