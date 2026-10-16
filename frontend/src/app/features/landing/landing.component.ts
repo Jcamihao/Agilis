@@ -119,7 +119,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     {
       name: 'Enterprise',
       tagline: 'Pra quem precisa de controle e suporte dedicado.',
-      features: ['Tudo do Business', 'Auditoria completa', 'Suporte prioritário'],
+      features: ['Tudo do Business', 'Suporte prioritário'],
       ctaLabel: 'Falar com vendas',
       ctaLink: '#contato',
     },

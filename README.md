@@ -64,9 +64,7 @@ npm run dev
   - Ações: mudar status, atribuir usuário, notificar, criar tarefa, e-mail
 
 ### Administração
-- **Relatórios** (CSV / Excel / PDF) — Tarefas, Produtividade, Auditoria, Time Tracking
-- **Auditoria** — log completo de todas as ações (quem, o quê, quando)
-- **Log de Auditoria** — exportável em CSV/Excel
+- **Relatórios** (CSV / Excel / PDF) — Tarefas, Produtividade, Time Tracking
 
 ### Onboarding
 - **Wizard de Primeiro Acesso** — 3 passos guiados: criar empresa → projeto → primeira tarefa
@@ -132,9 +130,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.6.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
+**v3.7.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.7.0** — Remoção da Auditoria (módulo, tela `/audit`, relatório e item do menu): só 2 pontos do código gravavam no log (criar tarefa e mudar status), então a tela mostrava quase nada apesar de prometer "log completo". Sai também o item "Auditoria completa" do plano Enterprise da landing. Migration `20261015000001_remove_audit_log` apaga `audit_logs` e o enum `AuditAction`
 - **v3.6.0** — Enxugamento: adapter SMTP e `nodemailer` saem (produção usa Resend; sem `RESEND_API_KEY` o e-mail cai no adapter Noop), `axios` vira `fetch` nativo no cliente do Selah IA, `date-fns` sai do backend (calendário usa `Date`) e o `members` reaproveita o `timeAgo`. 17 imports/variáveis sem uso removidos. Sem migration
 - **v3.5.0** — Remoção do Health Score (score A/B/C/D por projeto, cron noturno, tela `/health-score`, card do dashboard, coluna do Portfolio e card da landing). O sinal de saúde já existe de forma mais direta em Insights (atrasos, estagnação, backlog) e no % de progresso/atrasos do Portfolio. Migration `20261014000006_remove_health_score` apaga `health_scores` e o enum `HealthEntity`
 - **v3.4.0** — Remoção de OKRs e Metas (Objectives, Key Results e vínculo com tarefas): módulo, tela, relatório, coluna "OKR" do Portfolio e atalho do dashboard saem; migration `20261014000005_remove_okrs` apaga `objectives`, `key_results` e `key_result_tasks`

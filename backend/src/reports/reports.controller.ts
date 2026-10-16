@@ -44,19 +44,6 @@ export class ReportsController {
     return this.send(res!, result, format, 'productivity');
   }
 
-  @Get('audit')
-  @ApiOperation({ summary: 'Relatório de auditoria' })
-  async audit(
-    @Query('companyId') companyId: string,
-    @Query('format') format: Format = 'json',
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-    @Res() res?: Response,
-  ) {
-    const result = await this.service.exportAudit(companyId, format, from, to);
-    return this.send(res!, result, format, 'audit');
-  }
-
   @Get('time-tracking')
   @ApiOperation({ summary: 'Relatório de time tracking e registros de ponto' })
   async timeTracking(

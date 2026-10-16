@@ -128,11 +128,6 @@ export const routes: Routes = [
         title: 'Relatórios — Agilis',
       },
       {
-        path: 'audit',
-        loadComponent: () => import('./features/audit/audit.component').then((m) => m.AuditComponent),
-        title: 'Auditoria — Agilis',
-      },
-      {
         path: 'projects/:id/sprint-planning',
         loadComponent: () => import('./features/sprint-planning/sprint-planning.component').then((m) => m.SprintPlanningComponent),
         title: 'Sprint Planning — Agilis',

@@ -48,13 +48,6 @@ export class ReportsComponent {
       color: '#10b981',
     },
     {
-      key: 'audit',
-      title: 'Log de Auditoria',
-      description: 'Histórico completo de ações: quem fez o quê, quando e em qual entidade.',
-      icon: 'policy',
-      color: '#f59e0b',
-    },
-    {
       key: 'time-tracking',
       title: 'Time Tracking',
       description: 'Apontamentos de horas por tarefa e registros de ponto (entrada/saída) da equipe.',
@@ -84,7 +77,6 @@ export class ReportsComponent {
     try {
       if (reportKey === 'tasks')        this.reportsService.downloadTasks(companyId, format, filters);
       if (reportKey === 'productivity') this.reportsService.downloadProductivity(companyId, format);
-      if (reportKey === 'audit')        this.reportsService.downloadAudit(companyId, format, from || undefined, to || undefined);
       if (reportKey === 'time-tracking') this.reportsService.downloadTimeTracking(companyId, format, from || undefined, to || undefined);
 
       setTimeout(() => {

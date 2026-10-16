@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuditService } from '../audit/audit.service';
 import { RedisService } from '../redis/redis.service';
 import { CreateTaskDto, UpdateTaskDto, MoveTaskDto, CreateSubtaskDto, BulkUpdateTasksDto } from './dto/create-task.dto';
 import { TaskStatus } from '@prisma/client';
@@ -15,7 +14,6 @@ export class TasksService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: EventEmitter2,
-    private readonly audit: AuditService,
     private readonly redis: RedisService,
   ) {}
 
@@ -159,7 +157,6 @@ export class TasksService {
       this.events.emit(EVENTS.TASK_ASSIGNED, { task, assigneeId: dto.assigneeId, actor, companyId: project.companyId });
     }
 
-    this.audit.log({ userId, companyId: project.companyId, action: 'CREATE', entityType: 'task', entityId: task.id, newValues: { title: task.title, status: task.status, priority: task.priority } });
     this.invalidateProjectCache(dto.projectId);
 
     return task;
@@ -216,7 +213,6 @@ export class TasksService {
     this.events.emit(EVENTS.TASK_STATUS_CHANGED, {
       task: updated, oldStatus: task.status, newStatus: dto.status, actor, companyId: task.project.companyId,
     });
-    this.audit.log({ userId, companyId: task.project.companyId, action: 'STATUS_CHANGE', entityType: 'task', entityId: id, oldValues: { status: task.status }, newValues: { status: dto.status } });
     this.invalidateProjectCache(task.project.id);
 
     return updated;

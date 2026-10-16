@@ -16,7 +16,6 @@ import { CalendarModule } from './calendar/calendar.module';
 import { DashboardWidgetsModule } from './dashboard-widgets/dashboard-widgets.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 // V3
-import { AuditModule } from './audit/audit.module';
 import { AutomationModule } from './automation/automation.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { ReportsModule } from './reports/reports.module';
@@ -52,7 +51,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     CalendarModule,
     DashboardWidgetsModule,
     AttachmentsModule,
-    AuditModule,
     AutomationModule,
     MetricsModule,
     ReportsModule,

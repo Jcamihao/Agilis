@@ -101,38 +101,6 @@ export class ReportsService {
     return { data: rows, total: rows.length };
   }
 
-  // ── Audit Report ───────────────────────────────────────────────────────────
-
-  async exportAudit(companyId: string, format: ReportFormat, from?: string, to?: string) {
-    const where: any = { companyId };
-    if (from || to) {
-      where.createdAt = {};
-      if (from) where.createdAt.gte = new Date(from);
-      if (to)   where.createdAt.lte = new Date(to);
-    }
-
-    const logs = await this.prisma.auditLog.findMany({
-      where,
-      include: { user: { select: { name: true, email: true } } },
-      orderBy: { createdAt: 'desc' },
-      take: 5000,
-    });
-
-    const rows = logs.map((l) => ({
-      timestamp:  l.createdAt.toISOString(),
-      user:       l.user.name,
-      email:      l.user.email,
-      action:     l.action,
-      entityType: l.entityType,
-      entityId:   l.entityId,
-      ipAddress:  l.ipAddress ?? '',
-    }));
-
-    if (format === 'csv')   return this.toCsv(rows);
-    if (format === 'excel') return this.toExcel(rows, 'Auditoria');
-    return { data: rows, total: rows.length };
-  }
-
   // ── Time Tracking Report ──────────────────────────────────────────────────
 
   async exportTimeTracking(companyId: string, format: ReportFormat, from?: string, to?: string) {

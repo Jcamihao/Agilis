@@ -71,7 +71,6 @@ export class SidebarComponent {
         { label: 'Automações',          icon: 'auto_awesome',  route: '/automations' },
         { label: 'Métricas',            icon: 'bar_chart',     route: '/metrics' },
         { label: 'Relatórios',          icon: 'summarize',     route: '/reports' },
-        { label: 'Auditoria',           icon: 'verified_user', route: '/audit' },
       ],
     },
   ];

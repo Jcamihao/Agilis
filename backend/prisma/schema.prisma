@@ -82,18 +82,6 @@ enum SprintStatus {
   COMPLETED
 }
 
-enum AuditAction {
-  CREATE
-  UPDATE
-  DELETE
-  LOGIN
-  LOGOUT
-  EXPORT
-  STATUS_CHANGE
-  ASSIGN
-  COMMENT
-}
-
 // V4 Enums
 
 enum InsightType {
@@ -123,7 +111,6 @@ model Company {
   teams           Team[]
   projects        Project[]
   automations     AutomationRule[]
-  auditLogs       AuditLog[]
   insights        Insight[]
 
   aiConversations AiConversation[]
@@ -161,7 +148,6 @@ model User {
   notifications      Notification[]
   dashboardWidgets   DashboardWidget[]
   attachments          Attachment[]
-  auditLogs            AuditLog[]
   aiMessages           AiMessage[]
   taskParticipations   TaskParticipant[] @relation("taskParticipations")
   timeEntries          TimeEntry[]
@@ -479,26 +465,6 @@ model AutomationExecution {
 
   @@index([ruleId, createdAt(sort: Desc)])
   @@map("automation_executions")
-}
-
-model AuditLog {
-  id         String      @id @default(uuid())
-  userId     String
-  companyId  String?
-  action     AuditAction
-  entityType String
-  entityId   String
-  oldValues  Json?
-  newValues  Json?
-  ipAddress  String?
-  createdAt  DateTime    @default(now())
-
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-
-  @@index([companyId, createdAt(sort: Desc)])
-  @@index([entityType, entityId])
-  @@map("audit_logs")
 }
 
 // ─── V4: IA Operacional ──────────────────────────────────────────────────────

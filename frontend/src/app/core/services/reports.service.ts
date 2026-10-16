@@ -44,12 +44,6 @@ export class ReportsService {
     this.download('/reports/productivity', params, `produtividade-${Date.now()}.${ext}`);
   }
 
-  downloadAudit(companyId: string, format: 'csv' | 'excel', from?: string, to?: string) {
-    const ext = format === 'excel' ? 'xlsx' : 'csv';
-    const params = this.buildParams({ companyId, format, from, to });
-    this.download('/reports/audit', params, `auditoria-${Date.now()}.${ext}`);
-  }
-
   downloadTimeTracking(companyId: string, format: 'csv' | 'excel', from?: string, to?: string) {
     const ext = format === 'excel' ? 'xlsx' : 'csv';
     const params = this.buildParams({ companyId, format, from, to });
