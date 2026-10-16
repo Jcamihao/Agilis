@@ -81,7 +81,6 @@ Agilis/
 │   │   ├── automation/         # Motor de automações + cron
 │   │   ├── calendar/           # Calendário + exportação iCal
 │   │   ├── companies/          # Multi-tenant
-│   │   ├── dashboard-widgets/  # Widgets customizáveis
 │   │   ├── insights/           # Insights CRON horário
 │   │   ├── projects/           # Projetos + portfolio + forecast
 │   │   ├── reports/            # CSV/Excel: tarefas, produtividade, time
@@ -128,9 +127,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.8.1** — Redução de escopo: produto focado em gestão de projetos/tarefas.
+**v3.9.0** — Redução de escopo: produto focado em gestão de projetos/tarefas.
 
 Changelog:
+- **v3.9.0** — Dashboard fixo: saem os widgets personalizáveis (ligar/desligar, reordenar por arrastar, resetar), o módulo `dashboard-widgets` com 5 rotas e a tabela por usuário. Três dos cards eram cópia do que `GET /companies/:id/dashboard` já devolvia; o gráfico de 7 dias e a carga da equipe passaram para essa mesma rota (com teste). Migration `20261015000002_remove_dashboard_widgets` apaga `dashboard_widgets` e o enum `WidgetType`
 - **v3.8.1** — Correção de deploy: o `angular.json` perdeu o `fileReplacements` da configuração `production` (commit e172678), então `npm run build:prod` empacotava o `environment.ts` de dev e o navegador chamaria `http://localhost:3000/api/v1`. Agora o build de produção usa `environment.prod.ts` (`/api/v1`, relativo, atrás do proxy)
 - **v3.8.0** — Remoção da página de Métricas (módulo, tela `/metrics` e item do menu): repetia taxa de conclusão e atrasos que o Dashboard e o Portfolio já mostram, e o card "Saúde dos Projetos" exibia um "+X% vs. mês anterior" que não vinha de dado nenhum (era `taxa − 89`). Sem migration (não havia tabela própria)
 - **v3.7.0** — Remoção da Auditoria (módulo, tela `/audit`, relatório e item do menu): só 2 pontos do código gravavam no log (criar tarefa e mudar status), então a tela mostrava quase nada apesar de prometer "log completo". Sai também o item "Auditoria completa" do plano Enterprise da landing. Migration `20261015000001_remove_audit_log` apaga `audit_logs` e o enum `AuditAction`

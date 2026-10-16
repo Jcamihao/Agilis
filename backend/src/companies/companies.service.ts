@@ -52,7 +52,10 @@ export class CompaniesService {
   async getDashboardStats(companyId: string, userId: string) {
     await this.checkMembership(companyId, userId);
 
-    const [totalTasks, completedTasks, overdueTasks, activeProjects, recentActivities] = await Promise.all([
+    const days = 7;
+    const since = new Date(Date.now() - days * 86_400_000);
+
+    const [totalTasks, completedTasks, overdueTasks, activeProjects, recentActivities, doneRecently, teamWorkload] = await Promise.all([
       this.prisma.task.count({ where: { project: { companyId } } }),
       this.prisma.task.count({ where: { project: { companyId }, status: 'DONE' } }),
       this.prisma.task.count({
@@ -69,9 +72,29 @@ export class CompaniesService {
         orderBy: { createdAt: 'desc' },
         take: 10,
       }),
+      this.prisma.task.findMany({
+        where: { project: { companyId }, status: 'DONE', updatedAt: { gte: since } },
+        select: { updatedAt: true },
+      }),
+      this.prisma.user.findMany({
+        where: { companies: { some: { companyId } } },
+        select: { id: true, name: true, avatarUrl: true, _count: { select: { assignedTasks: true } } },
+        take: 8,
+      }),
     ]);
 
-    return { totalTasks, completedTasks, overdueTasks, activeProjects, recentActivities };
+    // Tarefas concluídas por dia nos últimos 7 dias (dias sem conclusão aparecem com 0)
+    const byDay: Record<string, number> = {};
+    for (let i = 0; i < days; i++) byDay[new Date(Date.now() - i * 86_400_000).toISOString().slice(0, 10)] = 0;
+    for (const t of doneRecently) {
+      const day = t.updatedAt.toISOString().slice(0, 10);
+      if (day in byDay) byDay[day]++;
+    }
+    const productivity = Object.entries(byDay)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({ date, count }));
+
+    return { totalTasks, completedTasks, overdueTasks, activeProjects, recentActivities, productivity, teamWorkload };
   }
 
   private async checkOwnership(companyId: string, userId: string) {

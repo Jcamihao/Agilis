@@ -131,6 +131,8 @@ export interface DashboardStats {
   overdueTasks: number;
   activeProjects: number;
   recentActivities: Activity[];
+  productivity: { date: string; count: number }[];
+  teamWorkload: { id: string; name: string; avatarUrl?: string; _count: { assignedTasks: number } }[];
 }
 
 export interface Activity {
@@ -271,26 +273,6 @@ export interface NotificationsPage {
   limit: number;
 }
 
-export type WidgetType =
-  | 'MY_TASKS'
-  | 'OVERDUE_TASKS'
-  | 'COMPLETED_TASKS'
-  | 'ACTIVE_PROJECTS'
-  | 'PRODUCTIVITY_CHART'
-  | 'RECENT_ACTIVITY'
-  | 'TEAM_WORKLOAD';
-
-export interface DashboardWidget {
-  id: string;
-  userId: string;
-  widgetType: WidgetType;
-  position: number;
-  colSpan: number;
-  rowSpan: number;
-  isActive: boolean;
-  config?: any;
-}
-
 export interface CalendarRange {
   start: string;
   end: string;
@@ -309,47 +291,6 @@ export const NOTIFICATION_CONFIG: Record<
   TASK_OVERDUE: { icon: 'warning', color: '#ef4444' },
   TASK_STATUS_CHANGED: { icon: 'swap_horiz', color: '#10b981' },
   PROJECT_INVITE: { icon: 'group_add', color: '#14b8a6' },
-};
-
-export const WIDGET_CONFIG: Record<
-  WidgetType,
-  { label: string; icon: string; description: string }
-> = {
-  MY_TASKS: {
-    label: 'Minhas Tarefas',
-    icon: 'task_alt',
-    description: 'Tarefas atribuídas a você',
-  },
-  OVERDUE_TASKS: {
-    label: 'Tarefas Atrasadas',
-    icon: 'schedule',
-    description: 'Tarefas com prazo vencido',
-  },
-  COMPLETED_TASKS: {
-    label: 'Concluídas',
-    icon: 'check_circle',
-    description: 'Total de tarefas concluídas',
-  },
-  ACTIVE_PROJECTS: {
-    label: 'Projetos Ativos',
-    icon: 'folder_open',
-    description: 'Projetos em andamento',
-  },
-  PRODUCTIVITY_CHART: {
-    label: 'Produtividade',
-    icon: 'insights',
-    description: 'Tarefas concluídas por dia',
-  },
-  RECENT_ACTIVITY: {
-    label: 'Atividade Recente',
-    icon: 'history',
-    description: 'Últimas ações da equipe',
-  },
-  TEAM_WORKLOAD: {
-    label: 'Carga da Equipe',
-    icon: 'group',
-    description: 'Tarefas por membro',
-  },
 };
 
 export type InsightType = 'RISK' | 'BOTTLENECK' | 'DELAY_PREDICTION' | 'RECOMMENDATION' | 'ACHIEVEMENT';

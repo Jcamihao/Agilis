@@ -9,34 +9,7 @@
         Visão geral das atividades e produtividade da equipe.
       </p>
     </div>
-    <div class="flex items-center gap-2">
-      <button (click)="toggleCustomize()"
-              class="ag-btn ag-btn--secondary ag-btn--sm"
-              [style.background]="customizing() ? 'rgb(var(--c-border) / 0.06)' : ''"
-              [style.border-color]="customizing() ? 'rgb(var(--c-border) / 0.3)' : ''"
-              [style.color]="customizing() ? 'rgb(var(--c-text))' : ''">
-        <span class="material-symbols-rounded text-base">
-          {{ customizing() ? 'check' : 'dashboard_customize' }}
-        </span>
-        {{ customizing() ? 'Concluir' : 'Personalizar' }}
-      </button>
-      @if (customizing()) {
-        <button (click)="resetWidgets()" class="ag-btn ag-btn--ghost ag-btn--sm" style="color: rgb(var(--f-danger));">
-          <span class="material-symbols-rounded text-base">restart_alt</span>
-          Resetar
-        </button>
-      }
-    </div>
   </div>
-
-  <!-- Customize hint -->
-  @if (customizing()) {
-    <div class="p-3.5 rounded-2xl text-[13px] flex items-center gap-2 animate-fade-in"
-         style="background: rgb(var(--c-border) / 0.06); border: 1px solid rgb(var(--c-border) / 0.15); color: rgb(var(--c-text));">
-      <span class="material-symbols-rounded text-base">info</span>
-      Arraste para reorganizar. Clique no olho para mostrar/esconder. Clique em ✓ para salvar.
-    </div>
-  }
 
   <!-- ── Onboarding Banner (new users) ─────────────────── -->
   @if (isNewUser()) {
@@ -75,26 +48,24 @@
   }
 
   <!-- ── Quick Actions ─────────────────────────────────── -->
-  @if (!customizing()) {
-    <div class="quick-actions-bar">
-      <span class="qa-label">Acesso rápido</span>
-      <a routerLink="/projects" class="qa-chip">
-        <span class="material-symbols-rounded">rocket_launch</span> Projetos
-      </a>
-      <a routerLink="/my-tasks" class="qa-chip">
-        <span class="material-symbols-rounded">task_alt</span> Minhas Tarefas
-      </a>
-      <a routerLink="/teams" class="qa-chip">
-        <span class="material-symbols-rounded">group</span> Equipes
-      </a>
-      <a routerLink="/approvals" class="qa-chip">
-        <span class="material-symbols-rounded">approval</span> Aprovações
-      </a>
-      <a routerLink="/insights" class="qa-chip">
-        <span class="material-symbols-rounded">lightbulb</span> Insights IA
-      </a>
-    </div>
-  }
+  <div class="quick-actions-bar">
+    <span class="qa-label">Acesso rápido</span>
+    <a routerLink="/projects" class="qa-chip">
+      <span class="material-symbols-rounded">rocket_launch</span> Projetos
+    </a>
+    <a routerLink="/my-tasks" class="qa-chip">
+      <span class="material-symbols-rounded">task_alt</span> Minhas Tarefas
+    </a>
+    <a routerLink="/teams" class="qa-chip">
+      <span class="material-symbols-rounded">group</span> Equipes
+    </a>
+    <a routerLink="/approvals" class="qa-chip">
+      <span class="material-symbols-rounded">approval</span> Aprovações
+    </a>
+    <a routerLink="/insights" class="qa-chip">
+      <span class="material-symbols-rounded">lightbulb</span> Insights IA
+    </a>
+  </div>
 
   <!-- ── Row 1: Stat Cards ──────────────────────────────── -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -126,9 +97,9 @@
           <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: rgb(var(--c-500));">
             Tarefas Atrasadas
           </p>
-          @if (widgetData()['OVERDUE_TASKS'] !== undefined) {
+          @if (stats(); as st) {
             <h3 class="text-[32px] font-semibold leading-[1.1] tracking-[-0.04em] mt-1"
-                style="color: rgb(var(--f-danger));">{{ widgetData()['OVERDUE_TASKS'] }}</h3>
+                style="color: rgb(var(--f-danger));">{{ st.overdueTasks }}</h3>
           } @else {
             <div class="ag-skeleton h-9 w-10 mt-2 rounded-xl"></div>
           }
@@ -146,9 +117,9 @@
           <p class="text-[12px] font-medium uppercase tracking-[0.05em]" style="color: rgb(var(--c-500));">
             Projetos Ativos
           </p>
-          @if (widgetData()['ACTIVE_PROJECTS'] !== undefined) {
+          @if (stats(); as st) {
             <h3 class="text-[32px] font-semibold leading-[1.1] tracking-[-0.04em] mt-1"
-                style="color: rgb(var(--c-text));">{{ widgetData()['ACTIVE_PROJECTS'] }}</h3>
+                style="color: rgb(var(--c-text));">{{ st.activeProjects }}</h3>
           } @else {
             <div class="ag-skeleton h-9 w-10 mt-2 rounded-xl"></div>
           }
@@ -168,8 +139,8 @@
           </p>
           <div class="flex items-baseline gap-2 mt-1">
             <h3 class="text-[32px] font-semibold leading-[1.1] tracking-[-0.04em]"
-                style="color: rgb(var(--c-text));">{{ widgetData()['COMPLETED_TASKS'] ?? '—' }}</h3>
-            @if ((widgetData()['COMPLETED_TASKS'] ?? 0) > 0) {
+                style="color: rgb(var(--c-text));">{{ stats()?.completedTasks ?? '—' }}</h3>
+            @if ((stats()?.completedTasks ?? 0) > 0) {
               <span class="text-[11px] font-semibold flex items-center gap-0.5 px-2 py-0.5 rounded-full"
                     style="background: rgb(var(--f-success) / 0.1); color: rgb(var(--f-success));">
                 <span class="material-symbols-rounded" style="font-size:13px;">trending_up</span>
@@ -310,7 +281,7 @@
     <h3 class="text-[20px] font-semibold leading-[1.4] tracking-[-0.01em] mb-6"
         style="color: rgb(var(--c-text));">Carga de Trabalho da Equipe</h3>
 
-    @if (teamWorkloadLoading()) {
+    @if (loading()) {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         @for (i of [1,2,3]; track i) {
           <div class="ag-skeleton h-16 rounded-xl"></div>
@@ -369,59 +340,5 @@
       </div>
     }
   </div>
-
-  <!-- ── Widget Customize Mode (drag-and-drop) ─────────── -->
-  @if (customizing()) {
-    <div class="animate-fade-in">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="material-symbols-rounded text-base" style="color: rgb(var(--c-text));">widgets</span>
-        <p class="text-[13px] font-semibold" style="color: rgb(var(--c-text));">Widgets Personalizáveis</p>
-      </div>
-      <div cdkDropList
-           (cdkDropListDropped)="onWidgetDrop($event)"
-           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        @for (widget of activeWidgets(); track widget.widgetType) {
-          <div cdkDrag [class]="getWidgetClass(widget)" class="cursor-grab">
-            <div *cdkDragPlaceholder
-                 class="rounded-2xl border-2 border-dashed h-24"
-                 style="border-color: rgb(var(--c-border) / 0.2); background: rgb(var(--c-border) / 0.03);"
-                 [class]="getWidgetClass(widget)"></div>
-            <div class="dash-card p-4 flex items-center justify-between"
-                 style="ring: 2px solid rgb(var(--c-border) / 0.2);">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-rounded text-base" cdkDragHandle style="color: rgb(var(--c-500));">
-                  drag_indicator
-                </span>
-                <span class="text-[12px] font-semibold uppercase tracking-wide" style="color: rgb(var(--c-700));">
-                  {{ WIDGET_CONFIG[widget.widgetType].label }}
-                </span>
-              </div>
-              <button (click)="toggleWidgetActive(widget)" class="p-1 rounded-lg transition-colors">
-                <span class="material-symbols-rounded text-base"
-                      [style.color]="widget.isActive ? 'rgb(var(--c-text))' : 'rgb(var(--c-500))'">
-                  {{ widget.isActive ? 'visibility' : 'visibility_off' }}
-                </span>
-              </button>
-            </div>
-          </div>
-        }
-        @for (w of inactiveWidgets(); track w.widgetType) {
-          <div class="col-span-1 rounded-2xl border-2 border-dashed p-4 flex flex-col items-center
-                       justify-center gap-2 cursor-pointer transition-all group"
-               style="border-color: rgb(var(--c-border) / 0.4);"
-               onmouseenter="this.style.borderColor='rgb(var(--c-border) / 0.3)'"
-               onmouseleave="this.style.borderColor='rgb(var(--c-border) / 0.4)'"
-               (click)="toggleWidgetActive(w)">
-            <span class="material-symbols-rounded text-[28px]" style="color: rgb(var(--c-500));">
-              {{ WIDGET_CONFIG[w.widgetType].icon }}
-            </span>
-            <p class="text-[11px] font-medium" style="color: rgb(var(--c-500));">
-              + {{ WIDGET_CONFIG[w.widgetType].label }}
-            </p>
-          </div>
-        }
-      </div>
-    </div>
-  }
 
 </div>

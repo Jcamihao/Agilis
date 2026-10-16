@@ -42,16 +42,6 @@ enum NotificationType {
   INSIGHT_GENERATED
 }
 
-enum WidgetType {
-  MY_TASKS
-  OVERDUE_TASKS
-  COMPLETED_TASKS
-  ACTIVE_PROJECTS
-  PRODUCTIVITY_CHART
-  RECENT_ACTIVITY
-  TEAM_WORKLOAD
-}
-
 enum AutomationTrigger {
   TASK_CREATED
   TASK_STATUS_CHANGED
@@ -146,7 +136,6 @@ model User {
   comments           Comment[]
   mentions           Mention[]         @relation("mentionedUser")
   notifications      Notification[]
-  dashboardWidgets   DashboardWidget[]
   attachments          Attachment[]
   aiMessages           AiMessage[]
   taskParticipations   TaskParticipant[] @relation("taskParticipations")
@@ -404,24 +393,6 @@ model Notification {
   @@index([userId, isRead])
   @@index([userId, createdAt(sort: Desc)])
   @@map("notifications")
-}
-
-model DashboardWidget {
-  id         String     @id @default(uuid())
-  userId     String
-  widgetType WidgetType
-  position   Int        @default(0)
-  colSpan    Int        @default(1)
-  rowSpan    Int        @default(1)
-  isActive   Boolean    @default(true)
-  config     Json?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, widgetType])
-  @@map("dashboard_widgets")
 }
 
 // ─── V3 Models ───────────────────────────────────────────────────────────────

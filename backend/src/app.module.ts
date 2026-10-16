@@ -13,7 +13,6 @@ import { TasksModule } from './tasks/tasks.module';
 import { CommentsModule } from './comments/comments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { CalendarModule } from './calendar/calendar.module';
-import { DashboardWidgetsModule } from './dashboard-widgets/dashboard-widgets.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 // V3
 import { AutomationModule } from './automation/automation.module';
@@ -48,7 +47,6 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     CommentsModule,
     NotificationsModule,
     CalendarModule,
-    DashboardWidgetsModule,
     AttachmentsModule,
     AutomationModule,
     ReportsModule,
