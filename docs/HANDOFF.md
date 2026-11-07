@@ -1,6 +1,6 @@
 # Handoff do Agilis
 
-Atualizado em 2026-11-07, logo depois de fechar a feature "convite por link / QR code" (commitada, ainda sem push). Onde algo foi só presumido ou lido de memória de sessões anteriores, o texto diz isso.
+Atualizado em 2026-11-07, depois de publicar a feature "convite por link / QR code" no GitHub e durante a correção de responsividade mobile. Onde algo foi só presumido ou lido de memória de sessões anteriores, o texto diz isso.
 
 ## 1. Projeto
 
@@ -11,7 +11,7 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Caminho local: `/home/caminhao/codeStage/Agilis`. Remoto: `git@github.com:Jcamihao/Agilis.git`. Branch: `master`.
 - Convenção: Conventional Commits com a versão no assunto, por exemplo `feat!: remover Auditoria (v3.7.0)`. A versão sobe em `package.json` da raiz a cada commit (semver) e o `README.md` ganha uma linha no changelog. Os `package.json` de `backend/` e `frontend/` têm versões próprias e não são usados como versão do produto.
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Versão atual: **3.10.2** (a 3.10.2 é só a atualização deste handoff; a última com código é a **3.10.1**). A `master` local está **7 commits à frente** do `origin/master` (nenhum pushado): `16df666` rate limit no login/cadastro (v3.9.3), `835b35d` correção do 400 ao editar projeto (v3.9.4), `58857c6` formulários duplicados removidos (v3.9.5), `1a427c8` handoff (v3.9.6), `2d6f32d` API de convite por link (v3.10.0) `4bffc25` tela de convite por link/QR (v3.10.1) e o commit deste handoff (v3.10.2). O último commit já no remoto é `06523c4` (v3.9.2).
+- Versão atual: **3.10.2** (a 3.10.2 é só a atualização deste handoff; a última com código é a **3.10.1**). Em 2026-11-07 foi feito `git push origin master`: os sete commits de `16df666` até `3785c1a` agora estão no `origin/master`, incluindo rate limit, correção de edição de projeto, remoção de formulários duplicados e convite por link/QR.
 - Estado do working tree (verificado com `git status` ao fechar o convite): sobram só dois grupos de mudanças não commitadas, que não são do convite:
   1. **Responsividade mobile (outro agente, Codex, via extensão do VS Code):** edições em `frontend/src/app/layout/*` (main-layout, sidebar, topbar), calendar, insights-page, list-view, sprint-planning e time-report, mais `docs/mobile-responsividade-contrato.md`. Não são minhas; não commitar, reverter ou sobrescrever sem alinhar.
   2. **Documentos comerciais** (`FOUNDER_CONTEXT.md`, `docs/estrategia-founder-skills.md`, `docs/outreach-sequencia.md`).
@@ -47,7 +47,7 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 
 ## 6. Onde parou
 
-**Concluído e commitado: convite por link / QR code para a empresa ("equipe" na UI é a página Membros).**
+**Concluído, commitado e publicado no GitHub: convite por link / QR code para a empresa ("equipe" na UI é a página Membros).**
 - Contrato em `.superpowers/sdd/convite-link/contrato.md` (decisões: token aleatório de 32 bytes, só o hash sha256 vai ao banco; validade de 1, 7 ou 30 dias; entra como MEMBER; revogável; QR gerado no navegador).
 - Backend (`2d6f32d`, v3.10.0): `POST/GET /invites`, `DELETE /invites/:id`, `GET /invites/:token/preview` (público), `POST /invites/:token/accept`, e `inviteToken` em `POST /auth/register`. Feito por subagente haiku, revisado por sonnet com teste vivo (13 passos) e 6 mutantes; eu conferi o código e rodei build e testes.
 - Frontend (`4bffc25`, v3.10.1): aba "Link / QR code" em Membros, página pública `/convite/:token`, `?convite=` em login e cadastro. O revisor sonnet achou e corrigiu um bug grave: o QR não aparecia no bundle de produção (a lib `qrcode` é CommonJS e os nomes saem em `.default`); o dev não pegou porque só rodou `build`, sem navegador.
@@ -55,7 +55,12 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 - Não verificado: botão Compartilhar (headless não tem `navigator.share`), ADMIN que não é OWNER na aba de link, Android/iOS/Capacitor, corrida real de dois accepts simultâneos, limite de tentativas do accept.
 - Sobras de `ponytail-review` não aplicadas (≈ -34 linhas, sem mudar comportamento): `createdAgo` só chama `timeAgo`; `setValidity` com ternário; um mapeador de mensagens de erro repetido em 3 arquivos; fallback `execCommand` do Copiar (pedido pelo contrato); tipo `InviteValidityDays`.
 
-**Produção (verificado pela memória de sessões anteriores, não reconferido hoje):** o Agilis roda na VPS compartilhada (host `31.220.104.87`, acesso só por chave SSH do dono) na versão **3.9.2**, com 42 migrations, banco do Agilis separado, containers `agilis-*` com `restart: unless-stopped`. Layout: código em `/root/Agilis` (chega por `git archive`, não é clone), infra em `/root/agilis-infra/` (`docker-compose.prod.yml` com `name: agilis`, `.env.production` com permissão 600 que nunca deve ser impresso). Backend em `127.0.0.1:3040`, front em `127.0.0.1:4240`, vhost do nginx do host em `127.0.0.1:8240`. O acesso externo é um quick tunnel da Cloudflare (`trycloudflare.com`, sem domínio próprio) atrás de uma "porta de entrada" por cookie secreto no nginx, com `limit_req` de 10 por minuto em login/cadastro. IA do Agilis desligada. **As versões 3.9.3 a 3.10.1 NÃO estão em produção** e ainda nem foram pushadas. A 3.10.0 traz uma migration nova (`company_invites`), a única pendente em relação à produção.
+**Em andamento, ainda não commitado: responsividade mobile.**
+- Implementação isolada no frontend: menu lateral como gaveta abaixo de 1024 px, backdrop, conteúdo com largura total e ajustes de cabeçalhos/abas no Calendário, Insights, Lista, Relatório de Tempo e Planejamento de Sprints.
+- O build de produção do frontend passou; os seis avisos NG8107 do Dashboard já existiam. A revisão visual com Playwright em 390×844 precisa ser concluída antes de commit.
+- Kanban e Projetos não foram alterados nesta fase: havia refatoração externa nesses arquivos e ela foi preservada.
+
+**Produção (verificado pela memória de sessões anteriores, não reconferido hoje):** o Agilis roda na VPS compartilhada (host `31.220.104.87`, acesso só por chave SSH do dono) na versão **3.9.2**, com 42 migrations, banco do Agilis separado, containers `agilis-*` com `restart: unless-stopped`. Layout: código em `/root/Agilis` (chega por `git archive`, não é clone), infra em `/root/agilis-infra/` (`docker-compose.prod.yml` com `name: agilis`, `.env.production` com permissão 600 que nunca deve ser impresso). Backend em `127.0.0.1:3040`, front em `127.0.0.1:4240`, vhost do nginx do host em `127.0.0.1:8240`. O acesso externo é um quick tunnel da Cloudflare (`trycloudflare.com`, sem domínio próprio) atrás de uma "porta de entrada" por cookie secreto no nginx, com `limit_req` de 10 por minuto em login/cadastro. IA do Agilis desligada. **As versões 3.9.3 a 3.10.1 continuam fora de produção, mas agora estão no GitHub.** A 3.10.0 traz uma migration nova (`company_invites`), a única pendente em relação à produção.
 
 Fatos desta sessão que o próximo agente deve saber:
 - v3.8.1 corrigiu um bug grave: o `angular.json` tinha perdido o `fileReplacements`, então o build de produção apontava para `http://localhost:3000/api/v1` e o login pelo navegador ficaria quebrado. Hoje o bundle usa `/api/v1` e tem 0 ocorrências de `localhost:3000` (verificado). Nunca reintroduzir.
@@ -65,10 +70,9 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 7. O que falta, em ordem
 
-1. Fazer push e deploy das versões 3.9.3 a 3.10.1 (detalhes no item 4); só depois de o outro agente fechar a responsividade.
+1. Concluir a auditoria em 390×844 da responsividade mobile, corrigir qualquer falha encontrada e então commitar separadamente essa fase.
 2. Decidir com o dono o que fazer com o convite por e-mail existente (ver seção 8). Recomendação: remover a aba "Por e-mail" ou fazê-la enviar o link por e-mail.
-3. Responsividade mobile: o outro agente está nisso (a sidebar nasce aberta com 248 px em 390 px de largura e várias telas deixam controles fora da viewport). Esperar ele terminar e commitar antes de qualquer deploy, para não subir o front dele pela metade.
-4. Fazer push e deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
+3. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
 5. Plano comercial, que depende do dono: planilha de 40 prospects, cinco conversas, até cinco pilotos, medição na semana 2.
 6. Importador CSV somente se a migração bloquear pelo menos três dos cinco pilotos. Preço, limites e cobrança só depois de evidência de uso.
 7. Pendências menores: colocar `graphify-out/` no `.gitignore` e decidir se `CLAUDE.md` e `.claude/settings.json` entram no repositório; reescrever os docs comerciais sem OKR/Health Score; limpar o aviso de parâmetros não usados no backend (`actor`, `companyId`, `context`, `configService` em `jwt.strategy`), que não foi feito porque mexe em contratos.
