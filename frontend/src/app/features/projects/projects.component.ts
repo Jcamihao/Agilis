@@ -35,7 +35,6 @@ export class ProjectsComponent implements OnInit {
 
   loading = signal(true);
   creating = signal(false);
-  updatingProject = signal(false);
   loadingMembers = signal(false);
   allProjects = signal<Project[]>([]);
   companyMembers = signal<CompanyMember[]>([]);
@@ -43,8 +42,6 @@ export class ProjectsComponent implements OnInit {
   selectedMemberIds = signal<string[]>([]);
   selectedTeamIds = signal<string[]>([]);
   showCreateModal = signal(false);
-  showSettingsModal = signal(false);
-  editingProject = signal<Project | null>(null);
   activeFilter = signal('all');
   companyFilter = signal<string>('all');
   viewMode = signal<'grid' | 'list'>('grid');
@@ -72,12 +69,6 @@ export class ProjectsComponent implements OnInit {
     color:     ['#6366f1'],
     icon:      ['folder'],
     companyId: ['', Validators.required],
-  });
-
-  settingsForm = this.fb.group({
-    name: ['', Validators.required],
-    description: [''],
-    color: ['#6366f1'],
   });
 
   // ── Archived ──────────────────────────────────────────────────────────────
@@ -191,26 +182,6 @@ export class ProjectsComponent implements OnInit {
 
   isMemberSelected(id: string): boolean {
     return this.selectedMemberIds().includes(id);
-  }
-
-  openSettings(project: Project) {
-    this.editingProject.set(project);
-    this.settingsForm.reset({ name: project.name, description: project.description ?? '', color: project.color });
-    this.showSettingsModal.set(true);
-  }
-
-  saveSettings() {
-    const project = this.editingProject();
-    if (!project || this.settingsForm.invalid) return;
-    this.updatingProject.set(true);
-    this.projectsService.update(project.id, this.settingsForm.value as Partial<Project>).subscribe({
-      next: (updated) => {
-        this.allProjects.update((list) => list.map((p) => p.id === updated.id ? { ...p, ...updated } : p));
-        this.showSettingsModal.set(false);
-        this.updatingProject.set(false);
-      },
-      error: () => this.updatingProject.set(false),
-    });
   }
 
   createProject() {

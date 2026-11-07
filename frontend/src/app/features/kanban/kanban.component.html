@@ -111,10 +111,6 @@
         @if (showActionsMenu()) {
           <div class="absolute right-0 top-full mt-1 z-50 w-48 bg-[rgb(var(--c-surface))] border border-slate-100 rounded-xl shadow-xl overflow-hidden"
                (click)="showActionsMenu.set(false)">
-            <button (click)="openSprintModal(); showActionsMenu.set(false)"
-                    class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors text-left">
-              <span class="material-symbols-rounded text-base text-slate-400">sprint</span> Nova Sprint
-            </button>
             <button (click)="openTemplatePanel(); showActionsMenu.set(false)"
                     class="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors text-left">
               <span class="material-symbols-rounded text-base text-slate-400">content_copy</span> Templates de tarefa
@@ -1321,64 +1317,6 @@
               ></div>
             }
             Criar Tarefa
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-<!-- ═══════ SPRINT MODAL ═══════ -->
-@if (showSprintModal()) {
-  <div (click)="closeSprintModal()"
-       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-    <div (click)="$event.stopPropagation()"
-         class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
-
-      <div class="flex items-center justify-between p-6 border-b border-b-[rgb(var(--c-border) / 0.07)]">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-rounded text-primary-600">sprint</span>
-          <h2 class="text-[15px] font-semibold text-[--text-primary]">Nova Sprint</h2>
-        </div>
-        <button (click)="closeSprintModal()"
-                class="p-2 rounded-full hover:bg-black/5 transition-colors text-[--text-tertiary]">
-          <span class="material-symbols-rounded">close</span>
-        </button>
-      </div>
-
-      <form [formGroup]="sprintForm" (ngSubmit)="createSprint()" class="p-6 space-y-4">
-        <div>
-          <label class="ag-label ag-label--required">Nome da Sprint</label>
-          <input type="text" formControlName="name" placeholder="Ex: Sprint 1 — Autenticação"
-                 class="ag-input" autofocus />
-        </div>
-        <div>
-          <label class="ag-label">Objetivo</label>
-          <textarea formControlName="goal" rows="2"
-                    placeholder="Qual é o objetivo desta sprint?"
-                    class="ag-input resize-none"></textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="ag-label">Início</label>
-            <input type="date" formControlName="startDate" class="ag-input" />
-          </div>
-          <div>
-            <label class="ag-label">Fim</label>
-            <input type="date" formControlName="endDate" class="ag-input" />
-          </div>
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="button" (click)="closeSprintModal()"
-                  class="flex-1 ag-btn ag-btn--secondary justify-center">
-            Cancelar
-          </button>
-          <button type="submit" [disabled]="creatingSprint() || sprintForm.invalid"
-                  class="flex-1 ag-btn ag-btn--primary justify-center">
-            @if (creatingSprint()) {
-              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
-            }
-            Criar Sprint
           </button>
         </div>
       </form>

@@ -105,10 +105,10 @@
                     {{ project.icon }}
                   </span>
                 </div>
-                <button (click)="openSettings(project)"
-                        class="text-slate-400 hover:text-[--text-primary] transition-colors opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:bg-slate-100">
+                <a [routerLink]="['/projects', project.id, 'kanban']" [queryParams]="{ config: 1 }"
+                   class="text-slate-400 hover:text-[--text-primary] transition-colors opacity-0 group-hover:opacity-100 p-1 rounded-lg hover:bg-slate-100">
                   <span class="material-symbols-rounded text-xl">more_horiz</span>
-                </button>
+                </a>
               </div>
 
               <!-- Status + Title + Description -->
@@ -364,53 +364,6 @@
   </div>
 
 </div>
-
-<!-- Settings Modal -->
-@if (showSettingsModal() && editingProject()) {
-  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-    <div class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
-      <div class="flex items-center justify-between p-6 border-b border-slate-100">
-        <h2 class="text-lg font-bold text-[--text-primary]">Configurações do Projeto</h2>
-        <button (click)="showSettingsModal.set(false)" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100">
-          <span class="material-symbols-rounded">close</span>
-        </button>
-      </div>
-      <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="p-6 flex flex-col gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="ag-label ag-label--required">Nome do Projeto</label>
-          <input type="text" formControlName="name" class="ag-input" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="ag-label">Descrição</label>
-          <textarea formControlName="description" rows="3" class="ag-input resize-none" placeholder="Descreva o objetivo do projeto..."></textarea>
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="ag-label">Cor do Projeto</label>
-          <div class="flex gap-2 flex-wrap">
-            @for (color of projectColors; track color) {
-              <button type="button" (click)="settingsForm.patchValue({ color })"
-                      class="w-7 h-7 rounded-lg border-2 transition-all"
-                      [style.background]="color"
-                      [class.border-slate-800]="settingsForm.get('color')?.value === color"
-                      [class.border-transparent]="settingsForm.get('color')?.value !== color">
-              </button>
-            }
-          </div>
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="button" (click)="showSettingsModal.set(false)" class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
-          <button type="submit" [disabled]="updatingProject() || settingsForm.invalid || settingsForm.pristine"
-                  class="flex-1 ag-btn ag-btn--primary justify-center">
-            @if (updatingProject()) {
-              <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
-            }
-            Salvar
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
 
 <!-- Create Modal -->
 @if (showCreateModal()) {

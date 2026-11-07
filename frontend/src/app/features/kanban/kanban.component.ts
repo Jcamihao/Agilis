@@ -43,6 +43,7 @@ interface Column {
 })
 export class KanbanComponent implements OnInit {
   @Input() id!: string;
+  @Input() config?: string; // ?config=1 (vindo de Projetos) abre as configurações do projeto
 
   readonly tasksService    = inject(TasksService);
   private readonly projectsService   = inject(ProjectsService);
@@ -101,16 +102,6 @@ export class KanbanComponent implements OnInit {
 
   // ── Sprints ────────────────────────────────────────────────────────────────
   sprints          = signal<Sprint[]>([]);
-  showSprintModal  = signal(false);
-  creatingSprint   = signal(false);
-
-  sprintForm = this.fb.group({
-    name:      ['', Validators.required],
-    goal:      [''],
-    startDate: [''],
-    endDate:   [''],
-  });
-
   sprintStatusLabel: Record<string, string> = {
     PLANNED:   'Planejada',
     ACTIVE:    'Ativa',
@@ -192,6 +183,7 @@ export class KanbanComponent implements OnInit {
         this.project.set(p);
         const cfg = (p as any).columnConfig as Record<string, string> | null;
         if (cfg) this.columnLabels.set({ ...this.DEFAULT_COLUMNS, ...cfg });
+        if (this.config) this.openConfig();
         this.cdr.markForCheck();
       },
     });
@@ -204,36 +196,6 @@ export class KanbanComponent implements OnInit {
   loadSprints() {
     this.sprintsService.getByProject(this.id).subscribe({
       next: (list) => { this.sprints.set(list); this.cdr.markForCheck(); },
-    });
-  }
-
-  openSprintModal() {
-    this.sprintForm.reset();
-    this.showSprintModal.set(true);
-  }
-
-  closeSprintModal() {
-    this.showSprintModal.set(false);
-    this.creatingSprint.set(false);
-  }
-
-  createSprint() {
-    if (this.sprintForm.invalid) return;
-    const v = this.sprintForm.value;
-    this.creatingSprint.set(true);
-    this.sprintsService.create({
-      name: v.name!,
-      goal: v.goal || undefined,
-      startDate: v.startDate || undefined,
-      endDate: v.endDate || undefined,
-      projectId: this.id,
-    }).subscribe({
-      next: (sprint) => {
-        this.sprints.update((list) => [sprint, ...list]);
-        this.closeSprintModal();
-        this.cdr.markForCheck();
-      },
-      error: () => this.creatingSprint.set(false),
     });
   }
 
