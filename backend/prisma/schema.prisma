@@ -98,6 +98,7 @@ model Company {
   updatedAt DateTime @updatedAt
 
   users           UserCompany[]
+  invites         CompanyInvite[]
   teams           Team[]
   projects        Project[]
   automations     AutomationRule[]
@@ -143,8 +144,25 @@ model User {
   approvalRequests     TaskApproval[]   @relation("approvalRequests")
   approvalReviews      TaskApproval[]   @relation("approvalReviews")
   taskTemplates         TaskTemplate[]     @relation("taskTemplateCreator")
+  createdInvites        CompanyInvite[]
 
   @@map("users")
+}
+
+model CompanyInvite {
+  id          String    @id @default(uuid())
+  companyId   String
+  createdById String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt(sort: Desc)])
+  @@map("company_invites")
 }
 
 model UserCompany {

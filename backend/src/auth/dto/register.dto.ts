@@ -18,6 +18,10 @@ export class RegisterDto {
   @IsString() @IsOptional()
   companyName?: string;
 
+  @ApiProperty({ required: false, description: 'Token de convite: entra na empresa do convite como MEMBER' })
+  @IsString() @IsOptional()
+  inviteToken?: string;
+
   @ApiProperty({ required: false })
   @IsString() @IsOptional()
   phone?: string;

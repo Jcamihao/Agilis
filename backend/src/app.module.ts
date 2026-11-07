@@ -30,6 +30,7 @@ import { ApprovalsModule } from './approvals/approvals.module';
 import { UploadModule } from './upload/upload.module';
 import { SearchModule } from './search/search.module';
 import { TaskTemplatesModule } from './task-templates/task-templates.module';
+import { InvitesModule } from './invites/invites.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { TaskTemplatesModule } from './task-templates/task-templates.module';
     UploadModule,
     SearchModule,
     TaskTemplatesModule,
+    InvitesModule,
   ],
 })
 export class AppModule {}

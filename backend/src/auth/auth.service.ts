@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { findActiveInvite } from '../invites/invite-token';
 
 @Injectable()
 export class AuthService {
@@ -60,6 +61,9 @@ export class AuthService {
       : `empresa-${Date.now()}`;
 
     const result = await this.prisma.$transaction(async (tx) => {
+      // Token inválido lança 404 aqui, antes de qualquer insert: nenhum usuário é criado.
+      const invite = dto.inviteToken ? await findActiveInvite(tx, dto.inviteToken) : null;
+
       const user = await tx.user.create({
         data: {
           name:             dto.name,
@@ -74,6 +78,18 @@ export class AuthService {
           addressComplement:dto.addressComplement?? null,
         },
       });
+
+      if (invite) {
+        // Convidado: não cria empresa nova; entra na empresa do convite como MEMBER.
+        await tx.userCompany.create({
+          data: { userId: user.id, companyId: invite.companyId, role: 'MEMBER' },
+        });
+        const company = await tx.company.findUniqueOrThrow({
+          where: { id: invite.companyId },
+          include: { users: true },
+        });
+        return { user, company };
+      }
 
       const company = await tx.company.create({
         data: {
