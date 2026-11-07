@@ -11,11 +11,8 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Caminho local: `/home/caminhao/codeStage/Agilis`. Remoto: `git@github.com:Jcamihao/Agilis.git`. Branch: `master`.
 - Convenção: Conventional Commits com a versão no assunto, por exemplo `feat!: remover Auditoria (v3.7.0)`. A versão sobe em `package.json` da raiz a cada commit (semver) e o `README.md` ganha uma linha no changelog. Os `package.json` de `backend/` e `frontend/` têm versões próprias e não são usados como versão do produto.
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Versão atual: **3.10.2** (a 3.10.2 é só a atualização deste handoff; a última com código é a **3.10.1**). Em 2026-11-07 foi feito `git push origin master`: os sete commits de `16df666` até `3785c1a` agora estão no `origin/master`, incluindo rate limit, correção de edição de projeto, remoção de formulários duplicados e convite por link/QR.
-- Estado do working tree (verificado com `git status` ao fechar o convite): sobram só dois grupos de mudanças não commitadas, que não são do convite:
-  1. **Responsividade mobile (outro agente, Codex, via extensão do VS Code):** edições em `frontend/src/app/layout/*` (main-layout, sidebar, topbar), calendar, insights-page, list-view, sprint-planning e time-report, mais `docs/mobile-responsividade-contrato.md`. Não são minhas; não commitar, reverter ou sobrescrever sem alinhar.
-  2. **Documentos comerciais** (`FOUNDER_CONTEXT.md`, `docs/estrategia-founder-skills.md`, `docs/outreach-sequencia.md`).
-  Também não versionados: `CLAUDE.md` e `.claude/settings.json` (criados pelo `graphify claude install`), `graphify-out/` (artefato gerado, ainda sem entrada no `.gitignore`) e `.superpowers/` (contratos de fase, ver seção 11).
+- Versão atual: **3.10.3**, com responsividade mobile. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR e documentação foram publicados no `origin/master`.
+- Estado esperado após o commit v3.10.3: fontes e documentação limpas. Não versionados e deliberadamente fora deste commit: `CLAUDE.md`, `.claude/settings.json`, `.superpowers/`, `graphify-out/` e `frontend/graphify-out/`; decidir depois se entram no repositório ou no `.gitignore`.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
 
 ## 3. Stack
@@ -55,7 +52,7 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 - Não verificado: botão Compartilhar (headless não tem `navigator.share`), ADMIN que não é OWNER na aba de link, Android/iOS/Capacitor, corrida real de dois accepts simultâneos, limite de tentativas do accept.
 - Sobras de `ponytail-review` não aplicadas (≈ -34 linhas, sem mudar comportamento): `createdAgo` só chama `timeAgo`; `setValidity` com ternário; um mapeador de mensagens de erro repetido em 3 arquivos; fallback `execCommand` do Copiar (pedido pelo contrato); tipo `InviteValidityDays`.
 
-**Concluído localmente, ainda não commitado: responsividade mobile.**
+**Concluído e commitado: responsividade mobile (v3.10.3).**
 - Implementação isolada no frontend: menu lateral como gaveta abaixo de 1024 px, backdrop, conteúdo com largura total e ajustes de cabeçalhos/abas no Calendário, Insights, Lista, Relatório de Tempo e Planejamento de Sprints.
 - Kanban recebeu a mesma adaptação sem tocar na lógica: cabeçalho e filtros quebram linha, ações continuam acessíveis e o quadro mantém apenas a rolagem horizontal local das colunas.
 - O build de produção do frontend passou; os seis avisos NG8107 do Dashboard já existiam. A revisão visual real com Playwright em 390×844 confirmou sidebar fechada na carga (`x=-248`), conteúdo de 390 px, abertura/fechamento pelo backdrop e `main` sem overflow global no Calendário, Insights, Lista, Tempo, Sprints e Kanban. A API Agilis foi iniciada isolada em 3101 e o navegador de teste redirecionou as chamadas de desenvolvimento que apontam para 3000; o stream SSE foi abortado apenas no teste.
@@ -71,9 +68,8 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 7. O que falta, em ordem
 
-1. Commitar separadamente a responsividade mobile validada em 390×844; só fazer push se o dono pedir.
-2. Decidir com o dono o que fazer com o convite por e-mail existente (ver seção 8). Recomendação: remover a aba "Por e-mail" ou fazê-la enviar o link por e-mail.
-3. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
+1. Decidir com o dono o que fazer com o convite por e-mail existente (ver seção 8). Recomendação: remover a aba "Por e-mail" ou fazê-la enviar o link por e-mail.
+2. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
 5. Plano comercial, que depende do dono: planilha de 40 prospects, cinco conversas, até cinco pilotos, medição na semana 2.
 6. Importador CSV somente se a migração bloquear pelo menos três dos cinco pilotos. Preço, limites e cobrança só depois de evidência de uso.
 7. Pendências menores: colocar `graphify-out/` no `.gitignore` e decidir se `CLAUDE.md` e `.claude/settings.json` entram no repositório; reescrever os docs comerciais sem OKR/Health Score; limpar o aviso de parâmetros não usados no backend (`actor`, `companyId`, `context`, `configService` em `jwt.strategy`), que não foi feito porque mexe em contratos.

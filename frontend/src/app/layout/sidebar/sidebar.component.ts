@@ -27,7 +27,9 @@ interface NavSection {
 })
 export class SidebarComponent {
   @Input() collapsed = false;
+  @Input() mobile = false;
   @Output() toggleCollapse = new EventEmitter<void>();
+  @Output() navigate = new EventEmitter<void>();
 
   private readonly auth = inject(AuthService);
   readonly themeSvc = inject(ThemeService);

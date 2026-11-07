@@ -84,6 +84,27 @@
   }
 }
 
+@media (max-width: 1023px) {
+  .sp-page {
+    padding: 0 0 16px;
+    overflow: visible;
+  }
+
+  .sp-header {
+    align-items: flex-start;
+  }
+
+  .sp-header__actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .sp-view-toggle {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
 /* ── Create Sprint card ── */
 .sp-create-card {
   background: var(--card-bg);

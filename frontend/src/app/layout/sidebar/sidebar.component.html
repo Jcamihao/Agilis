@@ -1,7 +1,9 @@
 <aside
   class="ag-surface fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-smooth"
   style="border-right: 1px solid rgb(var(--c-border) / 0.12)"
-  [style.width]="collapsed ? '68px' : '248px'"
+  [class.-translate-x-full]="mobile && collapsed"
+  [class.shadow-2xl]="mobile && !collapsed"
+  [style.width]="collapsed && !mobile ? '68px' : '248px'"
 >
   <!-- Logo -->
   <div
@@ -38,7 +40,7 @@
       </p>
     }
     @for (item of mainNav; track item.route) {
-      <a [routerLink]="item.route" routerLinkActive #rlaMain="routerLinkActive"
+      <a [routerLink]="item.route" (click)="navigate.emit()" routerLinkActive #rlaMain="routerLinkActive"
          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
          class="nav-item flex items-center gap-3 px-3 py-[9px] cursor-pointer relative transition-all duration-150"
          [style.background]="rlaMain.isActive ? 'rgb(var(--c-border) / 0.08)' : ''"
@@ -79,7 +81,7 @@
       <!-- Section items -->
       @if (collapsed || isExpanded(section.key)) {
         @for (item of section.items; track item.route) {
-          <a [routerLink]="item.route" routerLinkActive #rla="routerLinkActive"
+          <a [routerLink]="item.route" (click)="navigate.emit()" routerLinkActive #rla="routerLinkActive"
              class="nav-item flex items-center gap-3 px-3 py-[9px] cursor-pointer relative transition-all duration-150"
              [style.background]="rla.isActive ? 'rgb(var(--c-border) / 0.08)' : ''"
              [class.nav-item--active]="rla.isActive"
@@ -99,7 +101,7 @@
 
   <!-- User Area -->
   <div class="p-3 flex-shrink-0" style="border-top: 1px solid rgb(var(--c-border) / 0.12)">
-    <a routerLink="/profile"
+    <a routerLink="/profile" (click)="navigate.emit()"
        class="nav-item flex items-center gap-3 px-2.5 py-2.5 cursor-pointer transition-all duration-150 group">
       <div class="flex-shrink-0 w-7 h-7 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-medium"
            style="background: rgb(var(--p-200)); color: rgb(var(--c-text)); border: 1px solid rgb(var(--c-border) / 0.15)">

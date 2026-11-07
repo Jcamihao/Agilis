@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-5">
 
   <!-- Header -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight flex items-center gap-2">
         <span class="material-symbols-rounded text-2xl text-primary-600">tips_and_updates</span>
@@ -10,7 +10,7 @@
       <p class="text-sm text-[--text-secondary] mt-0.5">Riscos, gargalos e recomendações gerados automaticamente</p>
     </div>
     <button (click)="generate()" [disabled]="generating() || loading()"
-      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-on-primary text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
+      class="self-start sm:self-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-on-primary text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
       <span class="material-symbols-rounded text-base" [class.animate-spin]="generating()">
         {{ generating() ? 'refresh' : 'auto_awesome' }}
       </span>
@@ -19,8 +19,9 @@
   </div>
 
   <!-- Filter tabs -->
-  <div class="flex items-center gap-1 bg-[rgb(var(--c-surface))] border border-[rgb(var(--c-border) / 0.08)] rounded-xl p-1 shadow-sm w-fit">
-    @for (f of typeFilters; track f.key) {
+  <div class="max-w-full overflow-x-auto">
+    <div class="flex w-max items-center gap-1 bg-[rgb(var(--c-surface))] border border-[rgb(var(--c-border) / 0.08)] rounded-xl p-1 shadow-sm">
+      @for (f of typeFilters; track f.key) {
       <button (click)="filterType.set(f.key)"
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
         [class.bg-primary-600]="filterType() === f.key"
@@ -37,7 +38,8 @@
           </span>
         }
       </button>
-    }
+      }
+    </div>
   </div>
 
   @if (loading()) {

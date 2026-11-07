@@ -1,17 +1,25 @@
     <div class="h-screen overflow-hidden" style="background: rgb(var(--c-canvas));">
       <!-- Sidebar (fixed) -->
-      <ag-sidebar [collapsed]="sidebarCollapsed()" (toggleCollapse)="toggleSidebar()" />
+      <ag-sidebar [collapsed]="isMobile() ? !mobileSidebarOpen() : sidebarCollapsed()"
+                  [mobile]="isMobile()"
+                  (toggleCollapse)="toggleSidebar()"
+                  (navigate)="closeMobileSidebar()" />
+
+      @if (isMobile() && mobileSidebarOpen()) {
+        <button type="button" aria-label="Fechar menu" (click)="closeMobileSidebar()"
+                class="fixed inset-0 z-30 bg-black/40 backdrop-blur-[1px]"></button>
+      }
 
       <!-- Main Content — block element, margin-left accounts for fixed sidebar width -->
-      <div class="flex flex-col h-screen transition-all duration-300 ease-smooth"
-           [style.margin-left]="sidebarCollapsed() ? '68px' : '248px'">
+      <div class="flex flex-col h-screen min-w-0 transition-all duration-300 ease-smooth"
+           [style.margin-left]="isMobile() ? '0' : (sidebarCollapsed() ? '68px' : '248px')">
 
         <!-- Topbar -->
         <ag-topbar (menuToggle)="toggleSidebar()" />
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto">
-          <div class="p-6 animate-fade-in-up">
+        <main class="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
+          <div class="p-4 sm:p-6 animate-fade-in-up">
             <router-outlet />
           </div>
         </main>

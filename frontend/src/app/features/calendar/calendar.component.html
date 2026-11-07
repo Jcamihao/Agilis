@@ -1,8 +1,8 @@
 <div class="flex flex-col" style="height: calc(100vh - 108px);">
 
   <!-- Page Header -->
-  <div class="flex justify-between items-center mb-4 flex-shrink-0">
-    <div class="flex items-center gap-5">
+  <div class="flex flex-col items-stretch gap-3 sm:flex-row sm:justify-between sm:items-center mb-4 flex-shrink-0">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5 min-w-0">
       <div>
         <div class="ag-section-badge">
           <span class="ag-section-num">7</span>
@@ -26,7 +26,7 @@
     </div>
 
     <!-- Navigation -->
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center justify-end gap-2">
       <button (click)="navigate(-1)"
               class="p-2 rounded-full transition-colors"
               style="color: rgb(var(--c-500));"
@@ -65,7 +65,7 @@
   </div>
 
   <!-- Content: Calendar + Sidebar -->
-  <div class="flex flex-1 gap-6 overflow-hidden">
+  <div class="flex flex-col xl:flex-row flex-1 gap-6 overflow-y-auto xl:overflow-hidden">
 
     <!-- ── Calendar Area ───────────────────────────── -->
     <div class="flex-1 rounded-xl overflow-hidden flex flex-col"
@@ -222,7 +222,7 @@
     </div>
 
     <!-- ── Right Sidebar ───────────────────────────── -->
-    <div class="w-80 flex flex-col gap-4 flex-shrink-0">
+    <div class="w-full xl:w-80 flex flex-col gap-4 flex-shrink-0">
 
       <!-- Filters -->
       <div class="cal-glass rounded-xl p-4" style="box-shadow: 0 4px 12px rgb(var(--c-border) / 0.05);">

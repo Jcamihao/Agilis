@@ -1,8 +1,8 @@
 <!-- ═══════ HEADER ═══════ -->
 <div class="space-y-6">
   <!-- Breadcrumb + title -->
-  <div class="flex items-start justify-between">
-    <div class="flex items-center gap-3">
+  <div class="flex flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex items-center gap-3 min-w-0">
       <a [routerLink]="['/projects', projectId(), 'kanban']"
         class="p-2 rounded-lg text-[--text-tertiary] hover:bg-black/5 hover:text-[--text-secondary] transition-colors">
         <span class="material-symbols-rounded text-xl">arrow_back</span>
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Links to other views -->
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <a [routerLink]="['/projects', projectId(), 'list']"
         class="ag-btn ag-btn--ghost ag-btn--sm flex items-center gap-1.5">
         <span class="material-symbols-rounded text-base">table_rows</span>
@@ -89,7 +89,7 @@
     </div>
 
     <!-- ── Tabs ── -->
-    <div class="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+    <div class="flex max-w-full gap-1 overflow-x-auto bg-slate-100 rounded-xl p-1 w-fit">
       @for (tab of [
         { key: 'tasks', label: 'Por Tarefa', icon: 'task_alt' },
         { key: 'users', label: 'Por Membro', icon: 'group' },

@@ -1,26 +1,26 @@
 <!-- ═══════ BOARD ═══════ -->
 <div class="flex flex-col" style="height: calc(100vh - 8rem)">
   <!-- Page Header -->
-  <div class="flex items-end justify-between mb-5 flex-shrink-0">
-    <div class="flex items-center gap-3">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-5 flex-shrink-0">
+    <div class="flex min-w-0 items-start gap-3">
       <a
         routerLink="/projects"
         class="p-2 rounded-lg text-[--text-tertiary] hover:bg-black/5 hover:text-[--text-secondary] transition-colors"
       >
         <span class="material-symbols-rounded text-xl">arrow_back</span>
       </a>
-      <div>
-        <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight">
+      <div class="min-w-0">
+        <h2 class="break-words text-2xl font-bold text-[--text-primary] tracking-tight">
           Minhas Tarefas
         </h2>
         @if (project()) {
-          <p class="text-sm text-[--text-secondary] mt-0.5">
+          <p class="break-words text-sm text-[--text-secondary] mt-0.5">
             Visualize e organize suas demandas do Sprint atual.
           </p>
         }
       </div>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
       <!-- Member avatars -->
       <div class="hidden sm:flex -space-x-2">
         @for (col of columns(); track col.key; let i = $index) {
@@ -40,7 +40,7 @@
         </div>
       </div>
       <!-- View toggle -->
-      <div class="flex items-center bg-[rgb(var(--c-surface))] border border-[rgb(var(--c-border) / 0.08)] rounded-xl overflow-visible shadow-sm">
+      <div class="flex max-w-full items-center overflow-x-auto rounded-xl border border-[rgb(var(--c-border) / 0.08)] bg-[rgb(var(--c-surface))] shadow-sm">
         <button class="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold bg-primary-50 text-primary-600 cursor-default rounded-l-xl">
           <span class="material-symbols-rounded text-base">view_kanban</span>
           Kanban
@@ -85,7 +85,7 @@
 
       <!-- Bulk mode toggle -->
       <button (click)="toggleBulkMode()"
-              class="ag-btn flex items-center gap-1.5 text-sm font-medium transition-colors"
+              class="ag-btn shrink-0 flex items-center gap-1.5 text-sm font-medium transition-colors"
               [class.ag-btn--secondary]="!bulkMode()"
               [class.bg-amber-50]="bulkMode()"
               [class.text-amber-700]="bulkMode()"
@@ -94,13 +94,13 @@
         {{ bulkMode() ? 'Cancelar seleção' : 'Selecionar' }}
       </button>
 
-      <button (click)="openCreate()" class="ag-btn ag-btn--primary flex items-center gap-2">
+      <button (click)="openCreate()" class="ag-btn ag-btn--primary shrink-0 flex items-center gap-2">
         <span class="material-symbols-rounded text-base">add</span>
         Nova Tarefa
       </button>
 
       <!-- Overflow actions: Nova Sprint, Configurar -->
-      <div class="relative">
+      <div class="relative shrink-0">
         <button (click)="showActionsMenu.set(!showActionsMenu())"
                 class="ag-btn ag-btn--secondary flex items-center gap-1"
                 [class.ring-2]="showActionsMenu()"
@@ -128,9 +128,9 @@
 
   <!-- Filter Bar -->
   <div
-    class="flex items-center gap-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)] p-2 mb-5 flex-shrink-0 shadow-sm"
+    class="flex flex-wrap items-center gap-2 sm:gap-3 bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.08)] p-2 mb-5 flex-shrink-0 shadow-sm"
   >
-    <div class="flex-1 relative">
+    <div class="relative min-w-[180px] flex-1">
       <span
         class="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"
         >search</span
@@ -143,7 +143,7 @@
         class="w-full bg-transparent border-none outline-none text-sm text-[--text-primary] pl-10 py-2 placeholder-slate-400"
       />
     </div>
-    <div class="w-px h-6 bg-slate-100"></div>
+    <div class="hidden h-6 w-px bg-slate-100 sm:block"></div>
     <div class="relative flex items-center">
       <span class="material-symbols-rounded absolute left-2.5 text-base pointer-events-none"
             [class.text-primary-600]="selectedSprintId()"
@@ -163,7 +163,7 @@
       </select>
       <span class="material-symbols-rounded absolute right-0.5 text-sm pointer-events-none text-slate-400">expand_more</span>
     </div>
-    <div class="w-px h-6 bg-slate-100"></div>
+    <div class="hidden h-6 w-px bg-slate-100 sm:block"></div>
     <button
       (click)="filterBy('member')"
       class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-slate-50 text-[--text-secondary] text-sm font-medium transition-colors"

@@ -1,4 +1,4 @@
-import { Component, signal, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy, OnInit, HostListener } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../sidebar/sidebar.component';
@@ -17,14 +17,36 @@ export class MainLayoutComponent implements OnInit {
   private readonly companiesSvc = inject(CompaniesService);
 
   sidebarCollapsed = signal(false);
+  isMobile = signal(false);
+  mobileSidebarOpen = signal(false);
   showOnboarding = signal(false);
 
   ngOnInit() {
+    this.updateViewport();
     this.checkOnboarding();
   }
 
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.updateViewport();
+  }
+
   toggleSidebar() {
+    if (this.isMobile()) {
+      this.mobileSidebarOpen.update((v) => !v);
+      return;
+    }
     this.sidebarCollapsed.update((v) => !v);
+  }
+
+  closeMobileSidebar() {
+    this.mobileSidebarOpen.set(false);
+  }
+
+  private updateViewport() {
+    const mobile = window.innerWidth < 1024;
+    this.isMobile.set(mobile);
+    if (!mobile) this.mobileSidebarOpen.set(false);
   }
 
   private checkOnboarding() {
