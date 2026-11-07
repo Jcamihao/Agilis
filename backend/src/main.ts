@@ -22,6 +22,10 @@ async function bootstrap() {
   const prefix = configService.get<string>('API_PREFIX', 'api/v1');
   const corsOrigin = configService.get<string>('CORS_ORIGIN', 'http://localhost:4200');
 
+  // Quantos proxies confiáveis ficam na frente (ex.: 1). Sem isso req.ip é o do proxy.
+  const trustProxy = configService.get<string>('TRUST_PROXY');
+  if (trustProxy) app.set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
+
   app.use(helmet());
   app.use(compression());
 

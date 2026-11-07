@@ -1,11 +1,13 @@
 import { Controller, Post, Body, Get, UseGuards, HttpCode, HttpStatus, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { AuthThrottlerGuard } from './guards/auth-throttler.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('auth')
@@ -14,6 +16,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @UseGuards(AuthThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login do usuário' })
@@ -22,6 +26,8 @@ export class AuthController {
   }
 
   @Public()
+  @UseGuards(AuthThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Cadastro de novo usuário' })
