@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuard
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -46,7 +47,7 @@ export class ProjectsController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar projeto' })
-  update(@Param('id') id: string, @Body() dto: CreateProjectDto, @CurrentUser('id') userId: string) {
+  update(@Param('id') id: string, @Body() dto: UpdateProjectDto, @CurrentUser('id') userId: string) {
     return this.projectsService.update(id, dto, userId);
   }
 

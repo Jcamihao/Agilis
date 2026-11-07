@@ -3,6 +3,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRole } from '@prisma/client';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 import { EVENTS } from '../events/agilis-events';
 
 const MEMBER_SELECT = {
@@ -110,7 +111,7 @@ export class ProjectsService {
     return this.findOne(project.id, userId);
   }
 
-  async update(id: string, dto: Partial<CreateProjectDto>, userId: string) {
+  async update(id: string, dto: UpdateProjectDto, userId: string) {
     const project = await this.prisma.project.findUnique({ where: { id } });
     if (!project) throw new NotFoundException('Projeto não encontrado');
     await this.checkCompanyAccess(project.companyId, userId);
