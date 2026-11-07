@@ -55,10 +55,11 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 - Não verificado: botão Compartilhar (headless não tem `navigator.share`), ADMIN que não é OWNER na aba de link, Android/iOS/Capacitor, corrida real de dois accepts simultâneos, limite de tentativas do accept.
 - Sobras de `ponytail-review` não aplicadas (≈ -34 linhas, sem mudar comportamento): `createdAgo` só chama `timeAgo`; `setValidity` com ternário; um mapeador de mensagens de erro repetido em 3 arquivos; fallback `execCommand` do Copiar (pedido pelo contrato); tipo `InviteValidityDays`.
 
-**Em andamento, ainda não commitado: responsividade mobile.**
+**Concluído localmente, ainda não commitado: responsividade mobile.**
 - Implementação isolada no frontend: menu lateral como gaveta abaixo de 1024 px, backdrop, conteúdo com largura total e ajustes de cabeçalhos/abas no Calendário, Insights, Lista, Relatório de Tempo e Planejamento de Sprints.
-- O build de produção do frontend passou; os seis avisos NG8107 do Dashboard já existiam. A revisão visual com Playwright em 390×844 precisa ser concluída antes de commit.
-- Kanban e Projetos não foram alterados nesta fase: havia refatoração externa nesses arquivos e ela foi preservada.
+- Kanban recebeu a mesma adaptação sem tocar na lógica: cabeçalho e filtros quebram linha, ações continuam acessíveis e o quadro mantém apenas a rolagem horizontal local das colunas.
+- O build de produção do frontend passou; os seis avisos NG8107 do Dashboard já existiam. A revisão visual real com Playwright em 390×844 confirmou sidebar fechada na carga (`x=-248`), conteúdo de 390 px, abertura/fechamento pelo backdrop e `main` sem overflow global no Calendário, Insights, Lista, Tempo, Sprints e Kanban. A API Agilis foi iniciada isolada em 3101 e o navegador de teste redirecionou as chamadas de desenvolvimento que apontam para 3000; o stream SSE foi abortado apenas no teste.
+- Os servidores temporários de frontend (4301) e backend (3101) foram encerrados ao final. PostgreSQL e Redis locais continuam saudáveis.
 
 **Produção (verificado pela memória de sessões anteriores, não reconferido hoje):** o Agilis roda na VPS compartilhada (host `31.220.104.87`, acesso só por chave SSH do dono) na versão **3.9.2**, com 42 migrations, banco do Agilis separado, containers `agilis-*` com `restart: unless-stopped`. Layout: código em `/root/Agilis` (chega por `git archive`, não é clone), infra em `/root/agilis-infra/` (`docker-compose.prod.yml` com `name: agilis`, `.env.production` com permissão 600 que nunca deve ser impresso). Backend em `127.0.0.1:3040`, front em `127.0.0.1:4240`, vhost do nginx do host em `127.0.0.1:8240`. O acesso externo é um quick tunnel da Cloudflare (`trycloudflare.com`, sem domínio próprio) atrás de uma "porta de entrada" por cookie secreto no nginx, com `limit_req` de 10 por minuto em login/cadastro. IA do Agilis desligada. **As versões 3.9.3 a 3.10.1 continuam fora de produção, mas agora estão no GitHub.** A 3.10.0 traz uma migration nova (`company_invites`), a única pendente em relação à produção.
 
@@ -70,7 +71,7 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 7. O que falta, em ordem
 
-1. Concluir a auditoria em 390×844 da responsividade mobile, corrigir qualquer falha encontrada e então commitar separadamente essa fase.
+1. Commitar separadamente a responsividade mobile validada em 390×844; só fazer push se o dono pedir.
 2. Decidir com o dono o que fazer com o convite por e-mail existente (ver seção 8). Recomendação: remover a aba "Por e-mail" ou fazê-la enviar o link por e-mail.
 3. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
 5. Plano comercial, que depende do dono: planilha de 40 prospects, cinco conversas, até cinco pilotos, medição na semana 2.
