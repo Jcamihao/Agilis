@@ -11,7 +11,7 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Caminho local: `/home/caminhao/codeStage/Agilis`. Remoto: `git@github.com:Jcamihao/Agilis.git`. Branch: `master`.
 - Convenção: Conventional Commits com a versão no assunto, por exemplo `feat!: remover Auditoria (v3.7.0)`. A versão sobe em `package.json` da raiz a cada commit (semver) e o `README.md` ganha uma linha no changelog. Os `package.json` de `backend/` e `frontend/` têm versões próprias e não são usados como versão do produto.
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Versão atual: **3.10.3**, com responsividade mobile. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR e documentação foram publicados no `origin/master`.
+- Versão atual: **3.10.3**, com responsividade mobile. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`.
 - Estado esperado após o commit v3.10.3: fontes e documentação limpas. Não versionados e deliberadamente fora deste commit: `CLAUDE.md`, `.claude/settings.json`, `.superpowers/`, `graphify-out/` e `frontend/graphify-out/`; decidir depois se entram no repositório ou no `.gitignore`.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
 
