@@ -21,10 +21,6 @@ export class MembersService {
     return this.api.get<OrgMember[]>('/users/company-members/detailed', { companyId });
   }
 
-  invite(companyId: string, email: string, name: string, role: string) {
-    return this.api.post<OrgMember[]>('/users/company-members/invite', { email, name, role }, { companyId });
-  }
-
   updateRole(companyId: string, userId: string, role: string) {
     return this.api.patch<OrgMember[]>(`/users/company-members/${userId}/role?companyId=${companyId}`, { role });
   }

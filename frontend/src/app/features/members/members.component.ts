@@ -1,6 +1,5 @@
 import { Component, signal, inject, OnInit, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { MembersService, OrgMember } from '../../core/services/members.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -20,13 +19,12 @@ const ROLE_CFG: Record<string, { label: string; badgeClass: string }> = {
   selector: 'ag-members',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule],
   templateUrl: './members.component.html'
 })
 export class MembersComponent implements OnInit {
   private readonly auth    = inject(AuthService);
   private readonly service = inject(MembersService);
-  private readonly fb      = inject(FormBuilder);
   private readonly toast   = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
   private readonly invitesService = inject(InvitesService);
@@ -39,14 +37,12 @@ export class MembersComponent implements OnInit {
 
   // ── State ─────────────────────────────────────────────────────────────────
   loading      = signal(true);
-  inviting     = signal(false);
   showInvite   = signal(false);
   members      = signal<OrgMember[]>([]);
   search       = signal('');
   openMenuId   = signal<string | null>(null);
 
   // ── Convite por link ──────────────────────────────────────────────────────
-  inviteTab      = signal<'link' | 'email'>('link');
   linkValidity   = signal<InviteValidityDays>(7);
   linkGenerating = signal(false);
   // Link e QR existem só na memória deste componente; somem ao fechar o modal.
@@ -82,13 +78,6 @@ export class MembersComponent implements OnInit {
     { key: 'VIEWER', label: 'Visualizador' },
   ];
 
-  // ── Form ──────────────────────────────────────────────────────────────────
-  inviteForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    name:  [''],
-    role:  ['MEMBER'],
-  });
-
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit() {
     document.addEventListener('click', () => this.openMenuId.set(null));
@@ -106,7 +95,6 @@ export class MembersComponent implements OnInit {
 
   // ── Modal de convite ──────────────────────────────────────────────────────
   openInvite() {
-    this.inviteTab.set(this.isAdmin() ? 'link' : 'email');
     this.generatedLink.set(null);
     this.showInvite.set(true);
     if (this.isAdmin()) this.loadInvites();
@@ -119,11 +107,6 @@ export class MembersComponent implements OnInit {
 
   setValidity(value: string) {
     this.linkValidity.set(value === '1' ? 1 : value === '30' ? 30 : 7);
-  }
-
-  setTab(tab: 'link' | 'email') {
-    this.inviteTab.set(tab);
-    if (tab === 'link') this.loadInvites();
   }
 
   loadInvites() {
@@ -241,28 +224,6 @@ export class MembersComponent implements OnInit {
     let ok = false;
     try { ok = document.execCommand('copy'); } catch { ok = false; } finally { ta.remove(); }
     return ok;
-  }
-
-  // ── Invite ────────────────────────────────────────────────────────────────
-  invite() {
-    if (this.inviteForm.invalid) return;
-    const cid = this.auth.currentCompanyId();
-    if (!cid) return;
-    this.inviting.set(true);
-    const { email, name, role } = this.inviteForm.value;
-    this.service.invite(cid, email!, name ?? '', role!).subscribe({
-      next: (data) => {
-        this.members.set(data);
-        this.inviteForm.reset({ role: 'MEMBER' });
-        this.closeInvite();
-        this.inviting.set(false);
-        this.toast.success(`${email} adicionado com sucesso!`);
-      },
-      error: (err) => {
-        this.inviting.set(false);
-        this.toast.error(err?.error?.message || 'Erro ao convidar usuário');
-      },
-    });
   }
 
   // ── Role change ───────────────────────────────────────────────────────────

@@ -127,9 +127,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.10.3** — Responsividade mobile: navegação e ações principais acessíveis em telas pequenas.
+**v3.10.4** — Convites seguros por Link / QR Code.
 
 Changelog:
+- **v3.10.4** — Convite por e-mail removido da interface de Membros. Administradores agora usam somente Link / QR Code: escolhem validade, geram, copiam, compartilham, baixam o QR e revogam links ativos. A rota legada foi preservada sem uso pela interface.
 - **v3.10.3** — Responsividade mobile: sidebar vira gaveta abaixo de 1024 px, com backdrop e conteúdo usando toda a largura. Calendário, Insights, Lista, Relatório de Tempo, Planejamento de Sprints e Kanban reorganizam cabeçalhos, filtros e ações para 390 px; apenas abas e colunas do Kanban usam rolagem horizontal local quando necessário.
 - **v3.10.1** — Convite por link / QR code na tela: em Membros → Convidar Membro, aba "Link / QR code" (padrão para admin) gera o link com validade de 1, 7 ou 30 dias, mostra o QR (gerado no navegador, com Copiar, Compartilhar e Baixar PNG) e lista os links ativos com Revogar. Nova página pública `/convite/:token` (entrar na equipe se logado; criar conta ou entrar se não). Login e cadastro entendem `?convite=`: o cadastro não pede nome de empresa e o novo usuário entra como Membro. Limitação conhecida: o app usa a primeira empresa do usuário, sem seletor; quem já tem outra empresa entra na convidada, mas a sessão continua na primeira. A aba "Por e-mail" segue como estava (quebrada no backend)
 - **v3.10.0** — Convite por link (API): admin da empresa gera link com validade de 1, 7 ou 30 dias (`POST /invites`), lista e revoga (`GET /invites`, `DELETE /invites/:id`); quem abre vê o nome da empresa sem login (`GET /invites/:token/preview`) e entra como Membro (`POST /invites/:token/accept`, idempotente); `POST /auth/register` aceita `inviteToken` e o novo usuário entra na empresa do convite sem criar empresa própria. O banco guarda só o hash sha256 do token. Migration `20261107000001_company_invites`. A tela (link, QR code e página de aceite) vem no próximo commit

@@ -11,8 +11,8 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Caminho local: `/home/caminhao/codeStage/Agilis`. Remoto: `git@github.com:Jcamihao/Agilis.git`. Branch: `master`.
 - Convenção: Conventional Commits com a versão no assunto, por exemplo `feat!: remover Auditoria (v3.7.0)`. A versão sobe em `package.json` da raiz a cada commit (semver) e o `README.md` ganha uma linha no changelog. Os `package.json` de `backend/` e `frontend/` têm versões próprias e não são usados como versão do produto.
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Versão atual: **3.10.3**, com responsividade mobile. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`.
-- Estado esperado após o commit v3.10.3: fontes e documentação limpas. Não versionados e deliberadamente fora deste commit: `CLAUDE.md`, `.claude/settings.json`, `.superpowers/`, `graphify-out/` e `frontend/graphify-out/`; decidir depois se entram no repositório ou no `.gitignore`.
+- Versão atual: **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. O commit v3.10.4 permanece local até o dono pedir push.
+- Estado esperado após o commit v3.10.4: fontes e documentação limpas. Não versionados e deliberadamente fora deste commit: `CLAUDE.md`, `.claude/settings.json`, `.superpowers/`, `graphify-out/` e `frontend/graphify-out/`; decidir depois se entram no repositório ou no `.gitignore`.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
 
 ## 3. Stack
@@ -58,6 +58,11 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 - O build de produção do frontend passou; os seis avisos NG8107 do Dashboard já existiam. A revisão visual real com Playwright em 390×844 confirmou sidebar fechada na carga (`x=-248`), conteúdo de 390 px, abertura/fechamento pelo backdrop e `main` sem overflow global no Calendário, Insights, Lista, Tempo, Sprints e Kanban. A API Agilis foi iniciada isolada em 3101 e o navegador de teste redirecionou as chamadas de desenvolvimento que apontam para 3000; o stream SSE foi abortado apenas no teste.
 - Os servidores temporários de frontend (4301) e backend (3101) foram encerrados ao final. PostgreSQL e Redis locais continuam saudáveis.
 
+**Concluído e commitado: convite somente por Link / QR code (v3.10.4).**
+- O modal de Membros não oferece mais a aba ou formulário "Por e-mail". Para administradores, o único fluxo visível é selecionar a validade, gerar o link, copiar/compartilhar/baixar o QR e revogar links ativos.
+- Removidos o formulário Reactivo e a chamada do frontend para `POST /users/company-members/invite`. A rota antiga do backend foi preservada por compatibilidade, mas ficou sem uso pela interface.
+- Verificado no navegador real: o modal não exibe "Por e-mail", oferece "Gerar link", lista links ativos e não fez chamada ao endpoint legado. O build de produção passou; os seis avisos NG8107 do Dashboard já existiam.
+
 **Produção (verificado pela memória de sessões anteriores, não reconferido hoje):** o Agilis roda na VPS compartilhada (host `31.220.104.87`, acesso só por chave SSH do dono) na versão **3.9.2**, com 42 migrations, banco do Agilis separado, containers `agilis-*` com `restart: unless-stopped`. Layout: código em `/root/Agilis` (chega por `git archive`, não é clone), infra em `/root/agilis-infra/` (`docker-compose.prod.yml` com `name: agilis`, `.env.production` com permissão 600 que nunca deve ser impresso). Backend em `127.0.0.1:3040`, front em `127.0.0.1:4240`, vhost do nginx do host em `127.0.0.1:8240`. O acesso externo é um quick tunnel da Cloudflare (`trycloudflare.com`, sem domínio próprio) atrás de uma "porta de entrada" por cookie secreto no nginx, com `limit_req` de 10 por minuto em login/cadastro. IA do Agilis desligada. **As versões 3.9.3 a 3.10.1 continuam fora de produção, mas agora estão no GitHub.** A 3.10.0 traz uma migration nova (`company_invites`), a única pendente em relação à produção.
 
 Fatos desta sessão que o próximo agente deve saber:
@@ -68,7 +73,7 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 7. O que falta, em ordem
 
-1. Decidir com o dono o que fazer com o convite por e-mail existente (ver seção 8). Recomendação: remover a aba "Por e-mail" ou fazê-la enviar o link por e-mail.
+1. Fazer push da v3.10.4 se o dono pedir.
 2. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
 5. Plano comercial, que depende do dono: planilha de 40 prospects, cinco conversas, até cinco pilotos, medição na semana 2.
 6. Importador CSV somente se a migração bloquear pelo menos três dos cinco pilotos. Preço, limites e cobrança só depois de evidência de uso.
@@ -76,7 +81,7 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 8. Desafios e riscos
 
-- **Convite por e-mail atual está quebrado e é uma armadilha.** `POST /users/company-members/invite` devolve 400 (`property email should not exist`) porque o DTO não tem validadores. Além disso, se funcionasse, criaria a conta com senha aleatória, e o app **não tem recuperação de senha** (só um link morto na tela de login). A pessoa convidada nunca conseguiria entrar. A UI ainda oferece o papel VIEWER, que não existe no enum do banco. Nada disso foi alterado, por estar fora do pedido.
+- **Endpoint legado de convite por e-mail continua quebrado, mas não é mais exposto pela interface.** `POST /users/company-members/invite` devolve 400 (`property email should not exist`) porque o DTO não tem validadores. Além disso, se funcionasse, criaria a conta com senha aleatória, e o app **não tem recuperação de senha** (só um link morto na tela de login). A UI ainda oferece o papel VIEWER, que não existe no enum do banco. A rota foi preservada sem uso para evitar quebra de compatibilidade; removê-la é limpeza futura, não requisito do fluxo de convite.
 - Não existe recuperação de senha. Qualquer usuário que esquecer a senha fica trancado.
 - A sessão do app é de **uma empresa só** (`user.companies[0]`); não há seletor de empresa. Quem já tem outra empresa e aceita um convite entra nela, mas o app continua na primeira; e num login seguinte sem `?convite=` a empresa ativa volta a ser a primeira (verificado no navegador). Limitação aceita no contrato; resolver exige um seletor de empresa.
 - O token do convite viaja na URL (`/api/v1/invites/<token>/...`) e pode cair no log de acesso do nginx na VPS. O risco é baixo (log legível só por root), mas vale excluir esse caminho do access log, como já foi feito no SSE e no `/__gate/`.
@@ -89,7 +94,7 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 9. Decisões abertas do dono
 
-- O que fazer com o convite por e-mail: remover a aba, converter para "enviar o link por e-mail", ou consertar o DTO e construir recuperação de senha. Recomendação: converter para enviar o link.
+- Se a rota legada `POST /users/company-members/invite` deve ser removida numa limpeza futura. Hoje ela não é usada pela interface.
 - Quando subir as versões pendentes em produção (depende de o outro agente terminar a responsividade).
 - Se `graphify-out/` entra no `.gitignore` e se `CLAUDE.md` e `.claude/settings.json` entram no repositório.
 - Domínio próprio para o Agilis (hoje só o túnel `trycloudflare`).
