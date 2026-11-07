@@ -98,7 +98,7 @@
 
   <!-- Toggle to Register -->
   <div class="text-center">
-    <a routerLink="/auth/register" class="text-[12px] font-medium" style="color: rgb(var(--c-500));">
+    <a routerLink="/auth/register" [queryParams]="convite ? { convite } : {}" class="text-[12px] font-medium" style="color: rgb(var(--c-500));">
       Não tem uma conta?
       <span class="font-medium" style="color: rgb(var(--c-text));">Crie agora</span>
     </a>

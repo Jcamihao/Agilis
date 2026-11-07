@@ -17,6 +17,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.authRoutes),
   },
   {
+    // Convite por link: pública (quem não tem conta também abre). Fora de authGuard e publicGuard.
+    path: 'convite/:token',
+    loadComponent: () => import('./features/invite-accept/invite-accept.component').then((m) => m.InviteAcceptComponent),
+    title: 'Convite — Agilis',
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),

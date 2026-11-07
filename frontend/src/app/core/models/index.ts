@@ -372,3 +372,26 @@ export interface TaskApproval {
   approver?: Pick<User, 'id' | 'name' | 'avatarUrl'> | null;
 }
 
+
+export interface CompanyInvite {
+  id: string;
+  createdAt: string;
+  expiresAt: string;
+  createdBy: Pick<User, 'id' | 'name'>;
+}
+
+export interface CreatedCompanyInvite {
+  id: string;
+  token: string;
+  expiresAt: string;
+}
+
+export interface InvitePreview {
+  companyName: string;
+  invitedBy: string;
+}
+
+export interface InviteAcceptResult {
+  companyId: string;
+  alreadyMember: boolean;
+}

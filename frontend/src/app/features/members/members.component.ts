@@ -5,7 +5,9 @@ import { AuthService } from '../../core/services/auth.service';
 import { MembersService, OrgMember } from '../../core/services/members.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmService } from '../../core/services/confirm.service';
-import { timeAgo } from '../../core/utils/format';
+import { InvitesService, InviteValidityDays } from '../../core/services/invites.service';
+import { CompanyInvite } from '../../core/models';
+import { timeAgo, formatDateTime } from '../../core/utils/format';
 
 const ROLE_CFG: Record<string, { label: string; badgeClass: string }> = {
   OWNER:  { label: 'Proprietário', badgeClass: 'bg-amber-100 text-amber-700 border border-amber-200' },
@@ -27,6 +29,10 @@ export class MembersComponent implements OnInit {
   private readonly fb      = inject(FormBuilder);
   private readonly toast   = inject(ToastService);
   private readonly confirm = inject(ConfirmService);
+  private readonly invitesService = inject(InvitesService);
+
+  readonly formatDateTime = formatDateTime;
+  readonly canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   readonly currentUser = this.auth.user;
   readonly ROLE_CFG    = ROLE_CFG;
@@ -38,6 +44,15 @@ export class MembersComponent implements OnInit {
   members      = signal<OrgMember[]>([]);
   search       = signal('');
   openMenuId   = signal<string | null>(null);
+
+  // ── Convite por link ──────────────────────────────────────────────────────
+  inviteTab      = signal<'link' | 'email'>('link');
+  linkValidity   = signal<InviteValidityDays>(7);
+  linkGenerating = signal(false);
+  // Link e QR existem só na memória deste componente; somem ao fechar o modal.
+  generatedLink  = signal<{ url: string; expiresAt: string; qrDataUrl: string } | null>(null);
+  activeInvites  = signal<CompanyInvite[]>([]);
+  loadingInvites = signal(false);
 
   // ── Computed ──────────────────────────────────────────────────────────────
   filteredMembers = computed(() => {
@@ -89,6 +104,145 @@ export class MembersComponent implements OnInit {
     });
   }
 
+  // ── Modal de convite ──────────────────────────────────────────────────────
+  openInvite() {
+    this.inviteTab.set(this.isAdmin() ? 'link' : 'email');
+    this.generatedLink.set(null);
+    this.showInvite.set(true);
+    if (this.isAdmin()) this.loadInvites();
+  }
+
+  closeInvite() {
+    this.showInvite.set(false);
+    this.generatedLink.set(null);
+  }
+
+  setValidity(value: string) {
+    this.linkValidity.set(value === '1' ? 1 : value === '30' ? 30 : 7);
+  }
+
+  setTab(tab: 'link' | 'email') {
+    this.inviteTab.set(tab);
+    if (tab === 'link') this.loadInvites();
+  }
+
+  loadInvites() {
+    const cid = this.auth.currentCompanyId();
+    if (!cid) return;
+    this.loadingInvites.set(true);
+    this.invitesService.list(cid).subscribe({
+      next: (data) => { this.activeInvites.set(data); this.loadingInvites.set(false); },
+      error: (err) => {
+        this.loadingInvites.set(false);
+        this.toast.error(err?.error?.message || 'Erro ao carregar links de convite');
+      },
+    });
+  }
+
+  async generateLink() {
+    const cid = this.auth.currentCompanyId();
+    if (!cid || this.linkGenerating()) return;
+    this.linkGenerating.set(true);
+    this.invitesService.create(cid, this.linkValidity()).subscribe({
+      next: async (res) => {
+        // Modal fechado durante a requisição: descarta o link (não fica em memória).
+        if (!this.showInvite()) { this.linkGenerating.set(false); return; }
+        const url = `${location.origin}/convite/${res.token}`;
+        let qrDataUrl = '';
+        try {
+          // Import dinâmico: a lib só entra no bundle quando o admin gera um link.
+          // qrcode é CommonJS: no bundle de produção os nomes saem em `default`.
+          const mod = await import('qrcode');
+          const qr = typeof mod.toDataURL === 'function' ? mod : (mod as unknown as { default: typeof mod }).default;
+          qrDataUrl = await qr.toDataURL(url, {
+            width: 220,
+            margin: 2,
+            errorCorrectionLevel: 'M',
+            color: { dark: '#000000', light: '#FFFFFF' },
+          });
+        } catch {
+          this.toast.error('Não foi possível gerar o QR code. Use o link.');
+        }
+        this.linkGenerating.set(false);
+        if (!this.showInvite()) return;
+        this.generatedLink.set({ url, expiresAt: res.expiresAt, qrDataUrl });
+        this.loadInvites();
+      },
+      error: (err) => {
+        this.linkGenerating.set(false);
+        this.toast.error(err?.error?.message || 'Erro ao gerar link de convite');
+      },
+    });
+  }
+
+  async copyLink() {
+    const url = this.generatedLink()?.url;
+    if (!url) return;
+    let ok = false;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        ok = true;
+      }
+    } catch { ok = false; }
+    if (!ok) ok = this.copyWithExecCommand(url);
+    if (ok) this.toast.success('Link copiado');
+    else this.toast.error('Não foi possível copiar. Selecione o link e copie manualmente.');
+  }
+
+  async shareLink() {
+    const url = this.generatedLink()?.url;
+    if (!url || !this.canShare) return;
+    try {
+      await navigator.share({ title: 'Convite para o Agilis', text: 'Entre na minha equipe no Agilis', url });
+    } catch (err) {
+      if ((err as Error)?.name !== 'AbortError') this.toast.error('Não foi possível compartilhar.');
+    }
+  }
+
+  downloadQr() {
+    const qr = this.generatedLink()?.qrDataUrl;
+    if (!qr) return;
+    const a = document.createElement('a');
+    a.href = qr;
+    a.download = 'convite-agilis.png';
+    a.click();
+  }
+
+  async revokeInvite(invite: CompanyInvite) {
+    const ok = await this.confirm.open({
+      title: 'Revogar convite',
+      message: `Revogar este link criado por ${invite.createdBy.name}? Quem tiver o link não poderá mais entrar por ele.`,
+      confirmLabel: 'Revogar',
+      danger: true,
+    });
+    if (!ok) return;
+    this.invitesService.revoke(invite.id).subscribe({
+      next: () => {
+        this.activeInvites.update((list) => list.filter((i) => i.id !== invite.id));
+        this.toast.success('Convite revogado');
+      },
+      error: (err) => this.toast.error(err?.error?.message || 'Erro ao revogar convite'),
+    });
+  }
+
+  createdAgo(date: string): string {
+    return timeAgo(date);
+  }
+
+  private copyWithExecCommand(text: string): boolean {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; } finally { ta.remove(); }
+    return ok;
+  }
+
   // ── Invite ────────────────────────────────────────────────────────────────
   invite() {
     if (this.inviteForm.invalid) return;
@@ -100,7 +254,7 @@ export class MembersComponent implements OnInit {
       next: (data) => {
         this.members.set(data);
         this.inviteForm.reset({ role: 'MEMBER' });
-        this.showInvite.set(false);
+        this.closeInvite();
         this.inviting.set(false);
         this.toast.success(`${email} adicionado com sucesso!`);
       },

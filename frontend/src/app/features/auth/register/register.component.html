@@ -13,7 +13,7 @@
       }
       @case (3) {
         <h2 class="text-[32px] font-medium leading-[1.2] tracking-[-0.02em]" style="color: rgb(var(--c-text));">Quase lá!</h2>
-        <p class="text-[14px] leading-[1.5]" style="color: rgb(var(--c-500));">Informe o nome da sua empresa para finalizar.</p>
+        <p class="text-[14px] leading-[1.5]" style="color: rgb(var(--c-500));">{{ inviteToken ? 'Falta pouco para entrar na equipe.' : 'Informe o nome da sua empresa para finalizar.' }}</p>
       }
     }
   </div>
@@ -179,12 +179,18 @@
       @if (currentStep() === 3) {
         <div class="flex flex-col gap-4 animate-fade-in">
 
-          <div class="flex flex-col gap-1">
-            <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">
-              Nome da Empresa <span style="color: rgb(var(--c-500));">(opcional)</span>
-            </label>
-            <input type="text" formControlName="companyName" placeholder="Ex: TechNova Ltda" class="auth-input">
-          </div>
+          @if (inviteToken) {
+            <div class="px-3 py-2.5 text-[13px] border" style="color: rgb(var(--c-text)); border-color: rgb(var(--c-border) / 0.25);">
+              Você vai entrar na equipe que te convidou.
+            </div>
+          } @else {
+            <div class="flex flex-col gap-1">
+              <label class="text-[11px] font-medium uppercase tracking-[0.08em]" style="color: rgb(var(--c-border) / 0.5);">
+                Nome da Empresa <span style="color: rgb(var(--c-500));">(opcional)</span>
+              </label>
+              <input type="text" formControlName="companyName" placeholder="Ex: TechNova Ltda" class="auth-input">
+            </div>
+          }
 
           @if (error()) {
             <div class="px-3 py-2.5 text-[13px] border" style="background: rgb(var(--f-danger) / 0.08); color: rgb(var(--f-danger)); border-color: rgb(var(--f-danger) / 0.3);">
@@ -217,7 +223,7 @@
 
   <!-- Toggle to Login -->
   <div class="text-center">
-    <a routerLink="/auth/login" class="text-[12px] font-medium" style="color: rgb(var(--c-500));">
+    <a routerLink="/auth/login" [queryParams]="inviteToken ? { convite: inviteToken } : {}" class="text-[12px] font-medium" style="color: rgb(var(--c-500));">
       Já possui uma conta?
       <span class="font-medium" style="color: rgb(var(--c-text));">Faça login</span>
     </a>

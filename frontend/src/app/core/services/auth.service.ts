@@ -35,10 +35,27 @@ export class AuthService {
     name: string; email: string; password: string; companyName?: string;
     phone?: string; cpfCnpj?: string; cep?: string; uf?: string;
     address?: string; addressNumber?: string; addressComplement?: string;
+    inviteToken?: string;
   }) {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/auth/register`, data).pipe(
       tap((res) => {
         if (res.success) this.setSession(res.data);
+      }),
+    );
+  }
+
+  /**
+   * Após aceitar um convite, recarrega o perfil e põe a empresa aceita como
+   * PRIMEIRA de `user.companies` (o app usa `companies[0]` como empresa ativa).
+   */
+  refreshCompanies(firstCompanyId: string) {
+    return this.http.get<ApiResponse<User>>(`${this.apiUrl}/auth/me`).pipe(
+      tap((res) => {
+        if (!res.success) return;
+        const companies = [...(res.data.companies ?? [])];
+        const idx = companies.findIndex((c) => c.companyId === firstCompanyId);
+        if (idx > 0) companies.unshift(...companies.splice(idx, 1));
+        this.updateUser({ companies });
       }),
     );
   }

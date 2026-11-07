@@ -7,7 +7,7 @@
       <p class="ag-page-subtitle">Gerencie quem tem acesso à sua organização.</p>
     </div>
     @if (isAdmin()) {
-      <button (click)="showInvite.set(true)"
+      <button (click)="openInvite()"
               class="ag-btn ag-btn--primary flex items-center gap-2 shadow-sm self-start sm:self-auto">
         <span class="material-symbols-rounded text-lg">person_add</span>
         Convidar Membro
@@ -234,21 +234,128 @@
 
 <!-- ══════ INVITE MODAL ══════ -->
 @if (showInvite()) {
-  <div (click)="showInvite.set(false)"
+  <div (click)="closeInvite()"
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
     <div (click)="$event.stopPropagation()"
-         class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in">
+         class="bg-[rgb(var(--c-surface))] rounded-2xl w-full max-w-md shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto">
 
       <div class="flex items-center justify-between p-6 border-b border-slate-100">
         <div>
           <h2 class="text-lg font-bold text-[--text-primary]">Convidar Membro</h2>
-          <p class="text-sm text-[--text-secondary] mt-0.5">O usuário terá acesso imediato à organização.</p>
+          @if (isAdmin() && inviteTab() === 'link') {
+            <p class="text-sm text-[--text-secondary] mt-0.5">Quem tiver o link entra como Membro.</p>
+          } @else {
+            <p class="text-sm text-[--text-secondary] mt-0.5">O usuário terá acesso imediato à organização.</p>
+          }
         </div>
-        <button (click)="showInvite.set(false)"
+        <button (click)="closeInvite()"
                 class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors">
           <span class="material-symbols-rounded">close</span>
         </button>
       </div>
+
+      @if (isAdmin()) {
+        <div class="flex gap-2 px-6 pt-4" role="tablist">
+          <button type="button" role="tab" (click)="setTab('link')"
+                  [attr.aria-selected]="inviteTab() === 'link'"
+                  class="ag-btn ag-btn--sm flex-1 justify-center"
+                  [class.ag-btn--primary]="inviteTab() === 'link'"
+                  [class.ag-btn--secondary]="inviteTab() !== 'link'">
+            <span class="material-symbols-rounded text-base">qr_code_2</span>
+            Link / QR code
+          </button>
+          <button type="button" role="tab" (click)="setTab('email')"
+                  [attr.aria-selected]="inviteTab() === 'email'"
+                  class="ag-btn ag-btn--sm flex-1 justify-center"
+                  [class.ag-btn--primary]="inviteTab() === 'email'"
+                  [class.ag-btn--secondary]="inviteTab() !== 'email'">
+            <span class="material-symbols-rounded text-base">mail</span>
+            Por e-mail
+          </button>
+        </div>
+      }
+
+      @if (isAdmin() && inviteTab() === 'link') {
+        <div class="p-6 flex flex-col gap-5">
+
+          <!-- Validade + gerar -->
+          <div class="flex flex-col gap-1.5">
+            <label class="ag-label" for="invite-validity">Validade</label>
+            <div class="flex gap-2">
+              <select id="invite-validity" class="ag-input flex-1"
+                      [value]="linkValidity().toString()"
+                      (change)="setValidity($any($event.target).value)">
+                <option value="1">1 dia</option>
+                <option value="7">7 dias</option>
+                <option value="30">30 dias</option>
+              </select>
+              <button type="button" (click)="generateLink()" [disabled]="linkGenerating()"
+                      class="ag-btn ag-btn--primary">
+                @if (linkGenerating()) {
+                  <div class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
+                }
+                Gerar link
+              </button>
+            </div>
+          </div>
+
+          <!-- Link gerado (só em memória) -->
+          @if (generatedLink(); as g) {
+            <div class="flex flex-col items-center gap-3 p-4 border border-slate-200 rounded-xl">
+              @if (g.qrDataUrl) {
+                <div class="bg-white p-3 rounded-lg">
+                  <img [src]="g.qrDataUrl" alt="QR code do convite" width="220" height="220" class="block" />
+                </div>
+              }
+              <p class="text-xs text-[--text-secondary] break-all text-center select-all">{{ g.url }}</p>
+              <div class="flex gap-2 flex-wrap justify-center">
+                <button type="button" (click)="copyLink()" class="ag-btn ag-btn--sm ag-btn--secondary">
+                  <span class="material-symbols-rounded text-base">content_copy</span>
+                  Copiar
+                </button>
+                @if (canShare) {
+                  <button type="button" (click)="shareLink()" class="ag-btn ag-btn--sm ag-btn--secondary">
+                    <span class="material-symbols-rounded text-base">share</span>
+                    Compartilhar
+                  </button>
+                }
+                @if (g.qrDataUrl) {
+                  <button type="button" (click)="downloadQr()" class="ag-btn ag-btn--sm ag-btn--secondary">
+                    <span class="material-symbols-rounded text-base">download</span>
+                    Baixar PNG
+                  </button>
+                }
+              </div>
+              <p class="text-[11px] text-[--text-tertiary] text-center">
+                Quem tiver este link entra como Membro até {{ formatDateTime(g.expiresAt) }}.
+                Ele só aparece agora; para encerrar antes, revogue abaixo.
+              </p>
+            </div>
+          }
+
+          <!-- Links ativos -->
+          <div class="flex flex-col gap-2">
+            <p class="ag-label">Links ativos</p>
+            @if (loadingInvites()) {
+              <div class="ag-skeleton h-10 w-full rounded"></div>
+            } @else if (activeInvites().length === 0) {
+              <p class="text-xs text-[--text-tertiary]">Nenhum link ativo.</p>
+            } @else {
+              @for (inv of activeInvites(); track inv.id) {
+                <div class="flex items-center gap-3 py-2 border-b border-slate-100">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm text-[--text-primary] truncate">Criado por {{ inv.createdBy.name }}</p>
+                    <p class="text-[11px] text-[--text-tertiary]">
+                      Criado {{ createdAgo(inv.createdAt) }} · expira em {{ formatDateTime(inv.expiresAt) }}
+                    </p>
+                  </div>
+                  <button type="button" (click)="revokeInvite(inv)" class="ag-btn ag-btn--sm ag-btn--secondary">Revogar</button>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      } @else {
 
       <form [formGroup]="inviteForm" (ngSubmit)="invite()" class="p-6 flex flex-col gap-4">
         <div class="flex flex-col gap-1.5">
@@ -285,7 +392,7 @@
         </div>
 
         <div class="flex gap-3 pt-2">
-          <button type="button" (click)="showInvite.set(false)"
+          <button type="button" (click)="closeInvite()"
                   class="flex-1 ag-btn ag-btn--secondary justify-center">Cancelar</button>
           <button type="submit" [disabled]="inviteForm.invalid || inviting()"
                   class="flex-1 ag-btn ag-btn--primary justify-center">
@@ -298,6 +405,7 @@
           </button>
         </div>
       </form>
+      }
     </div>
   </div>
 }

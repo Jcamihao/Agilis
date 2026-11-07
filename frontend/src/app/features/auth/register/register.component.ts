@@ -1,7 +1,7 @@
 import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -26,6 +26,10 @@ export class RegisterComponent {
   private readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly route  = inject(ActivatedRoute);
+
+  // Token de convite (?convite=): o backend põe o usuário na empresa do convite.
+  readonly inviteToken = this.route.snapshot.queryParamMap.get('convite') || null;
 
   loading        = signal(false);
   error          = signal('');
@@ -137,7 +141,8 @@ export class RegisterComponent {
       name:             v.name!,
       email:            v.email!,
       password:         v.password!,
-      companyName:      v.companyName   || undefined,
+      companyName:      this.inviteToken ? undefined : (v.companyName || undefined),
+      inviteToken:      this.inviteToken ?? undefined,
       phone:            v.phone         || undefined,
       cpfCnpj:          v.cpfCnpj       || undefined,
       cep:              v.cep           || undefined,
