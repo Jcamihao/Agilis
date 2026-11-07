@@ -1,43 +1,43 @@
 # Founder Context
 
-Contexto de negócio do Agilis usado pelas founder-skills. Fatos vêm do repo e das respostas do dono (2026-10-14). Itens marcados com (suposição) não foram confirmados.
+Contexto de negócio do Agilis. Atualizado em 2026-11-07 após a entrega v3.9.0. Fatos técnicos foram verificados no repositório; hipóteses comerciais e dados externos continuam marcados como tal.
 
-## About Your Business
+## Negócio
 
-- **Company name**: Agilis (produto da codeStage)
-- **Industry**: SaaS B2B de gestão de projetos e tarefas (multi-tenant)
-- **Target audience**: times internos de empresas brasileiras (operações, produto, TI, PMO) que gerenciam vários projetos e hoje usam Trello, planilhas ou ClickUp. Gestor que precisa de visão executiva sem cobrar status no WhatsApp. (suposição: empresas de 10 a 60 pessoas)
-- **Value proposition**: gestão de projetos com IA que enxerga o workspace inteiro: Health Score A/B/C/D por projeto, gargalos, Brief Estratégico, Portfolio Executivo, OKRs. Em português, feito para o Brasil.
+- **Produto:** Agilis, SaaS B2B multiempresa de gestão de projetos e tarefas da codeStage.
+- **Cliente inicial:** gestor de operações, PMO, head de produto ou CTO de empresa brasileira com 10 a 60 pessoas, três ou mais projetos ativos e uso atual de Trello, planilhas ou ClickUp.
+- **Problema:** esse gestor descobre atrasos e gargalos perguntando no grupo e juntando status manualmente.
+- **Proposta de valor atual:** reunir tarefas, prazos e responsáveis e transformar esses dados em Portfolio Executivo, Insights automáticos e análises da IA em português. A promessa é dar visão de onde agir, não substituir o trabalho do time.
+- **Tom:** direto, prático, confiável, sem jargão corporativo. Usar “projeto”, “entrega”, “prazo”, “gargalo” e “visão executiva”. Evitar “revolucionário”, “all-in-one” e promessas sem evidência.
 
-## Brand Voice
+## Produto real em v3.9.2
 
-- **Tone**: direto, prático, sem jargão corporativo (suposição)
-- **Personality traits**: objetivo, confiável, focado em clareza
-- **Key messages**: saber o que está atrasado antes de perguntar; menos reunião de status
-- **Words to use**: projeto, entrega, prazo, gargalo, visão executiva
-- **Words to avoid**: "revolucionário", "all-in-one", promessas de produtividade sem número
+Kanban, lista, calendário com iCal, sprints e burndown, tarefas recorrentes, aprovações, time tracking, busca global, automações, Portfolio Executivo, Assistente IA via Selah IA, Brief Estratégico, Insights, Workload, relatórios CSV/Excel/PDF e wizard de onboarding.
 
-## Business Goals
+Health Score, OKRs, auditoria, webhooks, chat, portal do cliente, intake forms, wiki e Gantt não fazem parte do produto. Nunca devem aparecer como promessa de venda, diferencial ou item de plano.
 
-- **Short-term (3-6 months)**: primeiros 5 times usando de verdade (design partners) e validar que alguém paga
-- **Long-term (1-3 years)**: SaaS recorrente por usuário/mês com base de clientes no Brasil
-- **Key metrics**: times ativos por semana, projetos criados, % de times que voltam na semana 2, MRR
+## Estágio e metas
 
-## Products/Services
+- **Estágio:** beta fechado proposto. O repositório não contém CRM, pilotos, clientes ou receita; portanto esses dados precisam ser confirmados fora dele antes de serem tratados como fatos.
+- **Recursos:** fundador solo, poucas horas por semana, orçamento de aquisição próximo de zero e rede inicial limitada.
+- **Meta de 60 dias:** cinco times ativos em piloto e três conversas de disposição a pagar documentadas.
+- **Meta de 90 dias:** uma conversão paga manual ou uma decisão explícita, baseada em evidência, de mudar ICP ou proposta.
+- **Métricas:** convites enviados, respostas, conversas realizadas, pilotos iniciados, retorno na semana 2, projetos ativos por piloto e citações de preço aceitável.
 
-- **Main offerings**: Kanban, lista, calendário (iCal), sprints com burndown, OKRs, Health Score, Insights automáticos, Workload, Portfolio Executivo, Brief Estratégico IA, automações, webhooks, relatórios CSV/Excel/PDF, auditoria, time tracking, aprovações, wiki por projeto
-- **Pricing model**: assinatura SaaS por usuário/mês (valores ainda não definidos)
-- **Key features/benefits**: camada de IA (via Selah IA) sobre os dados reais do projeto, visão executiva consolidada
+## Concorrência e posição
 
-## Competitors
+- **Alternativas percebidas:** Trello, ClickUp, Asana, monday.com, Linear, Jira e planilhas.
+- **Posição a testar:** visão executiva em português para times que já têm trabalho espalhado, sem forçar uma ferramenta de engenharia pesada.
+- **Risco:** IA e Portfolio só viram diferencial se os primeiros times tomarem decisões com eles. Não alegar diferenciação comprovada antes de entrevistas e uso real.
 
-- **Main competitors**: Trello, ClickUp, Asana, monday.com, Linear, Jira
-- **Your advantages**: IA com contexto do workspace e visão executiva nativa; produto em português. Desvantagem: sem marca, sem usuários, sem ecossistema de integrações.
+## Oferta inicial e preço
 
-## Additional Context
+- **Oferta de piloto:** até cinco times, 60 dias sem cobrança, onboarding assistido e conversa semanal curta. Em troca, pede-se uso em um projeto real, feedback franco e autorização explícita antes de qualquer case ou depoimento.
+- **Cobrança:** não há assinatura, limites por plano, medição de uso de IA ou integração de pagamento implementados. A conversão inicial, se houver, deve ser manual e só depois da validação de disposição a pagar.
+- **Landing:** os nomes Starter, Business e Enterprise são apenas apresentação comercial estática. Não representam permissões ou preços aplicados pelo sistema.
 
-- **Estágio**: em desenvolvimento, sem usuários nem receita (versão 3.1.1 no package.json)
-- **Equipe**: fundador solo (dev fullstack), orçamento de marketing quase zero, poucas horas por semana
-- **Rede**: começa do zero, sem contatos no público-alvo
-- **Escopo deliberado**: em 2.4.0 e 2.5.0 foram removidos Portal do Cliente, Intake Forms, Wiki Corporativa, Chat, Mural e RH. Em 3.1.0 saíram Riscos, SLA e Gantt. O foco é gestão de projetos, não agência.
-- **Decisão de 2026-10-14**: o alvo deixou de ser agências e passou a ser times internos de empresas, por coerência com a remoção do Portal do Cliente.
+## Fonte única de trabalho comercial
+
+1. `docs/estrategia-founder-skills.md` define a ordem e os critérios de decisão.
+2. `docs/outreach-sequencia.md` define a cadência de LinkedIn do primeiro movimento.
+3. Uma planilha externa, criada antes do primeiro envio, registra prospects, contexto, data de cada contato, resposta, piloto, uso e objeções.

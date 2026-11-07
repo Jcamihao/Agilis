@@ -1,157 +1,108 @@
-# Agilis: estratégia (founder-skills)
+# Agilis: plano de validação comercial
 
-Gerado em 2026-10-14 com `strategic-planning`, `go-to-market-plan` e `pricing-strategist`, a partir de [FOUNDER_CONTEXT.md](../FOUNDER_CONTEXT.md).
+Atualizado em 2026-11-07 para o produto v3.9.2. Fonte de contexto: [FOUNDER_CONTEXT.md](../FOUNDER_CONTEXT.md). Este plano substitui as referências antigas a Health Score, OKRs, Auditoria e Webhooks.
 
-## Premissas (documentadas, como as skills exigem)
+## Estado de partida
 
-- Estágio: pré-lançamento, **zero usuários, zero receita**, v3.1.1.
-- Fundador solo, **poucas horas por semana, orçamento ~R$ 0, rede zero** no público-alvo.
-- Alvo: times internos de empresas brasileiras (suposição: 10 a 60 pessoas). Agências ficaram de fora porque o produto removeu Portal do Cliente e Intake Forms.
-- Horizonte: primeiros sinais em 60 a 90 dias.
-- Verificado no código: **não existe importador (Trello/CSV) nem módulo de cobrança/planos**.
-- Preços de concorrentes vêm de sites de terceiros e podem estar desatualizados. Confirme nas páginas oficiais antes de publicar qualquer comparação.
+- O código passou por redução de escopo até a v3.9.0. O último trabalho funcional conhecido foi simplificar o dashboard e corrigir o build de produção.
+- O produto atual já tem o necessário para um beta fechado: projetos, tarefas, calendário, Portfolio, Insights, IA, automações e onboarding.
+- O repositório não prova que exista piloto, cliente, receita, lista de prospects ou histórico de outreach. Trate a aquisição como não iniciada até haver uma planilha externa com esses dados.
+- Não há importador Trello/CSV, planos aplicados pelo backend, cobrança ou medição de custo por mensagem de IA.
 
-## Diagnóstico em uma frase
+## Hipóteses a validar
 
-O gargalo não é marketing. É **ter 5 times usando de verdade**. Sem isso, não dá para saber se a IA e o Health Score importam para alguém, e qualquer canal vira ruído.
+1. Gestores de times internos de 10 a 60 pessoas pagariam para não montar status manualmente de vários projetos.
+2. Portfolio, Insights e IA dão valor depois que um projeto real está preenchido.
+3. A troca manual de dados é um bloqueio relevante o bastante para justificar um importador.
 
----
+O gargalo agora é evidência de uso, não mais escopo de produto.
 
-# 1. strategic-planning: as 3 próximas jogadas
+## Movimento 1: cinco pilotos assistidos
 
-### Jogada 1: Design partners por abordagem direta (começar por esta)
+**Por quê:** sem uso real, não há como decidir preço, importador ou mensagem de venda. O founder pode fazer o onboarding manualmente antes de construir mais software.
 
-**Estratégia:** Oferecer 60 dias grátis, com onboarding feito por você, a 5 gestores de empresas pequenas. Em troca, pedir uso semanal e uma conversa de 20 minutos por semana. Sem rede, a abordagem direta é o único caminho que não custa dinheiro.
-
-**Playbook:**
-1. Montar lista de 40 gestores (operações, PMO, head de produto, CTO de empresas de 10 a 60 pessoas) no LinkedIn.
-2. Enviar nota de conexão sem pitch: mencionar um problema concreto ("saber o que está atrasado sem perguntar no grupo").
-3. Para quem aceitar, mensagem curta oferecendo o piloto grátis e pedindo 20 min.
-4. Fazer o onboarding por videochamada com os projetos reais deles.
-5. Registrar toda objeção e todo uso em uma planilha.
-
-**Métricas:** convites enviados (40), aceites (meta 25%), pilotos ativos (meta 5), times que voltam na semana 2.
-**Resultado esperado:** 3 a 5 pilotos em 30 dias. A taxa de aceite de convite frio é incerta; o número é uma estimativa, não garantia.
-**Faça hoje:** listar 10 perfis que se encaixam e salvar a dor que cada um já postou.
-
-### Jogada 2: Tirar a fricção de troca (importador de Trello e CSV)
-
-**Estratégia:** Hoje quem usa Trello ou planilha precisa recriar tudo à mão para testar o Agilis. Um importador transforma "vou testar" em 5 minutos. Como não existe no código, isso é trabalho de produto, não de marketing.
+**Oferta:** 60 dias sem cobrança para até cinco times. Cada time escolhe um projeto real; o founder ajuda a configurar empresa, projeto, membros, tarefas e prazos. Em troca, pede uma conversa de 20 minutos por semana e feedback direto. Não prometer resultado, case ou depoimento.
 
 **Playbook:**
-1. Importador do JSON exportado do Trello (quadros, listas, cartões, membros) para projeto e tarefas.
-2. Importador CSV genérico para planilhas.
-3. Ao importar, gerar o Health Score e o primeiro Brief Estratégico automaticamente. É o momento "uau".
-4. Oferecer o importador a cada piloto da Jogada 1.
 
-**Métricas:** % de pilotos que importam dados reais, tempo até o primeiro Health Score.
-**Resultado esperado:** quase todos os pilotos com dados reais na primeira semana.
-**Faça hoje:** exportar um quadro seu do Trello e olhar a estrutura do JSON.
+1. Criar uma planilha com: nome, empresa, cargo, tamanho estimado, ferramenta atual, sinal de dor, URL do LinkedIn, data de convite, resposta, reunião, piloto, retorno semana 2, objeção e preço citado.
+2. Selecionar 40 gestores que tenham três ou mais projetos ativos, ou publiquem sobre atraso, acompanhamento, Trello, ClickUp ou planilha.
+3. Enviar 10 convites personalizados por dia útil durante quatro dias, usando a sequência de [outreach](outreach-sequencia.md).
+4. Em cada conversa, descobrir: como o status é consolidado, qual projeto está mais difícil, que ferramenta usam, quanto tempo gastam cobrando atualização e o que impediria uma troca.
+5. Para cada aceite, conduzir onboarding de um único projeto e combinar o primeiro check-in em sete dias.
 
-### Jogada 3: Conteúdo em português que gera os primeiros contatos
+**Métricas e decisão:**
 
-**Estratégia:** Publicar uma vez por semana um caso real ("como descobri em 10 segundos que este projeto estava em risco") com tela do Health Score. Serve de prova para a Jogada 1 e atrai quem busca alternativa em português.
+| Até quando | Sinal | Meta | Decisão |
+|---|---|---:|---|
+| Dia 7 | Convites enviados | 40 | Sem lista de 40, parar de planejar produto e completar a lista. |
+| Dia 21 | Conversas de descoberta | 5 | Abaixo de 5, reescrever ICP e primeira mensagem. |
+| Dia 30 | Pilotos ativos | 2 | Abaixo de 2, revisar dor e oferta antes de criar importador. |
+| Dia 60 | Pilotos ativos | 5 | Com 5, consolidar objeções e decidir a próxima melhoria. |
+| Dia 60 | Retorno na semana 2 | 3 | Abaixo de 3, investigar onboarding e valor percebido antes de cobrar. |
+
+**Faça primeiro:** montar os primeiros 10 nomes com um sinal de dor específico para cada um.
+
+## Movimento 2: migrar dados como serviço, validar importador depois
+
+**Por quê:** o importador pode reduzir atrito, mas construir Trello e CSV agora é aposta. Primeiro medir se a entrada manual impede o piloto.
 
 **Playbook:**
-1. Post semanal no LinkedIn e em comunidades de gestão e tecnologia, usando dados do seed ou de pilotos autorizados.
-2. Uma página "Agilis vs Trello e ClickUp" em português, com comparação verificável.
-3. Link nos convites da Jogada 1.
 
-**Métricas:** visitas à página, respostas a DMs, cadastros vindos do conteúdo.
-**Resultado esperado:** pouco tráfego no começo. Serve mais como credibilidade nos convites do que como canal.
-**Faça hoje:** escrever o rascunho do primeiro post com uma captura do Health Score.
+1. No onboarding, migrar um projeto pequeno com o time, manualmente, em até 30 minutos. Registrar tempo, campos que faltaram e a reação do usuário.
+2. Mostrar o valor com o que existe: Portfolio para visão consolidada, Insights para atrasos e tarefas paradas, e IA/Brief para leitura do contexto. Não citar Health Score.
+3. Marcar “migração” como objeção somente quando o prospect disser que a entrada de dados impede ou adia o teste.
+4. Abrir o projeto de importador somente se três dos primeiros cinco pilotos trouxerem essa objeção ou se a configuração manual ultrapassar 30 minutos em três casos.
+5. Se o gatilho ocorrer, fazer primeiro CSV de tarefas com colunas mínimas: título, projeto, responsável, status, prioridade e prazo. Trello JSON vem depois, se houver demanda comprovada.
 
-## Prioridade
+**Métricas:** minutos para o primeiro projeto utilizável, número de objeções de migração, número de projetos ativos por piloto e uso de Portfolio/Insights na semana 2.
 
-**Comece pela Jogada 1.** Ela custa só tempo e é a que gera aprendizado. Faça a Jogada 2 em paralelo, porque o primeiro piloto vai pedir o importador. A Jogada 3 vem depois, quando houver um caso real para mostrar.
+**Faça primeiro:** preparar uma planilha modelo com as seis colunas mínimas, sem iniciar código.
 
-## Critérios de sucesso
+## Movimento 3: prova antes de escala
 
-- 5 pilotos ativos em 45 dias.
-- 3 deles ainda ativos na semana 4.
-- 1 piloto dizendo que pagaria, com valor citado.
+**Por quê:** conteúdo comparativo e parcerias sem caso real viram opinião. Um piloto que volta na semana 2 produz mensagem, objeção e linguagem melhores do que uma página genérica “vs. Trello”.
 
----
+**Playbook:**
 
-# 2. go-to-market-plan: 3 estratégias de entrada
+1. Depois de dois pilotos retornarem na semana 2, registrar uma página interna por piloto: dor inicial, fluxo usado, dado que chamou atenção, decisão tomada e fala literal do gestor.
+2. Publicar um post semanal no LinkedIn só com dado autorizado ou com cenário claramente demonstrativo. O tema é “como identificar o projeto que precisa de atenção”, não “Health Score”.
+3. Depois de um caso autorizado, criar uma página comparativa factual: quando Trello/planilha bastam, quando o Agilis ajuda, e quais capacidades ainda não existem. Não usar preços de concorrentes sem verificação oficial na data da publicação.
+4. Só então abordar três comunidades de PMO/operações e dois consultores de gestão. Entrar oferecendo a conversa de diagnóstico, não um cupom.
 
-**Cunha de mercado:** gestor de empresa pequena que acompanha vários projetos em Trello ou planilha e não tem visão consolidada. É um alvo estreito de propósito.
+**Métricas:** dois relatos internos completos até o dia 45, um caso autorizado até o dia 60, respostas originadas de conteúdo e pilotos por indicação.
 
-### Estratégia 1: Programa de design partners
+**Faça primeiro:** definir o formulário de entrevista de semana 2 com cinco perguntas: uso, decisão tomada, momento de valor, atrito e disposição a pagar.
 
-É a Jogada 1 acima. Gera os casos de uso e a prova social que as outras estratégias precisam. **Marco:** 5 pilotos em 30 dias, 2 casos documentados em 60, 1 conversão paga em 90.
+## Preço: hipótese, não configuração do produto
 
-### Estratégia 2: Product-led por migração
+Hoje não existe cobrança nem controle de plano. Por isso, a única política válida é piloto gratuito de 60 dias e cobrança manual apenas para quem disser que continuaria usando.
 
-**Estratégia:** Entrada gratuita e fácil para quem já usa Trello, com importador e um plano grátis genuinamente útil.
-**Playbook:** importador (Jogada 2); plano Grátis até 3 usuários; demo pública com dados de exemplo, sem cadastro; e-mail curto no dia 3 mostrando o Health Score do que ele importou.
-**Métricas:** cadastros, % que importa dados, % ativo na semana 2.
-**Marco:** 30 cadastros e 10 importações em 60 dias.
-**Faça hoje:** definir quais limites o plano Grátis terá.
+Antes de publicar preços ou construir billing, perguntar a cada piloto ativo:
 
-### Estratégia 3: Comunidades e parcerias de nicho
+1. “Se o Agilis deixasse de existir amanhã, o que você perderia?”
+2. “Para continuar usando com este time, que faixa mensal pareceria justa?”
+3. “Que recurso ou limite faria você trocar de plano?”
 
-**Estratégia:** Entrar em comunidades onde gestores brasileiros de projeto já conversam (grupos de PMO e gestão ágil, comunidades de tecnologia). Dar ajuda real antes de mencionar o produto.
-**Playbook:** escolher 3 comunidades; responder dúvidas por 2 semanas; depois oferecer o piloto a quem tiver o problema; abrir uma conversa com 2 consultores de gestão ágil para indicarem o Agilis aos clientes deles.
-**Métricas:** respostas úteis por semana, pedidos de piloto, indicações recebidas.
-**Marco:** 2 pilotos vindos de comunidade em 60 dias.
-**Faça hoje:** entrar em 3 comunidades e observar por 3 dias as perguntas que mais se repetem.
+Não alterar os rótulos da landing nem implementar limites até haver pelo menos três respostas de preço e evidência de retorno na semana 2. A conta de custo por mensagem da Selah IA também precisa existir antes de prometer franquias de IA.
 
-**Ordem:** 1, depois 2, depois 3. A estratégia 3 só funciona bem depois que existe um caso real para citar.
+## Ordem única de execução
 
-**Critério de sucesso:** 5 pilotos em 45 dias; 10 importações reais em 60; 1 cliente pagante em 90.
+1. Criar planilha e lista de 40 prospects.
+2. Enviar outreach e conduzir cinco conversas.
+3. Onboardar até cinco pilotos com um projeto real.
+4. Medir retorno e objeções na semana 2.
+5. Decidir: melhorar onboarding, construir CSV ou ajustar ICP.
+6. Só com evidência, produzir case, conteúdo, preço público e cobrança.
 
----
+## Critério de sucesso aos 90 dias
 
-# 3. pricing-strategist: estratégia de preço
+- Cinco pilotos iniciados e ao menos três retornando na semana 2.
+- Três entrevistas contendo uma faixa de preço aceitável.
+- Uma conversão manual paga ou uma decisão documentada de reposicionar ICP, promessa ou onboarding.
 
-**Tipo:** SaaS em camadas, por usuário. **Por quê:** B2B, assinatura por usuário foi sua escolha, e ticket acima de R$ 200 por mês por time pede lógica por assento. O custo variável da IA justifica limitar o uso por camada.
+## Decisões que continuam abertas
 
-**Referências (USD, anual, de sites de terceiros; confirmar nas páginas oficiais):** Trello Standard ~US$ 5 e Premium ~US$ 10; ClickUp Unlimited ~US$ 7 e Business ~US$ 12; Asana Starter ~US$ 10,99; monday Basic ~US$ 9 (mínimo de 3 assentos). Convertido a cerca de R$ 5,50 por dólar (câmbio suposto, ajuste), isso dá aproximadamente R$ 27 a R$ 66 por usuário.
-
-### Grátis
-- **Preço:** R$ 0
-- **Para quem:** times de até 3 pessoas testando, e porta de entrada da migração
-- **Inclui:** até 3 usuários, 3 projetos, kanban, lista, calendário, 20 mensagens de IA por mês
-- **Justificativa:** concorrentes também têm plano grátis; sem ele o produto desconhecido não é testado. Limites de usuários e projetos empurram o upgrade.
-
-### Time (camada principal)
-- **Preço:** R$ 39 por usuário/mês | R$ 374 por usuário/ano (20% de desconto)
-- **Para quem:** time de 5 a 30 pessoas que sai do Trello
-- **Inclui:** usuários e projetos ilimitados, sprints, OKRs, Health Score, Insights, automações, time tracking, IA com 200 mensagens por usuário
-- **Justificativa:** abaixo do Trello Premium e do ClickUp Business em reais, acima do Trello Standard. O Health Score e a IA justificam pagar mais que o Trello básico.
-
-### Gestão
-- **Preço:** R$ 69 por usuário/mês | R$ 662 por usuário/ano
-- **Para quem:** diretor ou PMO que acompanha vários projetos
-- **Inclui:** tudo do Time, mais Portfolio Executivo, Brief Estratégico IA, Workload, relatórios CSV/Excel/PDF, auditoria, webhooks, IA ampliada
-- **Justificativa:** próximo ao ClickUp Business em reais. Funciona como âncora para o Time parecer razoável.
-
-**Preço de fundador (pilotos):** 60 dias grátis e depois 50% de desconto por 12 meses no plano que usarem. Valor sugerido, não validado.
-
-### Táticas psicológicas
-- **Âncora:** o plano Gestão faz o Time parecer barato.
-- **Preço charmoso (39, 69):** no plano principal, para parecer valor pensado.
-- **Desconto anual de 20%:** aversão à perda; quem paga mensal vê o que deixa de economizar.
-
-### Gatilhos de upgrade
-- Grátis para Time: chegar ao 4º usuário, ao 4º projeto ou ao limite de IA.
-- Time para Gestão: precisar de visão consolidada de vários projetos (Portfolio, Brief) ou de relatório para diretoria.
-
-### Otimização de receita
-- Cobrança anual desde o início, para reduzir churn.
-- Pacote extra de IA, quando o consumo justificar.
-- Revisar preço após 10 pilotos com a pergunta "quanto você pagaria?".
-
-### Maior risco de preço
-**Custo da IA sem medição.** Eu não sei quanto cada mensagem custa no Selah IA. Se o custo médio por usuário passar de cerca de 20 a 25% do preço, o plano Time perde a margem-alvo de 75 a 80%. Antes de publicar preço: medir custo por mensagem e confirmar que os limites de IA cobrem o pior caso.
-
-**Pré-requisito técnico:** o código não tem planos nem cobrança. Para cobrar, será preciso construir isso. Nos pilotos, cobrança manual (Pix) resolve sem código.
-
----
-
-# Pontos de atenção
-
-1. **O produto não tem como cobrar nem importar hoje.** Os dois são lacunas de código, não de estratégia.
-2. **Mercado lotado.** Trello, ClickUp e Asana já têm IA. O diferencial real é "visão executiva em português", e isso só é hipótese até um piloto confirmar.
-3. **README desatualizado:** o título diz v2.5.0, o changelog e o package.json dizem 3.1.x.
+- O ICP inicial deve ser mantido como empresas de 10 a 60 pessoas, ou deve ser limitado a um setor específico depois das primeiras conversas?
+- Qual método de cobrança manual o fundador aceita usar se alguém quiser continuar após o piloto?
+- O uso real confirma que Portfolio e Insights são a primeira experiência de valor, ou outra tela assume esse papel?
