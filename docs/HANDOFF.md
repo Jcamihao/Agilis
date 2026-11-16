@@ -1,6 +1,6 @@
 # Handoff do Agilis
 
-Atualizado em 2026-11-07, depois de publicar a feature "convite por link / QR code" no GitHub e durante a correção de responsividade mobile. Onde algo foi só presumido ou lido de memória de sessões anteriores, o texto diz isso.
+Atualizado em 2026-11-16, depois de confirmar que a v3.10.4 está no GitHub e de ajustar o `.gitignore`. O conteúdo funcional vem da sessão de 2026-11-07. Onde algo foi só presumido ou lido de memória de sessões anteriores, o texto diz isso.
 
 ## 1. Projeto
 
@@ -8,11 +8,12 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 
 ## 2. Repositório
 
-- Caminho local: `/home/caminhao/codeStage/Agilis`. Remoto: `git@github.com:Jcamihao/Agilis.git`. Branch: `master`.
+- Caminho local: `/home/caminhao/coding/codeStage/Agilis`. Remoto: `git@github.com:Jcamihao/Agilis.git`. Branch: `master`.
 - Convenção: Conventional Commits com a versão no assunto, por exemplo `feat!: remover Auditoria (v3.7.0)`. A versão sobe em `package.json` da raiz a cada commit (semver) e o `README.md` ganha uma linha no changelog. Os `package.json` de `backend/` e `frontend/` têm versões próprias e não são usados como versão do produto.
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Versão atual: **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. O commit v3.10.4 permanece local até o dono pedir push.
-- Estado esperado após o commit v3.10.4: fontes e documentação limpas. Não versionados e deliberadamente fora deste commit: `CLAUDE.md`, `.claude/settings.json`, `.superpowers/`, `graphify-out/` e `frontend/graphify-out/`; decidir depois se entram no repositório ou no `.gitignore`.
+- Versão atual: **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. A v3.10.4 (`337330e`) também está no `origin/master` (verificado com `git fetch` em 2026-11-16: `master` e `origin/master` iguais).
+- Estado do git: `graphify-out/`, `frontend/graphify-out/`, `.claude/settings.json` e `CLAUDE.md` passaram para o `.gitignore` (commit `817099d`, na branch abaixo; são gerados ou específicos da máquina do dono). `.superpowers/` continua não versionado, porque guarda os contratos das fases; decisão aberta.
+- **Branch de trabalho:** `fix/gitignore-graphify`, tipo fix, base `master` (`337330e`), enviada ao remoto (`origin/fix/gitignore-graphify`), **merge aguardando aprovação do dono**. Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
 
 ## 3. Stack
@@ -73,11 +74,11 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 7. O que falta, em ordem
 
-1. Fazer push da v3.10.4 se o dono pedir.
+1. Aprovar o merge de `fix/gitignore-graphify` na `master` (sem tag: não muda o produto).
 2. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
 5. Plano comercial, que depende do dono: planilha de 40 prospects, cinco conversas, até cinco pilotos, medição na semana 2.
 6. Importador CSV somente se a migração bloquear pelo menos três dos cinco pilotos. Preço, limites e cobrança só depois de evidência de uso.
-7. Pendências menores: colocar `graphify-out/` no `.gitignore` e decidir se `CLAUDE.md` e `.claude/settings.json` entram no repositório; reescrever os docs comerciais sem OKR/Health Score; limpar o aviso de parâmetros não usados no backend (`actor`, `companyId`, `context`, `configService` em `jwt.strategy`), que não foi feito porque mexe em contratos.
+7. Pendências menores: reescrever os docs comerciais sem OKR/Health Score; limpar o aviso de parâmetros não usados no backend (`actor`, `companyId`, `context`, `configService` em `jwt.strategy`), que não foi feito porque mexe em contratos.
 
 ## 8. Desafios e riscos
 
@@ -96,7 +97,7 @@ Fatos desta sessão que o próximo agente deve saber:
 
 - Se a rota legada `POST /users/company-members/invite` deve ser removida numa limpeza futura. Hoje ela não é usada pela interface.
 - Quando subir as versões pendentes em produção (depende de o outro agente terminar a responsividade).
-- Se `graphify-out/` entra no `.gitignore` e se `CLAUDE.md` e `.claude/settings.json` entram no repositório.
+- Se `.superpowers/` (contratos das fases) deve ser versionado.
 - Domínio próprio para o Agilis (hoje só o túnel `trycloudflare`).
 - Ligar a IA em produção (exige chave do app `AgilisBack` no Selah, que é serviço ativo compartilhado; perguntar antes de tocar nele).
 - Manter o ICP amplo de empresas de 10 a 60 pessoas ou estreitar por setor depois das primeiras conversas; qual cobrança manual aceitar de um piloto; qual tela é a experiência inicial de maior valor.
