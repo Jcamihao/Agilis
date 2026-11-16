@@ -1,6 +1,6 @@
 # Handoff do Agilis
 
-Atualizado em 2026-11-16, depois de confirmar que a v3.10.4 está no GitHub e de ajustar o `.gitignore`. O conteúdo funcional vem da sessão de 2026-11-07. Onde algo foi só presumido ou lido de memória de sessões anteriores, o texto diz isso.
+Atualizado em 2026-11-16, depois do deploy da v3.10.4 na VPS. O conteúdo funcional vem da sessão de 2026-11-07. Onde algo foi só presumido ou lido de memória de sessões anteriores, o texto diz isso.
 
 ## 1. Projeto
 
@@ -11,7 +11,7 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Caminho local: `/home/caminhao/coding/codeStage/Agilis`. Remoto: `git@github.com:Jcamihao/Agilis.git`. Branch: `master`.
 - Convenção: Conventional Commits com a versão no assunto, por exemplo `feat!: remover Auditoria (v3.7.0)`. A versão sobe em `package.json` da raiz a cada commit (semver) e o `README.md` ganha uma linha no changelog. Os `package.json` de `backend/` e `frontend/` têm versões próprias e não são usados como versão do produto.
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Versão atual: **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. A v3.10.4 (`337330e`) também está no `origin/master` (verificado com `git fetch` em 2026-11-16: `master` e `origin/master` iguais).
+- Versão atual (código e produção): **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. A v3.10.4 (`337330e`) também está no `origin/master` (verificado com `git fetch` em 2026-11-16: `master` e `origin/master` iguais).
 - Estado do git: `graphify-out/`, `frontend/graphify-out/`, `.claude/settings.json` e `CLAUDE.md` passaram para o `.gitignore` (commit `817099d`, já na `master`; são gerados ou específicos da máquina do dono). `.superpowers/` continua não versionado, porque guarda os contratos das fases; decisão aberta.
 - **Branch de trabalho:** nenhuma em andamento; `master` (`f8c70c1`, merge `--no-ff` de `feature/docs-comerciais-sem-okr`, aprovado pelo dono em 2026-11-16). Sem tag nova, porque o produto não mudou. As branches `fix/gitignore-graphify` e `feature/docs-comerciais-sem-okr` continuam local e no remoto (apagar só se o dono pedir). Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
@@ -39,7 +39,7 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 
 ## 5. Planos e fonte única da ordem de trabalho
 
-- Plano comercial: `docs/estrategia-founder-skills.md` é a fonte única. Ordem: lista de 40 prospects, outreach, cinco conversas, até cinco pilotos assistidos, medição de retorno e objeções, e só então decidir onboarding, importador CSV, preço e cobrança. `docs/outreach-sequencia.md` tem a cadência de LinkedIn e `FOUNDER_CONTEXT.md` o ICP, a promessa e as restrições. Os três textos foram revisados em 2026-11-16 para a v3.10.4: citam OKRs e Health Score só na lista do que não se deve prometer. A produção ainda está na 3.9.2, então o deploy vem antes do primeiro piloto.
+- Plano comercial: `docs/estrategia-founder-skills.md` é a fonte única. Ordem: lista de 40 prospects, outreach, cinco conversas, até cinco pilotos assistidos, medição de retorno e objeções, e só então decidir onboarding, importador CSV, preço e cobrança. `docs/outreach-sequencia.md` tem a cadência de LinkedIn e `FOUNDER_CONTEXT.md` o ICP, a promessa e as restrições. Os três textos foram revisados em 2026-11-16 para a v3.10.4: citam OKRs e Health Score só na lista do que não se deve prometer. A produção está na 3.10.4 desde 2026-11-16.
 - Plano técnico em curso: a feature de convite por link/QR tem contrato em `.superpowers/sdd/convite-link/contrato.md` (decisões já tomadas, rotas, modelo de dados, telas). É a fonte da verdade dessa fase.
 - Decisões já tomadas pelo dono nesta frente: cortar escopo agressivamente (a sequência de remoções acima), manter só gestão de projetos/tarefas, usar subagentes em tarefas grandes ou que mexem em back e front.
 
@@ -64,7 +64,10 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 - Removidos o formulário Reactivo e a chamada do frontend para `POST /users/company-members/invite`. A rota antiga do backend foi preservada por compatibilidade, mas ficou sem uso pela interface.
 - Verificado no navegador real: o modal não exibe "Por e-mail", oferece "Gerar link", lista links ativos e não fez chamada ao endpoint legado. O build de produção passou; os seis avisos NG8107 do Dashboard já existiam.
 
-**Produção (verificado pela memória de sessões anteriores, não reconferido hoje):** o Agilis roda na VPS compartilhada (host `31.220.104.87`, acesso só por chave SSH do dono) na versão **3.9.2**, com 42 migrations, banco do Agilis separado, containers `agilis-*` com `restart: unless-stopped`. Layout: código em `/root/Agilis` (chega por `git archive`, não é clone), infra em `/root/agilis-infra/` (`docker-compose.prod.yml` com `name: agilis`, `.env.production` com permissão 600 que nunca deve ser impresso). Backend em `127.0.0.1:3040`, front em `127.0.0.1:4240`, vhost do nginx do host em `127.0.0.1:8240`. O acesso externo é um quick tunnel da Cloudflare (`trycloudflare.com`, sem domínio próprio) atrás de uma "porta de entrada" por cookie secreto no nginx, com `limit_req` de 10 por minuto em login/cadastro. IA do Agilis desligada. **As versões 3.9.3 a 3.10.1 continuam fora de produção, mas agora estão no GitHub.** A 3.10.0 traz uma migration nova (`company_invites`), a única pendente em relação à produção.
+**Produção (deploy feito e verificado em 2026-11-16): v3.10.4, commit `ecbfcf3`.** O deploy foi autorizado pelo dono. Estado verificado depois: 43 migrations aplicadas (a nova é `company_invites`), 0 migrations com falha, 0 `ERROR` no log do backend, 4 containers `agilis-*` saudáveis, `TRUST_PROXY=2` no container, front sem `localhost:3000`, páginas `/auth/login` e `/convite/<token inválido>` abrindo em Chrome real em 390 px sem overflow nem erro de JS. O rate limit passou a usar o IP do cliente (teste com `X-Forwarded-For` simulado: o 6º login do cliente A deu 429 e o cliente B deu 401). Não verificado: login real, convite ponta a ponta e QR em produção, porque o banco já tem 1 usuário e 1 empresa e não criei dados de teste; SSE pelo quick tunnel; IA continua desligada (sem chave).
+- Rollback: tags `agilis-{backend,frontend}:pre-20261116-055528`, código anterior em `/root/Agilis.bak-20261116-055528`, dump `/root/backups/agilis-pre-deploy-20261116-055528.sql.gz`, compose anterior em `/root/agilis-infra/docker-compose.prod.yml.bak-20261116-055528`. A migration nova é aditiva.
+- Layout na VPS: código em `/root/Agilis` (chega por `git archive`), infra em `/root/agilis-infra/` (`docker-compose.prod.yml` com `name: agilis`, `.env.production` com permissão 600 que nunca deve ser impresso, `first-deploy.sh`). Backend em `127.0.0.1:3040`, front em `127.0.0.1:4240`, vhost do nginx em `127.0.0.1:8240`. Acesso externo por quick tunnel da Cloudflare (`trycloudflare.com`, sem domínio próprio, serviço `agilis-tunnel` ativo desde 2026-11-07 sem reinício) atrás de uma "porta de entrada" por cookie secreto no nginx (`agilis-gate show` na VPS mostra o link com o segredo), com `limit_req` de 10 por minuto em login/cadastro. Receita de deploy que funcionou: dump, `docker tag` `:pre-<TS>`, `git archive` em `/root/Agilis-new`, trocar o diretório, rodar `first-deploy.sh` em segundo plano (o build passa de 2 minutos).
+- O comando `agilis-url` está quebrado: lê a URL do journal do systemd e o journal já rotacionou a linha. Para saber a URL: `curl -s http://127.0.0.1:20241/quicktunnel` na VPS (endpoint de métricas do cloudflared). A URL só muda se o serviço `agilis-tunnel` reiniciar.
 
 Fatos desta sessão que o próximo agente deve saber:
 - v3.8.1 corrigiu um bug grave: o `angular.json` tinha perdido o `fileReplacements`, então o build de produção apontava para `http://localhost:3000/api/v1` e o login pelo navegador ficaria quebrado. Hoje o bundle usa `/api/v1` e tem 0 ocorrências de `localhost:3000` (verificado). Nunca reintroduzir.
@@ -74,7 +77,6 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 7. O que falta, em ordem
 
-2. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
 5. Plano comercial, que depende do dono: planilha de 40 prospects, cinco conversas, até cinco pilotos, medição na semana 2.
 6. Importador CSV somente se a migração bloquear pelo menos três dos cinco pilotos. Preço, limites e cobrança só depois de evidência de uso.
 7. Pendências menores: limpar o aviso de parâmetros não usados no backend (`actor`, `companyId`, `context`, `configService` em `jwt.strategy`), que não foi feito porque mexe em contratos.
@@ -95,7 +97,6 @@ Fatos desta sessão que o próximo agente deve saber:
 ## 9. Decisões abertas do dono
 
 - Se a rota legada `POST /users/company-members/invite` deve ser removida numa limpeza futura. Hoje ela não é usada pela interface.
-- Quando subir as versões pendentes em produção (depende de o outro agente terminar a responsividade).
 - Se `.superpowers/` (contratos das fases) deve ser versionado.
 - Domínio próprio para o Agilis (hoje só o túnel `trycloudflare`).
 - Ligar a IA em produção (exige chave do app `AgilisBack` no Selah, que é serviço ativo compartilhado; perguntar antes de tocar nele).

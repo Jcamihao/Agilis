@@ -6,7 +6,7 @@ Atualizado em 2026-11-16 para o produto v3.10.4. Fonte de contexto: [FOUNDER_CON
 
 - O código passou por redução de escopo até a v3.9.0. Depois vieram freio de força bruta no login, correção da edição de projeto, convite por link/QR code e interface responsiva para celular (v3.10.4).
 - O produto atual já tem o necessário para um beta fechado: projetos, tarefas, calendário, Portfolio, Insights, IA, automações, onboarding e convite de membros por link ou QR code.
-- Antes do primeiro piloto, a versão em produção (3.9.2) precisa ser atualizada, senão o convite por link e a tela mobile não existem para o piloto. O deploy exige pedido do dono.
+- A produção está na v3.10.4 desde 2026-11-16, com convite por link/QR e tela mobile. O convite ponta a ponta ainda não foi testado em produção; fazer isso no onboarding do primeiro piloto.
 - O repositório não prova que exista piloto, cliente, receita, lista de prospects ou histórico de outreach. Trate a aquisição como não iniciada até haver uma planilha externa com esses dados.
 - Não há importador Trello/CSV, planos aplicados pelo backend, cobrança ou medição de custo por mensagem de IA.
 - Não há recuperação de senha: quem esquecer a senha fica trancado. Avisar cada piloto e anotar o caso na planilha; se ocorrer, tratar como objeção de produto.

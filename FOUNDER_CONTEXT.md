@@ -14,7 +14,7 @@ Contexto de negócio do Agilis. Atualizado em 2026-11-16 para o produto v3.10.4.
 
 Kanban, lista, calendário com iCal, sprints e burndown, tarefas recorrentes, aprovações, time tracking, busca global, automações, Portfolio Executivo, Assistente IA via Selah IA, Brief Estratégico, Insights, Workload, relatórios CSV/Excel/PDF e wizard de onboarding. Interface responsiva para celular. Convite de membros somente por link ou QR code, com validade de 1, 7 ou 30 dias; o convidado entra como membro.
 
-**Limites que afetam piloto:** não há recuperação de senha e a sessão usa uma empresa só, sem seletor (ambos verificados no código). Segundo o registro de sessões anteriores, ainda não reconferido em 2026-11-16, a produção está na v3.9.2, atrás desta versão, e a IA está desligada lá por falta de chave no Selah IA.
+**Limites que afetam piloto:** não há recuperação de senha e a sessão usa uma empresa só, sem seletor (ambos verificados no código). A produção está na v3.10.4 desde o deploy de 2026-11-16 (verificado). A IA está desligada lá por falta de chave no Selah IA (registro de sessões anteriores, não reconferido).
 
 Health Score, OKRs, auditoria, webhooks, chat, portal do cliente, intake forms, wiki e Gantt não fazem parte do produto. Nunca devem aparecer como promessa de venda, diferencial ou item de plano.
 
