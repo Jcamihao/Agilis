@@ -12,8 +12,8 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Convenção: Conventional Commits com a versão no assunto, por exemplo `feat!: remover Auditoria (v3.7.0)`. A versão sobe em `package.json` da raiz a cada commit (semver) e o `README.md` ganha uma linha no changelog. Os `package.json` de `backend/` e `frontend/` têm versões próprias e não são usados como versão do produto.
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 - Versão atual: **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. A v3.10.4 (`337330e`) também está no `origin/master` (verificado com `git fetch` em 2026-11-16: `master` e `origin/master` iguais).
-- Estado do git: `graphify-out/`, `frontend/graphify-out/`, `.claude/settings.json` e `CLAUDE.md` passaram para o `.gitignore` (commit `817099d`, na branch abaixo; são gerados ou específicos da máquina do dono). `.superpowers/` continua não versionado, porque guarda os contratos das fases; decisão aberta.
-- **Branch de trabalho:** `fix/gitignore-graphify`, tipo fix, base `master` (`337330e`), enviada ao remoto (`origin/fix/gitignore-graphify`), **merge aguardando aprovação do dono**. Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
+- Estado do git: `graphify-out/`, `frontend/graphify-out/`, `.claude/settings.json` e `CLAUDE.md` passaram para o `.gitignore` (commit `817099d`, já na `master`; são gerados ou específicos da máquina do dono). `.superpowers/` continua não versionado, porque guarda os contratos das fases; decisão aberta.
+- **Branch de trabalho:** nenhuma em andamento; `master` (`b6af668`, merge `--no-ff` de `fix/gitignore-graphify`, aprovado pelo dono em 2026-11-16). Sem tag nova, porque o produto não mudou. A branch `fix/gitignore-graphify` continua local e no remoto (apagar só se o dono pedir). Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
 
 ## 3. Stack
@@ -74,7 +74,6 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 7. O que falta, em ordem
 
-1. Aprovar o merge de `fix/gitignore-graphify` na `master` (sem tag: não muda o produto).
 2. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
 5. Plano comercial, que depende do dono: planilha de 40 prospects, cinco conversas, até cinco pilotos, medição na semana 2.
 6. Importador CSV somente se a migração bloquear pelo menos três dos cinco pilotos. Preço, limites e cobrança só depois de evidência de uso.
