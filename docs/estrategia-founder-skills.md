@@ -1,13 +1,16 @@
 # Agilis: plano de validação comercial
 
-Atualizado em 2026-11-07 para o produto v3.9.2. Fonte de contexto: [FOUNDER_CONTEXT.md](../FOUNDER_CONTEXT.md). Este plano substitui as referências antigas a Health Score, OKRs, Auditoria e Webhooks.
+Atualizado em 2026-11-16 para o produto v3.10.4. Fonte de contexto: [FOUNDER_CONTEXT.md](../FOUNDER_CONTEXT.md). Recursos removidos do produto (Health Score, OKRs, Auditoria, Webhooks, Gantt e outros) não entram em nenhuma oferta.
 
 ## Estado de partida
 
-- O código passou por redução de escopo até a v3.9.0. O último trabalho funcional conhecido foi simplificar o dashboard e corrigir o build de produção.
-- O produto atual já tem o necessário para um beta fechado: projetos, tarefas, calendário, Portfolio, Insights, IA, automações e onboarding.
+- O código passou por redução de escopo até a v3.9.0. Depois vieram freio de força bruta no login, correção da edição de projeto, convite por link/QR code e interface responsiva para celular (v3.10.4).
+- O produto atual já tem o necessário para um beta fechado: projetos, tarefas, calendário, Portfolio, Insights, IA, automações, onboarding e convite de membros por link ou QR code.
+- Antes do primeiro piloto, a versão em produção (3.9.2) precisa ser atualizada, senão o convite por link e a tela mobile não existem para o piloto. O deploy exige pedido do dono.
 - O repositório não prova que exista piloto, cliente, receita, lista de prospects ou histórico de outreach. Trate a aquisição como não iniciada até haver uma planilha externa com esses dados.
 - Não há importador Trello/CSV, planos aplicados pelo backend, cobrança ou medição de custo por mensagem de IA.
+- Não há recuperação de senha: quem esquecer a senha fica trancado. Avisar cada piloto e anotar o caso na planilha; se ocorrer, tratar como objeção de produto.
+- Segundo o registro de sessões anteriores (não reconferido), a IA está desligada em produção. Antes de vender Brief e Assistente, ligar a chave do app no Selah IA ou demonstrar só Portfolio e Insights.
 
 ## Hipóteses a validar
 
@@ -21,7 +24,7 @@ O gargalo agora é evidência de uso, não mais escopo de produto.
 
 **Por quê:** sem uso real, não há como decidir preço, importador ou mensagem de venda. O founder pode fazer o onboarding manualmente antes de construir mais software.
 
-**Oferta:** 60 dias sem cobrança para até cinco times. Cada time escolhe um projeto real; o founder ajuda a configurar empresa, projeto, membros, tarefas e prazos. Em troca, pede uma conversa de 20 minutos por semana e feedback direto. Não prometer resultado, case ou depoimento.
+**Oferta:** 60 dias sem cobrança para até cinco times. Cada time escolhe um projeto real; o founder ajuda a configurar empresa, projeto, tarefas e prazos, e convida os membros pelo link ou QR code gerado em Membros. Em troca, pede uma conversa de 20 minutos por semana e feedback direto. Não prometer resultado, case ou depoimento.
 
 **Playbook:**
 
@@ -50,7 +53,7 @@ O gargalo agora é evidência de uso, não mais escopo de produto.
 **Playbook:**
 
 1. No onboarding, migrar um projeto pequeno com o time, manualmente, em até 30 minutos. Registrar tempo, campos que faltaram e a reação do usuário.
-2. Mostrar o valor com o que existe: Portfolio para visão consolidada, Insights para atrasos e tarefas paradas, e IA/Brief para leitura do contexto. Não citar Health Score.
+2. Mostrar o valor com o que existe: Portfolio para visão consolidada, Insights para atrasos e tarefas paradas, e IA/Brief para leitura do contexto, quando a IA estiver ligada.
 3. Marcar “migração” como objeção somente quando o prospect disser que a entrada de dados impede ou adia o teste.
 4. Abrir o projeto de importador somente se três dos primeiros cinco pilotos trouxerem essa objeção ou se a configuração manual ultrapassar 30 minutos em três casos.
 5. Se o gatilho ocorrer, fazer primeiro CSV de tarefas com colunas mínimas: título, projeto, responsável, status, prioridade e prazo. Trello JSON vem depois, se houver demanda comprovada.
@@ -66,7 +69,7 @@ O gargalo agora é evidência de uso, não mais escopo de produto.
 **Playbook:**
 
 1. Depois de dois pilotos retornarem na semana 2, registrar uma página interna por piloto: dor inicial, fluxo usado, dado que chamou atenção, decisão tomada e fala literal do gestor.
-2. Publicar um post semanal no LinkedIn só com dado autorizado ou com cenário claramente demonstrativo. O tema é “como identificar o projeto que precisa de atenção”, não “Health Score”.
+2. Publicar um post semanal no LinkedIn só com dado autorizado ou com cenário claramente demonstrativo. O tema é “como identificar o projeto que precisa de atenção”, sem citar recursos que o produto não tem.
 3. Depois de um caso autorizado, criar uma página comparativa factual: quando Trello/planilha bastam, quando o Agilis ajuda, e quais capacidades ainda não existem. Não usar preços de concorrentes sem verificação oficial na data da publicação.
 4. Só então abordar três comunidades de PMO/operações e dois consultores de gestão. Entrar oferecendo a conversa de diagnóstico, não um cupom.
 

@@ -13,7 +13,7 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 - Versão atual: **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. A v3.10.4 (`337330e`) também está no `origin/master` (verificado com `git fetch` em 2026-11-16: `master` e `origin/master` iguais).
 - Estado do git: `graphify-out/`, `frontend/graphify-out/`, `.claude/settings.json` e `CLAUDE.md` passaram para o `.gitignore` (commit `817099d`, já na `master`; são gerados ou específicos da máquina do dono). `.superpowers/` continua não versionado, porque guarda os contratos das fases; decisão aberta.
-- **Branch de trabalho:** nenhuma em andamento; `master` (`b6af668`, merge `--no-ff` de `fix/gitignore-graphify`, aprovado pelo dono em 2026-11-16). Sem tag nova, porque o produto não mudou. A branch `fix/gitignore-graphify` continua local e no remoto (apagar só se o dono pedir). Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
+- **Branch de trabalho:** `feature/docs-comerciais-sem-okr`, tipo feature (só docs), base `master` (`62a13ca`), enviada ao remoto, **merge aguardando aprovação do dono**. Sem tag, porque o produto não mudou. Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
 
 ## 3. Stack
@@ -39,7 +39,7 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 
 ## 5. Planos e fonte única da ordem de trabalho
 
-- Plano comercial: `docs/estrategia-founder-skills.md` é a fonte única. Ordem: lista de 40 prospects, outreach, cinco conversas, até cinco pilotos assistidos, medição de retorno e objeções, e só então decidir onboarding, importador CSV, preço e cobrança. `docs/outreach-sequencia.md` tem a cadência de LinkedIn e `FOUNDER_CONTEXT.md` o ICP, a promessa e as restrições. Atenção: parte desses textos ainda cita OKRs e Health Score, que foram removidos; reescrever antes de usar.
+- Plano comercial: `docs/estrategia-founder-skills.md` é a fonte única. Ordem: lista de 40 prospects, outreach, cinco conversas, até cinco pilotos assistidos, medição de retorno e objeções, e só então decidir onboarding, importador CSV, preço e cobrança. `docs/outreach-sequencia.md` tem a cadência de LinkedIn e `FOUNDER_CONTEXT.md` o ICP, a promessa e as restrições. Os três textos foram revisados em 2026-11-16 para a v3.10.4: citam OKRs e Health Score só na lista do que não se deve prometer. A produção ainda está na 3.9.2, então o deploy vem antes do primeiro piloto.
 - Plano técnico em curso: a feature de convite por link/QR tem contrato em `.superpowers/sdd/convite-link/contrato.md` (decisões já tomadas, rotas, modelo de dados, telas). É a fonte da verdade dessa fase.
 - Decisões já tomadas pelo dono nesta frente: cortar escopo agressivamente (a sequência de remoções acima), manter só gestão de projetos/tarefas, usar subagentes em tarefas grandes ou que mexem em back e front.
 
@@ -77,7 +77,7 @@ Fatos desta sessão que o próximo agente deve saber:
 2. Fazer deploy das versões pendentes (3.9.3 em diante) na VPS, definindo `TRUST_PROXY` conforme a cadeia real de proxies (nginx do host mais túnel) depois de conferir que o vhost repassa o IP do cliente em `X-Forwarded-For`. O deploy leva só o que está commitado. Receita que funcionou: dump do banco, `docker tag` das imagens como `:pre-<TS>`, extrair o `git archive` em diretório novo, trocar o diretório, build, subir backend e frontend, healthcheck, com rollback pelas tags.
 5. Plano comercial, que depende do dono: planilha de 40 prospects, cinco conversas, até cinco pilotos, medição na semana 2.
 6. Importador CSV somente se a migração bloquear pelo menos três dos cinco pilotos. Preço, limites e cobrança só depois de evidência de uso.
-7. Pendências menores: reescrever os docs comerciais sem OKR/Health Score; limpar o aviso de parâmetros não usados no backend (`actor`, `companyId`, `context`, `configService` em `jwt.strategy`), que não foi feito porque mexe em contratos.
+7. Pendências menores: limpar o aviso de parâmetros não usados no backend (`actor`, `companyId`, `context`, `configService` em `jwt.strategy`), que não foi feito porque mexe em contratos.
 
 ## 8. Desafios e riscos
 

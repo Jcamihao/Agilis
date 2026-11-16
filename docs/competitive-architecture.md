@@ -3,8 +3,7 @@
 ## Product Surface
 
 - IA Operacional: Selah IA (serviço interno) com contexto real do workspace para resumos, planos de ação, gargalos, sugestão de responsáveis e perguntas executivas.
-- Health Score: pontuação 0-100 por empresa, equipe e projeto usando atraso, produtividade, backlog e inatividade.
-- Insights Inteligentes: riscos, gargalos, atrasos previstos, recomendações e conquistas gerados automaticamente.
+- Insights Inteligentes: alertas automáticos de atraso, estagnação, backlog excessivo e tarefas urgentes sem responsável.
 
 ## Event Driven Design
 
@@ -13,6 +12,7 @@ Eventos atuais:
 - `task.created`
 - `task.status_changed`
 - `task.assigned`
+- `task.due_soon`
 - `task.overdue`
 - `comment.created`
 
@@ -20,7 +20,6 @@ Consumidores:
 
 - Automation Engine executa regras e ações.
 - Insights roda por cron e pode evoluir para consumir eventos em fila.
-- Health Score recalcula por cron e por endpoint administrativo.
 
 Evolução para 100.000 usuários:
 
@@ -32,22 +31,18 @@ Evolução para 100.000 usuários:
 ## NestJS Modules
 
 - `AiModule`: chat, resumos, plano de ação, gargalos, sugestão de responsável.
-- `HealthScoreModule`: score por empresa/equipe/projeto.
 - `InsightsModule`: geração automática e gestão de insights.
 - `AutomationModule`: ações event-driven (notificação, e-mail, status, atribuição).
 
 ## Database
 
-Tabelas V4:
+Tabelas:
 
 - `ai_conversations`, `ai_messages`
-- `health_scores`
 - `insights`
 
 Índices críticos:
 
-- `health_scores(companyId, calculatedAt desc)`
-- `health_scores(entityType, entityId)`
 - `insights(companyId, isDismissed, createdAt desc)`
 
 ## AI Strategy
@@ -59,13 +54,13 @@ Tabelas V4:
 
 ## Angular UI
 
-A rota `/competitive` (agregador de IA, Health Score, Insights, Processos e WhatsApp) foi removida na v3.1.0 por não ter dado ou lógica própria. Cada módulo mantém sua rota: `/ia`, `/health-score`, `/insights`.
+A rota `/competitive` foi removida na v3.1.0 por não ter dado ou lógica própria. Cada módulo mantém sua rota: `/ia` e `/insights`. O Health Score foi removido na v3.5.0.
 
 ## Scaling Plan
 
 - PostgreSQL com índices compostos e read replicas.
 - Workers horizontais para IA, insights e automações.
-- Cache Redis para score e dashboards.
+- Cache Redis para dashboards.
 - Rate limit por empresa, usuário e módulo.
 - Filas com retry, dead-letter e backoff.
 - Observabilidade com tracing por evento, métricas por worker e logs estruturados.
