@@ -13,7 +13,7 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 - Versão atual: **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. A v3.10.4 (`337330e`) também está no `origin/master` (verificado com `git fetch` em 2026-11-16: `master` e `origin/master` iguais).
 - Estado do git: `graphify-out/`, `frontend/graphify-out/`, `.claude/settings.json` e `CLAUDE.md` passaram para o `.gitignore` (commit `817099d`, na branch abaixo; são gerados ou específicos da máquina do dono). `.superpowers/` continua não versionado, porque guarda os contratos das fases; decisão aberta.
-- **Branch de trabalho:** `fix/gitignore-graphify`, tipo fix, base `master` (`337330e`), ainda não enviada ao remoto, **merge aguardando aprovação do dono**. Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
+- **Branch de trabalho:** `fix/gitignore-graphify`, tipo fix, base `master` (`337330e`), enviada ao remoto (`origin/fix/gitignore-graphify`), **merge aguardando aprovação do dono**. Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
 
 ## 3. Stack
