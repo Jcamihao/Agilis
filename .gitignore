@@ -3,3 +3,9 @@ node_modules
 .env.production
 .env.local
 
+
+# grafo de código gerado (graphify) e config local da máquina
+graphify-out/
+frontend/graphify-out/
+.claude/settings.json
+CLAUDE.md
