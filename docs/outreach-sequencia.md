@@ -1,6 +1,6 @@
 # Agilis: sequência de outreach no LinkedIn
 
-Atualizada em 2026-11-07 para o plano de validação comercial. Use para convidar gestores a uma conversa curta, não para prometer resultados ou vender recursos que o Agilis não possui.
+Atualizada em 2026-11-16 para o plano de validação comercial. Use para convidar gestores a uma conversa curta, não para prometer resultados ou vender recursos que o Agilis não possui.
 
 **Alvo:** gestor de operações, PMO, head de produto ou CTO de empresa brasileira com 10 a 60 pessoas, vários projetos ativos e uso de Trello, planilha ou ClickUp.
 

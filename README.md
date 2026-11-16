@@ -7,7 +7,7 @@ Plataforma moderna de gestão operacional inspirada em ClickUp, Linear, Jira e N
 | Camada | Tecnologias |
 |--------|------------|
 | **Backend** | NestJS 10 · Prisma 5 · PostgreSQL · Redis · JWT |
-| **Frontend** | Angular 16 · Angular Material · TailwindCSS · Angular CDK |
+| **Frontend** | Angular 20 · TailwindCSS · Angular CDK |
 | **IA** | Selah IA (serviço interno da codeStage; prompts, provedor e modelo ficam lá) |
 | **Infra** | Docker Compose · PostgreSQL · Redis |
 
@@ -95,9 +95,9 @@ Agilis/
 │       ├── seed.ts             # Dados demo
 │       └── migrations/         # Histórico de migrações
 │
-├── frontend/                   # Angular 16
+├── frontend/                   # Angular 20
 │   └── src/app/
-│       ├── features/           # Páginas (kanban, gantt, dashboard, portfolio, …)
+│       ├── features/           # Páginas (kanban, dashboard, portfolio, …)
 │       ├── shared/components/  # GlobalSearch, OnboardingWizard, …
 │       ├── core/
 │       │   ├── services/       # Services para todos os módulos
