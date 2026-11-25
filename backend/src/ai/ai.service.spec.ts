@@ -20,6 +20,7 @@ const buildPrisma = (overrides: Record<string, any> = {}) =>
       findMany: jest.fn().mockResolvedValue([{ role: 'assistant', content: 'oi' }, { role: 'user', content: 'ola' }]),
       createMany: jest.fn().mockResolvedValue({}),
     },
+    aiUsageLog: { create: jest.fn().mockResolvedValue({}) },
     ...overrides,
   }) as any;
 
@@ -153,5 +154,64 @@ describe('AiService (Agilis -> Selah IA)', () => {
     const result = await new AiService(buildPrisma(), selah).chat('c', 'u', 'oi');
 
     expect(result.reply).toContain('não está configurado');
+  });
+});
+
+describe('Medição de custo de IA (F4)', () => {
+  it('chat registers one usage log with request/response chars', async () => {
+    const prisma = buildPrisma();
+    const selah = buildSelah();
+
+    await new AiService(prisma, selah).chat('c-1', 'u-1', 'como está o projeto?');
+
+    expect(prisma.aiUsageLog.create).toHaveBeenCalledTimes(1);
+    const data = prisma.aiUsageLog.create.mock.calls[0][0].data;
+    expect(data).toMatchObject({ companyId: 'c-1', feature: 'chat' });
+    expect(data.requestChars).toBeGreaterThan(0);
+    expect(data.responseChars).toBe(JSON.stringify('resposta').length);
+  });
+
+  it('a broken usage log never breaks the chat', async () => {
+    const prisma = buildPrisma({
+      aiUsageLog: { create: jest.fn().mockRejectedValue(new Error('banco fora')) },
+    });
+
+    const result = await new AiService(prisma, buildSelah()).chat('c-1', 'u-1', 'oi');
+
+    expect(result.reply).toBe('resposta');
+  });
+
+  it('failed Selah calls are not measured (nothing was answered)', async () => {
+    const prisma = buildPrisma();
+    const selah = buildSelah();
+    selah.chat.mockRejectedValue(new SelahAiError('fora do ar', 503));
+
+    await new AiService(prisma, selah).chat('c-1', 'u-1', 'oi');
+
+    expect(prisma.aiUsageLog.create).not.toHaveBeenCalled();
+  });
+
+  it('getUsage aggregates by month and blocks non-admins', async () => {
+    const now = new Date();
+    const prisma = buildPrisma({
+      userCompany: { findFirst: jest.fn().mockResolvedValue({ role: 'OWNER' }) },
+      aiUsageLog: {
+        findMany: jest.fn().mockResolvedValue([
+          { feature: 'chat', requestChars: 1000, responseChars: 400, createdAt: now },
+          { feature: 'chat', requestChars: 100, responseChars: 100, createdAt: now },
+          { feature: 'strategic-brief', requestChars: 2000, responseChars: 800, createdAt: now },
+        ]),
+      },
+    });
+
+    const res = await new AiService(prisma, buildSelah()).getUsage('c-1', 'u-1');
+
+    const month = res.months[0];
+    expect(month.calls).toBe(3);
+    expect(month.byFeature).toEqual({ chat: 2, 'strategic-brief': 1 });
+    expect(month.estimatedTokens).toBe(Math.round((1000 + 400 + 100 + 100 + 2000 + 800) * 0.25));
+
+    const nonAdmin = new AiService(buildPrisma({ userCompany: { findFirst: jest.fn().mockResolvedValue(null) } }), buildSelah());
+    await expect(nonAdmin.getUsage('c-1', 'u-x')).rejects.toThrow(/Apenas admins/);
   });
 });

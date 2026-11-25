@@ -2,18 +2,24 @@
 
 Fonte de decisão: análise YAGNI de 2026-11-25 com o dono. Cada fase é um commit com bump de versão na raiz e linha no changelog do README (convenção do repo). Fases que dependem de acesso externo (chaves, VPS) ficam com checklist manual e pulam para a próxima.
 
-| Fase | Entrega | Versão alvo |
-|---|---|---|
-| F1 | Remover Automações (back, front, schema, migration) | v3.11.0 |
-| F2 | Convite: limite de tentativas em `preview`/`accept` + checklist de verificação em produção | v3.11.1 |
-| F3 | Recuperação de senha (token com hash + e-mail + telas) | v3.12.0 |
-| F4 | Chaves IA/e-mail em produção: checklist manual + medição de custo por mensagem de IA (código) | v3.12.1 |
-| F5 | Onboarding wizard: "usar projeto de exemplo" | v3.13.0 |
-| F6 | Portfolio: ordenação por risco + insight "conflito de prazos" | v3.14.0 |
-| F7 | Workload: navegação de semana (confirmar ausência antes) | v3.15.0 |
-| F8 | Busca global: termos recentes (Ctrl+K já existe) | v3.15.1 |
-| F9 | Multiempresa: empresa ativa visível fora da sidebar (topbar/mobile) | v3.15.2 |
-| F10 | Alinhamento docs↔app (FOUNDER_CONTEXT/README: o que existe, o que saiu, o que está sob observação até o dia 60) + HANDOFF | docs |
+| Fase | Entrega | Versão alvo | Status |
+|---|---|---|---|
+| F1 | Remover Automações (back, front, schema, migration) | v3.11.0 | ✅ `a09be86` |
+| F2 | Convite: limite de tentativas em `preview`/`accept` + checklist de verificação em produção | — (código já existia) | ✅ verificado vivo; produção pendente do dono |
+| F3 | Recuperação de senha (token com hash + e-mail + telas) | v3.12.0 | ✅ `056ecd6` |
+| F4 | Chaves IA/e-mail em produção: checklist manual + medição de custo por mensagem de IA (código) | v3.12.1 | ✅ código; chaves pendentes do dono |
+| F5 | Onboarding wizard: "usar projeto de exemplo" | v3.13.0 | em andamento |
+| F6 | Portfolio: ordenação por risco + insight "conflito de prazos" | v3.14.0 | |
+| F7 | Workload: navegação de semana (confirmar ausência antes) | v3.15.0 | |
+| F8 | Busca global: termos recentes (Ctrl+K já existe) | v3.15.1 | |
+| F9 | Multiempresa: empresa ativa visível fora da sidebar (topbar/mobile) | v3.15.2 | |
+| F10 | Alinhamento docs↔app (FOUNDER_CONTEXT/README: o que existe, o que saiu, o que está sob observação até o dia 60) + HANDOFF | docs | |
+
+**Pendências manuais do dono (não dá pra executar daqui):**
+1. VPS: definir `RESEND_API_KEY` (e-mails reais) e `SELAH_IA_API_KEY`/`SELAH_IA_BASE_URL` (religar IA) + `APP_BASE_URL` com o domínio público; depois rodar o convite ponta a ponta e um `forgot-password` de verdade em produção.
+2. Publicar no Selah IA a entrada `AgilisBack` em `SELAH_APP_KEYS` se ainda não existir.
+3. Ao publicar os commits: `git push origin master` e deploy da VPS (migration `20261125000003_ai_usage_logs` etc. rodam no deploy).
+4. Medição de custo é estimativa por caracteres até o Selah devolver `usage` na resposta do adaptador (`ai_usage_logs` já está pronto para receber números reais).
 
 Sob observação até a decisão com dado no dia 60 dos pilotos (não cortar agora): Custom Fields, Modelos de tarefa, página Equipes, Aprovações.
 

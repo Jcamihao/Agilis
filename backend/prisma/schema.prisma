@@ -406,6 +406,22 @@ model Notification {
 
 // ─── V4: IA Operacional ──────────────────────────────────────────────────────
 
+// Medição de custo de IA (F4): uma linha por chamada bem-sucedida ao Selah.
+// Chars de request/response; estimativa de tokens = chars/4. O Selah hoje não
+// devolve uso por chamada na resposta do adaptador — quando passar a devolver,
+// estes campos viram números reais em vez de estimativa.
+model AiUsageLog {
+  id            String   @id @default(uuid())
+  companyId     String
+  feature       String // chat | project-summary | action-plan | bottlenecks | strategic-brief
+  requestChars  Int
+  responseChars Int
+  createdAt     DateTime @default(now())
+
+  @@index([companyId, createdAt])
+  @@map("ai_usage_logs")
+}
+
 model AiConversation {
   id        String   @id @default(uuid())
   companyId String

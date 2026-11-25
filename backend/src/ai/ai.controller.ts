@@ -24,6 +24,12 @@ export class AiController {
     return this.service.chat(dto.companyId, userId, dto.message, dto.conversationId);
   }
 
+  @Get('usage')
+  @ApiOperation({ summary: 'Uso de IA agregado por mês (admin): chamadas, chars e tokens estimados' })
+  getUsage(@Query('companyId') companyId: string, @CurrentUser('id') userId: string, @Query('months') months?: string) {
+    return this.service.getUsage(companyId, userId, Math.min(12, Math.max(1, Number(months) || 3)));
+  }
+
   @Get('conversations')
   @ApiOperation({ summary: 'Listar conversas' })
   getConversations(@Query('companyId') companyId: string) {

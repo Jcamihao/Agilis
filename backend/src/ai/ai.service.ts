@@ -1,4 +1,4 @@
-import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { formatActionPlan, formatBottlenecks, formatBullets } from './ai.formatters';
 import { SelahAiClientService, SelahAiError, SelahWorkspaceContext } from './selah-ai-client.service';
@@ -73,6 +73,60 @@ export class AiService {
     throw new ServiceUnavailableException(this.describeError(err));
   }
 
+  // Medição de custo (F4): uma linha por chamada bem-sucedida, fire-and-forget —
+  // medição nunca pode derrubar a resposta de IA. Estimativa: tokens ≈ chars/4.
+  private trackUsage(companyId: string, feature: string, request: unknown, response: unknown): void {
+    try {
+      const data = {
+        companyId,
+        feature,
+        requestChars: JSON.stringify(request).length,
+        responseChars: JSON.stringify(response).length,
+      };
+      void Promise.resolve(this.prisma.aiUsageLog?.create({ data }))
+        .catch(() => this.logger.warn(`Falha ao gravar medição de uso de IA (${feature})`));
+    } catch {
+      this.logger.warn(`Falha ao medir uso de IA (${feature})`);
+    }
+  }
+
+  // Uso agregado por mês para o fundador decidir franquia/preço de IA (admin da empresa).
+  async getUsage(companyId: string, userId: string, months = 3) {
+    const membership = await this.prisma.userCompany.findFirst({
+      where: { companyId, userId, role: { in: ['OWNER', 'ADMIN'] } },
+    });
+    if (!membership) throw new ForbiddenException('Apenas admins podem ver o uso de IA');
+
+    const from = new Date();
+    from.setMonth(from.getMonth() - (months - 1), 1);
+    from.setHours(0, 0, 0, 0);
+
+    const logs = await this.prisma.aiUsageLog.findMany({
+      where: { companyId, createdAt: { gte: from } },
+      select: { feature: true, requestChars: true, responseChars: true, createdAt: true },
+    });
+
+    const byMonth = new Map<string, { calls: number; byFeature: Record<string, number>; requestChars: number; responseChars: number }>();
+    for (const log of logs) {
+      const key = `${log.createdAt.getFullYear()}-${String(log.createdAt.getMonth() + 1).padStart(2, '0')}`;
+      const m = byMonth.get(key) ?? { calls: 0, byFeature: {}, requestChars: 0, responseChars: 0 };
+      m.calls += 1;
+      m.byFeature[log.feature] = (m.byFeature[log.feature] ?? 0) + 1;
+      m.requestChars += log.requestChars;
+      m.responseChars += log.responseChars;
+      byMonth.set(key, m);
+    }
+
+    return {
+      estimatedTokensPerChar: 0.25,
+      months: [...byMonth.entries()].map(([month, m]) => ({
+        month,
+        ...m,
+        estimatedTokens: Math.round((m.requestChars + m.responseChars) * 0.25),
+      })),
+    };
+  }
+
   // ── Chat ──────────────────────────────────────────────────────────────────
 
   async chat(companyId: string, userId: string, message: string, conversationId?: string): Promise<{ reply: string; conversationId: string }> {
@@ -94,14 +148,16 @@ export class AiService {
     });
 
     try {
-      const reply = await this.selah.chat({
+      const payload = {
         message,
         history: history.map((m) => ({
           role: (m.role === 'assistant' ? 'assistant' : 'user') as 'user' | 'assistant',
           content: clip(m.content, 4000),
         })),
         workspace: this.toWorkspacePayload(ctx),
-      });
+      };
+      const reply = await this.selah.chat(payload);
+      this.trackUsage(companyId, 'chat', payload, reply);
 
       await this.prisma.aiMessage.createMany({
         data: [
@@ -130,13 +186,16 @@ export class AiService {
     const overdue = project.tasks.filter((t) => t.dueDate && t.dueDate < new Date() && t.status !== 'DONE');
 
     try {
-      return await this.selah.summarizeProject({
+      const payload = {
         projectName: clip(project.name, 200),
         totalTasks: project.tasks.length,
         doneTasks: done,
         overdueTasks: overdue.length,
         overdueTaskTitles: overdue.slice(0, 3).map((t) => clip(t.title, 200)),
-      });
+      };
+      const summary = await this.selah.summarizeProject(payload);
+      this.trackUsage(project.companyId, 'project-summary', payload, summary);
+      return summary;
     } catch (err) {
       this.fail(err, 'resumo de projeto');
     }
@@ -157,7 +216,7 @@ export class AiService {
     if (!project) return 'Projeto não encontrado.';
 
     try {
-      const plan = await this.selah.actionPlan({
+      const payload = {
         projectName: clip(project.name, 200),
         tasks: project.tasks.map((t) => ({
           title: clip(t.title, 200),
@@ -165,7 +224,9 @@ export class AiService {
           assigneeName: t.assignee?.name ?? null,
           dueDateLabel: t.dueDate ? t.dueDate.toLocaleDateString('pt-BR') : null,
         })),
-      });
+      };
+      const plan = await this.selah.actionPlan(payload);
+      this.trackUsage(project.companyId, 'action-plan', payload, plan);
       return formatActionPlan(plan);
     } catch (err) {
       this.fail(err, 'plano de ação');
@@ -185,7 +246,7 @@ export class AiService {
     });
 
     try {
-      const analysis = await this.selah.bottlenecks({
+      const payload = {
         workspace: this.toWorkspacePayload(ctx),
         stagnantTasks: stagnant.map((t) => ({
           title: clip(t.title, 200),
@@ -193,7 +254,9 @@ export class AiService {
           projectName: clip(t.project.name, 200),
           assigneeName: t.assignee?.name ?? null,
         })),
-      });
+      };
+      const analysis = await this.selah.bottlenecks(payload);
+      this.trackUsage(companyId, 'bottlenecks', payload, analysis);
       return formatBottlenecks(analysis);
     } catch (err) {
       this.fail(err, 'gargalos');
@@ -254,14 +317,16 @@ export class AiService {
 
     let brief;
     try {
-      brief = await this.selah.strategicBrief({
+      const payload = {
         metrics: { totalTasks, doneTasks, overdueTasks, backlogTasks, activeProjects, members, completionRate, weeklyVelocity },
         insights: recentInsights.map((i) => ({
           severity: String(i.severity),
           title: clip(i.title, 200),
           description: clip(i.description, 600),
         })),
-      });
+      };
+      brief = await this.selah.strategicBrief(payload);
+      this.trackUsage(companyId, 'strategic-brief', payload, brief);
     } catch (err) {
       this.fail(err, 'brief estratégico');
     }
