@@ -170,7 +170,7 @@
                 }
                 <span class="text-[10px] text-[--text-tertiary] flex items-center gap-0.5">
                   <span class="material-symbols-rounded text-xs">schedule</span>
-                  Entrou {{ joinedAgo(member.joinedAt) }}
+                  Entrou {{ timeAgo(member.joinedAt) }}
                 </span>
                 @if (member._count.assignedTasks) {
                   <span class="text-[10px] text-[--text-tertiary] flex items-center gap-0.5">
@@ -321,7 +321,7 @@
                   <div class="flex-1 min-w-0">
                     <p class="text-sm text-[--text-primary] truncate">Criado por {{ inv.createdBy.name }}</p>
                     <p class="text-[11px] text-[--text-tertiary]">
-                      Criado {{ createdAgo(inv.createdAt) }} · expira em {{ formatDateTime(inv.expiresAt) }}
+                      Criado {{ timeAgo(inv.createdAt) }} · expira em {{ formatDateTime(inv.expiresAt) }}
                     </p>
                   </div>
                   <button type="button" (click)="revokeInvite(inv)" class="ag-btn ag-btn--sm ag-btn--secondary">Revogar</button>

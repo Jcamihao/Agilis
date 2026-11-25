@@ -7,6 +7,7 @@ import { ConfirmService } from '../../core/services/confirm.service';
 import { InvitesService, InviteValidityDays } from '../../core/services/invites.service';
 import { CompanyInvite } from '../../core/models';
 import { timeAgo, formatDateTime } from '../../core/utils/format';
+import { apiErrorMessage } from '../../core/utils/api-error';
 
 const ROLE_CFG: Record<string, { label: string; badgeClass: string }> = {
   OWNER:  { label: 'Proprietário', badgeClass: 'bg-amber-100 text-amber-700 border border-amber-200' },
@@ -30,6 +31,7 @@ export class MembersComponent implements OnInit {
   private readonly invitesService = inject(InvitesService);
 
   readonly formatDateTime = formatDateTime;
+  readonly timeAgo        = timeAgo;
   readonly canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   readonly currentUser = this.auth.user;
@@ -117,7 +119,7 @@ export class MembersComponent implements OnInit {
       next: (data) => { this.activeInvites.set(data); this.loadingInvites.set(false); },
       error: (err) => {
         this.loadingInvites.set(false);
-        this.toast.error(err?.error?.message || 'Erro ao carregar links de convite');
+        this.toast.error(apiErrorMessage(err, 'Erro ao carregar links de convite'));
       },
     });
   }
@@ -153,7 +155,7 @@ export class MembersComponent implements OnInit {
       },
       error: (err) => {
         this.linkGenerating.set(false);
-        this.toast.error(err?.error?.message || 'Erro ao gerar link de convite');
+        this.toast.error(apiErrorMessage(err, 'Erro ao gerar link de convite'));
       },
     });
   }
@@ -205,12 +207,8 @@ export class MembersComponent implements OnInit {
         this.activeInvites.update((list) => list.filter((i) => i.id !== invite.id));
         this.toast.success('Convite revogado');
       },
-      error: (err) => this.toast.error(err?.error?.message || 'Erro ao revogar convite'),
+      error: (err) => this.toast.error(apiErrorMessage(err, 'Erro ao revogar convite')),
     });
-  }
-
-  createdAgo(date: string): string {
-    return timeAgo(date);
   }
 
   private copyWithExecCommand(text: string): boolean {
@@ -233,7 +231,7 @@ export class MembersComponent implements OnInit {
     this.openMenuId.set(null);
     this.service.updateRole(cid, member.id, role).subscribe({
       next: (data) => { this.members.set(data); this.toast.success('Papel atualizado'); },
-      error: (err) => this.toast.error(err?.error?.message || 'Erro ao alterar papel'),
+      error: (err) => this.toast.error(apiErrorMessage(err, 'Erro ao alterar papel')),
     });
   }
 
@@ -251,7 +249,7 @@ export class MembersComponent implements OnInit {
     this.openMenuId.set(null);
     this.service.remove(cid, member.id).subscribe({
       next: (data) => { this.members.set(data); this.toast.success(`${member.name} removido`); },
-      error: (err) => this.toast.error(err?.error?.message || 'Erro ao remover membro'),
+      error: (err) => this.toast.error(apiErrorMessage(err, 'Erro ao remover membro')),
     });
   }
 
@@ -265,9 +263,4 @@ export class MembersComponent implements OnInit {
 
   isMe(member: OrgMember) { return member.id === this.currentUser()?.id; }
   isOwner(member: OrgMember) { return member.role === 'OWNER'; }
-
-  joinedAgo(date: string): string {
-    return timeAgo(date);
-  }
-
 }

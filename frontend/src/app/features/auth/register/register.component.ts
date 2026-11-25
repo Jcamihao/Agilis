@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl } from '@
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 interface ViaCepResponse {
   erro?: boolean;
@@ -153,7 +154,7 @@ export class RegisterComponent {
     }).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => {
-        this.error.set(err?.error?.message || 'Erro ao criar conta');
+        this.error.set(apiErrorMessage(err, 'Erro ao criar conta'));
         this.loading.set(false);
       },
     });

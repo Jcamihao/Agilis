@@ -6,6 +6,7 @@ import { switchMap } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvitesService } from '../../../core/services/invites.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 @Component({
   selector: 'ag-login',
@@ -55,13 +56,13 @@ export class LoginComponent {
         ).subscribe({
           next: () => this.router.navigate(['/dashboard']),
           error: (err) => {
-            this.toast.error(err?.error?.message || 'Não foi possível aceitar o convite');
+            this.toast.error(apiErrorMessage(err, 'Não foi possível aceitar o convite'));
             this.router.navigate(['/dashboard']);
           },
         });
       },
       error: (err) => {
-        this.error.set(err?.error?.message || 'Erro ao fazer login');
+        this.error.set(apiErrorMessage(err, 'Erro ao fazer login'));
         this.loading.set(false);
       },
     });
