@@ -28,8 +28,8 @@ Sob observação até a decisão com dado no dia 60 dos pilotos (não cortar ago
 
 ## F2 — Convite: limite de tentativas (v3.11.1)
 
-- `@Throttler` em `GET /invites/:token/preview` e `POST /invites/:token/accept` (por IP), no padrão do login v3.9.3 (429 com mensagem em pt).
-- Checklist produção (manual, dono): gerar link na VPS, aceitar com usuário novo, revogar, conferir HTTPS/cookie.
+- **Feito em 2026-11-25 (verificação ao vivo, código já estava na v3.10.x):** limite de 30/min por IP em `preview` e `accept` confirmado ativo; fluxo testado contra o backend local: criar convite → preview público ok → token inválido 404 → registrar com `inviteToken` vira MEMBER da empresa do convite (empresa única) → revogar → preview 404 → 35 requests de preview: 29×404 + 6×429 → token cru ausente do banco (só hash).
+- **Pendente manual (dono, na VPS):** gerar link pela UI em produção, aceitar com usuário novo via HTTPS, revogar, conferir rate limit. Sem bump de versão (nenhum código mudou).
 
 ## F3 — Recuperação de senha (v3.12.0)
 

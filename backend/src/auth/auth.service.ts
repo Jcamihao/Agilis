@@ -1,13 +1,17 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
+import { MailService } from '../mail/mail.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { findActiveInvite } from '../invites/invite-token';
+import { generateResetToken, hashResetToken, RESET_INVALID_MESSAGE } from './password-reset-token';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +20,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly redis: RedisService,
+    private readonly mail: MailService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -144,6 +149,58 @@ export class AuthService {
       const ttl = decoded.exp - Math.floor(Date.now() / 1000);
       if (ttl > 0) await this.redis.blacklistToken(decoded.jti, ttl);
     } catch {}
+  }
+
+  // Resposta idêntica com e-mail existente ou não: nunca revelar cadastro.
+  async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      select: { id: true, email: true },
+    });
+    if (!user) return;
+
+    const rawToken = generateResetToken();
+    await this.prisma.$transaction(async (tx) => {
+      // Um único token válido por usuário: os anteriores deixam de funcionar.
+      await tx.passwordResetToken.deleteMany({ where: { userId: user.id, usedAt: null } });
+      await tx.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: hashResetToken(rawToken),
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hora
+        },
+      });
+    });
+
+    const appUrl = this.configService.get<string>('APP_BASE_URL', 'http://localhost:4200').replace(/\/$/, '');
+    const link = `${appUrl}/redefinir-senha/${rawToken}`;
+    await this.mail.send({
+      to: user.email,
+      subject: 'Redefinição de senha — Agilis',
+      html: `<p>Recebemos um pedido para redefinir a senha da sua conta Agilis.</p>
+<p><a href="${link}">Redefinir minha senha</a></p>
+<p>Este link expira em 1 hora e só pode ser usado uma vez. Se você não pediu isso, ignore este e-mail — sua senha atual continua valendo.</p>`,
+    });
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<void> {
+    const tokenHash = hashResetToken(dto.token);
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const now = new Date();
+
+    await this.prisma.$transaction(async (tx) => {
+      const token = await tx.passwordResetToken.findFirst({
+        where: { tokenHash, usedAt: null, expiresAt: { gt: now } },
+      });
+      if (!token) throw new BadRequestException(RESET_INVALID_MESSAGE);
+
+      await tx.user.update({
+        where: { id: token.userId },
+        // tokensInvalidBefore derruba todos os JWT emitidos antes daqui (sessões em outros dispositivos).
+        data: { password: hashedPassword, tokensInvalidBefore: now },
+      });
+      await tx.passwordResetToken.update({ where: { id: token.id }, data: { usedAt: now } });
+    });
   }
 
   private generateTokens(userId: string, email: string) {

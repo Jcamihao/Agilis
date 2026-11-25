@@ -31,6 +31,16 @@ export class AuthService {
     );
   }
 
+  /** Sempre 202: a resposta não revela se o e-mail existe. */
+  forgotPassword(email: string) {
+    return this.http.post(`${this.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  /** 204 no sucesso; derruba todas as sessões do usuário. */
+  resetPassword(token: string, password: string) {
+    return this.http.post(`${this.apiUrl}/auth/reset-password`, { token, password });
+  }
+
   register(data: {
     name: string; email: string; password: string; companyName?: string;
     phone?: string; cpfCnpj?: string; cep?: string; uf?: string;
