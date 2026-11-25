@@ -21,7 +21,7 @@ const buildService = () => {
 };
 
 describe('CommentsService.create', () => {
-  it('emits COMMENT_CREATED once so comment automations can fire', async () => {
+  it('emits COMMENT_CREATED once so notification listeners can fire', async () => {
     const { service, events, task, author, comment } = buildService();
 
     await service.create({ taskId: 't1', content: 'oi' } as any, 'u-author');

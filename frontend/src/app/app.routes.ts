@@ -99,11 +99,6 @@ export const routes: Routes = [
         title: 'Notificações — Agilis',
       },
       {
-        path: 'automations',
-        loadComponent: () => import('./features/automations/automations.component').then((m) => m.AutomationsComponent),
-        title: 'Automações — Agilis',
-      },
-      {
         path: 'portfolio',
         loadComponent: () => import('./features/portfolio/portfolio.component').then((m) => m.PortfolioComponent),
         title: 'Portfolio Executivo — Agilis',

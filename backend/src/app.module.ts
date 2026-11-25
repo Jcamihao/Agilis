@@ -15,7 +15,6 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 // V3
-import { AutomationModule } from './automation/automation.module';
 import { ReportsModule } from './reports/reports.module';
 import { AiModule } from './ai/ai.module';
 import { InsightsModule } from './insights/insights.module';
@@ -49,7 +48,6 @@ import { InvitesModule } from './invites/invites.module';
     NotificationsModule,
     CalendarModule,
     AttachmentsModule,
-    AutomationModule,
     ReportsModule,
     AiModule,
     InsightsModule,

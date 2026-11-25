@@ -127,9 +127,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.10.5** — Convites seguros por Link / QR Code.
+**v3.11.0** — Convites seguros por Link / QR Code.
 
 Changelog:
+- **v3.11.0** — Automações removidas do produto (corte YAGNI: motor de regras sem tração no ICP, `SEND_EMAIL` falhando em silêncio sem chave, suporte caro para fundador solo). Saem o módulo `automation` (controller/service/engine/cron), a tela `/automations`, os tipos de banco (`automation_rules`, `automation_executions`, enums) e a notificação `AUTOMATION_TRIGGERED`. Notificações nativas (atribuição, prazo, atraso, menção, convite) e o e-mail via Resend continuam. Migration `20261125000001_remove_automations`
 - **v3.10.5** — Limpeza da revisão do convite por link/QR (sem mudança de comportamento): wrappers `createdAgo`/`joinedAgo` removidos (o template usa `timeAgo` direto) e as 8 ocorrências do mapeador `err?.error?.message || fallback` concentradas em `core/utils/api-error.ts` (Membros, Login e Cadastro)
 - **v3.10.4** — Convite por e-mail removido da interface de Membros. Administradores agora usam somente Link / QR Code: escolhem validade, geram, copiam, compartilham, baixam o QR e revogam links ativos. A rota legada foi preservada sem uso pela interface.
 - **v3.10.3** — Responsividade mobile: sidebar vira gaveta abaixo de 1024 px, com backdrop e conteúdo usando toda a largura. Calendário, Insights, Lista, Relatório de Tempo, Planejamento de Sprints e Kanban reorganizam cabeçalhos, filtros e ações para 390 px; apenas abas e colunas do Kanban usam rolagem horizontal local quando necessário.

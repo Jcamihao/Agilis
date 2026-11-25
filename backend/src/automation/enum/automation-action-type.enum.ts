@@ -1,7 +1,0 @@
-export enum AutomationActionType {
-  CHANGE_STATUS     = 'CHANGE_STATUS',
-  ASSIGN_USER       = 'ASSIGN_USER',
-  SEND_NOTIFICATION = 'SEND_NOTIFICATION',
-  CREATE_TASK       = 'CREATE_TASK',
-  SEND_EMAIL        = 'SEND_EMAIL',
-}

@@ -70,7 +70,6 @@ export class SidebarComponent {
       key: 'adm',
       label: 'Administração',
       items: [
-        { label: 'Automações',          icon: 'auto_awesome',  route: '/automations' },
         { label: 'Relatórios',          icon: 'summarize',     route: '/reports' },
       ],
     },

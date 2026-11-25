@@ -37,33 +37,8 @@ enum NotificationType {
   TASK_OVERDUE
   TASK_STATUS_CHANGED
   PROJECT_INVITE
-  AUTOMATION_TRIGGERED
 
   INSIGHT_GENERATED
-}
-
-enum AutomationTrigger {
-  TASK_CREATED
-  TASK_STATUS_CHANGED
-  TASK_OVERDUE
-  COMMENT_CREATED
-  TASK_ASSIGNED
-}
-
-enum AutomationActionType {
-  CHANGE_STATUS
-  ASSIGN_USER
-  SEND_NOTIFICATION
-  CREATE_TASK
-  SEND_EMAIL
-}
-
-enum ExecutionStatus {
-  PENDING
-  RUNNING
-  SUCCESS
-  FAILED
-  SKIPPED
 }
 
 enum SprintStatus {
@@ -101,7 +76,6 @@ model Company {
   invites         CompanyInvite[]
   teams           Team[]
   projects        Project[]
-  automations     AutomationRule[]
   insights        Insight[]
 
   aiConversations AiConversation[]
@@ -238,7 +212,6 @@ model Project {
   team         Team?            @relation(fields: [teamId], references: [id], onDelete: SetNull)
   tasks        Task[]
   sprints      Sprint[]
-  automations  AutomationRule[]
   members      ProjectMember[]
   teams        ProjectTeam[]
   customFields CustomField[]
@@ -288,7 +261,6 @@ model Task {
   activities   Activity[]
   comments     Comment[]
   attachments  Attachment[]
-  executions   AutomationExecution[]
   participants TaskParticipant[]
   timeEntries       TimeEntry[]
   customFieldValues CustomFieldValue[]
@@ -414,47 +386,6 @@ model Notification {
 }
 
 // ─── V3 Models ───────────────────────────────────────────────────────────────
-
-model AutomationRule {
-  id          String            @id @default(uuid())
-  name        String
-  description String?
-  companyId   String
-  projectId   String?
-  trigger     AutomationTrigger
-  conditions  Json
-  actions     Json
-  isActive    Boolean           @default(true)
-  runCount    Int               @default(0)
-  lastRunAt   DateTime?
-  createdById String
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-
-  company    Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  project    Project?              @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  executions AutomationExecution[]
-
-  @@index([companyId, isActive])
-  @@map("automation_rules")
-}
-
-model AutomationExecution {
-  id         String          @id @default(uuid())
-  ruleId     String
-  taskId     String?
-  status     ExecutionStatus @default(PENDING)
-  result     Json?
-  error      String?
-  durationMs Int?
-  createdAt  DateTime        @default(now())
-
-  rule AutomationRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
-  task Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
-
-  @@index([ruleId, createdAt(sort: Desc)])
-  @@map("automation_executions")
-}
 
 // ─── V4: IA Operacional ──────────────────────────────────────────────────────
 
