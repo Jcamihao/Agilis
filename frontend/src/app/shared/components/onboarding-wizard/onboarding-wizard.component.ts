@@ -2,10 +2,13 @@ import { Component, signal, inject, ChangeDetectionStrategy, output } from '@ang
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { lastValueFrom } from 'rxjs';
 import { CompaniesService } from '../../../core/services/companies.service';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { TasksService } from '../../../core/services/tasks.service';
+import { SprintsService } from '../../../core/services/sprints.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { apiErrorMessage } from '../../../core/utils/api-error';
 
 const ICONS = ['rocket_launch', 'star', 'bolt', 'favorite', 'code', 'brush', 'campaign', 'build', 'shopping_cart', 'school'];
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#8b5cf6', '#ef4444', '#f97316', '#14b8a6', '#84cc16'];
@@ -24,6 +27,7 @@ export class OnboardingWizardComponent {
   private readonly companiesSvc = inject(CompaniesService);
   private readonly projectsSvc = inject(ProjectsService);
   private readonly tasksSvc = inject(TasksService);
+  private readonly sprintsSvc = inject(SprintsService);
   private readonly auth = inject(AuthService);
 
   done = output<void>();
@@ -147,6 +151,57 @@ export class OnboardingWizardComponent {
 
   skip() {
     this.finish();
+  }
+
+  // Projeto de exemplo: dá ao piloto um Kanban, Portfolio e Insights populados
+  // em < 2 minutos. Tudo editável/apagável como qualquer projeto real.
+  async createSampleProject() {
+    const companyId = this.createdCompanyId();
+    if (!companyId || this.saving()) return;
+    this.saving.set(true);
+    this.error.set(null);
+
+    const inDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString();
+    try {
+      const project: any = await lastValueFrom(this.projectsSvc.create({
+        name: 'Primeiros passos',
+        companyId,
+        icon: 'rocket_launch',
+        color: this.selectedColor(),
+        description: 'Projeto de exemplo do Agilis. Complete, edite ou apague quando quiser.',
+      }));
+      const projectId = project?.id ?? project?.data?.id;
+
+      const tarefas = [
+        { title: 'Arraste um card para outra coluna',            status: 'IN_PROGRESS', priority: 'HIGH',   dueDate: inDays(0) },
+        { title: 'Marque esta tarefa como concluída',             status: 'DONE',        priority: 'MEDIUM' },
+        { title: 'Crie uma tarefa nova e defina o responsável',   status: 'BACKLOG',     priority: 'MEDIUM', dueDate: inDays(2) },
+        { title: 'Convide sua equipe pelo link ou QR code',       status: 'BACKLOG',     priority: 'HIGH',   dueDate: inDays(5) },
+        { title: 'Abra o Portfolio Executivo e os Insights',      status: 'BACKLOG',     priority: 'LOW',    dueDate: inDays(7) },
+        { title: 'Descreva seu primeiro projeto real',            status: 'IN_REVIEW',   priority: 'LOW' },
+      ];
+      for (const t of tarefas) {
+        await lastValueFrom(this.tasksSvc.create({ title: t.title, projectId, status: t.status as any, priority: t.priority as any, ...(t.dueDate ? { dueDate: t.dueDate } : {}) }));
+      }
+
+      // Sprint é o enfeite da demo: se falhar, o projeto já vale por si.
+      try {
+        await lastValueFrom(this.sprintsSvc.create({
+          projectId,
+          name: 'Boas-vindas',
+          goal: 'Descobrir o Agilis com as tarefas de exemplo.',
+          startDate: inDays(0),
+          endDate: inDays(14),
+        }));
+      } catch { /* segue sem sprint */ }
+
+      this.createdProjectId.set(projectId);
+      this.saving.set(false);
+      this.finish();
+    } catch (e: any) {
+      this.error.set(apiErrorMessage(e, 'Erro ao criar o projeto de exemplo'));
+      this.saving.set(false);
+    }
   }
 
   private finish() {

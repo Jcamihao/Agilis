@@ -97,6 +97,10 @@
             }
             Continuar
           </button>
+          <button type="button" class="ow-btn" (click)="createSampleProject()" [disabled]="saving()">
+            <span class="material-symbols-rounded">auto_fix_high</span>
+            Criar com projeto de exemplo
+          </button>
         </div>
       </form>
     }
