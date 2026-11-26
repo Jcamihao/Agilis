@@ -10,6 +10,7 @@ Criado em 2026-11-26, reorganizado em fases no mesmo dia. Status: **PLANEJAMENTO
 4. Opção **Geral** no switch: mostra tarefas, planos e afins de todas as empresas, cada item identificado, com filtro por empresa.
 5. **Remover** as telas **Assistente de IA** e **Portfólio Executivo**.
 6. **Importação de várias tasks de uma vez** por arquivo **CSV, XLS ou XLSX**.
+7. **Auditoria do design system** nos modos claro e escuro: achar tudo que não muda de aparência no escuro (o dono já viu ocorrências) e corrigir.
 
 ## 2. Estado atual (lido no código, 2026-11-26)
 
@@ -21,6 +22,7 @@ Criado em 2026-11-26, reorganizado em fases no mesmo dia. Status: **PLANEJAMENTO
 - **Portfólio Executivo:** tela `features/portfolio`, rota `/portfolio`, `portfolio.service.ts`, backend `GET /projects/portfolio` (`projects.service.ts:222`, com sinais de risco da F6). Citado no onboarding (tarefa de exemplo), README e FOUNDER_CONTEXT.
 - **Sidebar** grupo "Inteligência": Portfolio Executivo, Assistente IA, Insights, Carga de Trabalho.
 - **Importação:** o backend já tem `exceljs` (usado em `reports.service.ts`) e o módulo `upload/` (multer, 20 MB, MIME de planilha já permitido). `exceljs` lê CSV e XLSX, **não lê XLS** (formato binário antigo). Não existe importador de tarefas.
+- **Tema:** claro é o padrão; escuro liga com `[data-theme="dark"]` no `<html>` (`theme.service.ts`, `localStorage` `agilis-theme`). As cores vêm de variáveis CSS (`--p-*`, `--f-*`, `--c-*`) mapeadas no `tailwind.config` (`darkMode: ['selector', '[data-theme="dark"]']`; `styles/main.scss`). Varredura estática rápida de 2026-11-26: **68 arquivos** com cor literal (`#hex`, `rgb()`/`rgba()`) e **26 arquivos** com classes de paleta fixa do Tailwind (`bg-white`, `text-gray-*`, `border-slate-*` etc.); só **1 arquivo** usa `dark:`. Esses são os suspeitos de não acompanhar o tema escuro. Ainda não conferi tela por tela.
 - Menu "⋮" de Membros (`members.component.ts`): dropdown "ALTERAR PAPEL" cortado, provável `overflow` do container da lista.
 
 ## 3. Fases
@@ -66,10 +68,17 @@ Cada fase: branch `feature/<nome>` ou `fix/<nome>` a partir da `develop` atualiz
 - Botão "Importar tarefas" na tela do projeto (e/ou Projetos): escolher arquivo, baixar modelo, ver prévia com erros por linha, confirmar, ver o recibo ("42 criadas, 3 recusadas" com a lista dos motivos).
 - Pronto quando: fluxo completo no Chrome real (CSV, XLSX e XLS), erro de arquivo inválido com mensagem clara, tema claro/escuro, 360 e 1280 px.
 
-### Fase 9 — Fechamento (`docs/fechamento-empresa-import`)
+### Fase 9 — Auditoria do design system, claro e escuro (`fix/tema-claro-escuro`)
+- Roda **depois** das fases de tela (2, 5, 6, 8), para cobrir também o switch, o modo Geral e a importação, e depois da remoção de IA/Portfólio (menos telas).
+- Inventário: listar todos os tokens de cor/tipografia/espaço do design system e conferir que cada um tem valor nos dois temas (`styles/main.scss` e `tailwind.config`).
+- Caça a defeitos: (a) cores literais e classes de paleta fixa nos 68 + 26 arquivos suspeitos, trocando por tokens; (b) componentes de terceiros (CDK drag-drop, overlays, inputs nativos, scrollbars, `color-scheme`) que não trocam de tema; (c) estados (hover, focus, disabled, erro, vazio, skeleton, toast, modal, dropdown, tabela, badge) em cada tema; (d) imagens/ícones/SVG com cor fixa; (e) contraste (meta: WCAG AA, 4.5:1 para texto normal); (f) troca de tema com a página aberta (nada pode ficar preso no tema antigo) e tema persistido ao recarregar.
+- Método: Chrome real (Puppeteer), uma captura por rota nos dois temas, em 360 e 1280 px, comparando claro × escuro, com dado semeado para telas que dependem de dados; relatório com a lista de achados (tela, elemento, causa, correção) e a contagem antes/depois.
+- Pronto quando: nenhuma tela com elemento ilegível ou com cor fixa fora do token (varredura estática zera, salvo exceções justificadas e listadas), capturas dos dois temas anexadas ao relatório, `ng build` verde.
+
+### Fase 10 — Fechamento (`docs/fechamento-empresa-import`)
 - Relatório de revisão persistido, `graphify update .`, handoff, README (linha de changelog por versão), números verdes com data, seção NÃO verificado.
 
-**Ordem:** 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. A 2 vem antes da 3 para reduzir superfície (menos telas para migrar para empresa ativa). A 7 depende da 3 (empresa validada no backend).
+**Ordem:** 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10. A 2 vem antes da 3 para reduzir superfície (menos telas para migrar para empresa ativa). A 7 depende da 3 (empresa validada no backend).
 
 ## 4. Decisões do dono (abertas; recomendação entre parênteses)
 
@@ -82,6 +91,7 @@ Cada fase: branch `feature/<nome>` ou `fix/<nome>` a partir da `develop` atualiz
 - D7 Formato XLS: o `exceljs` não lê. Para aceitar XLS é preciso uma dependência nova (SheetJS, versão corrigida, lida só no backend e com limites). (recomendado: aceitar CSV e XLSX na primeira entrega e incluir XLS na Fase 7 só se você confirmar a dependência nova; o histórico de falhas de segurança do pacote `xlsx` no npm é a razão da cautela.)
 - D8 Projeto de destino: a importação vai para um projeto escolhido na tela. Coluna "projeto" na planilha para distribuir em vários projetos fica fora da primeira versão. (recomendado)
 - D9 Limites: 5 MB e 1000 linhas por arquivo. (recomendado)
+- D11 Auditoria de tema (Fase 9): corrigir tudo o que achar no mesmo fix (recomendado) ou só relatar e você escolhe o que corrigir. Se você já anotou ocorrências específicas, mande as telas para virarem casos de teste.
 - D10 Linha inválida: importar as válidas e listar as recusadas (recomendado) ou recusar o arquivo inteiro se houver qualquer erro.
 
 ## 5. Verificação prevista
@@ -90,4 +100,4 @@ Backend: jest, mutantes, integração em Postgres/Redis descartáveis (portas co
 
 ## 6. NÃO verificado (ainda)
 
-Hipóteses até as fases rodarem: quais controllers deixam passar `companyId` sem conferir membership; o custo de trocar `companies[0]` nos 24 pontos do front; se o modo Geral fica rápido com muitas empresas; o motivo exato do corte do menu em Membros; se algo além do Workload e do /diagnostico depende do módulo `ai/`; como o XLS legado se comporta com datas e fusos; o tamanho real das planilhas dos pilotos.
+Hipóteses até as fases rodarem: quais controllers deixam passar `companyId` sem conferir membership; o custo de trocar `companies[0]` nos 24 pontos do front; se o modo Geral fica rápido com muitas empresas; o motivo exato do corte do menu em Membros; quantos dos 68 + 26 arquivos suspeitos de tema são defeito real e quantos são cor fixa intencional (ex.: cor de status); se algo além do Workload e do /diagnostico depende do módulo `ai/`; como o XLS legado se comporta com datas e fusos; o tamanho real das planilhas dos pilotos.
