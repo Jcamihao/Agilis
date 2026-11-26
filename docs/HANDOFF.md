@@ -117,6 +117,7 @@ Fatos desta sessão que o próximo agente deve saber:
 - Cuidado ao rodar testes no mesmo diretório `dist/` enquanto o `nest start --watch` do outro agente está ativo: ele recompila e reinicia o servidor dele quando o `dist` muda.
 
 ## 9. Decisões abertas do dono
+- **Plano de empresa ativa (2026-11-26, na `develop`, sem código):** `docs/plan-empresa-ativa-2026-11.md`. Pedido do dono: switch de empresa ativa, excluir empresa, modo Geral com filtro por empresa, e fix do menu "⋮" cortado em Membros. Achado: o backend também fixa a empresa em `companies[0]` (`jwt.strategy.ts:48`), então a troca precisa chegar ao backend. Decisões D1–D5 do plano aguardam o dono; nada começa antes.
 
 - Se a rota legada `POST /users/company-members/invite` deve ser removida numa limpeza futura. Hoje ela não é usada pela interface.
 - Se `.superpowers/` (contratos das fases) deve ser versionado.
