@@ -6,7 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { PortfolioService, PortfolioProject } from '../../core/services/portfolio.service';
 import { AiService } from '../../core/services/ai.service';
 
-type SortKey = 'name' | 'progress' | 'overdue' | 'forecast';
+type SortKey = 'name' | 'progress' | 'overdue' | 'forecast' | 'risk';
 
 @Component({
   selector: 'ag-portfolio',
@@ -23,12 +23,18 @@ export class PortfolioComponent implements OnInit {
 
   loading = signal(true);
   projects = signal<PortfolioProject[]>([]);
-  sortKey = signal<SortKey>('progress');
+  sortKey = signal<SortKey>('risk');
   sortAsc = signal(false);
   briefLoading = signal(false);
   brief = signal<any>(null);
   showBrief = signal(false);
   search = signal('');
+
+  // Score de risco 0–100 com pesos declarados: atrasar pesa mais que o prazo chegando,
+  // que pesa mais que falta de dono. >= 40 = "onde agir" (promessa do produto).
+  risk(p: PortfolioProject): number {
+    return Math.min(40, p.overdue * 10) + Math.min(30, p.dueSoon * 6) + Math.min(20, p.unassigned * 5) + (p.progress < 30 && p.overdue >= 2 ? 10 : 0);
+  }
 
   sorted = computed(() => {
     const q = this.search().toLowerCase();
@@ -40,10 +46,19 @@ export class PortfolioComponent implements OnInit {
       if (key === 'progress') { av = a.progress;     bv = b.progress; }
       if (key === 'overdue')  { av = a.overdue;      bv = b.overdue; }
       if (key === 'forecast') { av = a.forecastDays ?? 9999; bv = b.forecastDays ?? 9999; }
+      if (key === 'risk')     { av = this.risk(a);   bv = this.risk(b); }
       const cmp = av < bv ? -1 : av > bv ? 1 : 0;
       return this.sortAsc() ? cmp : -cmp;
     });
     return list;
+  });
+
+  // Só um "onde agir primeiro" por tela: o de maior risco, se passar do limiar.
+  topRiskId = computed(() => {
+    const ps = this.projects();
+    if (!ps.length) return null;
+    const worst = ps.reduce((a, b) => (this.risk(b) > this.risk(a) ? b : a));
+    return this.risk(worst) >= 40 ? worst.id : null;
   });
 
   kpis = computed(() => {
@@ -53,7 +68,7 @@ export class PortfolioComponent implements OnInit {
       totalProjects:  ps.length,
       avgProgress:    Math.round(ps.reduce((s, p) => s + p.progress, 0) / ps.length),
       totalOverdue:   ps.reduce((s, p) => s + p.overdue, 0),
-      atRisk:         ps.filter((p) => p.overdue > 0).length,
+      atRisk:         ps.filter((p) => this.risk(p) >= 40).length,
       onTrack:        ps.filter((p) => p.progress >= 70 && p.overdue === 0).length,
     };
   });

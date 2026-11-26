@@ -37,6 +37,7 @@ export class InsightsPageComponent implements OnInit {
     { key: 'RISK',            label: 'Riscos',         icon: 'crisis_alert' },
     { key: 'BOTTLENECK',      label: 'Gargalos',       icon: 'traffic' },
     { key: 'DELAY_PREDICTION',label: 'Atrasos',        icon: 'schedule' },
+    { key: 'DEADLINE_CONFLICT',label: 'Conflitos de prazo', icon: 'calendar_month' },
     { key: 'RECOMMENDATION',  label: 'Recomendações',  icon: 'tips_and_updates' },
     { key: 'ACHIEVEMENT',     label: 'Conquistas',     icon: 'emoji_events' },
   ];
@@ -101,6 +102,7 @@ export class InsightsPageComponent implements OnInit {
       RISK:             'crisis_alert',
       BOTTLENECK:       'traffic',
       DELAY_PREDICTION: 'schedule',
+      DEADLINE_CONFLICT:'calendar_month',
       RECOMMENDATION:   'tips_and_updates',
       ACHIEVEMENT:      'emoji_events',
     };

@@ -293,7 +293,7 @@ export const NOTIFICATION_CONFIG: Record<
   PROJECT_INVITE: { icon: 'group_add', color: '#14b8a6' },
 };
 
-export type InsightType = 'RISK' | 'BOTTLENECK' | 'DELAY_PREDICTION' | 'RECOMMENDATION' | 'ACHIEVEMENT';
+export type InsightType = 'RISK' | 'BOTTLENECK' | 'DELAY_PREDICTION' | 'DEADLINE_CONFLICT' | 'RECOMMENDATION' | 'ACHIEVEMENT';
 export type InsightSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
 export interface Insight {

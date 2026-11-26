@@ -68,6 +68,12 @@
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-[--border] bg-[--surface-hover]">
+              <th class="px-4 py-3 text-left cursor-pointer" (click)="sort('risk')">
+                <span class="flex items-center gap-1 font-semibold text-[--text-secondary]">
+                  Risco
+                  @if (sortKey() === 'risk') { <span class="material-symbols-rounded text-xs">{{ sortAsc() ? 'arrow_upward' : 'arrow_downward' }}</span> }
+                </span>
+              </th>
               <th class="px-4 py-3 text-left cursor-pointer" (click)="sort('name')">
                 <span class="flex items-center gap-1 font-semibold text-[--text-secondary]">
                   Projeto
@@ -99,6 +105,32 @@
           <tbody>
             @for (p of sorted(); track p.id) {
               <tr class="border-b border-[--border] hover:bg-[--surface-hover] transition-colors">
+                <!-- Risk -->
+                <td class="px-4 py-4 text-center">
+                  @if (topRiskId() === p.id) {
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide"
+                          style="background:#fef3c7; color:#92400e;">
+                      <span class="material-symbols-rounded" style="font-size:12px">bolt</span>
+                      Onde agir
+                    </span>
+                  } @else if (risk(p) >= 40) {
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold"
+                          style="background:#fee2e2; color:#b91c1c;">
+                      {{ risk(p) }}
+                    </span>
+                  } @else if (risk(p) >= 15) {
+                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold"
+                          style="background:#fef9c3; color:#854d0e;">
+                      {{ risk(p) }}
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold"
+                          style="background:#d1fae5; color:#065f46;">
+                      ok
+                    </span>
+                  }
+                </td>
+
                 <!-- Project Name -->
                 <td class="px-4 py-4">
                   <div class="flex items-center gap-3">

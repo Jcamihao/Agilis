@@ -225,7 +225,7 @@ export class ProjectsService {
     const projects = await this.prisma.project.findMany({
       where: { companyId, isArchived: false },
       include: {
-        tasks: { select: { id: true, status: true, dueDate: true, updatedAt: true } },
+        tasks: { select: { id: true, status: true, dueDate: true, updatedAt: true, assigneeId: true } },
         _count: { select: { members: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -234,7 +234,12 @@ export class ProjectsService {
     return projects.map((p) => {
       const total     = p.tasks.length;
       const done      = p.tasks.filter((t) => t.status === 'DONE').length;
-      const overdue   = p.tasks.filter((t) => t.dueDate && t.dueDate < new Date() && t.status !== 'DONE').length;
+      const now       = new Date();
+      const in3days   = new Date(now.getTime() + 3 * 86_400_000);
+      const overdue   = p.tasks.filter((t) => t.dueDate && t.dueDate < now && t.status !== 'DONE').length;
+      // Sinais de risco à frente do atraso (badge "onde agir" do Portfolio):
+      const dueSoon   = p.tasks.filter((t) => t.dueDate && t.dueDate >= now && t.dueDate < in3days && t.status !== 'DONE').length;
+      const unassigned = p.tasks.filter((t) => t.status !== 'DONE' && !t.assigneeId).length;
       const progress  = total > 0 ? Math.round((done / total) * 100) : 0;
 
       // Velocity: tasks completed in last 14 days
@@ -249,6 +254,7 @@ export class ProjectsService {
       return {
         id: p.id, name: p.name, color: p.color, icon: p.icon,
         total, done, overdue, progress,
+        dueSoon, unassigned,
         memberCount: p._count.members,
         forecastDate,
         forecastDays,

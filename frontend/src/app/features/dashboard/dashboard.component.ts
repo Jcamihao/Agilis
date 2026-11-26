@@ -153,7 +153,7 @@ export class DashboardComponent implements OnInit {
   insightIcon(type: string): string {
     const map: Record<string, string> = {
       RISK: 'crisis_alert', BOTTLENECK: 'traffic',
-      DELAY_PREDICTION: 'schedule', RECOMMENDATION: 'tips_and_updates', ACHIEVEMENT: 'emoji_events',
+      DELAY_PREDICTION: 'schedule', DEADLINE_CONFLICT: 'calendar_month', RECOMMENDATION: 'tips_and_updates', ACHIEVEMENT: 'emoji_events',
     };
     return map[type] ?? 'info';
   }

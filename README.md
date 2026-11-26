@@ -127,9 +127,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.13.0** — Convites seguros por Link / QR Code.
+**v3.14.0** — Portfolio Executivo com risco por projeto.
 
 Changelog:
+- **v3.14.0** — Portfolio ganha a coluna "Risco": score 0–100 por projeto com pesos declarados no código (tarefas atrasadas pesam 10 cada até 40; vencendo em ≤3 dias, 6 cada até 30; sem responsável, 5 cada até 20; +10 se progresso < 30% com 2+ atrasadas). A lista ordena por risco por padrão, só o pior (≥ 40) recebe o selo "Onde agir", e o KPI "Em risco" usa o mesmo limiar. Insight novo pelo cron de sempre: 3+ tarefas do mesmo responsável vencendo na mesma janela de 7 dias vira `DEADLINE_CONFLICT` (CRITICAL em 5+), apontando para o Workload. Migration `20261125000004_deadline_conflict_insight`
 - **v3.13.0** — Onboarding ganha "Criar com projeto de exemplo": um clique cria "Primeiros passos" com 6 tarefas nas 4 colunas (prazos relativos para acender Insights/Portfolio), sprint Boas-vindas de 14 dias e descrição dizendo que é exemplo. Meta: piloto chega ao Portfolio populado em menos de 2 minutos. Tudo editável/apagável como qualquer projeto real
 - **v3.12.1** — Medição de custo de IA (pré-requisito da franquia): cada chamada bem-sucedida ao Selah IA passa a registrar em `ai_usage_logs` a feature, o tamanho do request e da resposta (tokens estimados por chars/4 até o Selah devolver `usage`). Nova rota `GET /ai/usage?companyId&months` (só OWNER/ADMIN) com agregação por mês. Falha na medição nunca derruba a resposta de IA. Migration `20261125000003_ai_usage_logs`
 - **v3.12.0** — Recuperação de senha: "Esqueci minha senha" no login leva a `/auth/recuperar-senha`; o e-mail (Resend, ou Noop em dev) traz link de 1 hora para `/auth/redefinir-senha/:token`. Token de 32 bytes com só o hash sha256 no banco (pattern do convite), um link válido por usuário, uso único, e a redefinição derruba todas as sessões emitidas antes (`tokensInvalidBefore` na validação JWT). `POST /auth/forgot-password` sempre 202 (não revela cadastro) e 5/min por IP+email; `POST /auth/reset-password` 10/min por IP. Migration `20261125000002_password_reset`. Testado vivo: reset→senha nova entra→senha velha 401→replay 400→sessão antiga 401

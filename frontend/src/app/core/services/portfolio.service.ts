@@ -9,6 +9,8 @@ export interface PortfolioProject {
   total: number;
   done: number;
   overdue: number;
+  dueSoon: number;
+  unassigned: number;
   progress: number;
   memberCount: number;
   forecastDate: string | null;

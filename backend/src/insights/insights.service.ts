@@ -29,7 +29,7 @@ export class InsightsService {
   }
 
   async generate(companyId: string) {
-    const [overdue, stagnant, backlog, unassignedUrgent, riskyProjects] = await Promise.all([
+    const [overdue, stagnant, backlog, unassignedUrgent, riskyProjects, dueWeek] = await Promise.all([
       this.prisma.task.findMany({
         where: { project: { companyId }, dueDate: { lt: new Date() }, status: { not: 'DONE' } },
         include: { assignee: { select: { name: true } }, project: { select: { id: true, name: true } } },
@@ -66,6 +66,18 @@ export class InsightsService {
           tasks: { where: { status: { not: 'DONE' } }, select: { id: true, dueDate: true } },
         },
         take: 20,
+      }),
+      // Conflito de prazos: tarefas atribuídas vencendo nos próximos 7 dias, agrupadas por pessoa.
+      // (Sem orderBy/_min no groupBy: dispara um bug de inferência de tipos do Prisma 5; ordenar em JS.)
+      this.prisma.task.groupBy({
+        by: ['assigneeId'],
+        where: {
+          project: { companyId },
+          status: { not: 'DONE' },
+          assigneeId: { not: null },
+          dueDate: { gte: new Date(), lt: new Date(Date.now() + 7 * 86_400_000) },
+        },
+        _count: { _all: true },
       }),
     ]);
 
@@ -139,6 +151,31 @@ export class InsightsService {
         entityType: 'project',
         entityId: delayedProject.id,
         metadata: { openTasks: delayedProject.tasks.length },
+        expiresAt: this.expiresInDays(5),
+      });
+    }
+
+    // ≥3 tarefas do mesmo responsável vencendo na mesma janela de 7 dias = uma pessoa afogando.
+    const crowded = dueWeek
+      .filter((g) => g.assigneeId && g._count._all >= 3)
+      .sort((a, b) => b._count._all - a._count._all);
+    if (crowded.length) {
+      const people = await this.prisma.user.findMany({
+        where: { id: { in: crowded.map((g) => g.assigneeId as string) } },
+        select: { id: true, name: true },
+      });
+      const nameOf = new Map(people.map((p) => [p.id, p.name]));
+      const top = crowded[0];
+      const who = nameOf.get(top.assigneeId as string) ?? 'um responsável';
+      insights.push({
+        companyId,
+        type: 'DEADLINE_CONFLICT',
+        severity: top._count._all >= 5 ? 'CRITICAL' : 'HIGH',
+        title: `${who} concentra ${top._count._all} tarefas vencendo nesta semana`,
+        description: `Com ${top._count._all} prazos na mesma janela, algo vai estourar. Adiante uma entrega, mova um prazo ou realoque com o Workload.`,
+        entityType: 'user',
+        entityId: top.assigneeId as string,
+        metadata: { count: top._count._all, affected: crowded.length },
         expiresAt: this.expiresInDays(5),
       });
     }
