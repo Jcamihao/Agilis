@@ -1,0 +1,99 @@
+<div class="flex flex-col gap-6">
+
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-[--text-primary] tracking-tight flex items-center gap-2">
+        <span class="material-symbols-rounded text-2xl text-primary-600">monitor_heart</span>
+        Diagnóstico
+      </h2>
+      <p class="text-sm text-[--text-secondary] mt-0.5">Erros capturados e uso real por módulo — o dado das decisões</p>
+    </div>
+    <select [(ngModel)]="days" (ngModelChange)="changeDays()" class="ag-input ag-input--sm">
+      <option [ngValue]="7">Últimos 7 dias</option>
+      <option [ngValue]="14">Últimos 14 dias</option>
+      <option [ngValue]="30">Últimos 30 dias</option>
+    </select>
+  </div>
+
+  @if (forbidden()) {
+    <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[--border] p-8 text-center">
+      <span class="material-symbols-rounded text-4xl text-[--text-tertiary]">lock</span>
+      <p class="text-sm text-[--text-secondary] mt-2">Só administradores veem esta página.</p>
+    </div>
+  } @else if (loading()) {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      @for (_ of [1,2]; track $index) {
+        <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[--border] h-64 ag-skeleton"></div>
+      }
+    </div>
+  } @else {
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+      <!-- Erros -->
+      <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[--border] shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-[--border] flex items-center justify-between">
+          <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
+            <span class="material-symbols-rounded text-base" [style.color]="totalErros() > 0 ? '#ef4444' : '#10b981'">bug_report</span>
+            Erros ({{ days() }} dias)
+          </h3>
+          <span class="text-2xl font-black" [style.color]="totalErros() > 0 ? '#ef4444' : '#10b981'">{{ totalErros() }}</span>
+        </div>
+        <div class="p-2">
+          @if (!errors()?.groups?.length) {
+            <p class="text-sm text-[--text-tertiary] text-center py-8">Nenhum erro registrado. 🎉</p>
+          }
+          @for (g of errors()?.groups; track g.message + g.source) {
+            <div class="px-3 py-2.5 border-b border-[--border] last:border-0">
+              <div class="flex items-start gap-2">
+                <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded flex-shrink-0 mt-0.5"
+                      [style.background]="g.source === 'SERVER' ? '#fee2e2' : '#fef3c7'"
+                      [style.color]="g.source === 'SERVER' ? '#b91c1c' : '#92400e'">
+                  {{ g.source === 'SERVER' ? 'back' : 'front' }}
+                </span>
+                <p class="text-xs text-[--text-primary] break-all leading-relaxed flex-1">{{ g.message }}</p>
+                <span class="text-xs font-bold text-[--text-secondary] flex-shrink-0">{{ g._count._all }}×</span>
+              </div>
+              <p class="text-[11px] text-[--text-tertiary] mt-1">visto pela última vez {{ ago(g._max.createdAt) }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Uso por módulo -->
+      <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[--border] shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-[--border]">
+          <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
+            <span class="material-symbols-rounded text-base text-primary-600">query_stats</span>
+            Uso real por módulo (últimos 30 dias)
+          </h3>
+          <p class="text-[11px] text-[--text-tertiary] mt-1">Contagem de eventos de produto — alimenta a decisão de corte do dia 60.</p>
+        </div>
+        <table class="w-full text-sm">
+          <tbody>
+            @for (row of usage()?.events; track row.event) {
+              <tr class="border-b border-[--border]">
+                <td class="px-4 py-2.5 text-[--text-primary]">{{ eventLabel(row.event) }}</td>
+                <td class="px-4 py-2.5 text-right font-bold text-[--text-primary]">{{ row._count._all }}</td>
+                <td class="px-4 py-2.5 text-right text-[11px] text-[--text-tertiary] whitespace-nowrap">{{ ago(row._max.createdAt) }}</td>
+              </tr>
+            }
+            @for (row of usage()?.ai; track row.feature) {
+              <tr class="border-b border-[--border]">
+                <td class="px-4 py-2.5 text-[--text-primary]">IA: {{ row.feature }} <span class="text-[10px] text-[--text-tertiary]">({{ (row._sum.requestChars ?? 0) | number }} chars enviados)</span></td>
+                <td class="px-4 py-2.5 text-right font-bold text-[--text-primary]">{{ row._count._all }}</td>
+                <td class="px-4 py-2.5 text-right text-[11px] text-[--text-tertiary]">—</td>
+              </tr>
+            }
+            @if (!usage()?.events?.length && !usage()?.ai?.length) {
+              <tr><td colspan="3" class="px-4 py-8 text-center text-sm text-[--text-tertiary]">
+                Nenhum evento ainda. Eles começam a aparecer quando o primeiro piloto usar o sistema.
+              </td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  }
+</div>

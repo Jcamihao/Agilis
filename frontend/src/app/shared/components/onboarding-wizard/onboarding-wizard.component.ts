@@ -7,6 +7,7 @@ import { CompaniesService } from '../../../core/services/companies.service';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { TasksService } from '../../../core/services/tasks.service';
 import { SprintsService } from '../../../core/services/sprints.service';
+import { TelemetryService } from '../../../core/services/telemetry.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { apiErrorMessage } from '../../../core/utils/api-error';
 
@@ -28,6 +29,7 @@ export class OnboardingWizardComponent {
   private readonly projectsSvc = inject(ProjectsService);
   private readonly tasksSvc = inject(TasksService);
   private readonly sprintsSvc = inject(SprintsService);
+  private readonly telemetry = inject(TelemetryService);
   private readonly auth = inject(AuthService);
 
   done = output<void>();
@@ -196,6 +198,7 @@ export class OnboardingWizardComponent {
       } catch { /* segue sem sprint */ }
 
       this.createdProjectId.set(projectId);
+      this.telemetry.track('onboarding.sample_created');
       this.saving.set(false);
       this.finish();
     } catch (e: any) {

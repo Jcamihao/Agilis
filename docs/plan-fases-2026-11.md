@@ -14,6 +14,9 @@ Fonte de decisão: análise YAGNI de 2026-11-25 com o dono. Cada fase é um comm
 | F8 | Busca global: termos recentes (Ctrl+K já existe) | v3.15.1 | ✅ 2026-11-26 |
 | F9 | Multiempresa: empresa ativa visível fora da sidebar (topbar/mobile) | v3.15.2 | ✅ 2026-11-26 |
 | F10 | Alinhamento docs↔app (FOUNDER_CONTEXT/README: o que existe, o que saiu, o que está sob observação até o dia 60) + HANDOFF | docs | ✅ 2026-11-26 |
+| F11 | Telemetria: erros persistentes, eventos de uso dos módulos sob observação, health p/ Kuma, página Diagnóstico | v3.16.0 | ✅ 2026-11-26 |
+
+**Pendência manual da F11 (dono, na VPS — configurar o Kuma):** criar um monitor HTTP(s) no Uptime Kuma apontando para `https://<url-do-túnel>/api/v1/telemetry/health` com **Keyword** `ok` e, na seção *Additional HTTP Headers*, o cookie do gate do nginx (o mesmo que `agilis-gate show` revela) — senão o gate barra a checagem com 401 antes de chegar na API. Alternativa: expor `/api/v1/telemetry/health` fora do gate no vhost (decisão do dono; o endpoint não vaza nada além de `ok`). Intervalo 60s + um aviso no celular basta.
 
 **Pendências manuais do dono (não dá pra executar daqui):**
 1. VPS: definir `RESEND_API_KEY` (e-mails reais) e `SELAH_IA_API_KEY`/`SELAH_IA_BASE_URL` (religar IA) + `APP_BASE_URL` com o domínio público; depois rodar o convite ponta a ponta e um `forgot-password` de verdade em produção.

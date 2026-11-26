@@ -81,6 +81,7 @@
       <!-- Section items -->
       @if (collapsed || isExpanded(section.key)) {
         @for (item of section.items; track item.route) {
+          @if (!item.adminOnly || isAdmin()) {
           <a [routerLink]="item.route" (click)="navigate.emit()" routerLinkActive #rla="routerLinkActive"
              class="nav-item flex items-center gap-3 px-3 py-[9px] cursor-pointer relative transition-all duration-150"
              [style.background]="rla.isActive ? 'rgb(var(--c-border) / 0.08)' : ''"
@@ -93,6 +94,7 @@
                     [style.color]="rla.isActive ? 'rgb(var(--c-text))' : 'rgb(var(--c-700))'">{{ item.label }}</span>
             }
           </a>
+          }
         }
       }
     }

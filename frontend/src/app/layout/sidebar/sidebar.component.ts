@@ -9,6 +9,7 @@ interface NavItem {
   icon: string;
   route: string;
   badge?: number;
+  adminOnly?: boolean;
 }
 
 interface NavSection {
@@ -35,6 +36,10 @@ export class SidebarComponent {
   readonly themeSvc = inject(ThemeService);
   readonly user = this.auth.user;
   readonly companyName = () => this.user()?.companies?.[0]?.company?.name;
+  readonly isAdmin = () => {
+    const role = this.user()?.companies?.[0]?.role;
+    return role === 'OWNER' || role === 'ADMIN';
+  };
 
   // Seções sempre visíveis (sem colapso)
   mainNav: NavItem[] = [
@@ -71,6 +76,7 @@ export class SidebarComponent {
       label: 'Administração',
       items: [
         { label: 'Relatórios',          icon: 'summarize',     route: '/reports' },
+        { label: 'Diagnóstico',         icon: 'monitoring',    route: '/diagnostico', adminOnly: true },
       ],
     },
   ];

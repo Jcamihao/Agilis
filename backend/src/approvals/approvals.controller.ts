@@ -5,6 +5,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApprovalsService, RequestApprovalDto, ReviewApprovalDto } from './approvals.service';
+import { TrackUsage } from '../telemetry/track-usage.decorator';
 
 @ApiTags('approvals')
 @UseGuards(JwtAuthGuard)
@@ -33,6 +34,7 @@ export class ApprovalsController {
   }
 
   @Post('request')
+  @TrackUsage('approval.requested')
   request(@Request() req: any, @Body() dto: RequestApprovalDto) {
     return this.svc.request(req.user.id, dto);
   }
@@ -40,6 +42,7 @@ export class ApprovalsController {
   // ── Review / Cancel ───────────────────────────────────────────────────────
 
   @Patch(':id/review')
+  @TrackUsage('approval.decided')
   review(
     @Param('id') id: string,
     @Request() req: any,

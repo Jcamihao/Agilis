@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { TaskTemplatesService } from './task-templates.service';
 import { CreateTaskTemplateDto, UpdateTaskTemplateDto, UseTaskTemplateDto } from './dto/task-template.dto';
+import { TrackUsage } from '../telemetry/track-usage.decorator';
 
 @ApiTags('task-templates')
 @UseGuards(JwtAuthGuard)
@@ -19,6 +20,7 @@ export class TaskTemplatesController {
   }
 
   @Post()
+  @TrackUsage('task_template.created')
   @ApiOperation({ summary: 'Criar template' })
   create(@Body() dto: CreateTaskTemplateDto, @CurrentUser('id') userId: string) {
     return this.svc.create(dto, userId);
@@ -37,6 +39,7 @@ export class TaskTemplatesController {
   }
 
   @Post(':id/use')
+  @TrackUsage('task_template.used')
   @ApiOperation({ summary: 'Criar tarefa a partir do template' })
   use(@Param('id') id: string, @Body() dto: UseTaskTemplateDto, @CurrentUser('id') userId: string) {
     return this.svc.useTemplate(id, dto, userId);

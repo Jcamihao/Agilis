@@ -4,6 +4,7 @@ import { TeamsService } from './teams.service';
 import { CreateTeamDto, AddTeamMemberDto } from './dto/create-team.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { TrackUsage } from '../telemetry/track-usage.decorator';
 
 @ApiTags('teams')
 @UseGuards(JwtAuthGuard)
@@ -25,6 +26,7 @@ export class TeamsController {
   }
 
   @Post()
+  @TrackUsage('team.created')
   @ApiOperation({ summary: 'Criar nova equipe' })
   create(@Body() dto: CreateTeamDto, @CurrentUser('id') userId: string) {
     return this.teamsService.create(dto, userId);
@@ -37,6 +39,7 @@ export class TeamsController {
   }
 
   @Post(':id/members')
+  @TrackUsage('team.member_added')
   @ApiOperation({ summary: 'Adicionar membro à equipe' })
   addMember(@Param('id') id: string, @Body() dto: AddTeamMemberDto, @CurrentUser('id') userId: string) {
     return this.teamsService.addMember(id, dto, userId);

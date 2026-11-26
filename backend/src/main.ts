@@ -9,6 +9,7 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { TelemetryService } from './telemetry/telemetry.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -47,7 +48,7 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter(app.get(TelemetryService)));
   app.useGlobalInterceptors(new TransformInterceptor());
 
   const swaggerConfig = new DocumentBuilder()

@@ -5,6 +5,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CustomFieldsService, CreateFieldDto, UpdateFieldDto } from './custom-fields.service';
+import { TrackUsage } from '../telemetry/track-usage.decorator';
 
 @ApiTags('custom-fields')
 @UseGuards(JwtAuthGuard)
@@ -21,6 +22,7 @@ export class CustomFieldsController {
   }
 
   @Post('projects/:projectId/custom-fields')
+  @TrackUsage('custom_field.created')
   create(@Param('projectId') projectId: string, @Body() dto: CreateFieldDto) {
     return this.svc.createField(projectId, dto);
   }
@@ -48,6 +50,7 @@ export class CustomFieldsController {
   }
 
   @Patch('tasks/:taskId/custom-fields/:fieldId')
+  @TrackUsage('custom_field.used')
   setValue(
     @Param('taskId') taskId: string,
     @Param('fieldId') fieldId: string,

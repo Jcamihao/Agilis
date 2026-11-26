@@ -423,6 +423,44 @@ model AiUsageLog {
   @@map("ai_usage_logs")
 }
 
+// ── Telemetria (instrumento do fundador, v3.16.0) ───────────────────────────
+// NÃO é auditoria para o tenant (a que saiu na v3.7.0 não volta). Serve para:
+// erros persistentes (Kuma cobre uptime, erro ninguém vê) e dados de uso que
+// decidem o corte dos módulos sob observação no dia 60 do piloto.
+
+model ProductEvent {
+  id        String   @id @default(uuid())
+  companyId String?
+  userId    String?
+  event     String // invite.accepted | approval.decided | team.created | custom_field.used | ...
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([companyId, event, createdAt])
+  @@index([createdAt])
+  @@map("product_events")
+}
+
+enum ErrorLogSource {
+  SERVER
+  CLIENT
+}
+
+model ErrorLog {
+  id        String         @id @default(uuid())
+  source    ErrorLogSource
+  message   String
+  stack     String?
+  method    String?
+  path      String?
+  userAgent String?
+  companyId String?
+  createdAt DateTime       @default(now())
+
+  @@index([source, createdAt])
+  @@map("error_logs")
+}
+
 model AiConversation {
   id        String   @id @default(uuid())
   companyId String

@@ -8,10 +8,14 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
+import { TelemetryService } from '../../telemetry/telemetry.service';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
+
+  // TelemetryService é opcional: sem ele (ex.: testes) o filtro só loga em console.
+  constructor(private readonly telemetry?: TelemetryService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -63,6 +67,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
       this.logger.error(exception.stack);
     } else {
       this.logger.error(String(exception));
+    }
+
+    // 5xx é bug nosso: persiste para o Diagnóstico. 4xx é esperado, não polui o log.
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR && this.telemetry) {
+      const err = exception instanceof Error ? exception : new Error(String(exception));
+      const user = (request as any).user;
+      this.telemetry.logError({
+        source: 'SERVER',
+        message: err.message,
+        stack: err.stack,
+        method: request.method,
+        path: request.url,
+        userAgent: request.headers['user-agent'],
+        companyId: user?.companyId,
+      });
     }
 
     response.status(status).json({

@@ -4,6 +4,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { InvitesService } from './invites.service';
+import { TrackUsage } from '../telemetry/track-usage.decorator';
 import { CreateInviteDto } from './dto/create-invite.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthThrottlerGuard } from '../auth/guards/auth-throttler.guard';
@@ -18,6 +19,7 @@ export class InvitesController {
   constructor(private readonly invitesService: InvitesService) {}
 
   @Post()
+  @TrackUsage('invite.created')
   @ApiOperation({ summary: 'Gera link de convite para a empresa (admin)' })
   create(
     @Query('companyId', ParseUUIDPipe) companyId: string,
@@ -52,6 +54,7 @@ export class InvitesController {
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @Post(':token/accept')
   @HttpCode(HttpStatus.OK)
+  @TrackUsage('invite.accepted')
   @ApiOperation({ summary: 'Entra na empresa do convite como MEMBER (idempotente)' })
   accept(@Param('token') token: string, @CurrentUser('id') userId: string) {
     return this.invitesService.accept(token, userId);

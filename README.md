@@ -122,9 +122,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.15.2** — Empresa ativa sempre visível no topo.
+**v3.16.0** — Telemetria: erros persistentes + uso real por módulo.
 
 Changelog:
+- **v3.16.0** — Instrumento do fundador (não é a auditoria da v3.7.0 de volta — nada disso aparece para o tenant). Três peças: (1) **Erros persistentes** — todo 5xx do backend e todo erro não tratado do front (ErrorHandler global) são gravados em `error_logs` com dedupe de 60s por assinatura, em vez de só no log do container; (2) **Eventos de uso** — os 4 módulos sob observação (Campos Personalizados, Templates, Equipes, Aprovações) mais convite e onboarding emitem eventos contados em `product_events` — é o dado que decide o corte no dia 60; (3) **Health check** `GET /api/v1/telemetry/health` (público, 200 = API + banco; 503 quando o banco cai) para o Kuma monitorar — uptime deixa de ser silêncio. Nova página **Diagnóstico** (só OWNER/ADMIN): erros agrupados por mensagem com contador e "visto há X", uso por módulo com última ocorrência, e IA consolidada. Migrations `20261126120000_add_telemetry`. Verificado vivo: dedupe, allowlist de eventos, agregação e health com banco em pé
 - **v3.15.2** — O nome da empresa ativa ganhou um chip no topo (ao lado da busca), visível em todas as telas. Antes só aparecia na sidebar, que no mobile é gaveta fechada: no celular ninguém via em qual empresa estava. Limite conhecido segue: o app usa a primeira empresa do usuário, sem seletor
 - **v3.15.1** — A busca global (Ctrl+K) abre mostrando as últimas 8 buscas do usuário como chips clicáveis (um clique refaz a busca) e botão "limpar". Ficam no `localStorage`, uma lista por usuário, sem servidor. Termos repetidos sobem para o topo em vez de duplicar
 - **v3.15.0** — Carga de Trabalho ganha setas de semana anterior/próxima no Calendário de Vencimentos: a grade de 14 dias desloca de 7 em 7 dias (a API aceita `?weekStart=YYYY-MM-DD`; formato inválido ou data inexistente volta para hoje sem erro), o tempo registrado segue a semana pedida, e um botão "Hoje" aparece quando você saiu da janela atual. De quebra, o heatmap saiu de 14 `count` sequenciais por membro para 1 única query com bucketing em JS. Testes no limiar da âncora, na janela de tempo e no fallback de `weekStart` inválido

@@ -114,6 +114,11 @@ export const routes: Routes = [
         title: 'Carga de Trabalho — Agilis',
       },
       {
+        path: 'diagnostico',
+        loadComponent: () => import('./features/diagnostico/diagnostico.component').then((m) => m.DiagnosticoComponent),
+        title: 'Diagnóstico — Agilis',
+      },
+      {
         path: 'insights',
         loadComponent: () => import('./features/insights-page/insights-page.component').then((m) => m.InsightsPageComponent),
         title: 'Insights — Agilis',
