@@ -13,7 +13,7 @@ Fonte de decisão: análise YAGNI de 2026-11-25 com o dono. Cada fase é um comm
 | F7 | Workload: navegação de semana (confirmar ausência antes) | v3.15.0 | ✅ 2026-11-26 |
 | F8 | Busca global: termos recentes (Ctrl+K já existe) | v3.15.1 | ✅ 2026-11-26 |
 | F9 | Multiempresa: empresa ativa visível fora da sidebar (topbar/mobile) | v3.15.2 | ✅ 2026-11-26 |
-| F10 | Alinhamento docs↔app (FOUNDER_CONTEXT/README: o que existe, o que saiu, o que está sob observação até o dia 60) + HANDOFF | docs | |
+| F10 | Alinhamento docs↔app (FOUNDER_CONTEXT/README: o que existe, o que saiu, o que está sob observação até o dia 60) + HANDOFF | docs | ✅ 2026-11-26 |
 
 **Pendências manuais do dono (não dá pra executar daqui):**
 1. VPS: definir `RESEND_API_KEY` (e-mails reais) e `SELAH_IA_API_KEY`/`SELAH_IA_BASE_URL` (religar IA) + `APP_BASE_URL` com o domínio público; depois rodar o convite ponta a ponta e um `forgot-password` de verdade em produção.

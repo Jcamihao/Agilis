@@ -1,6 +1,6 @@
 # Handoff do Agilis
 
-Atualizado em 2026-11-16, depois do deploy da v3.10.4 na VPS. O conteúdo funcional vem da sessão de 2026-11-07. Onde algo foi só presumido ou lido de memória de sessões anteriores, o texto diz isso.
+Atualizado em 2026-11-26, depois das fases F1–F10 do plano `docs/plan-fases-2026-11.md` (v3.11.0–v3.15.2, tudo commitado na `master` local e nada publicado). O conteúdo funcional de antes vem da sessão de 2026-11-07/16. Onde algo foi só presumido ou lido de memória de sessões anteriores, o texto diz isso.
 
 ## 1. Projeto
 
@@ -11,9 +11,9 @@ O Agilis é um SaaS B2B multiempresa para equipes brasileiras acompanharem proje
 - Caminho local: `/home/caminhao/coding/codeStage/Agilis`. Remoto: `git@github.com:Jcamihao/Agilis.git`. Branch: `master`.
 - Convenção: Conventional Commits com a versão no assunto, por exemplo `feat!: remover Auditoria (v3.7.0)`. A versão sobe em `package.json` da raiz a cada commit (semver) e o `README.md` ganha uma linha no changelog. Os `package.json` de `backend/` e `frontend/` têm versões próprias e não são usados como versão do produto.
 - Rodapé de commit: `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
-- Versão atual: código **3.10.5** (`463884e`, limpeza da revisão do convite, ainda não publicada nem em produção); produção **3.10.4**, com convite exclusivamente por Link / QR Code. Em 2026-11-07 foi feito `git push origin master`: os commits de rate limit, correção de edição de projeto, remoção de formulários duplicados, convite por link/QR, documentação e `dbca2e0` (responsividade mobile) foram publicados no `origin/master`. A v3.10.4 (`337330e`) também está no `origin/master` (verificado com `git fetch` em 2026-11-16: `master` e `origin/master` iguais).
+- Versão atual: código **3.15.2** (fases F1–F9 do plano `docs/plan-fases-2026-11.md`); produção ainda na **3.10.4** (deploy de 2026-11-16, convite exclusivamente por Link / QR Code). `origin/master` está congelado em `f8c70c1`: tudo de `463884e` (v3.10.5) a `55c66bb` (v3.15.2) espera `git push origin master` + deploy — push é sob pedido explícito do dono. Migrations que o próximo deploy vai aplicar: `20261125000001_remove_automations` (apaga `automation_rules`/`automation_executions`), `20261125000002_password_reset`, `20261125000003_ai_usage_logs`, `20261125000004_deadline_conflict_insight`. A última migration da lista publicada na VPS é a `company_invites` (43 migrations no deploy de 2026-11-16).
 - Estado do git: `graphify-out/`, `frontend/graphify-out/`, `.claude/settings.json` e `CLAUDE.md` passaram para o `.gitignore` (commit `817099d`, já na `master`; são gerados ou específicos da máquina do dono). `.superpowers/` continua não versionado, porque guarda os contratos das fases; decisão aberta.
-- **Branch de trabalho:** nenhuma em andamento; `master` (`463884e`, refactor da limpeza da revisão do convite + este commit de docs; ainda não publicados no remoto, `origin/master` está em `f8c70c1`). Antes disso: `f8c70c1`, merge `--no-ff` de `feature/docs-comerciais-sem-okr`, aprovado pelo dono em 2026-11-16. Sem tag nova, porque o produto não mudou. As branches `fix/gitignore-graphify` e `feature/docs-comerciais-sem-okr` continuam local e no remoto (apagar só se o dono pedir). Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
+- **Branch de trabalho:** nenhuma em andamento; `master` em `55c66bb` (v3.15.2) mais o commit de docs da F10 — nada disso publicado (`origin/master` em `f8c70c1`). As branches `fix/gitignore-graphify` e `feature/docs-comerciais-sem-okr` continuam local e no remoto (apagar só se o dono pedir). Quem começar uma sessão deve conferir `git branch --show-current` contra este bloco.
 - Regra do repositório compartilhado: outro agente commita e edita na mesma árvore. Nunca usar `--amend`, `reset`, `rebase`, `stash` ou `checkout` para desfazer; commitar com caminhos explícitos (`git add <arquivos>`), nunca `git add -A`.
 
 ## 3. Stack
@@ -39,11 +39,25 @@ Variáveis de ambiente (só nomes; modelo em `backend/.env.example`): `DATABASE_
 
 ## 5. Planos e fonte única da ordem de trabalho
 
-- Plano comercial: `docs/estrategia-founder-skills.md` é a fonte única. Ordem: lista de 40 prospects, outreach, cinco conversas, até cinco pilotos assistidos, medição de retorno e objeções, e só então decidir onboarding, importador CSV, preço e cobrança. `docs/outreach-sequencia.md` tem a cadência de LinkedIn e `FOUNDER_CONTEXT.md` o ICP, a promessa e as restrições. Os três textos foram revisados em 2026-11-16 para a v3.10.4: citam OKRs e Health Score só na lista do que não se deve prometer. A produção está na 3.10.4 desde 2026-11-16.
-- Plano técnico em curso: a feature de convite por link/QR tem contrato em `.superpowers/sdd/convite-link/contrato.md` (decisões já tomadas, rotas, modelo de dados, telas). É a fonte da verdade dessa fase.
+- Plano comercial: `docs/estrategia-founder-skills.md` é a fonte única. Ordem: lista de 40 prospects, outreach, cinco conversas, até cinco pilotos assistidos, medição de retorno e objeções, e só então decidir onboarding, importador CSV, preço e cobrança. `docs/outreach-sequencia.md` tem a cadência de LinkedIn e `FOUNDER_CONTEXT.md` o ICP, a promessa e as restrições. Os três textos foram revisados em 2026-11-26 para a v3.15.2 (Automações saíram do produto; Campos Personalizados, Templates, Equipes e Aprovações marcados como sob observação até o dia 60; recuperação de senha corrigida). A produção está na 3.10.4 desde 2026-11-16.
+- Plano técnico em curso: **`docs/plan-fases-2026-11.md`** — fases F1–F10 concluídas (F2 e F4 têm pendências manuais do dono: convite ponta a ponta em produção e as chaves `RESEND_API_KEY`/`SELAH_IA_API_KEY`). Não há próxima fase planejada; o próximo passo técnico é o push + deploy, sob pedido do dono. A feature de convite por link/QR tem contrato em `.superpowers/sdd/convite-link/contrato.md`.
 - Decisões já tomadas pelo dono nesta frente: cortar escopo agressivamente (a sequência de remoções acima), manter só gestão de projetos/tarefas, usar subagentes em tarefas grandes ou que mexem em back e front.
 
 ## 6. Onde parou
+
+**Concluído e commitado em 2026-11-25/26: fases F1–F10 do plano `docs/plan-fases-2026-11.md` (v3.11.0 → v3.15.2 + docs), nada publicado nem deployado.**
+- `a09be86` **F1 v3.11.0** — Automações removidas (módulo, tela, enums, tabelas via `20261125000001_remove_automations`). Migration testada contra banco limpo com shadow DB (`migrate diff` fecha em "No difference detected").
+- **F2** — convite: limite de tentativas confirmado vivo no código (30/min por IP em `preview`/`accept`); checklist de produção ficou pendente manual do dono.
+- `056ecd6` **F3 v3.12.0** — recuperação de senha (token 32 B com hash sha256, 1 h, uso único, derruba sessões antigas; `20261125000002_password_reset`); testado vivo pelo autor do commit.
+- `4d69a15` **F4 v3.12.1** — medição de custo de IA em `ai_usage_logs` + `GET /ai/usage`; chaves da VPS seguem pendentes do dono.
+- `27abc70` **F5 v3.13.0** — onboarding "Criar com projeto de exemplo".
+- `d3b71cc` **F6 v3.14.0** — coluna Risco no Portfolio (score de pesos declarados, selo "Onde agir" só para o pior ≥ 40) + insight `DEADLINE_CONFLICT` (3+ tarefas do mesmo responsável na janela de 7 dias; CRITICAL ≥ 5; `20261125000004_deadline_conflict_insight`). Validation desta sessão: migration aplicada em banco limpo, 3 testes de unidade novos, `generate()` exercitado contra Postgres real com dados sintéticos (título/severidade/metadata conferidos).
+- `14b7f36` **F7 v3.15.0** — Workload com navegação de semana: `GET /workload?weekStart=YYYY-MM-DD` ancora a grade de 14 dias e a semana do tempo registrado (inválido → hoje, regex + parse); heatmap de 14 counts virou 1 query; 2 testes de unidade; API testada ao vivo (default, semana futura, passada e `lixo`).
+- `c873135` **F8 v3.15.1** — buscas recentes no Ctrl+K (8 termos por usuário no `localStorage`, chips + limpar).
+- `55c66bb` **F9 v3.15.2** — chip da empresa ativa no topbar (visível no mobile, onde a sidebar é gaveta).
+- **F10 (este commit)** — FOUNDER_CONTEXT/README/estratégia alinhados ao produto real (Automações fora; observação até dia 60 documentada; recuperação de senha corrigida nos textos).
+- Estado de verificação das fases F6–F9 desta sessão: `tsc` e build de produção dos dois lados limpos; 89 testes do backend passando. **Não verificado no navegador**: a máquina não tem libs do Chromium (sem sudo) e nenhum agente conseguiu abrir Chrome — conferir visualmente o badge de risco, as setas do Workload, os chips de busca recente e o chip da empresa quando houver ambiente.
+- Ambiente deixado para trás: `docker compose up` de postgres+redis locais ligado, backend dev no 3102 e `ng serve` no 4200 (podem continuar; conferir `ss -ltnp` antes de subir outro). Banco local `agilis_db` migrado e com seed (`admin@agilis.app`).
 
 **Concluído, commitado e publicado no GitHub: convite por link / QR code para a empresa ("equipe" na UI é a página Membros).**
 - Contrato em `.superpowers/sdd/convite-link/contrato.md` (decisões: token aleatório de 32 bytes, só o hash sha256 vai ao banco; validade de 1, 7 ou 30 dias; entra como MEMBER; revogável; QR gerado no navegador).
@@ -83,14 +97,14 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 8. Desafios e riscos
 
-- **Endpoint legado de convite por e-mail continua quebrado, mas não é mais exposto pela interface.** `POST /users/company-members/invite` devolve 400 (`property email should not exist`) porque o DTO não tem validadores. Além disso, se funcionasse, criaria a conta com senha aleatória, e o app **não tem recuperação de senha** (só um link morto na tela de login). A UI ainda oferece o papel VIEWER, que não existe no enum do banco. A rota foi preservada sem uso para evitar quebra de compatibilidade; removê-la é limpeza futura, não requisito do fluxo de convite.
-- Não existe recuperação de senha. Qualquer usuário que esquecer a senha fica trancado.
+- **Endpoint legado de convite por e-mail continua quebrado, mas não é mais exposto pela interface.** `POST /users/company-members/invite` devolve 400 (`property email should not exist`) porque o DTO não tem validadores. Além disso, se funcionasse, criaria a conta com senha aleatória. A UI ainda oferece o papel VIEWER, que não existe no enum do banco. A rota foi preservada sem uso para evitar quebra de compatibilidade; removê-la é limpeza futura, não requisito do fluxo de convite.
+- Recuperação de senha existe no código desde a v3.12.0 (master), **mas a produção (v3.10.4) ainda não tem** — até o deploy com `RESEND_API_KEY`, quem esquecer a senha lá fica trancado.
 - A sessão do app é de **uma empresa só** (`user.companies[0]`); não há seletor de empresa. Quem já tem outra empresa e aceita um convite entra nela, mas o app continua na primeira; e num login seguinte sem `?convite=` a empresa ativa volta a ser a primeira (verificado no navegador). Limitação aceita no contrato; resolver exige um seletor de empresa.
 - O token do convite viaja na URL (`/api/v1/invites/<token>/...`) e pode cair no log de acesso do nginx na VPS. O risco é baixo (log legível só por root), mas vale excluir esse caminho do access log, como já foi feito no SSE e no `/__gate/`.
 - O contador do rate limit é em memória: reinicia com o backend e só vale para uma instância. Sem `TRUST_PROXY` correto, todos atrás do proxy dividem o balde do cadastro (10 por minuto no total). O login não sofre porque a chave inclui o e-mail. Quem varia IP por trás de proxy ainda pode testar senhas em contas diferentes; a defesa completa seria bloqueio por conta.
 - O nginx da VPS já limita login/cadastro por `CF-Connecting-IP`; o limite do app é defesa extra.
 - Não há prova no repositório de clientes, pilotos, receita ou outreach; confirmar fora do Git.
-- Não existem importador Trello/CSV, controle de planos, assinatura, cobrança ou medição de custo de IA. A landing mostra Starter, Business e Enterprise sem limites reais, e o e-mail `contato@agilis.app` e os planos são placeholders.
+- Não existem importador Trello/CSV, controle de planos, assinatura ou cobrança. Medição de custo por chamada de IA existe desde a v3.12.1 (`ai_usage_logs`, agregação em `GET /ai/usage`), mas é estimativa por caracteres até o Selah devolver `usage` no adaptador. A landing mostra Starter, Business e Enterprise sem limites reais, e o e-mail `contato@agilis.app` e os planos são placeholders.
 - Outro agente edita a mesma árvore; já houve colisão de porta (3101) e de arquivos. Conferir `git status` e `ss -ltnp` antes de subir servidor ou commitar.
 - Cuidado ao rodar testes no mesmo diretório `dist/` enquanto o `nest start --watch` do outro agente está ativo: ele recompila e reinicia o servidor dele quando o `dist` muda.
 
@@ -115,10 +129,10 @@ Fatos desta sessão que o próximo agente deve saber:
 
 ## 11. Onde estão os detalhes
 
-- Produto e changelog completo (v3.3.3 a v3.9.5): `README.md`.
+- Produto e changelog completo (v1.x a v3.15.2): `README.md`.
 - Contrato da feature de convite: `.superpowers/sdd/convite-link/contrato.md` (pode ganhar as seções "Dúvidas do backend" e "Dúvidas do revisor do backend").
 - Contrato da responsividade mobile (do outro agente): `docs/mobile-responsividade-contrato.md`.
 - Contexto e plano comerciais: `FOUNDER_CONTEXT.md`, `docs/estrategia-founder-skills.md`, `docs/outreach-sequencia.md`. Skills de estratégia, GTM e outreach: `.claude/skills/`.
-- Código de domínio: `backend/src/` (módulos incluindo `invites/` em andamento); interface: `frontend/src/app/`; schema e migrations: `backend/prisma/`; infraestrutura local: `docker-compose.yml`.
+- Código de domínio: `backend/src/` (módulos; `invites/` concluído e publicado na v3.10.x); interface: `frontend/src/app/`; schema e migrations: `backend/prisma/`; infraestrutura local: `docker-compose.yml`.
 - Mapa do código: `graphify-out/GRAPH_REPORT.md` e `graphify query`.
 - Memória do dono sobre a VPS (layout, receitas de deploy, incidentes) e sobre este projeto: `/home/caminhao/.claude/projects/-home-caminhao-codeStage/memory/` (`reference_vps_prod.md`, `project_agilis.md`).

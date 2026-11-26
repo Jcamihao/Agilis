@@ -70,9 +70,9 @@ export class LandingComponent implements OnInit, OnDestroy {
       description: 'Resumos, alertas de risco e sugestões — sua copiloto acompanha o que importa, sem você pedir.',
     },
     {
-      icon: 'bolt',
-      title: 'Automações',
-      description: 'Regras sem código que disparam notificações e e-mails quando uma tarefa muda, atrasa ou é atribuída.',
+      icon: 'group',
+      title: 'Carga de trabalho da equipe',
+      description: 'Heatmap de quem está sobrecarregado nesta semana e na próxima, antes do prazo estourar.',
     },
     {
       icon: 'insights',
@@ -111,7 +111,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     {
       name: 'Business',
       tagline: 'Pra operações com múltiplos times e projetos.',
-      features: ['Tudo do Starter', 'Automações e Portfólio', 'Múltiplas equipes e empresas'],
+      features: ['Tudo do Starter', 'Portfólio Executivo e Insights', 'Múltiplas equipes e empresas'],
       ctaLabel: 'Falar com vendas',
       ctaLink: '#contato',
       highlight: true,

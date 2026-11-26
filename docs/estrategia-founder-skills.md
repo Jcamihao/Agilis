@@ -1,15 +1,15 @@
 # Agilis: plano de validação comercial
 
-Atualizado em 2026-11-16 para o produto v3.10.4. Fonte de contexto: [FOUNDER_CONTEXT.md](../FOUNDER_CONTEXT.md). Recursos removidos do produto (Health Score, OKRs, Auditoria, Webhooks, Gantt e outros) não entram em nenhuma oferta.
+Atualizado em 2026-11-26 para o produto v3.15.2 (master local; produção ainda na v3.10.4). Fonte de contexto: [FOUNDER_CONTEXT.md](../FOUNDER_CONTEXT.md). Recursos removidos do produto (Health Score, OKRs, Auditoria, Webhooks, Gantt, Automações e outros) não entram em nenhuma oferta. Campos Personalizados, Templates de Tarefa, Equipes e Aprovações estão no app sob observação até o dia 60 do piloto — também não entram em oferta.
 
 ## Estado de partida
 
 - O código passou por redução de escopo até a v3.9.0. Depois vieram freio de força bruta no login, correção da edição de projeto, convite por link/QR code e interface responsiva para celular (v3.10.4).
-- O produto atual já tem o necessário para um beta fechado: projetos, tarefas, calendário, Portfolio, Insights, IA, automações, onboarding e convite de membros por link ou QR code.
+- O produto atual já tem o necessário para um beta fechado: projetos, tarefas, calendário, Portfolio com score de risco, Insights (incluindo conflito de prazos), IA, onboarding com projeto de exemplo e convite de membros por link ou QR code.
 - A produção está na v3.10.4 desde 2026-11-16, com convite por link/QR e tela mobile. O convite ponta a ponta ainda não foi testado em produção; fazer isso no onboarding do primeiro piloto.
 - O repositório não prova que exista piloto, cliente, receita, lista de prospects ou histórico de outreach. Trate a aquisição como não iniciada até haver uma planilha externa com esses dados.
 - Não há importador Trello/CSV, planos aplicados pelo backend, cobrança ou medição de custo por mensagem de IA.
-- Não há recuperação de senha: quem esquecer a senha fica trancado. Avisar cada piloto e anotar o caso na planilha; se ocorrer, tratar como objeção de produto.
+- Recuperação de senha existe no código desde a v3.12.0 (e-mail com link de 1 hora), mas só vale em produção depois do deploy da v3.11+ com `RESEND_API_KEY` — na v3.10.4 que está no ar ainda não há. Até lá, avisar cada piloto que quem esquecer a senha fica trancado e anotar o caso na planilha; se ocorrer, tratar como objeção de produto.
 - Segundo o registro de sessões anteriores (não reconferido), a IA está desligada em produção. Antes de vender Brief e Assistente, ligar a chave do app no Selah IA ou demonstrar só Portfolio e Insights.
 
 ## Hipóteses a validar

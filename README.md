@@ -43,11 +43,11 @@ npm run dev
 - **Minhas Tarefas** — fila pessoal com filtros de status/prioridade
 
 ### Produtividade
-- **Busca Global** (⌘K) — modal de busca universal: tarefas, projetos, membros
+- **Busca Global** (⌘K) — modal de busca universal: tarefas, projetos, membros, com as últimas buscas como sugestão
 - **Ações em Massa** — seleção múltipla no kanban + barra flutuante (mover status, excluir)
-- **Templates de Tarefa** — CRUD de templates corporativos, aplicar template no kanban
+- **Templates de Tarefa** — CRUD de templates corporativos, aplicar template no kanban *(no app, sob observação até o dia 60 do piloto)*
 - **Recorrência de Tarefas** — DAILY/WEEKLY/BIWEEKLY/MONTHLY, cron diário recria tarefas DONE
-- **Aprovações** — fluxo de aprovação com múltiplos aprovadores e etapas
+- **Aprovações** — fluxo de aprovação com múltiplos aprovadores e etapas *(no app, sob observação até o dia 60 do piloto)*
 - **Time Tracking** — apontamento de horas por tarefa + registro de ponto (entrada/saída)
 
 ### Inteligência & Analytics
@@ -57,16 +57,12 @@ npm run dev
 - **Insights** — alertas automáticos (CRON horário): tarefas atrasadas, estagnação, backlog excessivo, tarefas urgentes sem responsável
 - **Workload** — carga de trabalho por membro (14 dias), sugestão de rebalanceamento via IA
 
-### Automações & Integrações
-- **Motor de Automações** — regras "se evento X → ação Y" (CRUD completo + engine de execução)
-  - Triggers: tarefa criada, status alterado, prazo vencido, comentário, atribuição
-  - Ações: mudar status, atribuir usuário, notificar, criar tarefa, e-mail
-
 ### Administração
+- **Campos Personalizados e Equipes** — existem no app (módulo `custom-fields`, módulo `teams`, rota `/teams`), fora do discurso de venda e sob observação para corte com dado no dia 60 do piloto
 - **Relatórios** (CSV / Excel / PDF) — Tarefas, Produtividade, Time Tracking
 
 ### Onboarding
-- **Wizard de Primeiro Acesso** — 3 passos guiados: criar empresa → projeto → primeira tarefa
+- **Wizard de Primeiro Acesso** — 3 passos guiados: criar empresa → projeto → primeira tarefa, com opção "Criar com projeto de exemplo" (projeto "Primeiros passos" já populado para o Portfolio acender no piloto)
 
 ---
 
@@ -77,8 +73,7 @@ Agilis/
 ├── backend/                    # NestJS API
 │   ├── src/
 │   │   ├── ai/                 # Cliente do Selah IA + conversas, resumos, gargalos e brief estratégico
-│   │   ├── auth/               # JWT + guards
-│   │   ├── automation/         # Motor de automações + cron
+│   │   ├── auth/               # JWT + guards, recuperação de senha
 │   │   ├── calendar/           # Calendário + exportação iCal
 │   │   ├── companies/          # Multi-tenant
 │   │   ├── insights/           # Insights CRON horário
