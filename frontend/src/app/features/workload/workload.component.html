@@ -84,11 +84,31 @@
     <!-- ── Heatmap grid ── -->
     @if (members().length && dayHeaders().length) {
       <div class="bg-[rgb(var(--c-surface))] rounded-xl border border-[rgb(var(--c-border) / 0.07)] shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-50 flex items-center justify-between">
-          <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
-            <span class="material-symbols-rounded text-base text-slate-400">calendar_view_week</span>
-            Calendário de Vencimentos — próximos 14 dias
-          </h3>
+        <div class="p-4 border-b border-slate-50 flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-sm font-bold text-[--text-primary] flex items-center gap-2">
+              <span class="material-symbols-rounded text-base text-slate-400">calendar_view_week</span>
+              Calendário de Vencimentos
+            </h3>
+            <!-- Navegação de semana: desloca a janela de 14 dias de 7 em 7 dias -->
+            <div class="flex items-center gap-1 ml-2">
+              <button (click)="shiftWeek(-1)" title="Semana anterior"
+                class="w-7 h-7 rounded-lg flex items-center justify-center text-[--text-secondary] hover:bg-[--surface-hover] transition-colors">
+                <span class="material-symbols-rounded text-lg">chevron_left</span>
+              </button>
+              <span class="text-xs font-bold text-[--text-primary] min-w-[7.5rem] text-center">{{ weekRange() }}</span>
+              <button (click)="shiftWeek(1)" title="Semana seguinte"
+                class="w-7 h-7 rounded-lg flex items-center justify-center text-[--text-secondary] hover:bg-[--surface-hover] transition-colors">
+                <span class="material-symbols-rounded text-lg">chevron_right</span>
+              </button>
+              @if (!isCurrentWeek()) {
+                <button (click)="goToday()"
+                  class="ml-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 px-2 py-1 rounded-lg hover:bg-[--surface-hover] transition-colors">
+                  Hoje
+                </button>
+              }
+            </div>
+          </div>
           <!-- Legend -->
           <div class="flex items-center gap-3 text-xs text-[--text-tertiary]">
             @for (item of [
@@ -228,7 +248,7 @@
             @if (m.trackedMinThisWeek > 0) {
               <p class="text-xs text-[--text-tertiary] mt-2.5 flex items-center gap-1">
                 <span class="material-symbols-rounded text-sm">timer</span>
-                {{ formatMin(m.trackedMinThisWeek) }} registrados esta semana
+                {{ formatMin(m.trackedMinThisWeek) }} registrados na semana
               </p>
             }
           </div>

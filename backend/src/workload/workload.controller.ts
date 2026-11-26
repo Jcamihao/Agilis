@@ -11,8 +11,8 @@ export class WorkloadController {
   constructor(private readonly svc: WorkloadService) {}
 
   @Get()
-  getWorkload(@Req() req: any, @Query('projectId') projectId?: string) {
-    return this.svc.getCompanyWorkload(req.user.companyId, projectId);
+  getWorkload(@Req() req: any, @Query('projectId') projectId?: string, @Query('weekStart') weekStart?: string) {
+    return this.svc.getCompanyWorkload(req.user.companyId, projectId, weekStart);
   }
 
   @Post('suggest')

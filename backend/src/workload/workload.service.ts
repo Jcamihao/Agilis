@@ -28,14 +28,21 @@ export class WorkloadService {
 
   // ── Company workload ───────────────────────────────────────────────────────
 
-  async getCompanyWorkload(companyId: string, projectId?: string) {
+  async getCompanyWorkload(companyId: string, projectId?: string, weekStartRaw?: string) {
+    // weekStart = "YYYY-MM-DD" (dia em que a grade de 14 dias começa). Inválido/ausente = hoje.
+    // O regex barra formatos errados; o parse rejeita datas inexistentes como "2027-13-99".
+    let weekStart: string | undefined;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(weekStartRaw ?? '') && !Number.isNaN(new Date(weekStartRaw + 'T00:00:00').getTime())) {
+      weekStart = weekStartRaw;
+    }
+
     const users = await this.prisma.user.findMany({
       where: { companies: { some: { companyId } } },
       select: { id: true, name: true, avatarUrl: true },
     });
 
     const results = await Promise.all(
-      users.map(u => this.buildMemberWorkload(u, companyId, projectId)),
+      users.map(u => this.buildMemberWorkload(u, companyId, projectId, weekStart)),
     );
 
     // Sort: overloaded first, then busy, balanced, idle
@@ -49,7 +56,14 @@ export class WorkloadService {
     const overloaded   = results.filter(r => r.status === 'overloaded').length;
     const idle         = results.filter(r => r.status === 'idle').length;
 
-    return { members: results, totalTasks, avgCapacity, overloaded, idle };
+    return {
+      members: results,
+      totalTasks,
+      avgCapacity,
+      overloaded,
+      idle,
+      weekStart: results[0]?.dailyLoad[0]?.date ?? new Date().toISOString().slice(0, 10),
+    };
   }
 
   // ── AI redistribution suggestion ──────────────────────────────────────────
@@ -93,10 +107,13 @@ export class WorkloadService {
     user: { id: string; name: string; avatarUrl: string | null },
     companyId: string,
     projectId?: string,
+    weekStart?: string,
   ): Promise<MemberWorkload> {
     const now      = new Date();
     const in7days  = new Date(now.getTime() + 7 * 86_400_000);
-    const weekAgo  = new Date(now.getTime() - 7 * 86_400_000);
+    // Semana do tempo registrado: a pedida (?weekStart) ou os últimos 7 dias (padrão).
+    const trackFrom = weekStart ? new Date(weekStart + 'T00:00:00') : new Date(now.getTime() - 7 * 86_400_000);
+    const trackTo   = weekStart ? new Date(trackFrom.getTime() + 7 * 86_400_000) : now;
 
     const taskWhere: any = {
       assigneeId: user.id,
@@ -111,7 +128,7 @@ export class WorkloadService {
       this.prisma.task.count({ where: { ...taskWhere, status: 'BACKLOG' } }),
       this.prisma.task.count({ where: { assigneeId: user.id, project: { companyId }, status: 'DONE' } }),
       this.prisma.timeEntry.aggregate({
-        where: { userId: user.id, startedAt: { gte: weekAgo } },
+        where: { userId: user.id, startedAt: { gte: trackFrom, lt: trackTo } },
         _sum: { durationMin: true },
       }),
     ]);
@@ -128,8 +145,8 @@ export class WorkloadService {
       capacityScore >= 50 ? 'busy' :
       capacityScore >= 15 ? 'balanced' : 'idle';
 
-    // Daily load for next 14 days
-    const dailyLoad = await this.buildDailyLoad(user.id, companyId, projectId);
+    // Daily load for the 14 days from weekStart (or from today)
+    const dailyLoad = await this.buildDailyLoad(user.id, companyId, projectId, weekStart);
 
     return {
       user, total, overdue, dueSoon, inProgress, backlog, done,
@@ -137,28 +154,37 @@ export class WorkloadService {
     };
   }
 
-  private async buildDailyLoad(userId: string, companyId: string, projectId?: string) {
+  private async buildDailyLoad(userId: string, companyId: string, projectId?: string, weekStart?: string) {
+    // Âncora local do primeiro dia; sem weekStart, hoje (comportamento histórico).
+    const first = weekStart ? new Date(weekStart + 'T00:00:00') : new Date();
+    first.setHours(0, 0, 0, 0);
+    const last = new Date(first);
+    last.setDate(last.getDate() + 14);
+
+    // Uma query por membro (antes eram 14 counts sequenciais) e bucketing em JS.
+    const tasks = await this.prisma.task.findMany({
+      where: {
+        assigneeId: userId,
+        status:     { not: 'DONE' },
+        project:    { companyId, ...(projectId ? { id: projectId } : {}) },
+        dueDate:    { gte: first, lt: last },
+      },
+      select: { dueDate: true },
+    });
+
     const days: { date: string; count: number }[] = [];
-    const now = new Date();
-
-    const taskWhere: any = {
-      assigneeId: userId,
-      status:     { not: 'DONE' },
-      project:    { companyId, ...(projectId ? { id: projectId } : {}) },
-    };
-
+    const indexByDay = new Map<string, number>();
     for (let i = 0; i < 14; i++) {
-      const d = new Date(now);
+      const d = new Date(first);
       d.setDate(d.getDate() + i);
+      indexByDay.set(d.toISOString().slice(0, 10), i);
+      days.push({ date: d.toISOString().slice(0, 10), count: 0 });
+    }
+    for (const t of tasks) {
+      const d = new Date(t.dueDate!);
       d.setHours(0, 0, 0, 0);
-      const next = new Date(d);
-      next.setDate(next.getDate() + 1);
-
-      const count = await this.prisma.task.count({
-        where: { ...taskWhere, dueDate: { gte: d, lt: next } },
-      });
-
-      days.push({ date: d.toISOString().slice(0, 10), count });
+      const idx = indexByDay.get(d.toISOString().slice(0, 10));
+      if (idx !== undefined) days[idx].count++;
     }
 
     return days;

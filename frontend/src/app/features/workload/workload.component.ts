@@ -33,9 +33,24 @@ export class WorkloadComponent implements OnInit {
   filterProjectId = signal<string>('');
   suggestion  = signal<string>('');
   showSuggestion = signal(false);
+  // '' = janela padrão (começa hoje). Setas da UI deslocam a grade de 14 dias de 7 em 7 dias.
+  weekStart   = signal<string>('');
 
   readonly members   = computed(() => this.overview()?.members ?? []);
   readonly visibleDays = computed(() => this.members()[0]?.dailyLoad ?? []);
+
+  // Faixa exibida no cabeçalho do heatmap ("9 – 22 nov"), e se é a janela de hoje.
+  readonly weekRange = computed(() => {
+    const ws = this.overview()?.weekStart;
+    if (!ws) return '';
+    const a = new Date(ws + 'T00:00:00');
+    const b = new Date(a); b.setDate(b.getDate() + 13);
+    const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
+    return `${fmt(a)} – ${fmt(b)}`;
+  });
+  readonly isCurrentWeek = computed(
+    () => !this.overview()?.weekStart || this.overview()!.weekStart === WorkloadComponent.toIso(new Date()),
+  );
 
   // 14 days header
   readonly dayHeaders = computed(() =>
@@ -57,8 +72,7 @@ export class WorkloadComponent implements OnInit {
 
   load() {
     this.loading.set(true);
-    const pid = this.filterProjectId() || undefined;
-    this.svc.get(pid).subscribe({
+    this.svc.get(this.filterProjectId() || undefined, this.weekStart() || undefined).subscribe({
       next: (res: any) => {
         this.overview.set(res?.data ?? res);
         this.loading.set(false);
@@ -83,6 +97,22 @@ export class WorkloadComponent implements OnInit {
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
+
+  shiftWeek(delta: number) {
+    const base = new Date((this.overview()?.weekStart ?? WorkloadComponent.toIso(new Date())) + 'T00:00:00');
+    base.setDate(base.getDate() + delta * 7);
+    this.weekStart.set(WorkloadComponent.toIso(base));
+    this.load();
+  }
+
+  goToday() {
+    this.weekStart.set('');
+    this.load();
+  }
+
+  private static toIso(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
 
   statusConfig(s: MemberWorkload['status']): { label: string; color: string; bg: string; barColor: string } {
     const map = {

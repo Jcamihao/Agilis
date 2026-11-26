@@ -59,3 +59,56 @@ describe('WorkloadService.suggestRedistribution (via Selah IA)', () => {
     expect(result.overloaded).toBe(1);
   });
 });
+
+// Helper com mesma aritmética do serviço (meia-noite local → rótulo ISO), para não depender do fuso do CI.
+const isoOf = (d: Date) => d.toISOString().slice(0, 10);
+
+describe('WorkloadService.getCompanyWorkload — navegação de semana (?weekStart)', () => {
+  const prismaFor = (dueDates: Date[]) => ({
+    user: { findMany: jest.fn().mockResolvedValue([{ id: 'u1', name: 'Ana', avatarUrl: null }]) },
+    task: {
+      count: jest.fn().mockResolvedValue(0),
+      findMany: jest.fn().mockResolvedValue(dueDates.map((dueDate) => ({ dueDate }))),
+    },
+    timeEntry: { aggregate: jest.fn().mockResolvedValue({ _sum: { durationMin: 0 } }) },
+  });
+  const service = (prisma: any) =>
+    new WorkloadService(prisma, { workloadRedistribution: jest.fn() } as any);
+
+  it('ancora a grade de 14 dias e a semana de tempo registrado no weekStart pedido', async () => {
+    const first = new Date('2026-12-07T00:00:00'); // parse local, como o serviço
+    const prisma = prismaFor([new Date('2026-12-09T15:30:00')]);
+
+    const res = await service(prisma).getCompanyWorkload('c1', undefined, '2026-12-07');
+
+    const load = res.members[0].dailyLoad;
+    expect(load).toHaveLength(14);
+    expect(load[0].date).toBe(isoOf(first));
+    expect(res.weekStart).toBe(isoOf(first));
+    const day2 = load.find((d) => d.date === isoOf(new Date('2026-12-09T00:00:00')));
+    expect(day2?.count).toBe(1);
+
+    const grid = prisma.task.findMany.mock.calls[0][0].where.dueDate;
+    expect(grid.gte.getTime()).toBe(first.getTime());
+    expect(grid.lt.getTime()).toBe(first.getTime() + 14 * 86_400_000);
+
+    const tracked = prisma.timeEntry.aggregate.mock.calls[0][0].where.startedAt;
+    expect(tracked.gte.getTime()).toBe(first.getTime());
+    expect(tracked.lt.getTime()).toBe(first.getTime() + 7 * 86_400_000);
+  });
+
+  it('volta para a janela de hoje quando o weekStart é inválido', async () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const prisma = prismaFor([]);
+
+    const res = await service(prisma).getCompanyWorkload('c1', undefined, '2027-13-99');
+
+    expect(res.members[0].dailyLoad[0].date).toBe(isoOf(today));
+    const grid = prisma.task.findMany.mock.calls[0][0].where.dueDate;
+    expect(grid.gte.getTime()).toBe(today.getTime());
+    // sem weekStart válido, tempo registrado volta a ser a janela móvel de 7 dias
+    const tracked = prisma.timeEntry.aggregate.mock.calls[0][0].where.startedAt;
+    expect(Math.abs(tracked.lt.getTime() - Date.now())).toBeLessThan(5_000);
+  });
+});

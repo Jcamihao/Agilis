@@ -127,9 +127,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.14.0** — Portfolio Executivo com risco por projeto.
+**v3.15.0** — Workload com navegação de semana.
 
 Changelog:
+- **v3.15.0** — Carga de Trabalho ganha setas de semana anterior/próxima no Calendário de Vencimentos: a grade de 14 dias desloca de 7 em 7 dias (a API aceita `?weekStart=YYYY-MM-DD`; formato inválido ou data inexistente volta para hoje sem erro), o tempo registrado segue a semana pedida, e um botão "Hoje" aparece quando você saiu da janela atual. De quebra, o heatmap saiu de 14 `count` sequenciais por membro para 1 única query com bucketing em JS. Testes no limiar da âncora, na janela de tempo e no fallback de `weekStart` inválido
 - **v3.14.0** — Portfolio ganha a coluna "Risco": score 0–100 por projeto com pesos declarados no código (tarefas atrasadas pesam 10 cada até 40; vencendo em ≤3 dias, 6 cada até 30; sem responsável, 5 cada até 20; +10 se progresso < 30% com 2+ atrasadas). A lista ordena por risco por padrão, só o pior (≥ 40) recebe o selo "Onde agir", e o KPI "Em risco" usa o mesmo limiar. Insight novo pelo cron de sempre: 3+ tarefas do mesmo responsável vencendo na mesma janela de 7 dias vira `DEADLINE_CONFLICT` (CRITICAL em 5+), apontando para o Workload. Migration `20261125000004_deadline_conflict_insight`
 - **v3.13.0** — Onboarding ganha "Criar com projeto de exemplo": um clique cria "Primeiros passos" com 6 tarefas nas 4 colunas (prazos relativos para acender Insights/Portfolio), sprint Boas-vindas de 14 dias e descrição dizendo que é exemplo. Meta: piloto chega ao Portfolio populado em menos de 2 minutos. Tudo editável/apagável como qualquer projeto real
 - **v3.12.1** — Medição de custo de IA (pré-requisito da franquia): cada chamada bem-sucedida ao Selah IA passa a registrar em `ai_usage_logs` a feature, o tamanho do request e da resposta (tokens estimados por chars/4 até o Selah devolver `usage`). Nova rota `GET /ai/usage?companyId&months` (só OWNER/ADMIN) com agregação por mês. Falha na medição nunca derruba a resposta de IA. Migration `20261125000003_ai_usage_logs`

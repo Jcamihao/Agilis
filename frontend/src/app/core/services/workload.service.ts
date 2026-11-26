@@ -23,14 +23,18 @@ export interface WorkloadOverview {
   avgCapacity: number;
   overloaded: number;
   idle: number;
+  weekStart: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class WorkloadService {
   private readonly api = inject(ApiService);
 
-  get(projectId?: string) {
-    return this.api.get<WorkloadOverview>('/workload', projectId ? { projectId } : {});
+  get(projectId?: string, weekStart?: string) {
+    return this.api.get<WorkloadOverview>('/workload', {
+      ...(projectId ? { projectId } : {}),
+      ...(weekStart ? { weekStart } : {}),
+    });
   }
 
   suggest() {
