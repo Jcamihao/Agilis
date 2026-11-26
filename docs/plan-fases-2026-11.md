@@ -11,7 +11,7 @@ Fonte de decisão: análise YAGNI de 2026-11-25 com o dono. Cada fase é um comm
 | F5 | Onboarding wizard: "usar projeto de exemplo" | v3.13.0 | ✅ 2026-11-25 |
 | F6 | Portfolio: ordenação por risco + insight "conflito de prazos" | v3.14.0 | ✅ 2026-11-26 |
 | F7 | Workload: navegação de semana (confirmar ausência antes) | v3.15.0 | ✅ 2026-11-26 |
-| F8 | Busca global: termos recentes (Ctrl+K já existe) | v3.15.1 | |
+| F8 | Busca global: termos recentes (Ctrl+K já existe) | v3.15.1 | ✅ 2026-11-26 |
 | F9 | Multiempresa: empresa ativa visível fora da sidebar (topbar/mobile) | v3.15.2 | |
 | F10 | Alinhamento docs↔app (FOUNDER_CONTEXT/README: o que existe, o que saiu, o que está sob observação até o dia 60) + HANDOFF | docs | |
 

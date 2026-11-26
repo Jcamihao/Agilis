@@ -10,6 +10,7 @@ import { of, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SearchService, SearchResults } from '../../../core/services/search.service';
 import { CompaniesService } from '../../../core/services/companies.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Company } from '../../../core/models';
 
 @Component({
@@ -26,6 +27,7 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
 
   private readonly searchSvc  = inject(SearchService);
   private readonly companySvc = inject(CompaniesService);
+  private readonly auth       = inject(AuthService);
   private readonly router     = inject(Router);
   private readonly destroy$   = new Subject<void>();
 
@@ -33,6 +35,10 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
   loading      = signal(false);
   results      = signal<SearchResults | null>(null);
   companyId    = signal('');
+
+  // Últimos termos buscados (até 8), por usuário, no localStorage.
+  private static readonly RECENT_MAX = 8;
+  recent = signal<string[]>([]);
 
   readonly PRIORITY_LABEL: Record<string, string> = {
     LOW: 'Baixa', MEDIUM: 'Média', HIGH: 'Alta', CRITICAL: 'Crítica',
@@ -45,6 +51,8 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit() {
+    this.recent.set(this.loadRecent());
+
     this.companySvc.getAll().pipe(takeUntil(this.destroy$)).subscribe({
       next: (res: any) => {
         const companies: Company[] = res?.data ?? res ?? [];
@@ -60,6 +68,7 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
           this.results.set(null);
           return of(null);
         }
+        this.recordRecent(q.trim());
         this.loading.set(true);
         return this.searchSvc.search(q.trim(), this.companyId()).pipe(catchError(() => of(null)));
       }),
@@ -101,6 +110,38 @@ export class GlobalSearchComponent implements OnInit, OnDestroy {
   goProject(id: string) {
     this.router.navigate(['/projects', id, 'kanban']);
     this.close.emit();
+  }
+
+  // ── Termos recentes (localStorage, até 8 por usuário) ─────────────────────
+
+  private recentKey(): string {
+    return `agilis_search_recent_${this.auth.user()?.id ?? 'anon'}`;
+  }
+
+  private loadRecent(): string[] {
+    try {
+      const raw = JSON.parse(localStorage.getItem(this.recentKey()) ?? '[]');
+      return Array.isArray(raw) ? raw.filter((t) => typeof t === 'string').slice(0, 8) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private recordRecent(term: string) {
+    const next = [term, ...this.recent().filter((t) => t.toLowerCase() !== term.toLowerCase())]
+      .slice(0, GlobalSearchComponent.RECENT_MAX);
+    this.recent.set(next);
+    try { localStorage.setItem(this.recentKey(), JSON.stringify(next)); } catch { /* cota/modo privado: segue sem histórico */ }
+  }
+
+  applyRecent(term: string) {
+    this.queryControl.setValue(term); // dispara o mesmo fluxo de digitação (debounce + busca)
+    this.searchInput?.nativeElement?.focus();
+  }
+
+  clearRecent() {
+    this.recent.set([]);
+    try { localStorage.removeItem(this.recentKey()); } catch { /* idem */ }
   }
 
 }

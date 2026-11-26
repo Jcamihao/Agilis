@@ -23,7 +23,21 @@
     <div class="gs-body">
 
       @if (!queryControl.value || (queryControl.value.trim().length) < 2) {
-        <p class="gs-hint">Digite pelo menos 2 caracteres para buscar</p>
+        @if (recent().length) {
+          <div class="gs-section">
+            <p class="gs-section-label gs-recent-label">
+              <span class="material-symbols-rounded">history</span> Buscas recentes
+              <button class="gs-clear-recent" (click)="clearRecent()" title="Limpar histórico">limpar</button>
+            </p>
+            <div class="gs-recent-chips">
+              @for (term of recent(); track term) {
+                <button class="gs-chip" (click)="applyRecent(term)">{{ term }}</button>
+              }
+            </div>
+          </div>
+        } @else {
+          <p class="gs-hint">Digite pelo menos 2 caracteres para buscar</p>
+        }
       } @else if (isEmpty()) {
         <div class="gs-empty">
           <span class="material-symbols-rounded">search_off</span>
