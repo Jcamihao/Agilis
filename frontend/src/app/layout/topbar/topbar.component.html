@@ -27,6 +27,17 @@
         </button>
       </div>
 
+      <!-- Empresa ativa: no mobile a sidebar é gaveta, e este passa a ser o
+           único lugar onde a empresa (sempre a primeira) fica visível. -->
+      @if (companyName()) {
+        <div class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg flex-shrink-0 min-w-0"
+             style="background: rgb(var(--c-border) / 0.05); border: 1px solid rgb(var(--c-border) / 0.12);"
+             [title]="'Empresa ativa: ' + companyName()">
+          <span class="material-symbols-rounded flex-shrink-0" style="font-size: 16px; color: rgb(var(--c-500));">apartment</span>
+          <span class="text-[12px] font-semibold truncate max-w-20 sm:max-w-36" style="color: rgb(var(--c-600));">{{ companyName() }}</span>
+        </div>
+      }
+
       @if (showSearch()) {
         <ag-global-search (close)="showSearch.set(false)"></ag-global-search>
       }

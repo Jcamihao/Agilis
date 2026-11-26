@@ -1,5 +1,5 @@
 import {
-  Component, Output, EventEmitter, inject, ChangeDetectionStrategy, OnInit, signal, ChangeDetectorRef, HostListener, ElementRef, ViewChild,
+  Component, Output, EventEmitter, inject, ChangeDetectionStrategy, OnInit, signal, computed, ChangeDetectorRef, HostListener, ElementRef, ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -24,6 +24,9 @@ export class TopbarComponent implements OnInit {
   private readonly cdr     = inject(ChangeDetectorRef);
   readonly notifService    = inject(NotificationsService);
   readonly user            = this.auth.user;
+  // Nome da empresa ativa (a primeira, como o resto do app). No mobile a sidebar
+  // é gaveta, e esse era o único lugar onde a empresa aparecia.
+  readonly companyName     = computed(() => this.user()?.companies?.[0]?.company?.name);
 
   showSearch        = signal(false);
   showNotifications = signal(false);

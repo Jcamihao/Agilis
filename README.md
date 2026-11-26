@@ -127,9 +127,10 @@ npm run infra:logs       # Ver logs de todos os containers
 
 ## Versão
 
-**v3.15.1** — Buscas recentes no Ctrl+K.
+**v3.15.2** — Empresa ativa sempre visível no topo.
 
 Changelog:
+- **v3.15.2** — O nome da empresa ativa ganhou um chip no topo (ao lado da busca), visível em todas as telas. Antes só aparecia na sidebar, que no mobile é gaveta fechada: no celular ninguém via em qual empresa estava. Limite conhecido segue: o app usa a primeira empresa do usuário, sem seletor
 - **v3.15.1** — A busca global (Ctrl+K) abre mostrando as últimas 8 buscas do usuário como chips clicáveis (um clique refaz a busca) e botão "limpar". Ficam no `localStorage`, uma lista por usuário, sem servidor. Termos repetidos sobem para o topo em vez de duplicar
 - **v3.15.0** — Carga de Trabalho ganha setas de semana anterior/próxima no Calendário de Vencimentos: a grade de 14 dias desloca de 7 em 7 dias (a API aceita `?weekStart=YYYY-MM-DD`; formato inválido ou data inexistente volta para hoje sem erro), o tempo registrado segue a semana pedida, e um botão "Hoje" aparece quando você saiu da janela atual. De quebra, o heatmap saiu de 14 `count` sequenciais por membro para 1 única query com bucketing em JS. Testes no limiar da âncora, na janela de tempo e no fallback de `weekStart` inválido
 - **v3.14.0** — Portfolio ganha a coluna "Risco": score 0–100 por projeto com pesos declarados no código (tarefas atrasadas pesam 10 cada até 40; vencendo em ≤3 dias, 6 cada até 30; sem responsável, 5 cada até 20; +10 se progresso < 30% com 2+ atrasadas). A lista ordena por risco por padrão, só o pior (≥ 40) recebe o selo "Onde agir", e o KPI "Em risco" usa o mesmo limiar. Insight novo pelo cron de sempre: 3+ tarefas do mesmo responsável vencendo na mesma janela de 7 dias vira `DEADLINE_CONFLICT` (CRITICAL em 5+), apontando para o Workload. Migration `20261125000004_deadline_conflict_insight`
