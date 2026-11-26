@@ -11,6 +11,7 @@ Criado em 2026-11-26, reorganizado em fases no mesmo dia. Status: **PLANEJAMENTO
 5. **Remover** as telas **Assistente de IA** e **Portfólio Executivo**.
 6. **Importação de várias tasks de uma vez** por arquivo **CSV, XLS ou XLSX**.
 7. **Auditoria do design system** nos modos claro e escuro: achar tudo que não muda de aparência no escuro (o dono já viu ocorrências) e corrigir.
+8. **Modelo de ML para estatísticas do app**, usado para identificar gargalos e melhorar o mapa de calor (Carga de Trabalho), os gráficos e os dashboards.
 
 ## 2. Estado atual (lido no código, 2026-11-26)
 
@@ -22,6 +23,7 @@ Criado em 2026-11-26, reorganizado em fases no mesmo dia. Status: **PLANEJAMENTO
 - **Portfólio Executivo:** tela `features/portfolio`, rota `/portfolio`, `portfolio.service.ts`, backend `GET /projects/portfolio` (`projects.service.ts:222`, com sinais de risco da F6). Citado no onboarding (tarefa de exemplo), README e FOUNDER_CONTEXT.
 - **Sidebar** grupo "Inteligência": Portfolio Executivo, Assistente IA, Insights, Carga de Trabalho.
 - **Importação:** o backend já tem `exceljs` (usado em `reports.service.ts`) e o módulo `upload/` (multer, 20 MB, MIME de planilha já permitido). `exceljs` lê CSV e XLSX, **não lê XLS** (formato binário antigo). Não existe importador de tarefas.
+- **Dados que um modelo pode usar hoje:** `Task` (status, prioridade, `startDate`, `dueDate`, `createdAt`, `updatedAt`, responsável, projeto, sprint, subtarefas, recorrência), `TimeEntry`, `Activity` (histórico; a conferir se registra cada mudança de status com data, que é o que permite medir tempo parado em cada coluna), `Comment`, `TaskApproval`, `ProductEvent`. Já existem `Insight` (+ `insights.service.ts`), Carga de Trabalho (mapa de calor de 14 dias), Relatórios (tarefas, produtividade, tempo) e o Dashboard, todos por regras fixas, sem modelo. Não há histórico longo: o produto ainda está em pilotos, então volume de dados é pequeno.
 - **Tema:** claro é o padrão; escuro liga com `[data-theme="dark"]` no `<html>` (`theme.service.ts`, `localStorage` `agilis-theme`). As cores vêm de variáveis CSS (`--p-*`, `--f-*`, `--c-*`) mapeadas no `tailwind.config` (`darkMode: ['selector', '[data-theme="dark"]']`; `styles/main.scss`). Varredura estática rápida de 2026-11-26: **68 arquivos** com cor literal (`#hex`, `rgb()`/`rgba()`) e **26 arquivos** com classes de paleta fixa do Tailwind (`bg-white`, `text-gray-*`, `border-slate-*` etc.); só **1 arquivo** usa `dark:`. Esses são os suspeitos de não acompanhar o tema escuro. Ainda não conferi tela por tela.
 - Menu "⋮" de Membros (`members.component.ts`): dropdown "ALTERAR PAPEL" cortado, provável `overflow` do container da lista.
 
@@ -41,10 +43,13 @@ Regras de toda fase: branch `feature/<nome>` ou `fix/<nome>` a partir da `develo
 | B. Empresas | 6 | Modo Geral | 5 | back, front |
 | C. Importação | 7 | Importar tasks: backend | 3 | back |
 | C. Importação | 8 | Importar tasks: tela | 7 | front |
-| D. Qualidade visual | 9 | Auditoria claro/escuro | 2, 5, 6, 8 | front |
-| E. Fechamento | 10 | Relatório, docs, versão | todas | docs |
+| D. Inteligência de dados | 9 | Base de dados e estatística (baseline) | 3 | back |
+| D. Inteligência de dados | 10 | Modelo de ML: gargalos e previsões | 9 | back (e Selah, ver D12) |
+| D. Inteligência de dados | 11 | Mapa de calor, gráficos e dashboards com as estatísticas | 6, 10 | front, back |
+| E. Qualidade visual | 12 | Auditoria claro/escuro | 2, 5, 6, 8, 11 | front |
+| F. Fechamento | 13 | Relatório, docs, versão | todas | docs |
 
-Ordem de execução: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10. A fase 1 e a 2 são independentes e podem ir antes de tudo. A 2 vem antes da 3 para reduzir superfície (menos telas para migrar para empresa ativa).
+Ordem de execução: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13. A fase 1 e a 2 são independentes e podem ir antes de tudo. A 2 vem antes da 3 para reduzir superfície (menos telas para migrar para empresa ativa).
 
 ---
 
@@ -114,12 +119,40 @@ Ordem de execução: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10. A
 
 ---
 
-### BLOCO D — Qualidade visual
+### BLOCO D — Inteligência de dados (ML e estatísticas)
 
-#### Fase 9 — Auditoria do design system, claro e escuro
+Princípio: primeiro medir bem (estatística simples e auditável), depois treinar modelo só onde a estatística não bastar. Com poucos dados de piloto, um modelo treinado cedo erra e dá falsa confiança. Cada número mostrado ao usuário diz de onde veio e quanta amostra tem por trás.
+
+#### Fase 9 — Base de dados e estatística (baseline)
+- **Branch:** `feature/estatisticas-base`
+- **Objetivo:** ter, por empresa, as métricas que o modelo e as telas vão consumir, calculadas de forma determinística.
+- **Entrega:** conferir/garantir o histórico de mudança de status (`Activity`); tabela ou consulta de métricas por tarefa e por projeto (tempo em cada status, tempo de ciclo, tarefas paradas, WIP por pessoa e por coluna, taxa de atraso, retrabalho = tarefa que volta de status); rotina de agregação (BullMQ já existe) com recálculo incremental; todas as consultas com `companyId` validado (Fase 3) e com o modo Geral (Fase 6) em mente.
+- **Baseline estatístico (sem ML):** percentis (p50/p85), média móvel, z-score/IQR para anomalia, regressão linear simples para tendência. Serve de referência para medir se o modelo da Fase 10 é melhor.
+- **Pronto quando:** métricas conferidas à mão em banco semeado, testes com casos de borda (projeto vazio, uma tarefa só, tarefas sem data), datas em TZ=UTC, America/Sao_Paulo e Asia/Tokyo, isolamento A/B.
+
+#### Fase 10 — Modelo de ML: gargalos e previsões
+- **Branch:** `feature/ml-gargalos`
+- **Objetivo:** um modelo que aponta gargalos e prevê atraso e carga, melhor que o baseline.
+- **Saídas previstas (D13):** (a) **gargalo**: coluna, pessoa ou projeto onde o trabalho acumula, com a causa provável; (b) **risco de atraso** por tarefa (probabilidade e fatores); (c) **previsão de carga** por pessoa nos próximos 14 dias (alimenta o mapa de calor); (d) **anomalias** (pico de retrabalho, queda de vazão).
+- **Entrega:** definição das features a partir das métricas da Fase 9; treino e avaliação com separação por tempo (nunca embaralhar o futuro no treino); comparação com o baseline; rota que devolve a previsão com probabilidade, fatores e tamanho da amostra; regra de corte: abaixo de uma amostra mínima a rota devolve só o baseline e diz que não há dados suficientes.
+- **Onde roda (D12):** toda IA do dono passa pelo Selah IA; o modelo é servido pelo Selah e o Agilis chama por um único cliente (o mesmo `selah-ai-client`, medido em `ai_usage_logs`). Falha do Selah nunca derruba a tela: cai no baseline.
+- **Privacidade e isolamento (D14):** dados de uma empresa nunca treinam nem alimentam a previsão de outra; sem nome, título ou texto de tarefa saindo do Agilis (só números e categorias); LGPD registrada no handoff.
+- **Pronto quando:** métrica de avaliação registrada e melhor que o baseline em dados de teste, ou o relatório diz com honestidade que ainda não é (e o baseline segue); teste de isolamento A/B; falha do Selah simulada; mutantes mortos.
+
+#### Fase 11 — Mapa de calor, gráficos e dashboards com as estatísticas
+- **Branch:** `feature/dashboards-estatisticas`
+- **Objetivo:** o usuário vê o que a Fase 9 e a Fase 10 produzem.
+- **Entrega:** mapa de calor da Carga de Trabalho com previsão (dias futuros em tom distinto do realizado) e destaque de sobrecarga; gráficos de tempo de ciclo, vazão, WIP e atraso nos Relatórios; cartões de gargalo e de risco no Dashboard e na página Insights, cada um com "por quê", amostra e data do cálculo; filtro por empresa no modo Geral. Estados vazios claros quando não há dados suficientes.
+- **Pronto quando:** UI real no Chrome com dado semeado nos dois temas, 360 e 1280 px; nenhum número sem origem; `ng build` verde. A conferência visual detalhada dos temas vem na Fase 12.
+
+---
+
+### BLOCO E — Qualidade visual
+
+#### Fase 12 — Auditoria do design system, claro e escuro
 - **Branch:** `fix/tema-claro-escuro`
 - **Objetivo:** nada fica sem mudar, ilegível ou "preso" no tema escuro.
-- **Por que depois das fases de tela:** cobre também o switch, o modo Geral e a importação, e há menos telas após a Fase 2.
+- **Por que depois das fases de tela:** cobre também o switch, o modo Geral, a importação e as telas de estatística (Fase 11), e há menos telas após a Fase 2.
 - **Entrega:**
   - Inventário dos tokens (cor, tipografia, espaço) e conferência dos dois temas (`styles/main.scss`, `tailwind.config`).
   - Caça a defeitos: (a) cores literais e classes de paleta fixa nos 68 + 26 arquivos suspeitos, trocando por tokens; (b) componentes de terceiros (CDK drag-drop, overlays, inputs nativos, scrollbars, `color-scheme`); (c) estados (hover, focus, disabled, erro, vazio, skeleton, toast, modal, dropdown, tabela, badge); (d) imagens, ícones e SVG com cor fixa; (e) contraste WCAG AA (4.5:1); (f) troca de tema com a página aberta e persistência ao recarregar.
@@ -128,9 +161,9 @@ Ordem de execução: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10. A
 
 ---
 
-### BLOCO E — Fechamento
+### BLOCO F — Fechamento
 
-#### Fase 10 — Fechamento
+#### Fase 13 — Fechamento
 - **Branch:** `docs/fechamento-empresa-import`
 - **Entrega:** relatório de revisão persistido, `graphify update .`, handoff, README (linha de changelog por versão), números verdes com data e quem conferiu, seção NÃO verificado atualizada.
 
@@ -145,7 +178,11 @@ Ordem de execução: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10. A
 - D7 Formato XLS: o `exceljs` não lê. Para aceitar XLS é preciso uma dependência nova (SheetJS, versão corrigida, lida só no backend e com limites). (recomendado: aceitar CSV e XLSX na primeira entrega e incluir XLS na Fase 7 só se você confirmar a dependência nova; o histórico de falhas de segurança do pacote `xlsx` no npm é a razão da cautela.)
 - D8 Projeto de destino: a importação vai para um projeto escolhido na tela. Coluna "projeto" na planilha para distribuir em vários projetos fica fora da primeira versão. (recomendado)
 - D9 Limites: 5 MB e 1000 linhas por arquivo. (recomendado)
-- D11 Auditoria de tema (Fase 9): corrigir tudo o que achar no mesmo fix (recomendado) ou só relatar e você escolhe o que corrigir. Se você já anotou ocorrências específicas, mande as telas para virarem casos de teste.
+- D11 Auditoria de tema (Fase 12): corrigir tudo o que achar no mesmo fix (recomendado) ou só relatar e você escolhe o que corrigir. Se você já anotou ocorrências específicas, mande as telas para virarem casos de teste.
+- D12 Onde o modelo de ML roda: no Selah IA, único lugar de IA do dono (recomendado), ou dentro do backend do Agilis (sem serviço externo, mas contra a regra de que toda IA passa pelo Selah). O Selah tem de oferecer serviço de modelo/previsão; se ainda não oferece, a Fase 10 depende desse trabalho no projeto irmão.
+- D13 Que previsões entram na primeira versão: gargalo, risco de atraso, carga futura, anomalia (recomendado: gargalo e carga futura primeiro, que alimentam o mapa de calor; atraso e anomalia depois).
+- D14 Privacidade: modelo por empresa, sem misturar dados entre empresas e sem texto de tarefa saindo (recomendado). Alternativa: modelo global treinado com dados anonimizados de todas as empresas, o que exige base legal e aviso aos clientes.
+- D15 Escopo de produto: Métricas e Health Score foram cortados antes por foco. Estas estatísticas voltam só como apoio a gargalo, mapa de calor, gráficos e dashboards, sem tela própria de "Métricas" nem nota de saúde. Confirma?
 - D10 Linha inválida: importar as válidas e listar as recusadas (recomendado) ou recusar o arquivo inteiro se houver qualquer erro.
 
 ## 5. Verificação prevista
@@ -154,4 +191,4 @@ Backend: jest, mutantes, integração em Postgres/Redis descartáveis (portas co
 
 ## 6. NÃO verificado (ainda)
 
-Hipóteses até as fases rodarem: quais controllers deixam passar `companyId` sem conferir membership; o custo de trocar `companies[0]` nos 24 pontos do front; se o modo Geral fica rápido com muitas empresas; o motivo exato do corte do menu em Membros; quantos dos 68 + 26 arquivos suspeitos de tema são defeito real e quantos são cor fixa intencional (ex.: cor de status); se algo além do Workload e do /diagnostico depende do módulo `ai/`; como o XLS legado se comporta com datas e fusos; o tamanho real das planilhas dos pilotos.
+Hipóteses até as fases rodarem: quais controllers deixam passar `companyId` sem conferir membership; o custo de trocar `companies[0]` nos 24 pontos do front; se o modo Geral fica rápido com muitas empresas; o motivo exato do corte do menu em Membros; se o `Activity` guarda o histórico de status com data (sem isso o tempo por coluna não existe e a Fase 9 começa criando esse histórico, sem passado para recuperar); se há volume de dados para um modelo superar o baseline; se o Selah oferece serviço de modelo; quantos dos 68 + 26 arquivos suspeitos de tema são defeito real e quantos são cor fixa intencional (ex.: cor de status); se algo além do Workload e do /diagnostico depende do módulo `ai/`; como o XLS legado se comporta com datas e fusos; o tamanho real das planilhas dos pilotos.
